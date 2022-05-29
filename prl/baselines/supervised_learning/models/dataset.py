@@ -1,13 +1,15 @@
+from __future__ import annotations
+
 from functools import partial
 from os import listdir
 from os.path import isfile, join, abspath
 
+import numpy as np
 import pandas as pd
 import psutil
 import torch
-from torch.utils.data import ConcatDataset, SubsetRandomSampler, BatchSampler, RandomSampler
 from sklearn.utils import resample
-import numpy as np
+from torch.utils.data import ConcatDataset, SubsetRandomSampler, BatchSampler, RandomSampler
 
 BATCH_SIZE = 512
 
@@ -111,7 +113,6 @@ class MultipleParquetFilesDatasetDownsampled(torch.utils.data.Dataset):
         # azure compute has 64GB ram
         self._len = None
         self._init_load_data(file_paths)
-        
 
     def _downsample(self):
         # resample to remove data imbalance
@@ -211,7 +212,7 @@ def get_dataloaders(train_dir):
     # splits datasets
     train_dataset = MultipleParquetFilesDatasetDownsampled(train_dir_files)
     valid_dataset = MultipleParquetFilesDatasetDownsampled(train_dir_files)  # downsampling induces enough randomness
-    test_dataset = MultipleParquetFilesDatasetDownsampled(train_dir_files)    # to generate three sets from one file
+    test_dataset = MultipleParquetFilesDatasetDownsampled(train_dir_files)  # to generate three sets from one file
     # train_dataset = ConcatDataset(
     #     [SingleTxtFileDataset(train_file) for train_file in train_files])
     # valid_dataset = ConcatDataset(

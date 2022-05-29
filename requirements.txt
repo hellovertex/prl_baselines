@@ -1,4 +1,5 @@
 click
 gdown
+sklearn
 numpy
 pandas
