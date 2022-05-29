@@ -11,12 +11,12 @@ from core.encoder import Encoder
 from core.generator import TrainingDataGenerator
 from core.parser import Parser
 
-
+import sqlite3
 # from azureml.core import Experiment
 # from azureml.core import Workspace
 
 
-class CsvTrainingDataGenerator(TrainingDataGenerator):
+class SteinbergerGenerator(TrainingDataGenerator):
     """This handles creation and population of training data folders, containing encoded
     PokerEpisode instances. These encodings can be used for supervised learning. """
 
@@ -129,19 +129,7 @@ class CsvTrainingDataGenerator(TrainingDataGenerator):
         return file_path_metadata
 
     def _write_train_data(self, data, labels):
-        file_dir = os.path.join(self._data_dir + "02_vectorized", self._which_data_files)
-        # create new file every 100k lines
-        file_name = self._out_filename + '_' + str(int(self._num_lines_written / 50000))
-        file_path = os.path.join(file_dir, file_name)
-        columns = None
-        if not os.path.exists(file_path):
-            os.makedirs(os.path.realpath(file_dir), exist_ok=True)
-            columns = self._encoder.feature_names
-        pd.DataFrame(data=data,
-                     index=labels,
-                     columns=columns).to_csv(
-            file_path, index_label='label', mode='a')
-        return file_dir, file_path
+        raise NotImplementedError
 
     def _generate_training_data(self, from_parsed_hands):
         training_data, labels = None, None
@@ -199,3 +187,113 @@ class CsvTrainingDataGenerator(TrainingDataGenerator):
             if not self.file_has_been_encoded_already(logfile=self._logfile,
                                                       filename=filename):
                 self.generate_from_file(os.path.abspath(filename).__str__())
+
+
+class CsvTrainingDataGenerator(SteinbergerGenerator):
+    """This handles creation and population of training data folders, containing encoded
+    PokerEpisode instances. These encodings can be used for supervised learning. """
+
+    def __init__(self, data_dir: str,
+                 parser: Parser,
+                 encoder: Encoder,
+                 out_filename: str,
+                 write_azure: bool,
+                 logfile="log.txt"):
+        super().__init__(data_dir,
+                         parser,
+                         encoder,
+                         out_filename,
+                         write_azure,
+                         logfile)
+
+    def _write_train_data(self, data, labels):
+        file_dir = os.path.join(self._data_dir + "02_vectorized", self._which_data_files)
+        # create new file every 100k lines
+        file_name = self._out_filename + '_' + str(int(self._num_lines_written / 50000))
+        file_path = os.path.join(file_dir, file_name)
+        columns = None
+        if not os.path.exists(file_path):
+            os.makedirs(os.path.realpath(file_dir), exist_ok=True)
+            columns = self._encoder.feature_names
+        pd.DataFrame(data=data,
+                     index=labels,
+                     columns=columns).to_csv(
+            file_path, index_label='label', mode='a')
+        return file_dir, file_path
+
+# todo: consider removing this because too many rows for sql database
+# class SqlTrainingDataGenerator(SteinbergerGenerator):
+#     """This handles creation and population of training data folders, containing encoded
+#     PokerEpisode instances. These encodings can be used for supervised learning. """
+#
+#     def __init__(self, data_dir: str,
+#                  parser: Parser,
+#                  encoder: Encoder,
+#                  out_filename: str,
+#                  write_azure: bool,
+#                  logfile="log.txt"):
+#         super().__init__(data_dir,
+#                          parser,
+#                          encoder,
+#                          out_filename,
+#                          write_azure,
+#                          logfile)
+#         if not self.is_db_file(self._out_filename):
+#             self._out_filename += 'db'
+#         self._conn = sqlite3.connect(self._out_filename)
+#         self._table_exists = self.table_exists()
+#
+#     def __enter__(self):
+#         # for consistency with context manager interface
+#         return self
+#
+#     def __exit__(self, exc_type, exc_value, exc_traceback):
+#         self._conn.close()
+#
+#     def is_db_file(self, filepath):
+#         return os.path.splitext(filepath)[1] == ".db"
+#
+#     def table_exists(self):
+#         table_name = 'prl_transitions'
+#         return bool(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}';")
+#     def _create_table(self, cur):
+#         cur.execute('''CREATE TABLE stocks
+#                        (date text, trans text, symbol text, qty real, price real)''')
+#     def _write_train_data(self, data, labels):
+#         """todo: Implement SQL table logic."""
+#         # todo check if sql table is created at outpath
+#         # todo if not, create it at outpath
+#         # todo write data and labels to rows
+#         # 564 x 10M columns -> how much storage is needed ?
+#         #
+#
+#         cur = self._conn.cursor()
+#         if not self._table_exists:
+#             # create table
+#             self._create_table()
+#             self._table_exists = True
+#
+#         cur.execute()
+#
+
+
+class ParquetTrainingDataGenerator(SteinbergerGenerator):
+    """This handles creation and population of training data folders, containing encoded
+    PokerEpisode instances. These encodings can be used for supervised learning. """
+
+    def __init__(self, data_dir: str,
+                 parser: Parser,
+                 encoder: Encoder,
+                 out_filename: str,
+                 write_azure: bool,
+                 logfile="log.txt"):
+        super().__init__(data_dir,
+                         parser,
+                         encoder,
+                         out_filename,
+                         write_azure,
+                         logfile)
+
+    def _write_train_data(self, data, labels):
+        """todo: Implement writing to parquet file."""
+        # todo can we append without recreating the file?
