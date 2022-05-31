@@ -15,19 +15,21 @@ LOGFILE = DATA_DIR + "log.txt"
 #               type=str,
 #               help="Path to zip file that was provided by hhsmithy.com "
 #                    "and contains poker hands.")
-@click.option("--which-data-files",
+@click.argument("--zip_path",
+                type=str,
+                help="Indicates, which folder is searched "
+                     "for .zip files to be extracted.")
+@click.option("--blind_sizes",
               default="0.25-0.50",
               type=str,
-              help="Indicates, which folder inside data/01_raw/ "
-                   "is searched for .zip files to be extracted."
-                   "Possible values are e.g. '0.25-0.50', '0.50-1.00', '1.00-2.00'")
+              help="Possible values are e.g. '0.25-0.50', '0.50-1.00', '1.00-2.00'")
 @click.option("--from_gdrive_id",
               default="",
               type=str,
               help="If a string value is passed, it should contain a DL link for "
                    "google drive to a bulkhands.zip file containing poker hands. "
                    "The generator will try to download the data from there.")
-def main(which_data_files, from_gdrive_id):
+def main(zip_path, blind_sizes, from_gdrive_id):
     # Creates PokerEpisode instances from raw .txt files
     parser = TxtParser()
 
@@ -39,14 +41,14 @@ def main(which_data_files, from_gdrive_id):
                                   # out_dir=os.path.join(DATA_DIR + 'train_data'),
                                   parser=parser,
                                   encoder=encoder,
-                                  out_filename=f'6MAX_{which_data_files}.txt',
+                                  out_filename=f'6MAX_{blind_sizes}.txt',
                                   write_azure=False,
                                   logfile=LOGFILE) as generator:
         # Looks for .zip files inside folder derived from "which_data_files"
         # or downloads from gdrive. Extracts found .zip files
         # reads the extracted .txt files for poker hands
         # parses, encodes, vectorizes, and writes them to disk.
-        generator.run_data_generation(which_data_files, from_gdrive_id=from_gdrive_id)
+        generator.run_data_generation(zip_path, from_gdrive_id=from_gdrive_id)
         # # run example using google drive file id, which also works fine
         # generator.run_data_generation(which_data_files, from_gdrive_id="18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO")
 
