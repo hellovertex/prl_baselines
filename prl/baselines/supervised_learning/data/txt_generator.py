@@ -179,10 +179,11 @@ class SteinbergerGenerator(TrainingDataGenerator):
             #       f"metadata information is found at {file_path_metadata}")
             # print(df.head())
 
-    def run_data_generation(self, zip_path, blind_sizes, from_gdrive_id):
+    def run_data_generation(self, zip_path, blind_sizes, from_gdrive_id, unzipped_dir=None):
         self._blind_sizes = blind_sizes
         # extract zipfile (.zip is stored locally or downloaded via from_gdrive)
-        unzipped_dir = self._extract_all_zip_data(zip_path, blind_sizes, from_gdrive_id)
+        if not unzipped_dir:
+            unzipped_dir = self._extract_all_zip_data(zip_path, blind_sizes, from_gdrive_id)
         filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
         # parse, encode, vectorize and write the training data from .txt to disk
         for i, filename in enumerate(filenames):

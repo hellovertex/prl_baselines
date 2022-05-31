@@ -29,7 +29,13 @@ LOGFILE = DATA_DIR + "log.txt"
               help="If a string value is passed, it should contain a DL link for "
                    "google drive to a bulkhands.zip file containing poker hands. "
                    "The generator will try to download the data from there.")
-def main(zip_path, blind_sizes, from_gdrive_id):
+@click.option("--unzipped_dir",
+              default="",
+              type=str,
+              help="Passing unzipped_dir we can bypass the unzipping step and assume "
+                   "files have alredy been unzipped. "
+                   "In this case, the `zip_path` arg will be ignored.")
+def main(zip_path, blind_sizes, from_gdrive_id, unzipped_dir):
     # Creates PokerEpisode instances from raw .txt files
     parser = TxtParser()
 
@@ -48,7 +54,10 @@ def main(zip_path, blind_sizes, from_gdrive_id):
         # or downloads from gdrive. Extracts found .zip files
         # reads the extracted .txt files for poker hands
         # parses, encodes, vectorizes, and writes them to disk.
-        generator.run_data_generation(zip_path, blind_sizes, from_gdrive_id=from_gdrive_id)
+        generator.run_data_generation(zip_path,
+                                      blind_sizes,
+                                      from_gdrive_id=from_gdrive_id,
+                                      unzipped_dir=unzipped_dir)
         # # run example using google drive file id, which also works fine
         # generator.run_data_generation(which_data_files, from_gdrive_id="18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO")
 
