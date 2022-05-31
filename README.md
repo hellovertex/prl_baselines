@@ -24,3 +24,16 @@ is written, e.g. `data/folder/0.25-0.50/`.
 
 Possible values are
 `'0.01-0.02'`, ... `'0.25-0.50', '0.50-1.00', '1.00-2.00', '10.00-20.00',` etc.
+
+## When running from Azure ML - VM
+Before executing the `run_generate_train_data` script
+ - **provide the .zip file as a dataset inside Azure ML**.
+
+See `prl_docs\azure` for instructions on how to create a dataset from zipfile. 
+
+Verify dataset availability inside Azure ML-VM Terminal:
+- `az login`
+- `az ml data list`
+- 
+
+
