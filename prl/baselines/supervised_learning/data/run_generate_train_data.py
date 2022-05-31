@@ -15,10 +15,8 @@ LOGFILE = DATA_DIR + "log.txt"
 #               type=str,
 #               help="Path to zip file that was provided by hhsmithy.com "
 #                    "and contains poker hands.")
-@click.argument("--zip_path",
-                type=str,
-                help="Indicates, which folder is searched "
-                     "for .zip files to be extracted.")
+@click.argument("--zip_path",  # Indicates, which folder is searched for .zip files to be extracted
+                type=str)
 @click.option("--blind_sizes",
               default="0.25-0.50",
               type=str,
