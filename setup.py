@@ -1,7 +1,6 @@
 from setuptools import find_namespace_packages, setup
-import os.path as osp
 
-with open('%s/%s' % (osp.dirname(osp.realpath(__file__)), 'requirements.txt')) as f:
+with open('requirements.txt') as f:
     requirements = [line.strip() for line in f]
 
 setup(
