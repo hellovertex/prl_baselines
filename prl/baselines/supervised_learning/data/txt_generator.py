@@ -37,7 +37,7 @@ class SteinbergerGenerator(TrainingDataGenerator):
         self._logfile = logfile
         self._n_files_written_this_run = 0
         self._num_lines_written = 0
-        self._which_data_files = None
+        self._blind_sizes = None
         self._hand_counter = 0
 
         with open(logfile, "a+") as f:
@@ -108,17 +108,17 @@ class SteinbergerGenerator(TrainingDataGenerator):
             for i in zip_file.namelist():
                 zip_file.extract(i, out_dir)
 
-    def _extract_all_zip_data(self, which_data_files, from_gdrive_id):
-        path_to_data = self._data_dir + "01_raw/" + which_data_files
+    def _extract_all_zip_data(self, zip_path, blind_sizes, from_gdrive_id):
+        path_to_data = self._data_dir + "01_raw/" + blind_sizes
         if from_gdrive_id:
             # try to download from_gdrive to out.zip
             zipfiles = [gdown.download(id=from_gdrive_id,
-                                       output=f"{path_to_data}/bulkhands_{which_data_files}.zip",
+                                       output=f"{path_to_data}/bulkhands_{blind_sizes}.zip",
                                        quiet=False)]
         else:
             #
-            zipfiles = glob.glob(path_to_data.__str__() + '/*.zip', recursive=False)
-        out_dir = self._data_dir + "01_raw/" + f'{self._which_data_files}/unzipped'
+            zipfiles = glob.glob(zip_path.__str__(), recursive=False)
+        out_dir = self._data_dir + "01_raw/" + f'{self._blind_sizes}/unzipped'
         # creates out_dir if it does not exist
         # extracts zip file, only if extracted files with same name do not exist
         [self.extract(zipfile, out_dir=out_dir) for zipfile in zipfiles]
@@ -179,10 +179,10 @@ class SteinbergerGenerator(TrainingDataGenerator):
             #       f"metadata information is found at {file_path_metadata}")
             # print(df.head())
 
-    def run_data_generation(self, which_data_files, from_gdrive_id):
-        self._which_data_files = which_data_files
+    def run_data_generation(self, zip_path, blind_sizes, from_gdrive_id):
+        self._blind_sizes = blind_sizes
         # extract zipfile (.zip is stored locally or downloaded via from_gdrive)
-        unzipped_dir = self._extract_all_zip_data(which_data_files, from_gdrive_id)
+        unzipped_dir = self._extract_all_zip_data(zip_path, blind_sizes, from_gdrive_id)
         filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
         # parse, encode, vectorize and write the training data from .txt to disk
         for i, filename in enumerate(filenames):
@@ -209,7 +209,7 @@ class CsvTrainingDataGenerator(SteinbergerGenerator):
                          logfile)
 
     def _write_train_data(self, data, labels):
-        file_dir = os.path.join(self._data_dir + "02_vectorized", self._which_data_files)
+        file_dir = os.path.join(self._data_dir + "02_vectorized", self._blind_sizes)
         # create new file every 100k lines
         file_name = self._out_filename + '_' + str(int(self._num_lines_written / 500000))
         file_path = os.path.join(file_dir, file_name)

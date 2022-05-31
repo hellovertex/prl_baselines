@@ -48,7 +48,7 @@ def main(zip_path, blind_sizes, from_gdrive_id):
         # or downloads from gdrive. Extracts found .zip files
         # reads the extracted .txt files for poker hands
         # parses, encodes, vectorizes, and writes them to disk.
-        generator.run_data_generation(zip_path, from_gdrive_id=from_gdrive_id)
+        generator.run_data_generation(zip_path, blind_sizes, from_gdrive_id=from_gdrive_id)
         # # run example using google drive file id, which also works fine
         # generator.run_data_generation(which_data_files, from_gdrive_id="18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO")
 
