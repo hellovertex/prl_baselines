@@ -25,6 +25,15 @@ is written, e.g. `data/folder/0.25-0.50/`.
 Possible values are
 `'0.01-0.02'`, ... `'0.25-0.50', '0.50-1.00', '1.00-2.00', '10.00-20.00',` etc.
 
+Tip 1: As the BulkHands.zip downlaoded from hsmithy can be very large (200.000 files unzipped),
+it is recommended to generate multiple smaller zip files and run `run_generate_train_data` 
+for each of these, possibly on different machines simultaneously.
+
+Tip 2: By passing `--unzipped_dir` flag, the `--zip_path` parameter is ignored and unzipping will 
+be skipped. Instead training data will be generated from .txt files found in `unzipped_dir`
+
+
+
 ## When running from Azure ML - VM
 1. Before executing the `run_generate_train_data` script
  - **provide the .zip file as a dataset inside Azure ML**.
