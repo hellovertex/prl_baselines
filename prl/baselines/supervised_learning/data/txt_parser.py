@@ -50,6 +50,16 @@ class TxtParser(Parser):
         """Only games with a single small blind a single big blind are accepted.
         Text files included games with multiple small blinds. Maybe a bug in their crawler.
         We skip these games"""
+    class _ShowDownHappenedButNoSummaryDataExists(ValueError):
+        """ The file Alrischa-0.25-0.50-USD-NoLimitHoldem-PokerStars-11-12-2020.txt
+        had a wrong summary after showdown, no winners were printed and so the parser returned
+        empty lsit showdown players:
+        *** SUMMARY ***
+        Total pot $44.35 | Rake $2
+        Board [8c 6s Kc Kd 7s]
+        Seat 1: edmundtrebus (big blind) folded on the Flop
+        Seat 2: XOZAIH folded before Flop (didn't bet)
+        """
 
     def __init__(self):
         # todo consider making TxtParser another abstract class and make derived PokerStars-Parser
@@ -88,9 +98,17 @@ class TxtParser(Parser):
             f"Splitting showdown string went wrong: splits are {hands_played} "
         return hands_played[1]
 
-    @staticmethod
-    def get_winner(showdown: str) -> Tuple[List[PlayerWithCards], List[PlayerWithCards]]:
-        """Return player name of player that won showdown."""
+    def get_winner(self, showdown: str) -> Tuple[List[PlayerWithCards], List[PlayerWithCards]]:
+        """Return player name of player that won showdown.
+        Specifically, the part after ... *** SUMMARY *** is parsed, which looks like:
+        "*** SUMMARY ***
+        Total pot $3 | Rake $0.15
+        Board [Ac Js 9h 6d Tc]
+        Seat 1: edmundtrebus folded before Flop (didn't bet)
+        Seat 2: XOZAIH (button) folded before Flop (didn't bet)
+        Seat 4: macfaelan (small blind) showed [4s Ad] and won ($2.85) with a pair of Aces
+        Seat 6: Jay.Jay.1175 (big blind) mucked"
+        """
         re_showdown_hands = re.compile(
             rf'Seat \d: {PLAYER_NAME_TEMPLATE}{MATCH_ANY} showed (\[{POKER_CARD_TEMPLATE} {POKER_CARD_TEMPLATE}])',
             re.UNICODE)
@@ -105,6 +123,8 @@ class TxtParser(Parser):
                           for hand in showdown_hands]
         winners = [PlayerWithCards(name=hand[0].strip(), cards=hand[1])
                    for hand in winners]
+        if not showdown_hands:
+            raise self._ShowDownHappenedButNoSummaryDataExists()
         return winners, showdown_hands
 
     @staticmethod
@@ -283,6 +303,8 @@ class TxtParser(Parser):
             raise self._PlayerLeavesDuringPotContributionError
 
         hand_id = self.get_hand_id(episode)
+        if hand_id == 220253378490:
+            print('need breakpoint here')
         currency_symbol = self.get_currency_symbol(episode)
         winners, showdown_hands = self.get_winner(showdown)
         # blinds = self.get_blinds(episode)
@@ -359,6 +381,8 @@ class TxtParser(Parser):
                 # Only games with a single small blind a single big blind are accepted.
                 # Text files included games with multiple small blinds. Maybe a bug in their crawler.
                 # We skip these games.
+                continue
+            except self._ShowDownHappenedButNoSummaryDataExists:
                 continue
 
     def parse_file(self, file_path):
