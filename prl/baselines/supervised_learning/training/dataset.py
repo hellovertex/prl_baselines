@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import linecache
+import subprocess
 from functools import partial
 from os import listdir
 from os.path import isfile, join, abspath
@@ -103,6 +105,26 @@ class MultipleTxtFilesDataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return self._len
+
+
+class LazyTextDataset(torch.utils.data.Dataset):
+    def __init__(self, filename):
+        self._filename = filename
+        self._total_data = int(subprocess.check_output("wc -l " + filename, shell=True).split()[0]) - 1
+
+    def __getitem__(self, idx):
+        line = linecache.getline(self._filename, idx + 1)
+        csv_line = csv.reader([line])
+        return next(csv_line)
+
+    def __len__(self):
+        return self._total_data
+
+
+# path = "/ where_csv_files_are_dumped /"
+# files = list(map(lambda x: path + x, (filter(lambda x: x.endswith("csv"), os.listdir(path)))))
+# datasets = list(map(lambda x: LazyTextDataset(x), files))
+# dataset = ConcatDataset(datasets)
 
 
 class MultipleParquetFilesDatasetDownsampled(torch.utils.data.Dataset):
