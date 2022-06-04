@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import linecache
 import subprocess
 from functools import partial
@@ -16,97 +17,6 @@ from torch.utils.data import ConcatDataset, SubsetRandomSampler, BatchSampler, R
 BATCH_SIZE = 512
 
 
-class SingleTxtFileDataset(torch.utils.data.Dataset):
-    def __init__(self, file_path: str):
-        print(f"Initializing file {file_path}")
-        self.file_path = file_path
-        self._data: torch.Tensor | None = None
-        self._labels: torch.Tensor | None = None
-        self._len = self._get_len() - 1  # subtract one for column names
-
-    def _get_len(self):
-        """Get line count of large files cheaply"""
-        with open(self.file_path, 'rb') as f:
-            lines = 0
-            buf_size = 1024 * 1024
-            read_f = f.raw.read if hasattr(f, 'raw') and hasattr(f.raw, 'read') else f.read
-
-            buf = read_f(buf_size)
-            while buf:
-                lines += buf.count(b'\n')
-                buf = read_f(buf_size)
-
-        return lines
-
-    def load_file(self):
-        # loading
-        df = pd.read_csv(self.file_path, sep=",")
-
-        # preprocessing
-        fn_to_numeric = partial(pd.to_numeric, errors="coerce")
-        df = df.apply(fn_to_numeric).dropna()
-        labels = None
-        try:
-            # todo remove this when we do not have
-            # todo two label columns by accident anymore
-            labels = df.pop('label.1')
-        except KeyError:
-            labels = df.pop('label')
-        assert len(df.index) > 0
-        self._data = torch.tensor(df.values, dtype=torch.float32)
-        self._labels = torch.tensor(labels.values, dtype=torch.long)
-
-    def __getitem__(self, idx):
-        if self._data is None:
-            self.load_file()
-
-        return self._data[idx], self._labels[idx]
-
-    def __len__(self):
-        return self._len
-
-
-class HDF5Dataset(torch.utils.data.Dataset):
-    """Efficiently load training data. Pytorchs Default Dataloaders and Samplers are #$)%#."""
-
-
-class MultipleTxtFilesDataset(torch.utils.data.Dataset):
-    def __init__(self, file_paths: list):
-        self._data = []
-        self._labels = []
-        # loads everything into memory, which we can do only because our
-        # azure compute has 64GB ram
-        self._init_load_data(file_paths)
-        self._len = len(self._data)
-
-    def _init_load_data(self, file_paths):
-        for i, file_path in enumerate(file_paths):
-            print(f'Loading File {i}/{len(file_paths)} into memory...')
-            df = pd.read_csv(file_path, sep=",")
-            # preprocessing
-            fn_to_numeric = partial(pd.to_numeric, errors="coerce")
-            df = df.apply(fn_to_numeric).dropna()
-            labels = None
-            try:
-                # todo remove this when we do not have
-                # todo two label columns by accident anymore
-                labels = df.pop('label.1')
-            except KeyError:
-                labels = df.pop('label')
-            assert len(df.index) > 0
-            data = torch.tensor(df.values, dtype=torch.float32)
-            labels = torch.tensor(labels.values, dtype=torch.long)
-            for i, _ in enumerate(data):
-                self._data.append(data[i])
-                self._labels.append(labels[i])
-
-    def __getitem__(self, idx):
-        return self._data[idx], self._labels[idx]
-
-    def __len__(self):
-        return self._len
-
-
 class LazyTextDataset(torch.utils.data.Dataset):
     def __init__(self, filename):
         self._filename = filename
@@ -115,6 +25,8 @@ class LazyTextDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         line = linecache.getline(self._filename, idx + 1)
         csv_line = csv.reader([line])
+        # todo convert to binary e.g. numpy
+        # delete df
         return next(csv_line)
 
     def __len__(self):

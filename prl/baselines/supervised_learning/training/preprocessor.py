@@ -35,9 +35,8 @@ def downsample(df):
                       df_allin])
 
 
-def preprocess(path_to_csv_file,
+def to_parquet(path_to_csv_file,
                use_downsampling=True,
-               save_to_parquet=False,
                output_dir='../../../../data/03_preprocessed/'):
     # read csv, sample properly, and save to parquet file
     df = pd.read_csv(path_to_csv_file)
@@ -45,8 +44,7 @@ def preprocess(path_to_csv_file,
     df = df.apply(fn_to_numeric).dropna()
     if use_downsampling:
         df = downsample(df)
-    if save_to_parquet:
-        df.to_parquet(path=output_dir)
+    df.to_parquet(path=output_dir)
     return df
 
 
