@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import itertools
 import linecache
 import subprocess
 from functools import partial
@@ -16,6 +17,58 @@ from torch.utils.data import ConcatDataset, SubsetRandomSampler, BatchSampler, R
 
 BATCH_SIZE = 512
 
+# ------------ FRESH START -------------
+from torch.utils.data import Dataset, IterableDataset, DataLoader
+from itertools import chain
+from random import shuffle
+
+
+class OutOfMemoryDataset(IterableDataset):
+    def __init__(self, path_to_csv_files):
+        self._path_to_csv_files = path_to_csv_files
+        self.filenames = ["C:\\Users\\hellovertex\\Documents\\github.com\\dev.azure.com\\prl\\prl_baselines\\data\\dummies\\dummy1.csv",
+                          "C:\\Users\\hellovertex\\Documents\\github.com\\dev.azure.com\\prl\\prl_baselines\\data\\dummies\\dummy2.csv",]
+
+    def _iterators(self):
+        # read_csv(..., iterator=True) returns an Iterator for single .csv file
+        # chain(*[Iterator]) chains multiple iterators to a single iterator
+        iterators = []
+        for file in self.filenames:
+            iterators.append(pd.read_csv(file, sep=',', iterator=True, chunksize=10000))
+        return chain(*iterators)
+        # when iterating, one can call .sample for additional shuffling of each file
+    # def _shuffled_iter(self):
+    #     while True:
+    #         try:
+    #             # .sample returns a sampled(shuffled) fraction of the dataframe
+    #             # by setting frac=1 we basically shuffle the loaded chunk before returning it
+    #             yield next(self._iterators).sample(frac=1)
+    #         except StopIteration:
+    #             # before raising StopIteration, we shuffle the list of .csv filenames
+    #             # so that the next time the __iter__ is called,
+    #             # the files will be loaded in a different order
+    #             shuffle(self.filenames)
+    #             raise StopIteration
+
+    def __iter__(self):
+        try:
+            res = next(self._iterators())
+            # next(self._iterators()).sample returns a sampled(shuffled) fraction of the dataframe
+            # by setting frac=1 we basically shuffle the loaded chunk before returning it
+            return chain([res], self._iterators())
+        except StopIteration:
+            # before raising StopIteration, we shuffle the list of .csv filenames
+            # so that the next time the __iter__ is called,
+            # the files will be loaded in a different order
+            shuffle(self.filenames)
+            raise StopIteration
+
+it = OutOfMemoryDataset('')
+print(type(it))
+for i in it:
+    print(i)
+    break
+print(type(iter(it)))
 
 class LazyTextDataset(torch.utils.data.Dataset):
     def __init__(self, filename):
