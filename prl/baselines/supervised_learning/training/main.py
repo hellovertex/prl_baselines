@@ -48,11 +48,6 @@ def run_preprocessing(input_dir, output_dir, skip_preprocessing, to_parquet=Fals
             callbacks.append(to_parquet_fn)
         preprocessor = Preprocessor(path_to_csv_files=input_dir, callbacks=callbacks)
         preprocessor.run()
-    # load training data from output_dir (default: data/03_preprocessed)
-    from tqdm import tqdm
-    for i in tqdm(range(1000000)):
-        pass
-    # run training
 
 
 if __name__ == '__main__':

@@ -1,15 +1,21 @@
 from __future__ import annotations
 
+import csv
 import glob
 
+import enlighten as enlighten
 import pandas as pd
-
-BATCH_SIZE = 512
-
-# ------------ FRESH START -------------
 from torch.utils.data import IterableDataset
 from itertools import chain
 from random import shuffle
+import logging
+
+BATCH_SIZE = 512
+
+
+def row_count(input):
+    file = csv.reader(input)
+    return sum(1 for row in file)
 
 
 class OutOfMemoryDataset(IterableDataset):
@@ -18,13 +24,34 @@ class OutOfMemoryDataset(IterableDataset):
         self.batch_size = batch_size
         self.filenames = glob.glob(path_to_csv_files.__str__() + '/**/*.csv', recursive=True)
 
+        # Setup progress bar
+        self.manager = enlighten.get_manager()
+        self.pbar_len = self.manager.counter(total=len(self.filenames), desc='Ticks', unit='ticks')
+        self.pbar_iter = self.manager.counter(total=len(self.filenames), desc='Ticks', unit='ticks')
+
+        # Compute length of dataset by adding all rows across files
+        # happens out of memory
+        self._len = 0
+        for i, f in enumerate(self.filenames):
+            # print("Estimating length of dataset", end='') if i == 0 else print('.', end='')
+            logging.info(f"Estimating length of dataset: file {i}/{len(self.filenames)}")
+            self.pbar_len.update()
+            self._len += row_count(f)
+        self._len -= len(self.filenames)  # subtract headers
+
     def _iterators(self):
         # 1. pd.read_csv(..., iterator=True) returns an Iterator for single .csv file
         # 2. chain(*[Iterator]) chains multiple iterators to a single iterator
         # 3. when iterating, one can call next(...).sample(frac=1) for additional shuffling of each dataframe
         iterators = []
-        for file in self.filenames:
-            iterators.append(pd.read_csv(file, sep=',', iterator=True, chunksize=self.batch_size))
+        for i, f in enumerate(self.filenames):
+            # print("Computing iterators of dataset", end='') if i == 0 else print('.', end='')
+            logging.info(f"Computing iterators of dataset: file {i}/{len(self.filenames)}")
+            iterators.append(pd.read_csv(f, sep=',',
+                                         iterator=True,
+                                         chunksize=self.batch_size,
+                                         encoding='cp1252'))
+            self.pbar_iter.update()
         return chain(*iterators)
 
     def __iter__(self):
@@ -39,7 +66,5 @@ class OutOfMemoryDataset(IterableDataset):
             shuffle(self.filenames)
             raise StopIteration
 
-
-for i in OutOfMemoryDataset('', 1000):
-    print(i)
-    break
+    def __len__(self):
+        return self._len
