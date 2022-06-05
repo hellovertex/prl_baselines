@@ -1,23 +1,20 @@
 import logging
 import time
-from collections import OrderedDict
 
-import pandas as pd
-from matplotlib import pyplot as plt
-from sklearn.metrics import confusion_matrix
-import seaborn as sn
 import numpy as np
+import pandas as pd
+import seaborn as sn
 import torch
 import torch.nn.functional as F
+from matplotlib import pyplot as plt
 from prefetch_generator import BackgroundGenerator
+from sklearn.metrics import confusion_matrix
 from torch import nn
-from torch.utils.tensorboard import SummaryWriter
+from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
 from prl.baselines.supervised_learning.models.model import Net
 from prl.baselines.supervised_learning.training.dataset import OutOfMemoryDataset
-
-
 
 
 def load_checkpoint(path_to_checkpoint):

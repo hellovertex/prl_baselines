@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import glob
-import logging
 from itertools import chain
 from random import shuffle
 
@@ -32,7 +31,7 @@ class OutOfMemoryDataset(IterableDataset):
         for i, f in pbar:
             nrows = row_count(f)
             pbar.set_description(f"Computing total length of dataset. This may take a while. "
-                                 f"File {i+1}/{len(self.filenames)} has {nrows} rows")
+                                 f"File {i + 1}/{len(self.filenames)} has {nrows} rows")
             # print(f'File {f} has {nrows} rows.')
             self._len += nrows
         self._len -= len(self.filenames)  # subtract headers

@@ -18,10 +18,14 @@ TEST_BATCH_SIZE = 10000
 @click.command
 @click.option('--input_dir',
               type=str,
-              help='location of .csv files containing vectorized information')
+              help='location of .csv files containing vectorized information '
+                   'e.g. C:\\Users\\<...>\\prl_baselines\\data\\02_vectorized\\0.25-0.50\\. '
+                   'Note the blind size is part of the input dir because it has been created already."')
 @click.option('--output_dir_preprocessing',
               type=str,
-              help='location of where to write .parquet files [optional]')
+              help='location of where to write .parquet files [optional] '
+                   'e.g. C:\\Users\\<...>\\prl_baselines\\data\\03_preprocessed\\'
+                   'Note the blind size is NOT part of the output_dir because it will be created.')
 @click.option('--write_to_parquet',
               is_flag=True,
               show_default=True,
@@ -31,7 +35,7 @@ TEST_BATCH_SIZE = 10000
 @click.option('--skip_preprocessing',
               is_flag=True,
               show_default=True,
-              default=True,
+              default=False,
               help='Preprocessing can be skipped, e.g. if preprocessed data is already written to disk.')
 @click.option("--blind_sizes",
               default="0.25-0.50",
@@ -44,12 +48,14 @@ def main(input_dir, write_to_parquet, blind_sizes, output_dir_preprocessing, ski
         input_dir = DATA_DIR + f'/02_vectorized/{blind_sizes}'
     if not output_dir_preprocessing:
         output_dir_preprocessing = DATA_DIR + f'/03_preprocessed/{blind_sizes}'
+    else:
+        output_dir_preprocessing += f'/{blind_sizes}'
     run_preprocessing(input_dir=input_dir,
                       output_dir=output_dir_preprocessing,
                       write_to_parquet=write_to_parquet,
                       blind_sizes=blind_sizes,
                       skip_preprocessing=skip_preprocessing)
-    make_testfolder(output_dir_preprocessing, blind_sizes)
+    make_testfolder(output_dir_preprocessing)
 
     run_train_eval(input_dir=output_dir_preprocessing,
                    epochs=EPOCHS,
@@ -59,9 +65,8 @@ def main(input_dir, write_to_parquet, blind_sizes, output_dir_preprocessing, ski
                    resume=RESUME)
 
 
-def make_testfolder(output_dir_preprocessing, blind_sizes):
-    # get all datasamples, by convention they are stored in <output_dir_preprocessing>/<blind_sizes>
-    output_dir_preprocessing = output_dir_preprocessing + f'/{blind_sizes}'
+def make_testfolder(output_dir_preprocessing):
+    # get all datasamples
     files = glob.glob(output_dir_preprocessing.__str__() + '/**/*.csv', recursive=True)
     # move a subset to test directory
     testdir = output_dir_preprocessing + '/test'
@@ -74,10 +79,10 @@ def make_testfolder(output_dir_preprocessing, blind_sizes):
 def run_preprocessing(input_dir, output_dir, skip_preprocessing, write_to_parquet=False, blind_sizes='0.25-0.50'):
     if not skip_preprocessing:
         # write large preprocessed dataset to disk
-        to_csv_fn = partial(to_csv, output_dir=output_dir + f'/{blind_sizes}')
+        to_csv_fn = partial(to_csv, output_dir=output_dir)
         callbacks = [to_csv_fn]
         if write_to_parquet:
-            to_parquet_fn = partial(to_parquet, output_dir=output_dir + f'/{blind_sizes}')
+            to_parquet_fn = partial(to_parquet, output_dir=output_dir)
             callbacks.append(to_parquet_fn)
         preprocessor = Preprocessor(path_to_csv_files=input_dir, callbacks=callbacks)
         preprocessor.run()
