@@ -130,7 +130,7 @@ def run_train_eval(input_dir,
 
             # compute computation time and *compute_efficiency*
             process_time = start_time - time.time() - prepare_time
-            pbar.set_description("Compute efficiency: {:.2f}, epoch: {}/{}:".format(
+            pbar.set_description("Fraction of NN Training Time: {:.2f}, epoch: {}/{}:".format(
                 process_time / (process_time + prepare_time), epoch, epochs))
             start_time = time.time()
 
