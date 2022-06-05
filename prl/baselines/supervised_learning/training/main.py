@@ -35,7 +35,10 @@ from prl.baselines.supervised_learning.training.preprocessor import Preprocessor
               type=str,
               help="Possible values are e.g. '0.25-0.50', '0.50-1.00', '1.00-2.00'")
 def main(input_dir, to_parquet, blind_sizes, output_dir, skip_preprocessing):
+    run_preprocessing(input_dir, to_parquet, blind_sizes, output_dir, skip_preprocessing)
 
+
+def run_preprocessing(input_dir, output_dir, skip_preprocessing, to_parquet=False, blind_sizes='0.25-0.50'):
     if not skip_preprocessing:
         # write large preprocessed dataset to disk
         to_csv_fn = partial(to_csv, output_dir=output_dir + f'/{blind_sizes}')
@@ -46,9 +49,10 @@ def main(input_dir, to_parquet, blind_sizes, output_dir, skip_preprocessing):
         preprocessor = Preprocessor(path_to_csv_files=input_dir, callbacks=callbacks)
         preprocessor.run()
     # load training data from output_dir (default: data/03_preprocessed)
-
+    from tqdm import tqdm
+    for i in tqdm(range(1000000)):
+        pass
     # run training
-
 
 
 if __name__ == '__main__':

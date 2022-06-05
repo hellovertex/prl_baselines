@@ -1,4 +1,5 @@
 import glob
+import os
 from functools import partial
 
 import pandas as pd
@@ -15,7 +16,10 @@ ALL_IN = 6
 def to_csv(df: pd.DataFrame,
            filename,
            output_dir='../../../../data/03_preprocessed/'):
-    df.to_csv(path=output_dir + filename)
+    if not os.path.exists(output_dir):
+        os.makedirs(os.path.abspath(output_dir))
+    filename = os.path.basename(filename)
+    df.to_csv(os.path.join(output_dir, filename), index=False)
 
 
 def to_parquet(df: pd.DataFrame,
