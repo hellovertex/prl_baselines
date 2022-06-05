@@ -17,8 +17,7 @@ from tqdm import tqdm
 from prl.baselines.supervised_learning.models.model import Net
 from prl.baselines.supervised_learning.training.dataset import OutOfMemoryDataset
 
-BATCH_SIZE = 1000
-TEST_BATCH_SIZE = 10000
+
 
 
 def load_checkpoint(path_to_checkpoint):
@@ -28,8 +27,8 @@ def load_checkpoint(path_to_checkpoint):
 def run_train_eval(input_dir,
                    epochs,
                    lr,
-                   batch_size=BATCH_SIZE,
-                   test_batch_size=TEST_BATCH_SIZE,
+                   batch_size,
+                   test_batch_size,
                    log_interval=100,  # log training metrics every `log_interval` batches
                    ckpt_interval=10000,  # save checkpoint each `ckpt_interval` batches
                    eval_interval=10000,  # eval each `eval_interval` batches
@@ -52,8 +51,8 @@ def run_train_eval(input_dir,
 
     # datasets tr te
     classes = [0, 1, 2, 3, 4, 5]
-    dataset = OutOfMemoryDataset(input_dir, batch_size=BATCH_SIZE)
-    testset = OutOfMemoryDataset(input_dir + '/test', batch_size=BATCH_SIZE)
+    dataset = OutOfMemoryDataset(input_dir, batch_size=batch_size)
+    testset = OutOfMemoryDataset(input_dir + '/test', batch_size=batch_size)
 
     # network
     hidden_dim = [512, 512]

@@ -12,7 +12,8 @@ DATA_DIR = "../../../../data"
 EPOCHS = 1000
 LR = 1e-6
 RESUME = True
-
+BATCH_SIZE = 1000
+TEST_BATCH_SIZE = 10000
 
 @click.command
 @click.option('--input_dir',
@@ -58,6 +59,8 @@ def main(input_dir, write_to_parquet, blind_sizes, output_dir_preprocessing, ski
 
     run_train_eval(input_dir=output_dir_preprocessing,
                    epochs=EPOCHS,
+                   batch_size=BATCH_SIZE,
+                   test_batch_size=TEST_BATCH_SIZE,
                    lr=LR,
                    resume=RESUME)
 
@@ -68,7 +71,7 @@ def make_testfolder(output_dir_preprocessing, blind_sizes):
     files = glob.glob(output_dir_preprocessing.__str__() + '/**/*.csv', recursive=True)
     # move a subset to test directory
     testdir = output_dir_preprocessing + '/test'
-    if not os.exists(testdir):
+    if not os.path.exists(testdir):
         os.makedirs(testdir)
     for testfile in files[-2:]:  # use only two files (2GB)
         shutil.copyfile(testfile, testdir + os.path.basename(testfile))
