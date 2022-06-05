@@ -1,6 +1,7 @@
 tensorflow
 matplotlib
 prefetch_generator
+seaborn
 click
 gdown
 sklearn
