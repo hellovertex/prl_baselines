@@ -28,12 +28,6 @@ TEST_BATCH_SIZE = 10000
               default=False,
               help='Whether the preprocessed dataframes should be written to .parquet files.'
                    'Parquet files consume less memory than csv files.')
-@click.option('--write_to_csv',
-              is_flag=True,
-              show_default=True,
-              default=True,
-              help='Whether the preprocessed dataframes should be written to .csv files.'
-                   '')
 @click.option('--skip_preprocessing',
               is_flag=True,
               show_default=True,

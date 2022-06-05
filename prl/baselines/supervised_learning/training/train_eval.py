@@ -91,10 +91,10 @@ def run_train_eval(input_dir,
     total_loss = 0
     correct = 0
 
-    pbar = tqdm(enumerate(BackgroundGenerator(dataset)), total=len(dataset) / BATCH_SIZE)
+    pbar = tqdm(enumerate(BackgroundGenerator(dataset)), total=len(dataset) / batch_size)
     for epoch in range(start_epoch, epochs):
         pbar.set_description(
-            f'Training epoch {epoch}/{epochs} on {len(dataset)} examples using batches of size {BATCH_SIZE}... ')
+            f'Training epoch {epoch}/{epochs} on {len(dataset)} examples using batches of size {batch_size}... ')
         start_time = time.time()
         for i, data in pbar:
             # todo convert to pytorch tensors if applicable:
@@ -134,7 +134,7 @@ def run_train_eval(input_dir,
             if i % eval_interval == 0:
                 # bring models to evaluation mode
                 net.eval()
-                pbar_test = tqdm(enumerate(BackgroundGenerator(dataset)), total=len(testset) / BATCH_SIZE)
+                pbar_test = tqdm(enumerate(BackgroundGenerator(dataset)), total=len(testset) / test_batch_size)
 
                 test_loss = 0
                 correct = 0
