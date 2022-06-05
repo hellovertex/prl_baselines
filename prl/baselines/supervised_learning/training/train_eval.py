@@ -1,4 +1,5 @@
 import logging
+import os
 import time
 
 import numpy as np
@@ -27,8 +28,8 @@ def run_train_eval(input_dir,
                    batch_size,
                    test_batch_size,
                    log_interval=100,  # log training metrics every `log_interval` batches
-                   ckpt_interval=10000,  # save checkpoint each `ckpt_interval` batches
-                   eval_interval=10000,  # eval each `eval_interval` batches
+                   ckpt_interval=1000,  # save checkpoint each `ckpt_interval` batches
+                   eval_interval=1000,  # eval each `eval_interval` batches
                    ckpt_dir='./ckpt',
                    log_dir='./logdir',
                    resume=True,
@@ -45,7 +46,8 @@ def run_train_eval(input_dir,
     np.random.seed(1)
     torch.manual_seed(1)
     torch.cuda.manual_seed(1)
-
+    # ckpt_dir to filename for torch save/load functions to work properly
+    ckpt_dir = ckpt_dir + '/ckpt'
     # datasets tr te
     classes = [0, 1, 2, 3, 4, 5]
     dataset = OutOfMemoryDataset(input_dir, batch_size=batch_size)
@@ -93,8 +95,8 @@ def run_train_eval(input_dir,
     total_loss = 0
     correct = 0
 
-    pbar = tqdm(enumerate(BackgroundGenerator(dataset)), total=len(dataset) / batch_size)
     for epoch in range(start_epoch, epochs):
+        pbar = tqdm(enumerate(BackgroundGenerator(dataset)), total=len(dataset) / batch_size)
         pbar.set_description(
             f'Training epoch {epoch}/{epochs} on {len(dataset)} examples using batches of size {batch_size}... ')
         start_time = time.time()
@@ -187,6 +189,8 @@ def run_train_eval(input_dir,
 
             # save checkpoint if needed
             if i % ckpt_interval == 0:
+                if not os.path.exists(ckpt_dir):
+                    os.makedirs(ckpt_dir)
                 torch.save({'epoch': epoch,
                             'net': net.state_dict(),
                             'n_iter': n_iter,
