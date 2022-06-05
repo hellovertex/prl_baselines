@@ -1,5 +1,6 @@
 tensorflow
 matplotlib
+prefetch_generator
 click
 gdown
 sklearn

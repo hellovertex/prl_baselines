@@ -1,7 +1,3 @@
-import os
-import pickle
-
-import mlflow
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -85,7 +81,4 @@ def test(epoch, args, model, test_loader, train_loader, device):
 
 def log_scalar(name, value, step, out_dir=None):
     """Log a scalar value to both MLflow and TensorBoard"""
-    try:
-        mlflow.log_metric(name, value, step=step)
-    except Exception:
-        pass
+    pass
