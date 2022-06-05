@@ -86,7 +86,8 @@ def run_train_eval(input_dir,
             logging.info(f"Continue Training from scratch")
 
     # typically we use tensorboardX to keep track of experiments
-    writer = SummaryWriter(log_dir=log_dir)
+    writer = SummaryWriter(log_dir=log_dir,
+                           comment=f"LR_{lr}_BATCH_{batch_size}")
     n_iter = start_n_iter
     i_train = 0
     total_loss = 0
@@ -98,7 +99,6 @@ def run_train_eval(input_dir,
             f'Training epoch {epoch}/{epochs} on {len(dataset)} examples using batches of size {batch_size}... ')
         start_time = time.time()
         for i, data in pbar:
-            # todo convert to pytorch tensors if applicable:
             labels = data.pop('label')
             data = torch.tensor(data.values)
             labels = torch.tensor(labels.values, dtype=torch.int64)
@@ -110,7 +110,6 @@ def run_train_eval(input_dir,
             # forward and backward pass
             optim.zero_grad()
             output = net(data)
-            # todo check if this works with our batches
             loss = F.cross_entropy(output, labels)
             loss.backward()
             optim.step()
@@ -153,7 +152,7 @@ def run_train_eval(input_dir,
                         test_loss += F.cross_entropy(
                             output, labels, reduction="sum"
                         ).data.item()  # sum up batch loss
-                        pred = output.data.max(1)[1]  # get the index of the max log-probability
+                        pred = torch.argmax(output, dim=1)
                         correct += pred.eq(labels.data).cpu().sum().item()
 
                 test_loss /= len(testset)
@@ -179,7 +178,8 @@ def run_train_eval(input_dir,
                         k += 1
 
                 # Write confusion matrix to tensorboard
-                cf_matrix = confusion_matrix(labels, output)
+                prediction = torch.argmax(output,dim=1)
+                cf_matrix = confusion_matrix(labels, prediction)
                 df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix) * 10, index=[i for i in range(output_dim)],
                                      columns=[i for i in classes])
                 plt.figure(figsize=(12, 7))
