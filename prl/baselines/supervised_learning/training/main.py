@@ -73,7 +73,11 @@ def make_testfolder(output_dir_preprocessing):
     if not os.path.exists(testdir):
         os.makedirs(testdir)
     for testfile in files[-2:]:  # use only two files (2GB)
-        shutil.copyfile(testfile, testdir + os.path.basename(testfile))
+        try:
+            shutil.copyfile(testfile, testdir + '/' + os.path.basename(testfile))
+        except shutil.SameFileError:
+            # file already exists, thats ok
+            pass
 
 
 def run_preprocessing(input_dir, output_dir, skip_preprocessing, write_to_parquet=False, blind_sizes='0.25-0.50'):

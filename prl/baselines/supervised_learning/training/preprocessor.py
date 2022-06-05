@@ -50,12 +50,19 @@ class Preprocessor:
 
     def downsample(self, df):
         n_samples = df['label'].value_counts()[ALL_IN]  # ALL_IN is rarest class
+
         df_fold = df[df['label'] == FOLD]
         df_checkcall = df[df['label'] == CHECK_CALL]
         df_raise_min = df[df['label'] == RAISE_MIN_OR_3BB]
         df_raise_half = df[df['label'] == RAISE_HALF_POT]
         df_raise_pot = df[df['label'] == RAISE_POT]
         df_allin = df[df['label'] == ALL_IN]
+
+        # overwrite labels such that 0,1,3,4,5,6 become 0,1,2,3,4,5 because 2 is never used
+        df_allin['label'] = 5
+        df_raise_pot['label'] = 4
+        df_raise_half['label'] = 3
+        df_raise_min['label'] = 2
 
         df_fold_downsampled = resample(df_fold, replace=True, n_samples=n_samples, random_state=1)
         df_checkcall_downsampled = resample(df_checkcall, replace=True, n_samples=n_samples, random_state=1)

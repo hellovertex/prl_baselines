@@ -54,7 +54,11 @@ def run_train_eval(input_dir,
     # network
     hidden_dim = [512, 512]
     output_dim = 6
-    input_dim = 564
+    # waste the first batch to dynamically get the input dimension
+    for data in dataset:
+        input_dim = data.shape[1] - 1
+        break
+    # input_dim = 564
     net = Net(input_dim, output_dim, hidden_dim)
 
     # if running on GPU and we want to use cuda move model there
@@ -95,7 +99,9 @@ def run_train_eval(input_dir,
         start_time = time.time()
         for i, data in pbar:
             # todo convert to pytorch tensors if applicable:
-            labels = data.pop['labels']
+            labels = data.pop('label')
+            data = torch.tensor(data.values)
+            labels = torch.tensor(labels.values, dtype=torch.int64)
             if use_cuda:
                 data = data.cuda()
                 labels = labels.cuda()
@@ -137,7 +143,9 @@ def run_train_eval(input_dir,
                 correct = 0
                 with torch.no_grad():
                     for j, data in pbar_test:
-                        labels = data.pop['labels']
+                        labels = data.pop('label')
+                        data = torch.tensor(data.values)
+                        labels = torch.tensor(labels.values, dtype=torch.int64)
                         if use_cuda:
                             data = data.cuda()
                             labels = labels.cuda()

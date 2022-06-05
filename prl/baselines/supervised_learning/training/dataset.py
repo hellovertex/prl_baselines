@@ -42,7 +42,7 @@ class OutOfMemoryDataset(IterableDataset):
         # 3. when iterating, one can call next(...).sample(frac=1) for additional shuffling of each dataframe
         iterators = []
         for i, f in enumerate(self.filenames):
-            iterators.append(pd.read_csv(f, sep=',',
+            iterators.append(pd.read_csv(f, sep=',', dtype='float32',
                                          iterator=True,
                                          chunksize=self.batch_size,
                                          encoding='cp1252'))
