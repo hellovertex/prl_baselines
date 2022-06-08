@@ -11,8 +11,8 @@ def test_preprocessing_read_write():
                       blind_sizes='0.25-0.50',
                       skip_preprocessing=False)
     # read csv files from output_dir
-    df1 = pd.read_csv(dir_path+"/output"+"/0.25-0.50/dummy1.csv")
-    df2 = pd.read_csv(dir_path+"/output"+"/0.25-0.50/dummy2.csv")
+    df1 = pd.read_csv(dir_path+"/output"+"/dummy1.csv")
+    df2 = pd.read_csv(dir_path+"/output"+"/dummy2.csv")
     assert df1.shape == (6, 564)
     assert df2.shape == (6, 564)
 

@@ -37,7 +37,7 @@ class Preprocessor:
 
     def __init__(self, path_to_csv_files, callbacks=[to_csv]):
         self._path_to_csv_files = path_to_csv_files
-        self._csv_files = glob.glob(path_to_csv_files.__str__() + '/**/*.csv', recursive=True)
+        self._csv_files = glob.glob(path_to_csv_files.__str__() + '/*.csv', recursive=False)
         self._callbacks = callbacks
 
     def run(self):
