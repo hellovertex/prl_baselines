@@ -28,6 +28,16 @@ class TAGAgent:
         return (RAISE, 3 * self._blind_sizes[BB])
 
     def act(self, obs):
+        # open raise given position and open raising range
+        # 3-bet given position and opponents assumed open raising range
+        # 4-bet / 5 bet given position and opponents assumed 3-betting range
+        # cold calling given players left to act, and callers position -> and our hands equity
+        #  given their open raising range, the more remaining players, the smaller our calling range,
+        #   we can make this a function of num remaining players where we call we call with n hands on 1 rem.
+        #    n-2 with 2 rem, etc...
+        # if should_fold:
+        # if should_call:
+        # if should_raise:
         # ranges = estimate_opponent_ranges()  # uses self._action_history to get ranges
         # stage = get_stage(obs)
         # if self.can_open_raise(stage, ranges):
