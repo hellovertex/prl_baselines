@@ -6,17 +6,17 @@
 
 ### Inside virtual env run
 Install Poker RL-environment as namespace package
-3. `pip install requests`
-4. `cd prl_environment`
-5. `git submodule update --init`
-6. `pip install -e .`  `# use -e optionally for development`
+
+2. `cd prl_environment`
+3. `git submodule update --recursive --remote` (and `--init` if you did not clone using `--recurse-submodules`)
+4. `pip install -e .`  where using `-e` is optional for convenient development
 
 Install Training data generation package
-7. `cd ../prl_baselines`
-8. `pip install -e .`  `# use -e optionally for development`
+1. `cd ../prl_baselines`
+2. `pip install -e .`  `# use -e optionally for development`
 
 Run training data generation from .zipfile to .csv files
-9. `python run_generate_train_data --zip_path "<PATH_TO_ZIPFILE_WITH_BULKHANDS>"`
+1. `python run_generate_train_data --zip_path "<PATH_TO_ZIPFILE_WITH_BULKHANDS>"`
 
 This will create `.csv` files in the `data/folder`, each containing 500k training examples.
 Note: Setting `--blind_sizes` parameter will determine the subfolder to which training data
