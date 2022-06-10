@@ -1,7 +1,7 @@
 # prl_baselines
 
 ## How to: Fresh Start
-1. `git clone https://github.com/hellovertex/prl_environment.git`
+1. `git clone --recurse-submodules https://github.com/hellovertex/prl_environment.git`
 2. `git clone https://github.com/hellovertex/prl_baselines.git`
 
 ### Inside virtual env run
