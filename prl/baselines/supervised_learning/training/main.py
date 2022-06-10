@@ -55,7 +55,7 @@ def main(input_dir, write_to_parquet, blind_sizes, output_dir_preprocessing, ski
                       write_to_parquet=write_to_parquet,
                       blind_sizes=blind_sizes,
                       skip_preprocessing=skip_preprocessing)
-    make_testfolder(output_dir_preprocessing)
+    make_folder_testdataset(output_dir_preprocessing)
 
     run_train_eval(input_dir=output_dir_preprocessing,
                    epochs=EPOCHS,
@@ -65,7 +65,7 @@ def main(input_dir, write_to_parquet, blind_sizes, output_dir_preprocessing, ski
                    resume=RESUME)
 
 
-def make_testfolder(output_dir_preprocessing):
+def make_folder_testdataset(output_dir_preprocessing):
     # get all datasamples
     files = glob.glob(output_dir_preprocessing.__str__() + '/**/*.csv', recursive=True)
     # move a subset to test directory

@@ -211,8 +211,8 @@ class CsvTrainingDataGenerator(SteinbergerGenerator):
 
     def _write_train_data(self, data, labels):
         file_dir = os.path.join(self._data_dir + "02_vectorized", self._blind_sizes)
-        # create new file every 100k lines
-        file_name = self._out_filename + '_' + str(int(self._num_lines_written / 500000))
+        # create new file every 500k lines
+        file_name = self._out_filename + '_' + str(int(self._num_lines_written / 500000)) + '.csv'
         file_path = os.path.join(file_dir, file_name)
         columns = None
         if not os.path.exists(file_path):

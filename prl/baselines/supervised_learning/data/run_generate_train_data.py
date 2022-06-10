@@ -2,7 +2,7 @@ import click
 from prl.environment.Wrappers.prl_wrappers import AugmentObservationWrapper
 
 from steinberger_encoder import RLStateEncoder
-from txt_generator import CsvTrainingDataGenerator
+from train_data_generator import CsvTrainingDataGenerator
 from txt_parser import TxtParser
 
 DATA_DIR = "../../../../data/"

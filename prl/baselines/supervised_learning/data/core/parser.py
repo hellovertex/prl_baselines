@@ -46,7 +46,7 @@ class Action(NamedTuple):
 
 
 class PokerEpisode(NamedTuple):
-    """UnderConstruction"""
+    """Used to initialize and step the RL-environment."""
     date: str
     hand_id: int
     variant: str
