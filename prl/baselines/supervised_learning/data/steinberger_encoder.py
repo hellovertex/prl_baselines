@@ -197,7 +197,7 @@ class RLStateEncoder(Encoder):
                             lut_holder=NoLimitHoldem.get_lut_holder())
         self._wrapped_env = self.env_wrapper_cls(env)
         # will be used for naming feature index in training data vector
-        self._feature_names = list(self._wrapped_env.obs_idx_dict.keys())
+        self._feature_names = list(self._wrapped_env.obs_idx_dict.keys()).append("button_index")
         return starting_stack_sizes_list
 
     def _make_ante(self, ante: str, multiply_by=100) -> float:
