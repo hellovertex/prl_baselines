@@ -39,6 +39,7 @@ class SteinbergerGenerator(TrainingDataGenerator):
         self._num_lines_written = 0
         self._blind_sizes = None
         self._hand_counter = 0
+        self._n_invalid_files = 0
 
         with open(logfile, "a+") as f:
             self._n_files_already_encoded = len(f.readlines())
@@ -156,7 +157,14 @@ class SteinbergerGenerator(TrainingDataGenerator):
     def generate_from_file(self, abs_filepath):
         """Docstring"""
         self._hand_counter = 0
-        parsed_hands = self._parser.parse_file(abs_filepath)
+        try:
+            parsed_hands = self._parser.parse_file(abs_filepath)
+        except UnicodeDecodeError:
+            print('---------------------------------------')
+            print(f'Skipping {self._n_invalid_files}th invalid file {abs_filepath} because it has invalid continuation byte...')
+            print('---------------------------------------')
+            self._n_skipped += 1
+            return
         training_data, labels = self._generate_training_data(parsed_hands)
 
         # some rare cases, where the file did not contain showdown plays
