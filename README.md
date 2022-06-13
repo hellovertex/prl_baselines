@@ -1,6 +1,6 @@
 # prl_baselines
 
-## How to: Fresh Start
+## Installation
 1. `git clone --recurse-submodules https://github.com/hellovertex/prl_environment.git`
 2. `git clone https://github.com/hellovertex/prl_baselines.git`
 
