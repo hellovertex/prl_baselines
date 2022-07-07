@@ -47,7 +47,6 @@ def run_train_eval(input_dir,
     torch.manual_seed(1)
     torch.cuda.manual_seed(1)
     # ckpt_dir to filename for torch save/load functions to work properly
-    ckpt_dir = ckpt_dir + '/ckpt'
     # datasets tr te
     classes = [0, 1, 2, 3, 4, 5]
     dataset = OutOfMemoryDataset(input_dir, batch_size=batch_size)
@@ -76,7 +75,7 @@ def run_train_eval(input_dir,
     start_epoch = 0
     if resume:
         try:
-            ckpt = load_checkpoint(ckpt_dir)
+            ckpt = load_checkpoint(ckpt_dir + '/ckpt')
             net.load_state_dict(ckpt['net'])
             start_epoch = ckpt['epoch']
             start_n_iter = ckpt['n_iter']
@@ -138,12 +137,12 @@ def run_train_eval(input_dir,
             if i % eval_interval == 0:
                 # bring models to evaluation mode
                 net.eval()
-                pbar_test = tqdm(enumerate(BackgroundGenerator(dataset)), total=len(testset) / test_batch_size)
+                # pbar_test = tqdm(enumerate(BackgroundGenerator(dataset)), total=len(testset) / test_batch_size)
 
                 test_loss = 0
                 correct = 0
                 with torch.no_grad():
-                    for j, data in pbar_test:
+                    for j, data in enumerate(BackgroundGenerator(testset)):
                         labels = data.pop('label')
                         data = torch.tensor(data.values)
                         labels = torch.tensor(labels.values, dtype=torch.int64)
@@ -181,7 +180,7 @@ def run_train_eval(input_dir,
 
                 # Write confusion matrix to tensorboard
                 prediction = torch.argmax(output,dim=1)
-                cf_matrix = confusion_matrix(labels, prediction)
+                cf_matrix = confusion_matrix(labels.to('cpu'), prediction.to('cpu'))
                 df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix) * 10, index=[i for i in range(output_dim)],
                                      columns=[i for i in classes])
                 plt.figure(figsize=(12, 7))
@@ -189,10 +188,13 @@ def run_train_eval(input_dir,
 
             # save checkpoint if needed
             if i % ckpt_interval == 0:
-                if not os.path.exists(ckpt_dir):
-                    os.makedirs(ckpt_dir)
+                if not os.path.exists( ckpt_dir + '/ckpt'):
+                    os.makedirs( ckpt_dir + '/ckpt')
+                
                 torch.save({'epoch': epoch,
                             'net': net.state_dict(),
                             'n_iter': n_iter,
                             'optim': optim.state_dict(),
-                            'loss': loss}, ckpt_dir)  # net
+                            'loss': loss},  ckpt_dir + '/ckpt')  # net
+                # save model for inference 
+                torch.save(net, ckpt_dir + '/model.pt')

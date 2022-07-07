@@ -75,6 +75,6 @@ class Preprocessor:
                           df_raise_min_downsampled,
                           df_raise_half_downsampled,
                           df_raise_pot_downsampled,
-                          df_allin])
+                          df_allin]).sample(frac=1)
 
 # preprocess("C:\\Users\\hellovertex\\Documents\\github.com\\dev.azure.com\\prl\\prl_baselines\data\\02_vectorized\\0.25-0.50\\6MAX_0.25-0.50.txt_2")

@@ -8,8 +8,6 @@ import pandas as pd
 from torch.utils.data import IterableDataset
 from tqdm import tqdm
 
-BATCH_SIZE = 512
-
 
 def row_count(input):
     return sum(1 for line in open(input, encoding='cp1252'))
@@ -19,7 +17,7 @@ class OutOfMemoryDataset(IterableDataset):
     def __init__(self, path_to_csv_files, batch_size):
         self.path_to_csv_files = path_to_csv_files
         self.batch_size = batch_size
-        self.filenames = glob.glob(path_to_csv_files.__str__() + '/**/*.csv', recursive=True)
+        self.filenames = glob.glob(path_to_csv_files.__str__() + '/*.csv', recursive=False)
 
         # Compute length of dataset by adding all rows across files
         # happens out of memory

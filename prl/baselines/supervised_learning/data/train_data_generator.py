@@ -163,7 +163,7 @@ class SteinbergerGenerator(TrainingDataGenerator):
             print('---------------------------------------')
             print(f'Skipping {self._n_invalid_files}th invalid file {abs_filepath} because it has invalid continuation byte...')
             print('---------------------------------------')
-            self._n_skipped += 1
+            self._n_skipped += 1  # todo push fix
             return
         training_data, labels = self._generate_training_data(parsed_hands)
 

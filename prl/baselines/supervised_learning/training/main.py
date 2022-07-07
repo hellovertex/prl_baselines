@@ -9,10 +9,10 @@ from prl.baselines.supervised_learning.training.preprocessor import Preprocessor
 from prl.baselines.supervised_learning.training.train_eval import run_train_eval
 
 DATA_DIR = "../../../../data"
-EPOCHS = 1000
+EPOCHS = 8000
 LR = 1e-6
 RESUME = True
-BATCH_SIZE = 1000
+BATCH_SIZE = 50000
 TEST_BATCH_SIZE = 10000
 
 @click.command
@@ -37,11 +37,16 @@ TEST_BATCH_SIZE = 10000
               show_default=True,
               default=False,
               help='Preprocessing can be skipped, e.g. if preprocessed data is already written to disk.')
+@click.option('--skip_testfolder_creation',
+              is_flag=True,
+              show_default=True,
+              default=False)
 @click.option("--blind_sizes",
               default="0.25-0.50",
               type=str,
               help="Possible values are e.g. '0.25-0.50', '0.50-1.00', '1.00-2.00'")
-def main(input_dir, write_to_parquet, blind_sizes, output_dir_preprocessing, skip_preprocessing):
+def main(input_dir, write_to_parquet, blind_sizes, output_dir_preprocessing, skip_preprocessing,
+         skip_testfolder_creation):
     """ Call with `python main.py --output_dir_preprocessing <PATH_TO_DATAFOLDER>/03_preprocessed
     """
     if not input_dir:
@@ -55,7 +60,8 @@ def main(input_dir, write_to_parquet, blind_sizes, output_dir_preprocessing, ski
                       write_to_parquet=write_to_parquet,
                       blind_sizes=blind_sizes,
                       skip_preprocessing=skip_preprocessing)
-    make_folder_testdataset(output_dir_preprocessing)
+    if not skip_testfolder_creation:
+        make_folder_testdataset(output_dir_preprocessing)
 
     run_train_eval(input_dir=output_dir_preprocessing,
                    epochs=EPOCHS,
@@ -74,7 +80,7 @@ def make_folder_testdataset(output_dir_preprocessing):
         os.makedirs(testdir)
     for testfile in files[-2:]:  # use only two files (2GB)
         try:
-            shutil.copyfile(testfile, testdir + '/' + os.path.basename(testfile))
+            shutil.move(testfile, testdir + '/' + os.path.basename(testfile))
         except shutil.SameFileError:
             # file already exists, thats ok
             pass
