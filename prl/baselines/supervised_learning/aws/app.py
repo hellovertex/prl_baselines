@@ -10,7 +10,7 @@ def lambda_handler(event, context):
 
     print("## CONTEXT")
     print(context)
-    obs = event['query']  # list[float]
+    obs = json.loads(event['body'])['query']  # list[float]
     action = torch.argmax(model(torch.Tensor(obs)))
 
     # TODO implement

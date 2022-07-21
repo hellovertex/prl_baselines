@@ -1,5 +1,5 @@
 # @name configure_environment
-POST http://localhost:9000/2015-03-31/functions/function/invocations
+POST https://p235bek4niablvfxiktuwuswni0qecqs.lambda-url.eu-central-1.on.aws/
 Content-Type: application/json
 Accept: application/json
 
