@@ -3,7 +3,7 @@ import json
 import requests
 
 # url = "http://localhost:9000/2015-03-31/functions/function/invocations"
-url =  "http://p235bek4niablvfxiktuwuswni0qecqs.lambda-url.eu-central-1.on.aws/"
+url = "https://p235bek4niablvfxiktuwuswni0qecqs.lambda-url.eu-central-1.on.aws/"
 data = {
     "query": [0.0, 0.02500000037252903, 0.05000000074505806, 0.15000000596046448, 0.0, 0.10000000149011612, 1.0, 0.0,
               0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -34,6 +34,6 @@ data = {
               0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
               0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
               0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4.0]}
-
-res = requests.post(url=url, data=json.dumps(data))
+print('running request...')
+res = requests.post(url=url, data=json.dumps(data), headers={'Content-Type': 'application/json'})
 print(res.text)
