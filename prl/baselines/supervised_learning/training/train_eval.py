@@ -10,11 +10,11 @@ import torch.nn.functional as F
 from matplotlib import pyplot as plt
 from prefetch_generator import BackgroundGenerator
 from sklearn.metrics import confusion_matrix
-from torch import nn
 from tensorboardX import SummaryWriter
+from torch import nn
 from tqdm import tqdm
 
-from prl.baselines.supervised_learning.models.model import Net
+from prl.baselines.supervised_learning.models.nn_model import MLP
 from prl.baselines.supervised_learning.training.dataset import OutOfMemoryDataset
 
 
@@ -60,7 +60,7 @@ def run_train_eval(input_dir,
         input_dim = data.shape[1] - 1
         break
     # input_dim = 564
-    net = Net(input_dim, output_dim, hidden_dim)
+    net = MLP(input_dim, output_dim, hidden_dim)
 
     # if running on GPU and we want to use cuda move model there
     use_cuda = torch.cuda.is_available()
@@ -120,7 +120,7 @@ def run_train_eval(input_dir,
             correct += pred.eq(labels.data).cpu().sum().item()
             i_train += 1
             if i % log_interval == 0:
-                writer.add_scalar(tag='Training Loss', scalar_value=total_loss/i_train, global_step=n_iter)
+                writer.add_scalar(tag='Training Loss', scalar_value=total_loss / i_train, global_step=n_iter)
                 writer.add_scalar(tag='Training Accuracy', scalar_value=100.0 * correct / i_train, global_step=n_iter)
 
                 i_train = 0
@@ -179,7 +179,7 @@ def run_train_eval(input_dir,
                         k += 1
 
                 # Write confusion matrix to tensorboard
-                prediction = torch.argmax(output,dim=1)
+                prediction = torch.argmax(output, dim=1)
                 cf_matrix = confusion_matrix(labels.to('cpu'), prediction.to('cpu'))
                 df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix) * 10, index=[i for i in range(output_dim)],
                                      columns=[i for i in classes])
@@ -188,13 +188,13 @@ def run_train_eval(input_dir,
 
             # save checkpoint if needed
             if i % ckpt_interval == 0:
-                if not os.path.exists( ckpt_dir + '/ckpt'):
-                    os.makedirs( ckpt_dir + '/ckpt')
-                
+                if not os.path.exists(ckpt_dir + '/ckpt'):
+                    os.makedirs(ckpt_dir + '/ckpt')
+
                 torch.save({'epoch': epoch,
                             'net': net.state_dict(),
                             'n_iter': n_iter,
                             'optim': optim.state_dict(),
-                            'loss': loss},  ckpt_dir + '/ckpt')  # net
+                            'loss': loss}, ckpt_dir + '/ckpt')  # net
                 # save model for inference 
                 torch.save(net, ckpt_dir + '/model.pt')
