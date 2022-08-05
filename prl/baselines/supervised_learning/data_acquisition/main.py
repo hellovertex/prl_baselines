@@ -3,24 +3,12 @@ from prl.environment.Wrappers.prl_wrappers import AugmentObservationWrapper
 
 from csv_writer import CSVWriter
 from hsmithy_parser import HSmithyParser
-from prl.baselines.supervised_learning.config import DATA_DIR
+from prl.baselines.supervised_learning.config import LOGFILE
 from prl.baselines.supervised_learning.data_acquisition.runner import Runner
 from rl_state_encoder import RLStateEncoder
 
-LOGFILE = DATA_DIR + "log.txt"
-
 
 @click.command()
-# @click.option("--path-to-bulkhands_zip",
-#               default=DATA_DIR + "01_raw/0.25-0.50/BulkHands_example.zip",
-#               type=str,
-#               help="Path to zip file that was provided by hhsmithy.com "
-#                    "and contains poker hands.")
-@click.option("--zip_path",
-              default="/home/sascha/Documents/github.com/prl_baselines/data/01_raw",
-              type=str,
-              help="Indicates, which folder is searched "
-                   "for .zip files to be extracted.")
 @click.option("--blind_sizes",
               default="0.25-0.50",
               type=str,
@@ -37,7 +25,10 @@ LOGFILE = DATA_DIR + "log.txt"
               help="Passing unzipped_dir we can bypass the unzipping step and assume "
                    "files have alredy been unzipped. "
                    "In this case, the `zip_path` arg will be ignored.")
-def main(zip_path, blind_sizes, from_gdrive_id, unzipped_dir):
+def main(blind_sizes, from_gdrive_id, unzipped_dir):
+    """Extracts .zip files found in prl_baselines/data/01_raw unless `unzipped_dir` is provided.
+     Reads the extracted .txt files and 1) parses, 2) encodes, 3) vectorizes poker hands and 4) writes them to disk.
+     The .zip file can also be downloaded from gdrive by providing a gdrive-url."""
     # Creates PokerEpisode instances from raw .txt files
     parser = HSmithyParser()
 
@@ -53,15 +44,8 @@ def main(zip_path, blind_sizes, from_gdrive_id, unzipped_dir):
                 writer=writer,
                 write_azure=False,
                 logfile=LOGFILE) as runner:
-        # Looks for .zip files inside folder derived from "which_data_files"
-        # or downloads from gdrive. Extracts found .zip files
-        # reads the extracted .txt files for poker hands
-        # parses, encodes, vectorizes, and writes them to disk.
-        runner.run(blind_sizes,
-                   unzipped_dir=unzipped_dir,
-                   from_gdrive_id=from_gdrive_id)
-        # # run example using google drive file id, which also works fine
-        # generator.run_data_generation(which_data_files, from_gdrive_id="18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO")
+        # parse PokerEpisodes, encode, vectorize, write training data and labels to disk
+        runner.run(blind_sizes, unzipped_dir=unzipped_dir, from_gdrive_id=from_gdrive_id)
 
 
 if __name__ == '__main__':

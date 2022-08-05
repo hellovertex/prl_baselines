@@ -30,7 +30,7 @@ class Runner:
         self._n_invalid_files = 0
         self._n_skipped = 0
         self._experiment = None
-        self._blind_sizes = None
+        self.blind_sizes = None
 
         with open(logfile, "a+") as f:
             self._n_files_already_encoded = len(f.readlines())
@@ -101,17 +101,17 @@ class Runner:
             for i in zip_file.namelist():
                 zip_file.extract(i, out_dir)
 
-    def _extract_all_zip_data(self, blind_sizes, from_gdrive_id):
-        path_to_data = DATA_DIR + "01_raw/" + blind_sizes
+    def _extract_all_zip_data(self, from_gdrive_id):
+        path_to_data = DATA_DIR + "01_raw/" + self.blind_sizes
         if from_gdrive_id:
             # try to download from_gdrive to out.zip
             zipfiles = [gdown.download(id=from_gdrive_id,
-                                       output=f"{path_to_data}/bulkhands_{blind_sizes}.zip",
+                                       output=f"{path_to_data}/bulkhands_{self.blind_sizes}.zip",
                                        quiet=False)]
         else:
             #
-            zipfiles = glob.glob(path_to_data.__str__(), recursive=False)
-        out_dir = DATA_DIR + "01_raw/" + f'{blind_sizes}/unzipped'
+            zipfiles = glob.glob(path_to_data.__str__() + '/*.zip', recursive=False)
+        out_dir = DATA_DIR + "01_raw/" + f'{self.blind_sizes}/unzipped'
         # creates out_dir if it does not exist
         # extracts zip file, only if extracted files with same name do not exist
         [self.extract(zipfile, out_dir=out_dir) for zipfile in zipfiles]
@@ -136,7 +136,7 @@ class Runner:
         # encode
         training_data, labels, n_samples = self._encode(parsed_hands)
         # write
-        if training_data:
+        if training_data is not None:
             print(f"\nExtracted {len(training_data)} training samples from {self._hand_counter + 1} poker hands"
                   f"in file {self._n_files_written_this_run + self._n_files_already_encoded} {abs_filepath}...")
 
@@ -145,7 +145,7 @@ class Runner:
             file_dir, file_path = self.writer.write_train_data(training_data,
                                                                labels,
                                                                self.encoder.feature_names,
-                                                               n_samples)
+                                                               n_samples, self.blind_sizes)
 
             self._write_metadata(file_dir=file_dir)
 
@@ -155,11 +155,11 @@ class Runner:
         :param unzipped_dir:
         :param from_gdrive_id:
         """
-        self._blind_sizes = blind_sizes
+        self.blind_sizes = blind_sizes
         self._hand_counter = 0
         # extract zipfile (.zip is stored locally or downloaded via from_gdrive)
         if not unzipped_dir:
-            unzipped_dir = self._extract_all_zip_data(blind_sizes, from_gdrive_id)
+            unzipped_dir = self._extract_all_zip_data(from_gdrive_id)
         filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
         # parse, encode, vectorize and write the training data from .txt to disk
         for i, filename in enumerate(filenames):

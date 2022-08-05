@@ -1,3 +1,3 @@
 import os
-DATA_DIR = "../../../data/"
-print(os.path.abspath(DATA_DIR))
+DATA_DIR = str(os.path.abspath("../../../../data/")) + '/'
+LOGFILE = DATA_DIR + "log.txt"

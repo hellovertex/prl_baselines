@@ -14,7 +14,7 @@ class CSVWriter(Writer):
 
     def __init__(self, out_filename_base):
         super(CSVWriter).__init__()
-        self.n_files_written_this_run = None
+        self.n_files_written_this_run = 0
         self.out_filename_base = out_filename_base
         self.num_lines_written = 0
 
