@@ -36,7 +36,7 @@ def main(blind_sizes, from_gdrive_id, unzipped_dir):
     encoder = RLStateEncoder(env_wrapper_cls=AugmentObservationWrapper)
 
     # writes training data from encoder to disk
-    writer = CSVWriter(out_filename_base=f'6MAX_{blind_sizes}.txt')
+    writer = CSVWriter(out_filename_base=f'6MAX_{blind_sizes}')
 
     # Uses the results of parser and encoder to write training data to disk or cloud
     with Runner(parser=parser,
