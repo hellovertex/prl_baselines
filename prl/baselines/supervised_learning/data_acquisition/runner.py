@@ -101,7 +101,11 @@ class Runner:
             for i in zip_file.namelist():
                 zip_file.extract(i, out_dir)
 
-    def _extract_all_zip_data(self, from_gdrive_id):
+    def _extract_all_zip_data(self, from_gdrive_id=None) -> str:
+        """
+        :param from_gdrive_id: google drive id of .zip file. If None, .zip file will be looked up in data folder.
+        :return: directory to which poker data has been unzipped
+        """
         path_to_data = DATA_DIR + "01_raw/" + self.blind_sizes
         if from_gdrive_id:
             # try to download from_gdrive to out.zip
@@ -151,9 +155,9 @@ class Runner:
 
     def run(self, blind_sizes, unzipped_dir=None, from_gdrive_id=None):
         """
-        :param blind_sizes:
-        :param unzipped_dir:
-        :param from_gdrive_id:
+        :param blind_sizes: determines data folder paths that are looked up and created, e.g. "data/01_raw/0.25-0.50"
+        :param unzipped_dir: if a zip file has been unpacked previously, pass folder containing its unzipped content
+        :param from_gdrive_id: if the zip file is not stored locally, it can be downloaded from gdrive-url
         """
         self.blind_sizes = blind_sizes
         self._hand_counter = 0

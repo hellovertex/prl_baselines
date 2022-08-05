@@ -14,7 +14,7 @@ from rl_state_encoder import RLStateEncoder
               type=str,
               help="Possible values are e.g. '0.25-0.50', '0.50-1.00', '1.00-2.00'")
 @click.option("--from_gdrive_id",
-              default="",
+              default="18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO",
               type=str,
               help="If a string value is passed, it should contain a DL link for "
                    "google drive to a bulkhands.zip file containing poker hands. "
