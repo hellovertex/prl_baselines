@@ -106,7 +106,7 @@ class Runner:
         :param from_gdrive_id: google drive id of .zip file. If None, .zip file will be looked up in data folder.
         :return: directory to which poker data has been unzipped
         """
-        path_to_data = DATA_DIR + "01_raw/" + self.blind_sizes
+        path_to_data = str(DATA_DIR) + "/01_raw/" + self.blind_sizes
         if from_gdrive_id:
             # try to download from_gdrive to out.zip
             zipfiles = [gdown.download(id=from_gdrive_id,
