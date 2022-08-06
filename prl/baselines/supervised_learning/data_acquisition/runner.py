@@ -115,7 +115,7 @@ class Runner:
         else:
             #
             zipfiles = glob.glob(path_to_data.__str__() + '/*.zip', recursive=False)
-        out_dir = DATA_DIR + "01_raw/" + f'{self.blind_sizes}/unzipped'
+        out_dir = str(DATA_DIR) + "/01_raw/" + f'{self.blind_sizes}/unzipped'
         # creates out_dir if it does not exist
         # extracts zip file, only if extracted files with same name do not exist
         [self.extract(zipfile, out_dir=out_dir) for zipfile in zipfiles]
