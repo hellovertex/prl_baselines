@@ -19,14 +19,25 @@ TEST_BATCH_SIZE = 10000
               default="0.25-0.50",
               type=str,
               help="Possible values are e.g. '0.25-0.50', '0.50-1.00', '1.00-2.00'")
-def main(blind_sizes):
+@click.option("--path_to_datasamples",
+              type=str,
+              help="Optional if you do not want to use training data from data/03_preprocessed/{blind_sizes}, "
+                   "e.g. if you want to train using data that is not down-sampled.")
+@click.option("--path_to_testsamples",
+              type=str,
+              help="Optional if you do not want to use test data from data/03_preprocessed/{blind_sizes}/test, "
+                   "e.g. if you want to test using data that is not down-sampled.")
+def main(blind_sizes, path_to_datasamples, path_to_testsamples):
     """ Call with `python main.py --output_dir_preprocessing <PATH_TO_DATAFOLDER>/03_preprocessed
     """
-    path_to_test_data = str(DATA_DIR) + '/03_preprocessed' + f'/{blind_sizes}/test/'
-    if not path_to_test_data:
-        make_folder_testdataset(blind_sizes)
+    if not path_to_datasamples:
+        path_to_datasamples = str(DATA_DIR) + '/03_preprocessed' + f'/{blind_sizes}'
+    if not path_to_testsamples:
+        path_to_testsamples = path_to_datasamples + '/test'
+    if not os.path.exists(path_to_testsamples):
+        make_folder_testdataset(path_to_datasamples, path_to_testsamples)
 
-    run_train_eval(input_dir=output_dir_preprocessing,
+    run_train_eval(input_dir=path_to_datasamples,
                    epochs=EPOCHS,
                    batch_size=BATCH_SIZE,
                    test_batch_size=TEST_BATCH_SIZE,
@@ -34,15 +45,12 @@ def main(blind_sizes):
                    resume=RESUME)
 
 
-def make_folder_testdataset(blind_sizes):
-    # get all datasamples
-    path_to_datasamples = str(DATA_DIR) + '/03_preprocessed' + f'/{blind_sizes}'
-    path_to_testsamples = path_to_datasamples + '/test'
+def make_folder_testdataset(path_to_datasamples, path_to_testsamples, n_files=2):
     files = glob.glob(path_to_datasamples + '/**/*.csv', recursive=True)
     # move a subset to test directory
     if not os.path.exists(path_to_testsamples):
         os.makedirs(path_to_testsamples)
-    for testfile in files[-2:]:  # use only two files (2GB)
+    for testfile in files[-n_files:]:
         try:
             shutil.move(testfile, path_to_testsamples + '/' + os.path.basename(testfile))
         except shutil.SameFileError:

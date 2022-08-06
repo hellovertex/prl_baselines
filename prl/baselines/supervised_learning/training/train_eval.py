@@ -55,11 +55,11 @@ def run_train_eval(input_dir,
     # network
     hidden_dim = [512, 512]
     output_dim = 6
+    input_dim = None
     # waste the first batch to dynamically get the input dimension
     for data in dataset:
         input_dim = data.shape[1] - 1
         break
-    # input_dim = 564
     net = MLP(input_dim, output_dim, hidden_dim)
 
     # if running on GPU and we want to use cuda move model there
@@ -150,9 +150,8 @@ def run_train_eval(input_dir,
                             data = data.cuda()
                             labels = labels.cuda()
                         output = net(data)
-                        test_loss += F.cross_entropy(
-                            output, labels, reduction="sum"
-                        ).data.item()  # sum up batch loss
+                        # sum up batch loss
+                        test_loss += F.cross_entropy(output, labels, reduction="sum").data.item()
                         pred = torch.argmax(output, dim=1)
                         correct += pred.eq(labels.data).cpu().sum().item()
 
