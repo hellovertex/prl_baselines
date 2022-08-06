@@ -14,7 +14,7 @@ from rl_state_encoder import RLStateEncoder
               type=str,
               help="Possible values are e.g. '0.25-0.50', '0.50-1.00', '1.00-2.00'")
 @click.option("--from_gdrive_id",
-              default="18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO",
+              default="",
               type=str,
               help="Google drive id of a bulkhands.zip file containing poker hands. "
                    "The id can be obtained from the google drive download-link url."

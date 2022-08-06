@@ -17,6 +17,7 @@ class OutOfMemoryDataset(IterableDataset):
     def __init__(self, path_to_csv_files, batch_size):
         self.path_to_csv_files = path_to_csv_files
         self.batch_size = batch_size
+        # important: keep recursive=False parameter because path_to_csv_files includes folder test/
         self.filenames = glob.glob(path_to_csv_files.__str__() + '/*.csv', recursive=False)
 
         # Compute length of dataset by adding all rows across files

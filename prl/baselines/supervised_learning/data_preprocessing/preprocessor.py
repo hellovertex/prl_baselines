@@ -5,27 +5,14 @@ from functools import partial
 import pandas as pd
 from sklearn.utils import resample
 
+from prl.baselines.supervised_learning.config import DATA_DIR
+
 FOLD = 0
 CHECK_CALL = 1
 RAISE_MIN_OR_3BB = 3
 RAISE_HALF_POT = 4
 RAISE_POT = 5
 ALL_IN = 6
-
-
-def to_csv(df: pd.DataFrame,
-           filename,
-           output_dir='../../../../data/03_preprocessed/'):
-    if not os.path.exists(output_dir):
-        os.makedirs(os.path.abspath(output_dir))
-    filename = os.path.basename(filename)
-    df.to_csv(os.path.join(output_dir, filename), index=False)
-
-
-def to_parquet(df: pd.DataFrame,
-               filename,
-               output_dir='../../../../data/03_preprocessed/'):
-    df.to_parquet(path=output_dir + filename)
 
 
 class Preprocessor:
@@ -35,10 +22,10 @@ class Preprocessor:
     - csv file is written back to `output_dir`, which is data/03_preprocessed by default
     - additional callbacks can be provided, e.g. to write the file back as .parquet file """
 
-    def __init__(self, path_to_csv_files, callbacks=[to_csv]):
+    def __init__(self, path_to_csv_files, callbacks=None):
         self._path_to_csv_files = path_to_csv_files
         self._csv_files = glob.glob(path_to_csv_files.__str__() + '/*.csv', recursive=False)
-        self._callbacks = callbacks
+        self._callbacks = [] if not callbacks else callbacks
 
     def run(self):
         for file in self._csv_files:
@@ -76,5 +63,3 @@ class Preprocessor:
                           df_raise_half_downsampled,
                           df_raise_pot_downsampled,
                           df_allin]).sample(frac=1)
-
-# preprocess("C:\\Users\\hellovertex\\Documents\\github.com\\dev.azure.com\\prl\\prl_baselines\data\\02_vectorized\\0.25-0.50\\6MAX_0.25-0.50.txt_2")
