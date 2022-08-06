@@ -16,15 +16,15 @@ from rl_state_encoder import RLStateEncoder
 @click.option("--from_gdrive_id",
               default="18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO",
               type=str,
-              help="If a string value is passed, it should contain a DL link for "
-                   "google drive to a bulkhands.zip file containing poker hands. "
-                   "The generator will try to download the data from there.")
+              help="Google drive id of a bulkhands.zip file containing poker hands. "
+                   "The id can be obtained from the google drive download-link url."
+                   "The runner will try to download the data from gdrive and proceed with unzipping."
+                   "If unzipped_dir is passed as an argument, this parameter will be ignored.")
 @click.option("--unzipped_dir",
               default="",
-              type=str,
+              type=str,  # absolute path
               help="Passing unzipped_dir we can bypass the unzipping step and assume "
-                   "files have alredy been unzipped. "
-                   "In this case, the `zip_path` arg will be ignored.")
+                   "files have alredy been unzipped. ")
 def main(blind_sizes, from_gdrive_id, unzipped_dir):
     """Extracts .zip files found in prl_baselines/data/01_raw unless `unzipped_dir` is provided.
      Reads the extracted .txt files and 1) parses, 2) encodes, 3) vectorizes poker hands and 4) writes them to disk.

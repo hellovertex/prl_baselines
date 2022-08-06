@@ -116,7 +116,7 @@ def run_train_eval(input_dir,
             optim.step()
             total_loss += loss.data.item()
             # udpate tensorboardX
-            pred = output.data.max(1)[1]  # get the index of the max log-probability
+            pred = torch.argmax(output, dim=1)  # get the index of the max log-probability
             correct += pred.eq(labels.data).cpu().sum().item()
             i_train += 1
             if i % log_interval == 0:
