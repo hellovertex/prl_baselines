@@ -1,3 +1,4 @@
 import os
-DATA_DIR = str(os.path.abspath("../../../../data/")) + '/'
-LOGFILE = DATA_DIR + "log.txt"
+from pathlib import Path
+DATA_DIR = Path(os.path.abspath(__file__)).parent.parent.parent.parent.joinpath('data')
+LOGFILE = DATA_DIR.joinpath("log.txt")
