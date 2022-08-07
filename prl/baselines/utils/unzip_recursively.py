@@ -1,4 +1,4 @@
-"""Use this on virutal machines to get the BulkHands.zip from google drive.
+"""Use this on virutal machines to unzip BulkHands.zip.
 Useful before running eda.py"""
 import glob
 import io
@@ -32,7 +32,7 @@ def extract(filename, out_dir):
               type=str,  # absolute path
               help="Absolute path where .zip file should be unzipped to.")
 def main(path_to_zipfile, abs_out_path):
-    zipfiles = glob.glob(path_to_zipfile.__str__() + '/*.zip', recursive=False)
+    zipfiles = glob.glob(path_to_zipfile, recursive=False)
     [extract(zipfile, out_dir=abs_out_path) for zipfile in zipfiles]
 
 
