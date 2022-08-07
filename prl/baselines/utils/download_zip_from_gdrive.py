@@ -4,6 +4,7 @@ import click
 import gdown
 
 
+@click.command
 @click.option("--from_gdrive_id",
               default="",
               type=str,
