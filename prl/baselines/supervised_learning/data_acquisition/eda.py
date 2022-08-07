@@ -13,8 +13,9 @@ from prl.baselines.supervised_learning.data_acquisition.core.parser import Poker
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
 
 
-# PlayerStat = namedtuple("PlayerStat", ["n_hands_played", "n_showdowns", "n_won", "total_earnings"])
-
+# How many showdown hands must be available to generate a summary of the player
+# the more data available, the higher it should be, e.g. try between 100 and 1000
+MIN_SHOWDOWNS = 100
 
 
 class PlayerStat(BaseModel):
@@ -29,7 +30,7 @@ player_stats_dict: Dict[str, PlayerStat] = {}  # player: {n_hands_played, n_show
 BLIND_SIZES = "0.25-0.50"
 
 
-def write(player_dict, outfile='result.txt'):
+def write(player_dict, outfile):
     """Writes player_dict to result.txt file"""
     with open(outfile, 'w') as f:
         f.write(json.dumps(player_dict))
@@ -67,10 +68,10 @@ def run(cbs=None):
 
 def reduce() -> pd.DataFrame:
     import ast
-    with open("result.txt", "r") as data:
+    with open(abs_path + "/eda_players.txt", "r") as data:
         df = pd.DataFrame.from_dict(ast.literal_eval(data.read()), orient='index')
     df = df.sort_values(0, ascending=False)
-    df = df[df > 100].dropna()
+    df = df[df > MIN_SHOWDOWNS].dropna()
     return df
 
 
@@ -137,7 +138,8 @@ def update_stats_dict(top_players: List[str], episodes: Iterable[PokerEpisode]):
 
 
 def get_stats():
-    with open("result.txt", "r") as data:
+    abs_path = str(DATA_DIR)+ '/01_raw'+f'/{blind_sizes}'+"/eda_players.txt"
+    with open(abs_path, "r") as data:
         player_dict = ast.literal_eval(data.read())
         player_names = list(player_dict.keys())
         print(player_names)
@@ -146,11 +148,13 @@ def get_stats():
 
 
 if __name__ == "__main__":
+    blind_sizes = '0.25-0.50'
+    abs_path = str(DATA_DIR) + '/01_raw' + f'/{blind_sizes}'
     # *** First run ***
-    # run(cbs=[update_player_dict])  # 1.
-    # write(player_dict)
-    # df = reduce()  # 2.
-    # write(df.to_dict()[0])
+    run(cbs=[update_player_dict])  # 1.
+    write(player_dict, outfile=abs_path + "/eda_players.txt")
+    df = reduce()  # 2.
+    write(df.to_dict()[0], outfile=abs_path + "/eda_players.txt")
     time.sleep(0.5)
     # *** Second run ***
     get_stats()
@@ -158,4 +162,4 @@ if __name__ == "__main__":
     serialized_dict = {}
     for k,v in player_stats_dict.items():
         serialized_dict[k] = v.dict()
-    write(serialized_dict, outfile='result2.txt')
+    write(serialized_dict, outfile=abs_path + "/eda_result.txt")

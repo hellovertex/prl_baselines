@@ -243,6 +243,7 @@ class RLStateEncoder(Encoder):
                 filtered_players = top_players if top_players else showdown_players
                 # only store obs and action of acting player
                 if player.position_index == next_to_act and player.player_name in filtered_players:
+
                     observations.append(obs)
                     # use showdown player actions as labels, 0 for loser and action for winner
                     if not top_players:
