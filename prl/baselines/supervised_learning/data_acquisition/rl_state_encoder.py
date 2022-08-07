@@ -203,7 +203,7 @@ class RLStateEncoder(Encoder):
         """Converts ante string to float, e.g. '$0.00' -> float(0.00)"""
         return float(ante.split(self._currency_symbol)[1]) * multiply_by
 
-    def _simulate_environment(self, env, episode, cards_state_dict, table, starting_stack_sizes_list, top_players=None):
+    def _simulate_environment(self, env, episode, cards_state_dict, table, starting_stack_sizes_list, selected_players=None):
         """Under Construction."""
         # if episode.hand_id == 216163387520 or episode.hand_id == 214211025466:
         for s in starting_stack_sizes_list:
@@ -240,13 +240,12 @@ class RLStateEncoder(Encoder):
             for player in table:
                 # if player reached showdown (we can see his cards)
                 # can use showdown players actions and observations or use only top_players actions and observations
-                filtered_players = top_players if top_players else showdown_players
+                filtered_players = selected_players if selected_players else showdown_players
                 # only store obs and action of acting player
                 if player.position_index == next_to_act and player.player_name in filtered_players:
-
                     observations.append(obs)
                     # use showdown player actions as labels, 0 for loser and action for winner
-                    if not top_players:
+                    if not selected_players:
                         # player that won showdown -- can be multiple (split pot)
                         if player.player_name in [winner.name for winner in episode.winners]:
                             action_label = self._wrapped_env.discretize(action_formatted)
@@ -270,7 +269,7 @@ class RLStateEncoder(Encoder):
             raise RuntimeError("Seems we need more debugging")
         return observations, actions
 
-    def encode_episode(self, episode: PokerEpisode, top_players=None) -> Tuple[Observations, Actions_Taken]:
+    def encode_episode(self, episode: PokerEpisode, selected_players=None) -> Tuple[Observations, Actions_Taken]:
         """Runs environment with steps from PokerEpisode.
         Returns observations and corresponding actions of players that made it to showdown."""
         # utils
@@ -288,12 +287,21 @@ class RLStateEncoder(Encoder):
 
         # Collect observations and actions, observations are possibly augmented
         try:
+            # skip episode if no selected_players has played in it
+            if selected_players:
+                skip = True
+                for p_info in episode.player_stacks:
+                    if p_info.player_name in selected_players:
+                        skip = False
+                        break
+                if skip:
+                    return None, None
             return self._simulate_environment(env=self._wrapped_env,
                                               episode=episode,
                                               cards_state_dict=cards_state_dict,
                                               table=table,
                                               starting_stack_sizes_list=starting_stack_sizes_list,
-                                              top_players=top_players)
+                                              selected_players=selected_players)
         except self._EnvironmentEdgeCaseEncounteredError:
             return None, None
         except self._EnvironmentDidNotTerminateInTimeError:

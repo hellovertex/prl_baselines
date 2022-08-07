@@ -1,3 +1,4 @@
+import ast
 import glob
 import io
 import os
@@ -66,11 +67,18 @@ class Runner:
             file.write(self.parser.metadata.__repr__() + "\n")
         return file_path_metadata
 
-    def _encode(self, from_parsed_hands):
+    def _encode(self, from_parsed_hands, blind_sizes, only_from_selected_players):
         training_data, labels = None, None
         n_samples = 0
         for i, hand in enumerate(from_parsed_hands):
-            observations, actions = self.encoder.encode_episode(hand, top_players=None)
+            if only_from_selected_players:
+                fpath = str(DATA_DIR) + '/01_raw' + f'/{blind_sizes}' + '/eda_result_filtered.txt'
+                with open(fpath, "r") as data:
+                    player_dict = ast.literal_eval(data.read())
+                    selected_players = list(player_dict.keys())
+            else:
+                selected_players = None
+            observations, actions = self.encoder.encode_episode(hand, selected_players=selected_players)
             if not observations:
                 continue
             if training_data is None:
@@ -133,12 +141,14 @@ class Runner:
             self._n_skipped += 1  # todo push fix
         return parsed_hands
 
-    def parse_encode_write(self, abs_filepath):
+    def parse_encode_write(self, abs_filepath, blind_sizes, only_from_selected_players=False):
         """Docstring"""
         # parse
         parsed_hands = self.parse(abs_filepath)
         # encode
-        training_data, labels, n_samples = self._encode(parsed_hands)
+        training_data, labels, n_samples = self._encode(parsed_hands,
+                                                        blind_sizes,
+                                                        only_from_selected_players)
         # write
         if training_data is not None:
             print(f"\nExtracted {len(training_data)} training samples from {self._hand_counter + 1} poker hands"
@@ -164,7 +174,7 @@ class Runner:
         IMPORTANT: Inspect eda_result.txt and filter players, e.g. remove those with negative ROIs or
         only pick best earners and save as eda_result_filtered.txt.
         If set to false, the default training data will be generated which uses all showdown hands which results in more
-        data generated but more noise as well.
+        data generated but more noise as well. I added version two because using all data the NN didnt learn good play.
         """
         self.blind_sizes = blind_sizes
         self._hand_counter = 0
@@ -175,7 +185,9 @@ class Runner:
         # parse, encode, vectorize and write the training data from .txt to disk
         for i, filename in enumerate(filenames):
             if not self.file_has_been_encoded_already(logfile=self.logfile, filename=filename):
-                self.parse_encode_write(os.path.abspath(filename).__str__())
+                self.parse_encode_write(os.path.abspath(filename).__str__(),
+                                        blind_sizes=blind_sizes,
+                                        only_from_selected_players=version_two)
 
 
 
