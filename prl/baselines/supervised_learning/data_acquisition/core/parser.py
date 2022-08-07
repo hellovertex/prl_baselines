@@ -57,7 +57,7 @@ class PokerEpisode(NamedTuple):
     player_stacks: List[PlayerStack]
     btn_idx: int
     board_cards: str
-    actions_total: Dict[str, List[Action]]
+    actions_total: Dict[str, List[Action]]  # hole cards, flop , turn, river
     winners: List[PlayerWithCards]
     showdown_hands: List[PlayerWithCards]
 

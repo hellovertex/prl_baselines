@@ -2,22 +2,22 @@ import ast
 import glob
 import json
 import time
-from dataclasses import dataclass
+from pydantic import BaseModel
 from functools import partial
 from typing import Iterable, Dict, List
 
 import pandas as pd
 
 from prl.baselines.supervised_learning.config import DATA_DIR
-from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode
+from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, PlayerStack, ActionType
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
 
 
 # PlayerStat = namedtuple("PlayerStat", ["n_hands_played", "n_showdowns", "n_won", "total_earnings"])
 
 
-@dataclass
-class PlayerStat:
+
+class PlayerStat(BaseModel):
     n_hands_played: int
     n_showdowns: int
     n_won: int
@@ -25,13 +25,13 @@ class PlayerStat:
 
 
 player_dict = {}  # player: games_played, games_won
-player_stats: Dict[str, PlayerStat] = {}  # player: {n_hands_played, n_showdowns, n_won, total_earnings}
+player_stats_dict: Dict[str, PlayerStat] = {}  # player: {n_hands_played, n_showdowns, n_won, total_earnings}
 BLIND_SIZES = "0.25-0.50"
 
 
-def write(player_dict):
+def write(player_dict, outfile='result.txt'):
     """Writes player_dict to result.txt file"""
-    with open('result.txt', 'w') as f:
+    with open(outfile, 'w') as f:
         f.write(json.dumps(player_dict))
 
 
@@ -46,8 +46,8 @@ def update_player_dict(episodes: Iterable[PokerEpisode]):
                 player_dict[player.name] += 1
 
 
-def run(cbs=None) -> Dict[str, int]:
-    """Reads unzipped folder and returns dictionary with player names and number of games played"""
+def run(cbs=None):
+    """Reads unzipped folder and updates dictionaries when proper callback fn is provided"""
     filenames = glob.glob(str(DATA_DIR) + f'/01_raw/{BLIND_SIZES}/unzipped/' '/**/*.txt', recursive=True)
     parser = HSmithyParser()
     # parse, encode, vectorize and write the training data from .txt to disk
@@ -55,14 +55,14 @@ def run(cbs=None) -> Dict[str, int]:
         try:
             parsed_hands = parser.parse_file(filename)
             if cbs:
-                [cb(parsed_hands) for cb in cbs]  # update_player_dict(parsed_hands)
-            print(f'After {i}-th file we have {len(player_dict.keys())} different players')
+                [cb(episodes=parsed_hands) for cb in cbs]  # update_player_dict(parsed_hands)
+            if i%100==0:
+                print(f'Reading {i}-th file...')
         except UnicodeDecodeError:
             print('---------------------------------------')
             print(
                 f'Skipping {filename} because it has invalid continuation byte...')
             print('---------------------------------------')
-    return player_dict
 
 
 def reduce() -> pd.DataFrame:
@@ -74,18 +74,66 @@ def reduce() -> pd.DataFrame:
     return df
 
 
+def _update_player_earnings(episode: PokerEpisode, top_player: PlayerStack):
+    p_name = top_player.player_name
+    earned = 0
+    pot = 0
+    # strip currency symbol and convert to number
+    # go thorugh blinds and see if starting stack decreased
+    for blind in episode.blinds:
+        amt = float(blind.amount[1:])
+        if blind.player_name == p_name:
+            earned -= amt
+        pot += amt
+    # go through actions and increase/decrease starting stacks
+    for action in episode.actions_total['as_sequence']:
+        amt = 0
+        if action.action_type != ActionType.FOLD:
+            amt = float(action.raise_amount)
+        # update pot
+        pot += amt
+        if action.player_name == p_name:
+            if action.action_type == ActionType.FOLD:
+                break
+            else:
+                if action.raise_amount != -1:
+                    # subtract chips for top_player
+                    earned -= amt
+    for winner in episode.winners:
+        if winner.name == p_name:
+            earned += pot
+    player_stats_dict[p_name].total_earnings += earned
+
+
+def _update_stats(episode: PokerEpisode, top_player: PlayerStack):
+    # create new entry in player_stats_dict if necessary
+    top_player_name = top_player.player_name
+    if top_player_name not in player_stats_dict:
+        # {'n_hands_played': 1, 'n_showdowns': 0, 'n_won': 0, 'total_earnings': 0.0}
+        player_stats_dict[top_player_name] = PlayerStat(n_hands_played=1,
+                                                        n_showdowns=0,
+                                                        n_won=0,
+                                                        total_earnings=0.0)
+    else:
+        player_stats_dict[top_player_name].n_hands_played += 1
+    # update showdowns and wins
+    for showdown_player in episode.showdown_hands:
+        if top_player_name == showdown_player.name:
+            player_stats_dict[top_player_name].n_showdowns += 1
+    for winner in episode.winners:
+        if top_player_name == winner.name:
+            player_stats_dict[top_player_name].n_won += 1
+    # update earnings
+    _update_player_earnings(episode, top_player)
+
+
 def update_stats_dict(top_players: List[str], episodes: Iterable[PokerEpisode]):
     # player: {n_hands_played, n_showdowns, n_won, total_earnings}
-
     # for each played hand
     for episode in episodes:
-        for players in episode.player_stacks:
-            for p in players:
-                if not p.name in player_stats:
-                    # {'n_hands_played': 1, 'n_showdowns': 0, 'n_won': 0, 'total_earnings': 0.0}
-                    player_stats[p.name] = PlayerStat(1, 0, 0, 0.0)
-                else:
-                    player_stats[p.name].n_hands_played += 1
+        for episode_player in episode.player_stacks:
+            if episode_player.player_name in top_players:
+                _update_stats(episode, episode_player)
 
 
 def get_stats():
@@ -99,10 +147,15 @@ def get_stats():
 
 if __name__ == "__main__":
     # *** First run ***
-    # player_dict = run(cbs=[update_player_dict])  # 1.
+    # run(cbs=[update_player_dict])  # 1.
     # write(player_dict)
     # df = reduce()  # 2.
     # write(df.to_dict()[0])
     time.sleep(0.5)
     # *** Second run ***
     get_stats()
+    print(player_stats_dict)
+    serialized_dict = {}
+    for k,v in player_stats_dict.items():
+        serialized_dict[k] = v.dict()
+    write(serialized_dict, outfile='result2.txt')

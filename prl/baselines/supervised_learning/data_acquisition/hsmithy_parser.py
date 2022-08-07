@@ -130,14 +130,19 @@ class HSmithyParser(Parser):
 
     @staticmethod
     def _get_action_type(line: str):
-        """Returns either 'fold', 'check_call', or 'raise."""
+        """Returns either 'fold', 'check_call', or 'raise with how much was called/raised or -1 in case of fold"""
         default_raise_amount = -1  # for fold, check and call actions
         if 'raises' in line or 'bets' in line:
             pattern = re.compile(r'(\d+\.?\d*)')
             raise_amount = pattern.findall(line)[-1]
             return ActionType.RAISE, raise_amount
         if 'calls' in line or 'checks' in line:
-            return ActionType.CHECK_CALL, default_raise_amount
+            if 'calls' in line:
+                pattern = re.compile(r'(\d+\.?\d*)')
+                amt = pattern.findall(line)[-1]
+            else:
+                amt = default_raise_amount
+            return ActionType.CHECK_CALL, amt
         if 'folds' in line:
             return ActionType.FOLD, default_raise_amount
         raise RuntimeError(f"Could not parse action type from line: \n{line}")
