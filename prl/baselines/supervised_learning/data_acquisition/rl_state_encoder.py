@@ -240,7 +240,7 @@ class RLStateEncoder(Encoder):
             for player in table:
                 # if player reached showdown (we can see his cards)
                 # can use showdown players actions and observations or use only top_players actions and observations
-                filtered_players = selected_players if selected_players else showdown_players
+                filtered_players = showdown_players if not selected_players else showdown_players + selected_players
                 # only store obs and action of acting player
                 if player.position_index == next_to_act and player.player_name in filtered_players:
                     observations.append(obs)
