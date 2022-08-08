@@ -69,6 +69,7 @@ class Runner:
 
     def _encode(self, from_parsed_hands, blind_sizes, only_from_selected_players):
         training_data, labels = None, None
+
         n_samples = 0
         for i, hand in enumerate(from_parsed_hands):
             if only_from_selected_players:
@@ -145,23 +146,24 @@ class Runner:
         """Docstring"""
         # parse
         parsed_hands = self.parse(abs_filepath)
-        # encode
-        training_data, labels, n_samples = self._encode(parsed_hands,
-                                                        blind_sizes,
-                                                        only_from_selected_players)
-        # write
-        if training_data is not None:
-            print(f"\nExtracted {len(training_data)} training samples from {self._hand_counter + 1} poker hands"
-                  f"in file {self._n_files_written_this_run + self._n_files_already_encoded} {abs_filepath}...")
+        if parsed_hands:  # in case of uncaught exceptions, parsed_hands will None
+            # encode
+            training_data, labels, n_samples = self._encode(parsed_hands,
+                                                            blind_sizes,
+                                                            only_from_selected_players)
+            # write
+            if training_data is not None:  # in case of uncaught exceptions, training_data will be None
+                print(f"\nExtracted {len(training_data)} training samples from {self._hand_counter + 1} poker hands"
+                      f"in file {self._n_files_written_this_run + self._n_files_already_encoded} {abs_filepath}...")
 
-            self.writer.log_progress(self.logfile, abs_filepath)
-            # write train data
-            file_dir, file_path = self.writer.write_train_data(training_data,
-                                                               labels,
-                                                               self.encoder.feature_names,
-                                                               n_samples, self.blind_sizes)
+                self.writer.log_progress(self.logfile, abs_filepath)
+                # write train data
+                file_dir, file_path = self.writer.write_train_data(training_data,
+                                                                   labels,
+                                                                   self.encoder.feature_names,
+                                                                   n_samples, self.blind_sizes)
 
-            self._write_metadata(file_dir=file_dir)
+                self._write_metadata(file_dir=file_dir)
 
     def run(self, blind_sizes, unzipped_dir=None, from_gdrive_id=None, version_two=False):
         """
