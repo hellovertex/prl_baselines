@@ -203,7 +203,8 @@ class RLStateEncoder(Encoder):
         """Converts ante string to float, e.g. '$0.00' -> float(0.00)"""
         return float(ante.split(self._currency_symbol)[1]) * multiply_by
 
-    def _simulate_environment(self, env, episode, cards_state_dict, table, starting_stack_sizes_list, selected_players=None):
+    def _simulate_environment(self, env, episode, cards_state_dict, table, starting_stack_sizes_list,
+                              selected_players=None):
         """Under Construction."""
         # if episode.hand_id == 216163387520 or episode.hand_id == 214211025466:
         for s in starting_stack_sizes_list:
@@ -240,10 +241,8 @@ class RLStateEncoder(Encoder):
             for player in table:
                 # if player reached showdown (we can see his cards)
                 # can use showdown players actions and observations or use only top_players actions and observations
-                # todo showdown_players + selected_players must be intersection showdown_players && selected_players
-                #  and 2. we must write the training data metadata generation later than in the parser, e.g. here
-                #  and 3. remove metadata from smithyparser entirely
-                filtered_players = showdown_players if not selected_players else showdown_players + selected_players
+                filtered_players = showdown_players if not selected_players else [p for p in showdown_players if
+                                                                                  p in selected_players]
                 # only store obs and action of acting player
                 if player.position_index == next_to_act and player.player_name in filtered_players:
                     observations.append(obs)

@@ -1,8 +1,8 @@
 """ This module will
  - read .txt files inside ./data/
- - parse them to create corresponding environment states. """
+ - parse them to create corresponding PokerEpisode objects. """
 import re
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Iterator, Iterable, Generator
 
 from core.parser import Parser, PokerEpisode, Action, ActionType, PlayerStack, Blind, PlayerWithCards
 
@@ -65,20 +65,6 @@ class HSmithyParser(Parser):
     def __init__(self):
         # todo consider making HSmithyParser another abstract class and make derived PokerStars-Parser
         self._variant = None
-        self._metadata = {'n_total_episodes': 0,
-                          'n_total_showdowns': 0,
-                          'n_mucks': 0,
-                          'n_showdowns_no_mucks': 0}
-
-    def _reset_metadata_counts(self):
-        self._metadata = {'n_total_episodes': 0,
-                          'n_total_showdowns': 0,
-                          'n_mucks': 0,
-                          'n_showdowns_no_mucks': 0}
-
-    @property
-    def metadata(self):
-        return self._metadata
 
     @staticmethod
     def get_hand_id(episode: str) -> int:
@@ -302,7 +288,7 @@ class HSmithyParser(Parser):
             return res_ante[0]
         return currency_symbol + '0.00'
 
-    def _parse_episode(self, episode: str, showdown: str):
+    def _parse_episode(self, episode: str, showdown: str) -> PokerEpisode:
         """UnderConstruction"""
         # edge case that player leaves before rundown should be skipped
         if "leaves the table" in episode:
@@ -325,8 +311,6 @@ class HSmithyParser(Parser):
         board_cards = self.get_board_cards(episode)
         actions_total = self._parse_actions(episode)
 
-        self._metadata['n_showdowns_no_mucks'] += 1
-
         return PokerEpisode(date='',  # todo
                             hand_id=hand_id,
                             variant=self._variant,
@@ -341,36 +325,32 @@ class HSmithyParser(Parser):
                             winners=winners,
                             showdown_hands=showdown_hands)
 
-    def _parse_hands(self, hands_played):
+    def _parse_hands(self, hands_played) -> Generator[PokerEpisode, None, None]:
         for current in hands_played:  # c for current_hand
-            self._metadata['n_total_episodes'] += 1
             # Only parse hands that went to Showdown stage, i.e. were shown
             if not '*** SHOW DOWN ***' in current:
                 continue
 
             # get showdown
-            self._metadata['n_total_showdowns'] += 1
             showdown = self.get_showdown(current)
 
             # skip if player did not show hand
             if 'mucks' in showdown:
-                self._metadata['n_mucks'] += 1
                 continue
 
             try:
                 yield self._parse_episode(current, showdown)
             except self._InvalidPlayerNameError as e:
-                # todo log here
                 # if an _InvalidPlayerNameError is thrown, we have encountered some weird player name like
                 #  é=mc².Fin  é=mc³.Start
-                # we can parse unicode characters and very exotic names including those
+                # we can parse unicode characters and very exotic player names including those
                 # with multiple whitespaces but this name finally broke our nameparser
                 # Hence we skip these _very_ rare cases where the name is unparsable without further efforts
                 continue
             except self._InvalidGameTypeError as e:
                 # We can encounter games where not only small blind,
                 # big blind, and ante are posted, but that contain lines like
-                # <'player posts small & big blinds'>. We skip these games
+                # <'player one posts small & big blinds'>. We skip these games
                 # because our env does not support them.
                 continue
             except self._PlayerLeavesDuringPotContributionError:
@@ -391,9 +371,8 @@ class HSmithyParser(Parser):
             except self._ShowDownHappenedButNoSummaryDataExists:
                 continue
 
-    def parse_file(self, file_path):
-        # self._reset_metadata_counts()
-        self._variant = 'NoLimitHoldem'  # todo parse from filename
+    def parse_file(self, file_path) -> Generator[PokerEpisode, None, None]:
+        self._variant = 'NoLimitHoldem'  # todo parse variant from filename
         with open(file_path, 'r', encoding='utf-8') as f:  # pylint: disable=invalid-name,unspecified-encoding
             hand_database = f.read()
             hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
