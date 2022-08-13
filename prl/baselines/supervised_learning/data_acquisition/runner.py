@@ -87,6 +87,10 @@ class Runner:
         return out_dir
 
     def _log(self, file_dir, abs_filepath):
+
+        if not os.path.exists(os.path.dirname(self.logfile)):
+            os.makedirs(os.path.realpath(os.path.dirname(self.logfile)), exist_ok=True)
+
         # Store which files we parsed
         with open(self.logfile, "a") as f:
             f.write(abs_filepath + "\n")
