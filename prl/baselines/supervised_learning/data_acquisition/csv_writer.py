@@ -18,11 +18,6 @@ class CSVWriter(Writer):
         self.out_filename_base = out_filename_base
         self.num_lines_written = 0
 
-    def log_progress(self, logfile, abs_filepath):
-        with open(logfile, "a") as f:
-            f.write(abs_filepath + "\n")
-        self.n_files_written_this_run += 1
-
     def write_train_data(self, data, labels, feature_names, n_samples, blind_sizes):
         file_dir = os.path.join(str(DATA_DIR) + "/02_vectorized/", blind_sizes)
         self.num_lines_written += n_samples
