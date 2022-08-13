@@ -92,7 +92,7 @@ class Runner:
             f.write(abs_filepath + "\n")
         # Store how many showdowns in total we parsed
         file_path_metadata = os.path.join(file_dir, f"{self.writer.out_filename_base}.meta")
-        with open(file_path_metadata, "a") as file:
+        with open(file_path_metadata, "w") as file:
             file.write({'n_showdowns': self._n_showdowns}.__repr__() + "\n")
         return file_path_metadata
 
