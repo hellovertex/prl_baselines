@@ -20,7 +20,8 @@ class Runner:
                  writer: Writer,
                  write_azure: bool,
                  logfile="log.txt"):
-        self.n_files_written_this_run = 0
+        self._n_files_written_this_run = 0
+        self._n_files_already_encoded = 0
         self._n_showdowns = 0
         self._only_from_selected_players: bool = False
         self._selected_players: Optional[List[str]] = []
@@ -139,16 +140,14 @@ class Runner:
             training_data, labels, n_samples = self._encode(parsed_hands)
             # ** Write **
             if training_data is not None:  # in case of uncaught exceptions, training_data will be None
-                print(f"\nExtracted {len(training_data)} training samples from {self._hand_counter + 1} poker hands"
-                      f"in file {self._n_files_written_this_run + self._n_files_already_encoded} {abs_filepath}...")
-
-                # write train data
                 file_dir, file_path = self.writer.write_train_data(training_data,
                                                                    labels,
                                                                    self.encoder.feature_names,
                                                                    n_samples, self.blind_sizes)
 
-                self.n_files_written_this_run += 1
+                self._n_files_written_this_run += 1
+                print(f"\nExtracted {len(training_data)} training samples from {self._hand_counter + 1} poker hands"
+                      f" in file {self._n_files_written_this_run + self._n_files_already_encoded}: {abs_filepath}...")
                 self._log(file_dir=file_dir, abs_filepath=abs_filepath)
 
     def run(self, blind_sizes, unzipped_dir=None, from_gdrive_id=None, version_two=False):
