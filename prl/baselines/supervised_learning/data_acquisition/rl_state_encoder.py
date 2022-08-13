@@ -222,6 +222,17 @@ class RLStateEncoder(Encoder):
         observations = []
         actions = []
         showdown_players: List[str] = [player.name for player in episode.showdown_hands]
+        skip = False
+        # Maybe skip game, if selected_players is set and no selected player was in showdown
+        if selected_players:
+            skip = True
+            for s in selected_players:
+                if s in showdown_players:
+                    skip = False
+                    break
+        if skip:
+            return None, None  # observations, actions are empty, if selected players were not part of showdown
+
         it = 0
         debug_action_list = []
         while not done:

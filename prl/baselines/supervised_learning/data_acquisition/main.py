@@ -30,7 +30,7 @@ from rl_state_encoder import RLStateEncoder
               default=True,
               help="See runner.run docstring for an explanation of what changed with version two.")
 def main(blind_sizes, from_gdrive_id, unzipped_dir, version_two):
-    """Extracts .zip files found in prl_baselines/data/01_raw unless `unzipped_dir` is provided.
+    """Extracts .zip files found in prl_baselines/data/01_raw -- unless `unzipped_dir` is provided.
      Reads the extracted .txt files and 1) parses, 2) encodes, 3) vectorizes poker hands and 4) writes them to disk.
      The .zip file can also be downloaded from gdrive by providing a gdrive-url."""
     # Creates PokerEpisode instances from raw .txt files
