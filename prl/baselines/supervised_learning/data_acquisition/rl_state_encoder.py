@@ -240,6 +240,8 @@ class RLStateEncoder(Encoder):
             for player in table:
                 # if player reached showdown (we can see his cards)
                 # can use showdown players actions and observations or use only top_players actions and observations
+                # todo showdown_players + selected_players must be intersection showdown_players && selected_players
+                #  and 2. we must write the training data metadata generation later than in the parser, e.g. here
                 filtered_players = showdown_players if not selected_players else showdown_players + selected_players
                 # only store obs and action of acting player
                 if player.position_index == next_to_act and player.player_name in filtered_players:
