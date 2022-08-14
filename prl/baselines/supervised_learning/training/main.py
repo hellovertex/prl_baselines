@@ -10,8 +10,8 @@ from prl.baselines.supervised_learning.training.train_eval import run_train_eval
 EPOCHS = 8000
 LR = 1e-6
 RESUME = True
-BATCH_SIZE = 50000
-TEST_BATCH_SIZE = 10000
+BATCH_SIZE = 64
+TEST_BATCH_SIZE = 64
 
 
 @click.command
@@ -45,7 +45,7 @@ def main(blind_sizes, path_to_datasamples, path_to_testsamples):
                    resume=RESUME)
 
 
-def make_folder_testdataset(path_to_datasamples, path_to_testsamples, n_files=2):
+def make_folder_testdataset(path_to_datasamples, path_to_testsamples, n_files=1):
     files = glob.glob(path_to_datasamples + '/**/*.csv', recursive=True)
     # move a subset to test directory
     if not os.path.exists(path_to_testsamples):
