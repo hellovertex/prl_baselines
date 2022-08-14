@@ -57,7 +57,7 @@ class OutOfMemoryDataset(IterableDataset):
             # so that the next time the __iter__ is called,
             # the files will be loaded in a different order
             shuffle(self.filenames)
-            raise StopIteration
+            return self._iterators()  # raise StopIteration
 
     def __len__(self):
         return self._len

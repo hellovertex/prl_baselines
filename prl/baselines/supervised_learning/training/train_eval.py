@@ -95,7 +95,7 @@ def run_train_eval(input_dir,
     correct = 0
 
     for epoch in range(start_epoch, epochs):
-        pbar = tqdm(enumerate(BackgroundGenerator(dataset)), total=len(dataset) / batch_size)
+        pbar = tqdm(enumerate(BackgroundGenerator(dataset)), total=int(len(dataset) / batch_size))
         pbar.set_description(
             f'Training epoch {epoch}/{epochs} on {len(dataset)} examples using batches of size {batch_size}... ')
         start_time = time.time()
@@ -177,14 +177,6 @@ def run_train_eval(input_dir,
                         writer.add_histogram(f"layer{k}.bias", layer.state_dict()['bias'], global_step=n_iter)
                         k += 1
 
-                # Write confusion matrix to tensorboard
-                prediction = torch.argmax(output, dim=1)
-                cf_matrix = confusion_matrix(labels.to('cpu'), prediction.to('cpu'))
-                df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix) * 10, index=[i for i in range(output_dim)],
-                                     columns=[i for i in classes])
-                plt.figure(figsize=(12, 7))
-                writer.add_figure("Confusion matrix", sn.heatmap(df_cm, annot=True).get_figure(), epoch)
-
             # save checkpoint if needed
             if i % ckpt_interval == 0:
                 if not os.path.exists(ckpt_dir + '/ckpt'):
@@ -194,6 +186,6 @@ def run_train_eval(input_dir,
                             'net': net.state_dict(),
                             'n_iter': n_iter,
                             'optim': optim.state_dict(),
-                            'loss': loss}, ckpt_dir + '/ckpt')  # net
+                            'loss': loss}, ckpt_dir + '/ckpt.pt')  # net
                 # save model for inference 
                 torch.save(net, ckpt_dir + '/model.pt')
