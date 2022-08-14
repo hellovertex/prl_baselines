@@ -51,7 +51,8 @@ class OutOfMemoryDataset(IterableDataset):
         try:
             res = next(self._iterators())
             # Tip: use next(...).sample(frac=1) for additional shuffling of each dataframe
-            return chain([res], self._iterators())
+            # return chain([res], self._iterators())
+            return self._iterators()
         except StopIteration:
             # before raising StopIteration, we shuffle the list of .csv filenames
             # so that the next time the __iter__ is called,

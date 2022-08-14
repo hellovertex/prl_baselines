@@ -7,10 +7,10 @@ import click
 from prl.baselines.supervised_learning.config import DATA_DIR
 from prl.baselines.supervised_learning.training.train_eval import run_train_eval
 
-EPOCHS = 8000
+EPOCHS = 8000000
 LR = 1e-6
 RESUME = True
-BATCH_SIZE = 64
+BATCH_SIZE = 3690  # dont make batch size larger than dataset
 TEST_BATCH_SIZE = 64
 
 

@@ -129,8 +129,12 @@ def run_train_eval(input_dir,
 
             # compute computation time and *compute_efficiency*
             process_time = start_time - time.time() - prepare_time
+            try:
+                fraction = process_time / (process_time + prepare_time)
+            except ZeroDivisionError:
+                fraction = 0
             pbar.set_description("Fraction of NN Training Time: {:.2f}, epoch: {}/{}:".format(
-                process_time / (process_time + prepare_time), epoch, epochs))
+                fraction, epoch, epochs))
             start_time = time.time()
 
             # evaluate

@@ -52,6 +52,8 @@ class Preprocessor:
 
             if use_downsampling:
                 df = self.downsample(df)
+            # shuffle
+            df = df.sample(frac=1)
             [c(df, file) for c in self._callbacks]
 
     def downsample(self, df):
