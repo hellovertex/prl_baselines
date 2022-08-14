@@ -203,7 +203,8 @@ class RLStateEncoder(Encoder):
         """Converts ante string to float, e.g. '$0.00' -> float(0.00)"""
         return float(ante.split(self._currency_symbol)[1]) * multiply_by
 
-    def _simulate_environment(self, env, episode, cards_state_dict, table, starting_stack_sizes_list, selected_players=None):
+    def _simulate_environment(self, env, episode, cards_state_dict, table, starting_stack_sizes_list,
+                              selected_players=None):
         """Under Construction."""
         # if episode.hand_id == 216163387520 or episode.hand_id == 214211025466:
         for s in starting_stack_sizes_list:
@@ -221,6 +222,17 @@ class RLStateEncoder(Encoder):
         observations = []
         actions = []
         showdown_players: List[str] = [player.name for player in episode.showdown_hands]
+        skip = False
+        # Maybe skip game, if selected_players is set and no selected player was in showdown
+        if selected_players:
+            skip = True
+            for s in selected_players:
+                if s in showdown_players:
+                    skip = False
+                    break
+        if skip:
+            return None, None  # observations, actions are empty, if selected players were not part of showdown
+
         it = 0
         debug_action_list = []
         while not done:
@@ -240,7 +252,8 @@ class RLStateEncoder(Encoder):
             for player in table:
                 # if player reached showdown (we can see his cards)
                 # can use showdown players actions and observations or use only top_players actions and observations
-                filtered_players = showdown_players if not selected_players else showdown_players + selected_players
+                filtered_players = showdown_players if not selected_players else [p for p in showdown_players if
+                                                                                  p in selected_players]
                 # only store obs and action of acting player
                 if player.position_index == next_to_act and player.player_name in filtered_players:
                     observations.append(obs)

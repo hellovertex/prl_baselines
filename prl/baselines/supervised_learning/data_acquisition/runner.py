@@ -1,13 +1,13 @@
 import ast
 import glob
-import io
 import os
-import zipfile
+from typing import List, Optional
 
 import gdown
 import numpy as np
 
 from prl.baselines.supervised_learning.config import DATA_DIR
+from prl.baselines.supervised_learning.data_acquisition.core import utils
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Encoder
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Parser
 from prl.baselines.supervised_learning.data_acquisition.core.writer import Writer
@@ -20,6 +20,11 @@ class Runner:
                  writer: Writer,
                  write_azure: bool,
                  logfile="log.txt"):
+        self._n_files_written_this_run = 0
+        self._n_files_already_encoded = 0
+        self._n_showdowns = 0
+        self._only_from_selected_players: bool = False
+        self._selected_players: Optional[List[str]] = []
         self.parser = parser
         self.encoder = encoder
         self.writer = writer
@@ -61,58 +66,9 @@ class Runner:
                     break
         return skip_file
 
-    def _write_metadata(self, file_dir):
-        file_path_metadata = os.path.join(file_dir, f"{self.writer.out_filename_base}.meta")
-        with open(file_path_metadata, "a") as file:
-            file.write(self.parser.metadata.__repr__() + "\n")
-        return file_path_metadata
-
-    def _encode(self, from_parsed_hands, blind_sizes, only_from_selected_players):
-        training_data, labels = None, None
-
-        n_samples = 0
-        for i, hand in enumerate(from_parsed_hands):
-            if only_from_selected_players:
-                fpath = str(DATA_DIR) + '/01_raw' + f'/{blind_sizes}' + '/eda_result_filtered.txt'
-                with open(fpath, "r") as data:
-                    player_dict = ast.literal_eval(data.read())
-                    selected_players = list(player_dict.keys())
-            else:
-                selected_players = None
-            observations, actions = self.encoder.encode_episode(hand, selected_players=selected_players)
-            if not observations:
-                continue
-            if training_data is None:
-                training_data = observations
-                labels = actions
-            else:
-                try:
-                    training_data = np.concatenate((training_data, observations), axis=0)
-                    labels = np.concatenate((labels, actions), axis=0)
-                except Exception as e:
-                    print(e)
-            n_samples += len(observations)
-            print("Simulating environment", end='') if i == 0 else print('.', end='')
-            self._hand_counter += 1
-        return training_data, labels, n_samples
-
-    @staticmethod
-    def extract(filename, out_dir):
-        z = zipfile.ZipFile(filename)
-        for f in z.namelist():
-            try:
-                os.mkdir(out_dir)
-            except FileExistsError:
-                pass
-            # read inner zip file into bytes buffer
-            content = io.BytesIO(z.read(f))
-            zip_file = zipfile.ZipFile(content)
-            for i in zip_file.namelist():
-                zip_file.extract(i, out_dir)
-
     def _extract_all_zip_data(self, from_gdrive_id=None) -> str:
         """
-        :param from_gdrive_id: google drive id of .zip file. If None, .zip file will be looked up in data folder.
+        :param from_gdrive_id: Google Drive id of .zip file. If None, .zip file will be looked up in data folder.
         :return: directory to which poker data has been unzipped
         """
         path_to_data = str(DATA_DIR) + "/01_raw/" + self.blind_sizes
@@ -127,8 +83,45 @@ class Runner:
         out_dir = str(DATA_DIR) + "/01_raw/" + f'{self.blind_sizes}/unzipped'
         # creates out_dir if it does not exist
         # extracts zip file, only if extracted files with same name do not exist
-        [self.extract(zipfile, out_dir=out_dir) for zipfile in zipfiles]
+        [utils.extract(f_zip, out_dir=out_dir) for f_zip in zipfiles]
         return out_dir
+
+    def _log(self, file_dir, abs_filepath):
+
+        if not os.path.exists(os.path.dirname(self.logfile)):
+            os.makedirs(os.path.realpath(os.path.dirname(self.logfile)), exist_ok=True)
+
+        # Store which files we parsed
+        with open(self.logfile, "a") as f:
+            f.write(abs_filepath + "\n")
+        # Store how many showdowns in total we parsed
+        file_path_metadata = os.path.join(file_dir, f"{self.writer.out_filename_base}.meta")
+        with open(file_path_metadata, "w") as file:
+            file.write({'n_showdowns': self._n_showdowns}.__repr__() + "\n")
+        return file_path_metadata
+
+    def _encode(self, from_parsed_hands):
+        training_data, labels = None, None
+
+        n_samples = 0
+        for i, hand in enumerate(from_parsed_hands):
+            observations, actions = self.encoder.encode_episode(hand, selected_players=self._selected_players)
+            if not observations:
+                continue
+            if training_data is None:
+                training_data = observations
+                labels = actions
+            else:
+                try:
+                    training_data = np.concatenate((training_data, observations), axis=0)
+                    labels = np.concatenate((labels, actions), axis=0)
+                    self._n_showdowns += 1
+                except Exception as e:
+                    print(e)
+            n_samples += len(observations)
+            print("Simulating environment", end='') if i == 0 else print('.', end='')
+
+        return training_data, labels, n_samples
 
     def parse(self, abs_filepath):
         parsed_hands = None
@@ -139,31 +132,27 @@ class Runner:
             print(
                 f'Skipping {self._n_invalid_files}th invalid file {abs_filepath} because it has invalid continuation byte...')
             print('---------------------------------------')
-            self._n_skipped += 1  # todo push fix
+            self._n_skipped += 1
         return parsed_hands
 
-    def parse_encode_write(self, abs_filepath, blind_sizes, only_from_selected_players=False):
+    def parse_encode_write(self, abs_filepath, blind_sizes):
         """Docstring"""
-        # parse
+        # ** Parse **
         parsed_hands = self.parse(abs_filepath)
-        if parsed_hands:  # in case of uncaught exceptions, parsed_hands will None
-            # encode
-            training_data, labels, n_samples = self._encode(parsed_hands,
-                                                            blind_sizes,
-                                                            only_from_selected_players)
-            # write
+        if parsed_hands:  # in case of uncaught exceptions, parsed_hands will be None
+            # ** Encode **
+            training_data, labels, n_samples = self._encode(parsed_hands)
+            # ** Write **
             if training_data is not None:  # in case of uncaught exceptions, training_data will be None
-                print(f"\nExtracted {len(training_data)} training samples from {self._hand_counter + 1} poker hands"
-                      f"in file {self._n_files_written_this_run + self._n_files_already_encoded} {abs_filepath}...")
-
-                self.writer.log_progress(self.logfile, abs_filepath)
-                # write train data
                 file_dir, file_path = self.writer.write_train_data(training_data,
                                                                    labels,
                                                                    self.encoder.feature_names,
                                                                    n_samples, self.blind_sizes)
 
-                self._write_metadata(file_dir=file_dir)
+                self._n_files_written_this_run += 1
+                print(f"\nExtracted {len(training_data)} training samples from {self._hand_counter + 1} poker hands"
+                      f" in file {self._n_files_written_this_run + self._n_files_already_encoded}: {abs_filepath}...")
+                self._log(file_dir=file_dir, abs_filepath=abs_filepath)
 
     def run(self, blind_sizes, unzipped_dir=None, from_gdrive_id=None, version_two=False):
         """
@@ -173,26 +162,31 @@ class Runner:
         :param version_two: If true, training data will only be generated from most active players with best earnings,
         (!!)
         IMPORTANT: This option requires data/.../eda_result_filtered.txt which can be generated by running eda.py.
-        IMPORTANT: Inspect eda_result.txt and filter players, e.g. remove those with negative ROIs or
-        only pick best earners and save as eda_result_filtered.txt.
+        IMPORTANT: Inspect eda_result.txt generated from eda.py and filter players, e.g. remove those with negative ROIs or
+        only pick the best earners and save as eda_result_filtered.txt.
         If set to false, the default training data will be generated which uses all showdown hands which results in more
-        data generated but more noise as well. I added version two because using all data the NN didnt learn good play.
+        data generated but more noise as well. I added version two because using all data the NN didn't learn good play.
         """
         self.blind_sizes = blind_sizes
         self._hand_counter = 0
-        # extract zipfile (.zip is stored locally or downloaded via from_gdrive)
+
+        # extract zipfile with Poker-hands (.zip is stored locally or downloaded via from_gdrive)
         if not unzipped_dir:
             unzipped_dir = self._extract_all_zip_data(from_gdrive_id)
         filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
-        # parse, encode, vectorize and write the training data from .txt to disk
+
+        # Set selected players to learn from, if applicable
+        self._only_from_selected_players = version_two
+        if self._only_from_selected_players:
+            fpath = str(DATA_DIR) + '/01_raw' + f'/{blind_sizes}' + '/eda_result_filtered.txt'
+            with open(fpath, "r") as data:
+                player_dict = ast.literal_eval(data.read())
+                self._selected_players = list(player_dict.keys())
+        else:
+            self._selected_players = None
+
+        # Parse, encode, vectorize and write the training data from .txt to disk
         for i, filename in enumerate(filenames):
             if not self.file_has_been_encoded_already(logfile=self.logfile, filename=filename):
                 self.parse_encode_write(os.path.abspath(filename).__str__(),
-                                        blind_sizes=blind_sizes,
-                                        only_from_selected_players=version_two)
-
-
-
-
-
-
+                                        blind_sizes=blind_sizes)
