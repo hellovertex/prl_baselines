@@ -29,7 +29,9 @@ class Preprocessor:
 
     def run(self):
         for file in self._csv_files:
-            df = pd.read_csv(file)
+            df = pd.read_csv(file,  # sep=';',
+                             dtype='float32',
+                             encoding='cp1252')
             fn_to_numeric = partial(pd.to_numeric, errors="coerce")
             df = df.apply(fn_to_numeric).dropna()
             df = self.downsample(df)

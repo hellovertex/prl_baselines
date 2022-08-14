@@ -17,9 +17,19 @@ from prl.baselines.supervised_learning.data_preprocessing.preprocessor import Pr
               type=str,  # absolute path
               help="Passing path_to_csv_files we can bypass the naming convention "
                    "that will look up data/02_vectorized/{blind_sizes} for data to preprocess. ")
-def main(blind_sizes, path_to_csv_files):
+@click.option("--output_dir",
+              default="",
+              type=str,  # absolute path
+              help="Optionally pass an output dir to circumvent convetion of writing to ./data/03_preprocessed ")
+def main(blind_sizes, path_to_csv_files, output_dir):
     if not path_to_csv_files:
         path_to_csv_files = str(DATA_DIR) + '/02_vectorized' + f'/{blind_sizes}'
-    callbacks = [partial(to_csv, output_dir=str(DATA_DIR) + '/03_preprocessed' + f'/{blind_sizes}')]
+    if not output_dir:
+        output_dir = str(DATA_DIR) + '/03_preprocessed' + f'/{blind_sizes}'
+    callbacks = [partial(to_csv, output_dir=output_dir)]
     preprocessor = Preprocessor(path_to_csv_files, callbacks)
     preprocessor.run()
+
+
+if __name__ == '__main__':
+    main()
