@@ -20,7 +20,7 @@ from prl.baselines.supervised_learning.data_preprocessing.preprocessor import Pr
 @click.option("--output_dir",
               default="",
               type=str,  # absolute path
-              help="Optionally pass an output dir to circumvent convetion of writing to ./data/03_preprocessed ")
+              help="Optional. Pass output dir to circumvent convention of writing to ./data/03_preprocessed ")
 @click.option("--use_downsampling",
               default=True,
               type=bool,  # absolute path

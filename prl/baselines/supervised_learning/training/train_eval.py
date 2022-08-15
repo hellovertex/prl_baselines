@@ -75,7 +75,7 @@ def run_train_eval(input_dir,
     start_epoch = 0
     if resume:
         try:
-            ckpt = load_checkpoint(ckpt_dir + '/ckpt')
+            ckpt = load_checkpoint(ckpt_dir + '/ckpt.pt')
             net.load_state_dict(ckpt['net'])
             start_epoch = ckpt['epoch']
             start_n_iter = ckpt['n_iter']
