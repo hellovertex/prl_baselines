@@ -199,22 +199,20 @@ class Runner:
         # Parse, encode, vectorize and write the training data from .txt to disk
 
 
-        max_files_per_pickle = 10000
+        max_files_per_pickle = 250
         n_pickle_file = 0
         parsed_hands = []
         n_txt_files = len(filenames)
-
+        n_cum_parsed_hands = 0
         for i, filename in enumerate(filenames):
+            print(f'Reading {i}th file...')
             # read
             if not self.file_has_been_encoded_already(logfile=self.logfile, filename=filename):
                 hands = self.parse_encode_write(abs_filepath=os.path.abspath(filename).__str__(),
                                                 blind_sizes=blind_sizes)
-                if not hands: continue
-
-                if parsed_hands:
-                    itertools.chain(parsed_hands, hands)
-                else:
-                    parsed_hands = hands
+                for hand in hands:
+                    parsed_hands.append(hand)
+                    n_cum_parsed_hands += 1
 
             # write
             if i % max_files_per_pickle == max_files_per_pickle - 1:
@@ -228,8 +226,9 @@ class Runner:
 
             # write residuals before end of loop
             if i >= n_txt_files - 1:
+                print(f"Parsed a total of {n_cum_parsed_hands} episodes.")
                 _write(blind_sizes=blind_sizes,
-                       parsed_hands=parsed_hands,
+                       parsed_hands=list(parsed_hands),
                        n_pickle_file=n_pickle_file+1,
                        len_filenames=len(filenames),
                        max_files_per_pickle=max_files_per_pickle)
