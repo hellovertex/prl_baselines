@@ -25,7 +25,7 @@ class CSVWriter(Writer):
         file_name = self.out_filename_base + '_' + str(int(self.num_lines_written / 500000)) + '.csv'
         file_path = os.path.join(file_dir, file_name)
         columns = None
-        index = False
+        index = True
         header = False
         if not os.path.exists(file_path):
             os.makedirs(os.path.realpath(file_dir), exist_ok=True)
