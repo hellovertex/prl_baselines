@@ -1,6 +1,8 @@
 import ast
 import glob
+import itertools
 import os
+import pickle
 from typing import List, Optional
 
 import gdown
@@ -143,10 +145,6 @@ class Runner:
             # instead of vectorizing and writing the training data to a csv file, we decided to serialize
             # the PokerEpisode objects and save them to disk, because the parsing of the .txt files takes a
             # very long time and its good to have this intermediate step in case we want to repeat the process
-            # todo serialize using pickle
-            # todo write to disk in binary format or something similar
-
-            pass
             # ---------------- DEPRECATED BUT KEPT FOR FUTURE REFERENCE -------------------
             # # ** Encode **
             # training_data, labels, n_samples = self._encode(parsed_hands)
@@ -161,6 +159,8 @@ class Runner:
             #     print(f"\nExtracted {len(training_data)} training samples from {self._hand_counter + 1} poker hands"
             #           f" in file {self._n_files_written_this_run + self._n_files_already_encoded}: {abs_filepath}...")
             #     self._log(file_dir=file_dir, abs_filepath=abs_filepath)
+            pass
+        return parsed_hands
 
     def run(self, blind_sizes, unzipped_dir=None, from_gdrive_id=None):
         """
@@ -178,16 +178,48 @@ class Runner:
 
         # Set selected players to learn from, if applicable
         self._only_from_selected_players = False  # todo: (re-)move this
-        if self._only_from_selected_players:
-            fpath = str(DATA_DIR) + '/01_raw' + f'/{blind_sizes}' + '/eda_result_filtered.txt'
-            with open(fpath, "r") as data:
-                player_dict = ast.literal_eval(data.read())
-                self._selected_players = list(player_dict.keys())
-        else:
-            self._selected_players = None
+
+        # if self._only_from_selected_players:
+        #     fpath = str(DATA_DIR) + '/01_raw' + f'/{blind_sizes}' + '/eda_result_filtered.txt'
+        #     with open(fpath, "r") as data:
+        #         player_dict = ast.literal_eval(data.read())
+        #         self._selected_players = list(player_dict.keys())
+        # else:
+        #     self._selected_players = None
 
         # Parse, encode, vectorize and write the training data from .txt to disk
+        def _write(parsed_hands, n_pickle_file):
+            outfile = str(DATA_DIR) + "/01_raw" + f"/{blind_sizes}" + f"/pickled/poker_episodes_{n_pickle_file}"
+            with open(outfile, "ab+") as f:
+                for hand in parsed_hands:
+                    pickle.dump(hand, f)
+
+            print(f"Parsed {min(max_files_per_pickle * (n_pickle_file + 1), len(filenames))}/{len(filenames)} "
+                  f"files and wrote result to {outfile}...")
+
+        max_files_per_pickle = 10000
+        n_pickle_file = 0
+        parsed_hands = []
+        n_txt_files = len(filenames)
+
         for i, filename in enumerate(filenames):
+            # read
             if not self.file_has_been_encoded_already(logfile=self.logfile, filename=filename):
-                self.parse_encode_write(os.path.abspath(filename).__str__(),
-                                        blind_sizes=blind_sizes)
+                hands = self.parse_encode_write(abs_filepath=os.path.abspath(filename).__str__(),
+                                                blind_sizes=blind_sizes)
+                if not hands: continue
+
+                if parsed_hands:
+                    itertools.chain(parsed_hands, hands)
+                else:
+                    parsed_hands = hands
+
+            # write
+            if i % max_files_per_pickle == max_files_per_pickle - 1:
+                _write(parsed_hands, n_pickle_file)
+                parsed_hands = []
+                n_pickle_file += 1
+
+            # write residuals before end of loop
+            if i >= n_txt_files - 1:
+                _write(parsed_hands, n_pickle_file+1)
