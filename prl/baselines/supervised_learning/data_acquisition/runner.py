@@ -197,8 +197,6 @@ class Runner:
         #     self._selected_players = None
 
         # Parse, encode, vectorize and write the training data from .txt to disk
-
-
         max_files_per_pickle = 250
         n_pickle_file = 0
         parsed_hands = []

@@ -285,6 +285,15 @@ class RLStateEncoder(Encoder):
     def encode_episode(self, episode: PokerEpisode, selected_players=None) -> Tuple[Observations, Actions_Taken]:
         """Runs environment with steps from PokerEpisode.
         Returns observations and corresponding actions of players that made it to showdown."""
+        # skip episode if no selected_players has played in it
+        if selected_players:
+            skip = True
+            for p_info in episode.player_stacks:
+                if p_info.player_name in selected_players:
+                    skip = False
+                    break
+            if skip:
+                return None, None
         # utils
         table = self.make_table(episode)
         self._currency_symbol = episode.currency_symbol
@@ -300,15 +309,6 @@ class RLStateEncoder(Encoder):
 
         # Collect observations and actions, observations are possibly augmented
         try:
-            # skip episode if no selected_players has played in it
-            if selected_players:
-                skip = True
-                for p_info in episode.player_stacks:
-                    if p_info.player_name in selected_players:
-                        skip = False
-                        break
-                if skip:
-                    return None, None
             return self._simulate_environment(env=self._wrapped_env,
                                               episode=episode,
                                               cards_state_dict=cards_state_dict,
