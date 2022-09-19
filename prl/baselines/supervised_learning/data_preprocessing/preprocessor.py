@@ -16,20 +16,19 @@ ALL_IN = 6
 
 
 class Preprocessor:
-    """Out of memory preprocessor. Means the
-    - csv files get loaded one by one
-    - preprocessing is applied
-    - csv file is written back to `output_dir`, which is data/03_preprocessed by default
-    - additional callbacks can be provided, e.g. to write the file back as .parquet file """
-
-    def __init__(self, path_to_csv_files, callbacks=None):
+    def __init__(self, path_to_csv_files, ):
         self._path_to_csv_files = path_to_csv_files
         self._csv_files = glob.glob(path_to_csv_files.__str__() + '/*.csv', recursive=False)
-        self._callbacks = [] if not callbacks else callbacks
 
-    def run(self, use_downsampling=True):
+    def run(self, use_downsampling=True, callbacks=None):
+        """
+        For each csv file, create a numerical dataframe and remove erroneous lines
+        Additional callbacks can be provided, e.g. to write the file back as .csv file """
+
+        cbs = [] if not callbacks else callbacks
+
         for file in self._csv_files:
-            df = pd.read_csv(file, sep=';',
+            df = pd.read_csv(file, sep=',',
                              dtype='float32',
                              encoding='cp1252')
             fn_to_numeric = partial(pd.to_numeric, errors="coerce")
@@ -42,7 +41,8 @@ class Preprocessor:
             df_raise_pot = df[df['label'] == RAISE_POT]
             df_allin = df[df['label'] == ALL_IN]
 
-            # overwrite labels such that 0,1,3,4,5,6 become 0,1,2,3,4,5 because 2 is never used
+            # Manually overwrite labels such that 0,1,3,4,5,6 become 0,1,2,3,4,5 because 2 is never used.
+            # Initially it was there to distinguish CHECK from CALL but we joined them to CHECK_CALL = 1
             df_allin['label'] = 5
             df_raise_pot['label'] = 4
             df_raise_half['label'] = 3
@@ -52,21 +52,35 @@ class Preprocessor:
 
             if use_downsampling:
                 df = self.downsample(df)
+
             # shuffle
             df = df.sample(frac=1)
-            [c(df, file) for c in self._callbacks]
+            [c(df, file) for c in cbs]
 
     def downsample(self, df):
+        """ Each label in df will be downsampled to the number of all ins, "
+            so that training data is equally distributed. """
         n_samples = df['label'].value_counts()[ALL_IN]  # ALL_IN is rarest class
 
-        df_fold_downsampled = resample(df[df['label'] == FOLD], replace=True, n_samples=n_samples, random_state=1)
-        df_checkcall_downsampled = resample(df[df['label'] == CHECK_CALL], replace=True, n_samples=n_samples,
+        df_fold_downsampled = resample(df[df['label'] == FOLD],
+                                       replace=True,
+                                       n_samples=n_samples,
+                                       random_state=1)
+        df_checkcall_downsampled = resample(df[df['label'] == CHECK_CALL],
+                                            replace=True,
+                                            n_samples=n_samples,
                                             random_state=1)
-        df_raise_min_downsampled = resample(df[df['label'] == RAISE_MIN_OR_3BB], replace=True, n_samples=n_samples,
+        df_raise_min_downsampled = resample(df[df['label'] == RAISE_MIN_OR_3BB],
+                                            replace=True,
+                                            n_samples=n_samples,
                                             random_state=1)
-        df_raise_half_downsampled = resample(df[df['label'] == RAISE_HALF_POT], replace=True, n_samples=n_samples,
+        df_raise_half_downsampled = resample(df[df['label'] == RAISE_HALF_POT],
+                                             replace=True,
+                                             n_samples=n_samples,
                                              random_state=1)
-        df_raise_pot_downsampled = resample(df[df['label'] == RAISE_POT], replace=True, n_samples=n_samples,
+        df_raise_pot_downsampled = resample(df[df['label'] == RAISE_POT],
+                                            replace=True,
+                                            n_samples=n_samples,
                                             random_state=1)
 
         return pd.concat([df_fold_downsampled,

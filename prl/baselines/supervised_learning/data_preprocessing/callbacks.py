@@ -3,6 +3,8 @@ import pandas as pd
 
 
 def to_csv(df: pd.DataFrame, filename, output_dir):
+    """Writes pandas.DataFrame object to .csv file in `output_dir`.
+    If output_dir does not exist it will be created. `filename` must end with .csv"""
     if not os.path.exists(output_dir):
         os.makedirs(os.path.abspath(output_dir))
     filename = os.path.basename(filename)
