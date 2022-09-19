@@ -1,4 +1,4 @@
-import ast
+# import ast
 import glob
 import itertools
 import os
@@ -11,9 +11,18 @@ import numpy as np
 from prl.baselines.supervised_learning.config import DATA_DIR
 from prl.baselines.supervised_learning.data_acquisition.core import utils
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Encoder
-from prl.baselines.supervised_learning.data_acquisition.core.parser import Parser
+from prl.baselines.supervised_learning.data_acquisition.core.parser import Parser, PokerEpisode
 from prl.baselines.supervised_learning.data_acquisition.core.writer import Writer
 
+
+def _write(blind_sizes, parsed_hands, n_pickle_file, len_filenames, max_files_per_pickle):
+    outfile = str(DATA_DIR) + "/01_raw" + f"/{blind_sizes}" + f"/pickled/poker_episodes_{n_pickle_file}"
+    with open(outfile, "ab+") as f:
+        for hand in parsed_hands:
+            pickle.dump(hand, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    print(f"Parsed {min(max_files_per_pickle * (n_pickle_file + 1), len_filenames)}/{len_filenames} "
+          f"files and wrote result to {outfile}...")
 
 class Runner:
     def __init__(self,
@@ -188,14 +197,7 @@ class Runner:
         #     self._selected_players = None
 
         # Parse, encode, vectorize and write the training data from .txt to disk
-        def _write(parsed_hands, n_pickle_file):
-            outfile = str(DATA_DIR) + "/01_raw" + f"/{blind_sizes}" + f"/pickled/poker_episodes_{n_pickle_file}"
-            with open(outfile, "ab+") as f:
-                for hand in parsed_hands:
-                    pickle.dump(hand, f)
 
-            print(f"Parsed {min(max_files_per_pickle * (n_pickle_file + 1), len(filenames))}/{len(filenames)} "
-                  f"files and wrote result to {outfile}...")
 
         max_files_per_pickle = 10000
         n_pickle_file = 0
@@ -216,10 +218,18 @@ class Runner:
 
             # write
             if i % max_files_per_pickle == max_files_per_pickle - 1:
-                _write(parsed_hands, n_pickle_file)
+                _write(blind_sizes=blind_sizes,
+                       parsed_hands=parsed_hands,
+                       n_pickle_file=n_pickle_file,
+                       len_filenames=len(filenames),
+                       max_files_per_pickle=max_files_per_pickle)
                 parsed_hands = []
                 n_pickle_file += 1
 
             # write residuals before end of loop
             if i >= n_txt_files - 1:
-                _write(parsed_hands, n_pickle_file+1)
+                _write(blind_sizes=blind_sizes,
+                       parsed_hands=parsed_hands,
+                       n_pickle_file=n_pickle_file+1,
+                       len_filenames=len(filenames),
+                       max_files_per_pickle=max_files_per_pickle)
