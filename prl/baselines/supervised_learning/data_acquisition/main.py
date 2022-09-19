@@ -53,6 +53,7 @@ def main(blind_sizes, from_gdrive_id, unzipped_dir, version_two):
                 write_azure=False,
                 logfile=LOGFILE) as runner:
         # parse PokerEpisodes, encode, vectorize, write training data and labels to disk
+        unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
         runner.run(blind_sizes, unzipped_dir=unzipped_dir, from_gdrive_id=from_gdrive_id, version_two=version_two)
 
 
