@@ -16,7 +16,7 @@ from rl_state_encoder import RLStateEncoder
 @click.option("--from_gdrive_id",
               # for small example, use 18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO
               # for complete database (VERY LARGE), use 18kkgEM2CYF_Tl4Dn8oro6tUgqDfr9IAN
-              default="",
+              default="18kkgEM2CYF_Tl4Dn8oro6tUgqDfr9IAN",
               type=str,
               help="Google drive id of a .zip file containing poker hands. "
                    "For small example, use 18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO"
@@ -53,7 +53,7 @@ def main(blind_sizes, from_gdrive_id, unzipped_dir, version_two):
                 write_azure=False,
                 logfile=LOGFILE) as runner:
         # parse PokerEpisodes, encode, vectorize, write training data and labels to disk
-        unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
+        # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
         runner.run(blind_sizes, unzipped_dir=unzipped_dir, from_gdrive_id=from_gdrive_id, version_two=version_two)
 
 
