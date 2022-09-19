@@ -217,7 +217,8 @@ class RLStateEncoder(Encoder):
 
         state_dict = {'deck_state_dict': cards_state_dict, 'table': table}
         obs, _, done, _ = env.reset(config=state_dict)
-
+        assert obs[-1] in [0, 1, 2, 3, 4, 5], f"obs[-1] = {obs[-1]}. " \
+                                              f"get_current_obs should have caught this already. check the wrapper impl"
         # --- Step Environment with action --- #
         observations = []
         actions = []
