@@ -51,16 +51,17 @@ This module is supposed to convert a `PokerEpisode` - instance to .txt file for 
 """
 import datetime
 from datetime import datetime as dt
-from typing import NamedTuple
+from typing import NamedTuple, List
 
-from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode
+from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, PlayerStack
 
 
 class SnowieEpisode(NamedTuple):
     date: str
     game_id: int
 
-def _convert_seats():
+
+def _convert_seats(player_stacks: List[PlayerStack], hero_name):
     """Internal representation:
     [PlayerStack(seat_display_name='Seat 1', player_name='Solovyova', stack='$50'),
      PlayerStack(seat_display_name='Seat 2', player_name='x elrubio x', stack='$64.22'),
@@ -78,19 +79,32 @@ def _convert_seats():
     Seat 4 snowie4 100
     Seat 5 snowie5 100
      """
+    ret = ""
+    ith_snowie_player = 1
+    player_names_dict = {}
+    for p in player_stacks:
+        seat_id = int(p.seat_display_name[-1]) - 1
+        name = hero_name if hero_name == p.player_name else f"snowie {ith_snowie_player}"
+        stack = p.stack[1:]
+        ret += f"Seat {seat_id} {name} {stack}\n"
+        player_names_dict[p.player_name] = name
+        ith_snowie_player += 1
+    return ret, player_names_dict
+
+
+def _convert_blinds(blinds, player_names_dict):
+    pass
+
 
 def from_poker_episode(episode: PokerEpisode, hero_name: str = None):  # -> SnowieEpisode:
     if not hero_name:
         hero_name = episode.winners[0].name
-    for p in episode.player_stacks:
-        p.
-    str_seats = f"Seat 0 snowie1 100\n" \
-                f"Seat 1 snowie2 100\n" \ 
-                f"Seat 2 hero 100\n" \ 
-                f"Seat 3 snowie3 100\n" \ 
-                f"Seat 4 snowie4 100\n" \ 
-                f"Seat 5 snowie5 100\n"
-
+    seats, player_names_dict = _convert_seats(episode.player_stacks, hero_name)
+    blinds = _convert_blinds(episode.blinds, player_names_dict)
+    dealt_cards = _convert_dealt_cards(episode.showdown_hands, player_names_dict)
+    community_cards: dict = _convert_community_cards(episode.board_cards)
+    moves: dict = _convert_moves(episode.actions_total, player_names_dict)
+    maybe_move_uncalled_bet = _get_maybe_uncalled_bet(episode, player_names_dict)
     snowie_episode = f"GameStart\n" \
                      f"PokerClient: ExportFormat\n" \
                      f"Date: {datetime.date.strftime(datetime.date.today(), '%d/%m/%y')}\n" \
@@ -99,13 +113,25 @@ def from_poker_episode(episode: PokerEpisode, hero_name: str = None):  # -> Snow
                      f"GameId: {str(episode.hand_id)}\n" \
                      f"GameType: NoLimit\n" \
                      f"GameCurrency: {episode.currency_symbol}\n" \
-                     f"SmallBlindStake: {episode.blinds[0].amount[1:]}" \
-                     f"BigBlindStake: {episode.blinds[1].amount[1:]}" \
-                     f"AnteStake: {episode.ante[1:]}" \
-                     f"TableName: Table" \
-                     f"Max number of player: 6" \
-                     f"MyPlayerName: hero" \
-                     f"DealerPosition: {episode.btn_idx}"
+                     f"SmallBlindStake: {episode.blinds[0].amount[1:]}\n" \
+                     f"BigBlindStake: {episode.blinds[1].amount[1:]}\n" \
+                     f"AnteStake: {episode.ante[1:]}\n" \
+                     f"TableName: Table\n" \
+                     f"Max number of player: 6\n" \
+                     f"MyPlayerName: hero\n" \
+                     f"DealerPosition: {episode.btn_idx}\n" + \
+                     seats + \
+                     blinds + \
+                     dealt_cards + \
+                     moves['preflop'] + \
+                     community_cards['flop'] + \
+                     moves['flop'] + \
+                     community_cards['turn'] + \
+                     moves['turn'] + \
+                     community_cards['river'] + \
+                     moves['river'] + \
+                     maybe_move_uncalled_bet + \
+                     "GameEnd"
     return snowie_episode
 
 
