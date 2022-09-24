@@ -51,9 +51,9 @@ This module is supposed to convert a `PokerEpisode` - instance to .txt file for 
 """
 import datetime
 from datetime import datetime as dt
-from typing import NamedTuple, List
+from typing import NamedTuple, List, Dict, Tuple
 
-from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, PlayerStack
+from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, PlayerStack, Blind
 
 
 class SnowieEpisode(NamedTuple):
@@ -61,7 +61,7 @@ class SnowieEpisode(NamedTuple):
     game_id: int
 
 
-def _convert_seats(player_stacks: List[PlayerStack], hero_name):
+def _convert_seats(player_stacks: List[PlayerStack], hero_name: str) -> Tuple[str, Dict[str,str]]:
     """Internal representation:
     [PlayerStack(seat_display_name='Seat 1', player_name='Solovyova', stack='$50'),
      PlayerStack(seat_display_name='Seat 2', player_name='x elrubio x', stack='$64.22'),
@@ -78,6 +78,10 @@ def _convert_seats(player_stacks: List[PlayerStack], hero_name):
     Seat 3 snowie3 100
     Seat 4 snowie4 100
     Seat 5 snowie5 100
+
+    :returns
+    ret: Pokersnowie string representation of seats-section
+    player_names_dict: mapping from player names to poker snowie names
      """
     ret = ""
     ith_snowie_player = 1
@@ -92,8 +96,36 @@ def _convert_seats(player_stacks: List[PlayerStack], hero_name):
     return ret, player_names_dict
 
 
-def _convert_blinds(blinds, player_names_dict):
-    pass
+def _convert_blinds(blinds: List[Blind], player_names_dict: Dict[str, str]) -> str:
+    ret = ""
+    # player_names_dict[blinds[0].player_name]
+    # todo
+
+    return ret
+
+
+def _convert_dealt_cards(showdown_hands, player_names_dict):
+    ret = ""
+    # todo
+    return ret
+
+
+def _convert_community_cards(board_cards):
+    ret = {}
+    # todo
+    return {}
+
+
+def _convert_moves(actions_total, player_names_dict):
+    ret = {}
+    # todo
+    return ret
+
+
+def _get_maybe_uncalled_bet(episode, player_names_dict):
+    ret = ""
+    # todo
+    return ret
 
 
 def from_poker_episode(episode: PokerEpisode, hero_name: str = None):  # -> SnowieEpisode:
