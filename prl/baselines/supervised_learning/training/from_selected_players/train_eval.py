@@ -129,6 +129,10 @@ def run_train_eval(input_dir,
         pbar.set_description(
             f'Training epoch {epoch}/{epochs} on {len(traindataset)} examples using batches of size {batch_size}...')
         start_time = time.time()
+        i_train = 0
+        correct = 0
+        total_loss = 0
+
         for i, (x, y) in pbar:
             if use_cuda:  # keep
                 x = x.cuda()
@@ -144,14 +148,15 @@ def run_train_eval(input_dir,
             optim.step()
             total_loss += loss.data.item()  # add batch loss
             # udpate tensorboardX
-            correct += pred.eq(y.data).cpu().sum().item() / batch_size
+            correct += pred.eq(y.data).cpu().sum().item()
             i_train += 1
             if i % log_interval == 0:
+                n_batch = i_train * batch_size  # how many samples across all batches seen so far
                 writer.add_scalar(tag='Training Loss', scalar_value=total_loss / i_train, global_step=n_iter)
-                writer.add_scalar(tag='Training Accuracy', scalar_value=100.0 * correct / len(traindataset), global_step=n_iter)
+                writer.add_scalar(tag='Training Accuracy', scalar_value=100.0 * correct / n_batch, global_step=n_iter)
                 print(
                     "\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n".format(
-                        total_loss / i_train, round(correct), len(traindataset), round(100.0 * correct / len(traindataset), 2)
+                        total_loss / i_train, correct, n_batch, round(100.0 * correct / n_batch, 2)
                     )
                 )
                 i_train = 0
@@ -186,7 +191,7 @@ def run_train_eval(input_dir,
                         # sum up batch loss
                         test_loss += F.cross_entropy(output, y, reduction="sum").data.item()
                         pred = torch.argmax(output, dim=1)
-                        correct += pred.eq(y.data).cpu().sum().item() / batch_size
+                        correct += pred.eq(y.data).cpu().sum().item()
 
                 test_loss /= len(testdataset)
                 test_accuracy = 100 * correct / len(testdataset)
@@ -222,3 +227,4 @@ def run_train_eval(input_dir,
                             'loss': loss}, ckpt_dir + '/ckpt.pt')  # net
                 # save model for inference 
                 torch.save(model, ckpt_dir + '/model.pt')
+            n_iter += 1
