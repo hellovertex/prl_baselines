@@ -47,7 +47,8 @@ GameEnd
 
 Our internal representation of played hands is given by PokerEpisode - instances.
 
-This module is supposed to convert a `PokerEpisode` - instance to .txt file for import in PokerSnowie.
+This module is supposed to convert a `prl.baselines.supervised_learning.data_acquisition.core.parser.PokerEpisode` -
+instance to .txt file for import in PokerSnowie.
 """
 import datetime
 from datetime import datetime as dt
