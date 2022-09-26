@@ -142,16 +142,16 @@ def run_train_eval(input_dir,
             loss = F.cross_entropy(output, y)
             loss.backward()
             optim.step()
-            total_loss += loss.data.item()
+            total_loss += loss.data.item()  # add batch loss
             # udpate tensorboardX
             correct += pred.eq(y.data).cpu().sum().item() / batch_size
             i_train += 1
             if i % log_interval == 0:
                 writer.add_scalar(tag='Training Loss', scalar_value=total_loss / i_train, global_step=n_iter)
-                writer.add_scalar(tag='Training Accuracy', scalar_value=100.0 * correct / i_train, global_step=n_iter)
+                writer.add_scalar(tag='Training Accuracy', scalar_value=100.0 * correct / len(traindataset), global_step=n_iter)
                 print(
-                    "\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n".format(
-                        total_loss / i_train, round(correct), len(traindataset), 100.0 * correct / i_train
+                    "\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n".format(
+                        total_loss / i_train, round(correct), len(traindataset), round(100.0 * correct / len(traindataset), 2)
                     )
                 )
                 i_train = 0
