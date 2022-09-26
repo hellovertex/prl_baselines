@@ -20,7 +20,7 @@ class MLP(nn.Module):
     def forward(self, x):
         for layer in self.layers[:-1]:
             x = F.relu(layer(x))
-        out = F.softmax(self.layers[-1](x), dim=-1)
+        out = self.layers[-1](x)
         return out
 
     def log_weights(self):
