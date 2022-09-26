@@ -5,7 +5,7 @@ import shutil
 import click
 
 from prl.baselines.supervised_learning.config import DATA_DIR
-from prl.baselines.supervised_learning.training.train_eval import run_train_eval
+from prl.baselines.supervised_learning.training.from_all_players.train_eval import run_train_eval
 
 EPOCHS = 8000000
 LR = 1e-6

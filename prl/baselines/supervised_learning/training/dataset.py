@@ -1,16 +1,49 @@
 from __future__ import annotations
 
 import glob
+from functools import partial
+
+import torch
 from itertools import chain
 from random import shuffle
 
 import pandas as pd
-from torch.utils.data import IterableDataset
+from torch.utils.data import Dataset, IterableDataset
 from tqdm import tqdm
+
+from prl.baselines.supervised_learning.config import DATA_DIR
 
 
 def row_count(input):
     return sum(1 for line in open(input, encoding='cp1252'))
+
+
+class InMemoryDataset(Dataset):
+    def __init__(self, path_to_csv_files=None, blind_sizes="0.25-0.50"):
+        if not path_to_csv_files:
+            path_to_csv_files = str(DATA_DIR) + '/03_preprocessed' + f'/{blind_sizes}'
+
+        files = glob.glob(path_to_csv_files + "/*.csv", recursive=False)
+        frame = pd.concat((pd.read_csv(f,
+                                       sep=',',
+                                       dtype='float32',
+                                       encoding='cp1252') for f in files), ignore_index=True)
+
+        # convert strings to floats
+        fn_to_numeric = partial(pd.to_numeric, errors="coerce")
+        frame = frame.apply(fn_to_numeric).dropna()
+
+        y = frame['label']
+        x = frame.drop(['label'], axis=1)
+
+        self.x = torch.tensor(x.values, dtype=torch.float32)
+        self.y = torch.tensor(y.values, dtype=torch.int64)
+
+    def __len__(self):
+        return len(self.y)
+
+    def __getitem__(self, idx):
+        return self.x[idx], self.y[idx]
 
 
 class OutOfMemoryDataset(IterableDataset):
