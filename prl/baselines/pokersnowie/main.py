@@ -14,7 +14,10 @@ from prl.baselines.supervised_learning.config import LOGFILE
 @click.option("--path_out",default="",
               type=str,
               help="Absolute path where PokerSnowie database result should be written to")
-def main(path_in, path_out):
+@click.option("--n_hands", default="",
+              type=str,
+              help="How many PokerSnowie hands should be written to a single .txt file")
+def main(path_in, path_out, n_hands=1e6):
     """Translates databases from https://www.hhsmithy.com/ to https://www.pokersnowie.com/ databases
     Databases are .txt files in human readable format """
     # Parses hhsmithy databases
@@ -24,7 +27,7 @@ def main(path_in, path_out):
     db_gen = HandHistorySmithyToPokerSnowie(parser=parser)
 
     # writes PokerSnowie databses to .txt files
-    db_gen.generate_database(path_in, path_out)
+    db_gen.generate_database(path_in, path_out, n_hands)
 
 
 if __name__ == '__main__':
