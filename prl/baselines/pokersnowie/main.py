@@ -16,7 +16,7 @@ from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HS
 @click.option("--n_hands", default="",
               type=str,
               help="How many PokerSnowie hands should be written to a single .txt file")
-def main(path_in, path_out, n_hands=1e6):
+def main(path_in, path_out, n_hands=5e5):
     """Translates databases from https://www.hhsmithy.com/ to https://www.pokersnowie.com/ databases
     Databases are .txt files in human readable format """
     # Parses hhsmithy databases

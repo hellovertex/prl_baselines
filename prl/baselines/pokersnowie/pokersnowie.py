@@ -125,13 +125,40 @@ class PokerSnowieEpisode:
         # todo
         return ret
 
-    def from_poker_episode(self, episode: PokerEpisode, hero_name: str = None):  # -> SnowieEpisode:
-        if not hero_name:
-            hero_name = episode.winners[0].name
+    def _from_poker_episode(self, episode: PokerEpisode, hero_name: str = None):  # -> SnowieEpisode:
+        """
+                Seat 0 snowie1 100
+                Seat 1 snowie2 100
+                Seat 2 hero 100
+                Seat 3 snowie3 100
+                Seat 4 snowie4 100
+                Seat 5 snowie5 100
+                """
         seats, player_names_dict = self._convert_seats(episode.player_stacks, hero_name)
+        """
+        SmallBlind: snowie1 1
+        BigBlind: snowie2 2
+        """
         blinds = self._convert_blinds(episode.blinds, player_names_dict)
+        """
+        Dealt Cards: [Tc5c]
+        """
         dealt_cards = self._convert_dealt_cards(episode.showdown_hands, player_names_dict)
+        """
+        FLOP Community Cards:[Jc 7c 2c]
+        TURN Community Cards:[Jc 7c 2c 5d]
+        RIVER Community Cards:[Jc 7c 2c 5d 3d]
+        """
         community_cards: dict = self._convert_community_cards(episode.board_cards)
+        """
+        Move: snowie3 folds 0
+        Move: snowie4 raise_bet 4
+        Move: snowie5 folds 0
+        Move: snowie1 raise_bet 10
+        Move: snowie2 folds 0
+        Move: hero call_check 8
+        Move: snowie4 folds 0
+        """
         moves: dict = self._convert_moves(episode.actions_total, player_names_dict)
         maybe_move_uncalled_bet = self._get_maybe_uncalled_bet(episode, player_names_dict)
         snowie_episode = f"GameStart\n" \
@@ -160,8 +187,18 @@ class PokerSnowieEpisode:
                          community_cards['river'] + \
                          moves['river'] + \
                          maybe_move_uncalled_bet + \
-                         "GameEnd"
+                         "GameEnd\n\n"
         return snowie_episode
+
+    def from_poker_episode(self, episode: PokerEpisode, hero_names: List[str] = None):  # -> SnowieEpisode:
+        if not hero_names:
+            hero_names = [s.name for s in episode.showdown_hands]
+
+        poker_snowie_episodes = []
+        for hero in hero_names:
+            poker_snowie_episodes.append(self._from_poker_episode(episode, hero))
+
+        return poker_snowie_episodes
 
     def export(self, snowie_episode):
         pass
