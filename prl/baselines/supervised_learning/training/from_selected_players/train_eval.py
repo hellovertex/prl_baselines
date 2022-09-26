@@ -125,7 +125,7 @@ def run_train_eval(input_dir,
     correct = 0
 
     for epoch in range(start_epoch, epochs):
-        pbar = tqdm(enumerate(BackgroundGenerator(traindata)), total=round(len(train_dataloader)))
+        pbar = tqdm(enumerate(BackgroundGenerator(train_dataloader)), total=round(len(train_dataloader)))
         pbar.set_description(
             f'Training epoch {epoch}/{epochs} on {len(traindataset)} examples using batches of size {batch_size}...')
         start_time = time.time()
@@ -173,7 +173,7 @@ def run_train_eval(input_dir,
                 test_loss = 0
                 correct = 0
                 with torch.no_grad():
-                    for j, (x, y) in enumerate(BackgroundGenerator(testdata)):
+                    for j, (x, y) in enumerate(BackgroundGenerator(test_dataloader)):
                         if use_cuda:
                             x = x.cuda()
                             y = y.cuda()
@@ -187,7 +187,7 @@ def run_train_eval(input_dir,
                 test_accuracy = 100 * correct / len(testdataset)
                 print(
                     "\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n".format(
-                        test_loss, correct, len(testdataset), test_accuracy
+                        test_loss, round(correct), len(testdataset), test_accuracy
                     )
                 )
                 # return model to training mode
