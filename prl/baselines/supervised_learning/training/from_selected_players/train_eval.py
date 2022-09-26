@@ -125,7 +125,7 @@ def run_train_eval(input_dir,
     correct = 0
 
     for epoch in range(start_epoch, epochs):
-        pbar = tqdm(enumerate(BackgroundGenerator(traindata)), total=round(len(traindataset) / batch_size))
+        pbar = tqdm(enumerate(BackgroundGenerator(traindata)), total=round(len(train_dataloader)))
         pbar.set_description(
             f'Training epoch {epoch}/{epochs} on {len(traindataset)} examples using batches of size {batch_size}...')
         start_time = time.time()
@@ -183,8 +183,8 @@ def run_train_eval(input_dir,
                         pred = torch.argmax(output, dim=1)
                         correct += pred.eq(y.data).cpu().sum().item() / batch_size
 
-                test_loss /= len(testdataset)
-                test_accuracy = 100.0 * correct / len(testdataset)
+                test_loss /= len(test_dataloader)
+                test_accuracy = 100 * correct / len(testdataset)
                 print(
                     "\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n".format(
                         test_loss, correct, len(testdataset), test_accuracy
