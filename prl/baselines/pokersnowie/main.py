@@ -1,9 +1,7 @@
 import click
-from prl.environment.Wrappers.prl_wrappers import AugmentObservationWrapper
 
 from prl.baselines.pokersnowie.generate_database import HandHistorySmithyToPokerSnowie
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
-from prl.baselines.supervised_learning.config import LOGFILE
 
 
 @click.command()
@@ -11,7 +9,8 @@ from prl.baselines.supervised_learning.config import LOGFILE
               default="",
               type=str,
               help="Absolute path to hhsmithy .txt databases")
-@click.option("--path_out",default="",
+@click.option("--path_out",
+              default="",
               type=str,
               help="Absolute path where PokerSnowie database result should be written to")
 @click.option("--n_hands", default="",
