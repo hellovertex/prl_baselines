@@ -149,7 +149,11 @@ def run_train_eval(input_dir,
             if i % log_interval == 0:
                 writer.add_scalar(tag='Training Loss', scalar_value=total_loss / i_train, global_step=n_iter)
                 writer.add_scalar(tag='Training Accuracy', scalar_value=100.0 * correct / i_train, global_step=n_iter)
-
+                print(
+                    "\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n".format(
+                        total_loss / i_train, round(correct), len(traindataset), 100.0 * correct / i_train
+                    )
+                )
                 i_train = 0
                 correct = 0
                 total_loss = 0
@@ -160,6 +164,7 @@ def run_train_eval(input_dir,
                 fraction = process_time / (process_time + prepare_time)
             except ZeroDivisionError:
                 fraction = 0
+            # note that we prioritize GPU usage and iterations per second over Fraction of NN traintime
             pbar.set_description("Fraction of NN Training Time: {:.2f}, epoch: {}/{}:".format(
                 fraction, epoch, epochs))
             start_time = time.time()
@@ -183,7 +188,7 @@ def run_train_eval(input_dir,
                         pred = torch.argmax(output, dim=1)
                         correct += pred.eq(y.data).cpu().sum().item() / batch_size
 
-                test_loss /= len(test_dataloader)
+                test_loss /= len(testdataset)
                 test_accuracy = 100 * correct / len(testdataset)
                 print(
                     "\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n".format(
