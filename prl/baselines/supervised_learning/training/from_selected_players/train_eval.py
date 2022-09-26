@@ -154,11 +154,11 @@ def run_train_eval(input_dir,
                 n_batch = i_train * batch_size  # how many samples across all batches seen so far
                 writer.add_scalar(tag='Training Loss', scalar_value=total_loss / i_train, global_step=n_iter)
                 writer.add_scalar(tag='Training Accuracy', scalar_value=100.0 * correct / n_batch, global_step=n_iter)
-                print(
-                    "\nTrain set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n".format(
-                        total_loss / i_train, correct, n_batch, round(100.0 * correct / n_batch, 2)
-                    )
-                )
+                print(f"\nTrain set: "
+                      f"Average loss: {round(total_loss / i_train, 4)}, "
+                      f"Accuracy: {correct}/{n_batch} ({round(100.0 * correct / n_batch, 2)}%)\n")
+                if correct > 100000:
+                    print('wtf')
                 i_train = 0
                 correct = 0
                 total_loss = 0
@@ -181,7 +181,7 @@ def run_train_eval(input_dir,
                 # pbar_test = tqdm(enumerate(BackgroundGenerator(dataset)), total=len(testset) / test_batch_size)
 
                 test_loss = 0
-                correct = 0
+                test_correct = 0
                 with torch.no_grad():
                     for j, (x, y) in enumerate(BackgroundGenerator(test_dataloader)):
                         if use_cuda:
@@ -191,13 +191,13 @@ def run_train_eval(input_dir,
                         # sum up batch loss
                         test_loss += F.cross_entropy(output, y, reduction="sum").data.item()
                         pred = torch.argmax(output, dim=1)
-                        correct += pred.eq(y.data).cpu().sum().item()
+                        test_correct += pred.eq(y.data).cpu().sum().item()
 
                 test_loss /= len(testdataset)
-                test_accuracy = 100 * correct / len(testdataset)
+                test_accuracy = 100 * test_correct / len(testdataset)
                 print(
                     "\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n".format(
-                        test_loss, round(correct), len(testdataset), test_accuracy
+                        test_loss, round(test_correct), len(testdataset), test_accuracy
                     )
                 )
                 # return model to training mode
