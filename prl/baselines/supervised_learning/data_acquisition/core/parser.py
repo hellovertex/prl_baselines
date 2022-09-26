@@ -46,18 +46,27 @@ class Action(NamedTuple):
 
 
 class PokerEpisode(NamedTuple):
-    """Used to initialize and step the RL-environment."""
+    """Internal Representation of played hand.
+    Used to initialize and step the RL-environment."""
     date: str
     hand_id: int
     variant: str
     currency_symbol: str  # '$' or '€'  or '￡'
     num_players: int
     blinds: List[Blind]
-    ante: str
+    ante: str  # usually equal to '$0.00' or '€0.00' or '￡0.00'
     player_stacks: List[PlayerStack]
     btn_idx: int
-    board_cards: str
-    actions_total: Dict[str, List[Action]]  # hole cards, flop , turn, river
+    board_cards: str  # e.g. '[6h Ts Td 9c Jc]'
+    """
+    Dictionary with actions per stage:
+            {'preflop': actions_preflop,
+                'flop': actions_flop,
+                'turn': actions_turn,
+                'river': actions_river,
+                'as_sequence': as_sequence}
+    """
+    actions_total: Dict[str, List[Action]]
     winners: List[PlayerWithCards]
     showdown_hands: List[PlayerWithCards]
 
