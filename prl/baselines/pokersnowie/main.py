@@ -13,12 +13,12 @@ from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HS
               default="",
               type=str,
               help="Absolute path where PokerSnowie database result should be written to")
-@click.option("--n_hands", default="",
-              type=str,
+@click.option("--n_hands", default=500000,
+              type=int,
               help="How many PokerSnowie hands should be written to a single .txt file")
-def main(path_in, path_out, n_hands=5e5):
-    """Translates databases from https://www.hhsmithy.com/ to https://www.pokersnowie.com/ databases
-    Databases are .txt files in human readable format """
+def main(path_in, path_out, n_hands):
+    """Translates databases from https://www.hhsmithy.com/ to https://www.pokersnowie.com/ databases.
+    These are .txt files in human-readable format """
     # Parses hhsmithy databases
     parser = HSmithyParser()
 

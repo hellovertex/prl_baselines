@@ -56,8 +56,10 @@ from typing import NamedTuple, List, Dict, Tuple
 
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, PlayerStack, Blind
 
+SnowieEpisode = str
 
-class PokerSnowieEpisode:
+
+class SnowieConverter:
     @staticmethod
     def _convert_seats(player_stacks: List[PlayerStack], hero_name: str) -> Tuple[str, Dict[str, str]]:
         """Internal representation:
@@ -86,7 +88,7 @@ class PokerSnowieEpisode:
         player_names_dict = {}
         for p in player_stacks:
             seat_id = int(p.seat_display_name[-1]) - 1
-            name = hero_name if hero_name == p.player_name else f"snowie {ith_snowie_player}"
+            name = "hero" if hero_name == p.player_name else f"snowie{ith_snowie_player}"
             stack = p.stack[1:]
             ret += f"Seat {seat_id} {name} {stack}\n"
             player_names_dict[p.player_name] = name
@@ -95,11 +97,11 @@ class PokerSnowieEpisode:
 
     @staticmethod
     def _convert_blinds(blinds: List[Blind], player_names_dict: Dict[str, str]) -> str:
-        ret = ""
-        # player_names_dict[blinds[0].player_name]
-        # todo
-
-        return ret
+        sb = blinds[0]
+        bb = blinds[1]
+        sb_name = player_names_dict[sb.player_name]
+        bb_name = player_names_dict[bb.player_name]
+        return f"SmallBlind: {sb_name} {sb.amount[1:]}\nBigBlind: {bb_name} {bb.amount[1:]}\n"
 
     @staticmethod
     def _convert_dealt_cards(showdown_hands, player_names_dict):
@@ -127,13 +129,13 @@ class PokerSnowieEpisode:
 
     def _from_poker_episode(self, episode: PokerEpisode, hero_name: str = None):  # -> SnowieEpisode:
         """
-                Seat 0 snowie1 100
-                Seat 1 snowie2 100
-                Seat 2 hero 100
-                Seat 3 snowie3 100
-                Seat 4 snowie4 100
-                Seat 5 snowie5 100
-                """
+        Seat 0 snowie1 100
+        Seat 1 snowie2 100
+        Seat 2 hero 100
+        Seat 3 snowie3 100
+        Seat 4 snowie4 100
+        Seat 5 snowie5 100
+        """
         seats, player_names_dict = self._convert_seats(episode.player_stacks, hero_name)
         """
         SmallBlind: snowie1 1
@@ -190,7 +192,13 @@ class PokerSnowieEpisode:
                          "GameEnd\n\n"
         return snowie_episode
 
-    def from_poker_episode(self, episode: PokerEpisode, hero_names: List[str] = None):  # -> SnowieEpisode:
+    def from_poker_episode(self, episode: PokerEpisode, hero_names: List[str] = None) -> List[SnowieEpisode]:  # -> SnowieEpisode:
+        """
+        Converts episode to string representation that can be imported from PokerSnowie if written to txt file.
+        :param episode: Single hand played from start to finish
+        :param hero_names: Player names which will be hero after conversion to snowie-episode.
+        :return: String representation of PokerEpisode that can be imported from PokerSnowie if written to txt file
+        """
         if not hero_names:
             hero_names = [s.name for s in episode.showdown_hands]
 
