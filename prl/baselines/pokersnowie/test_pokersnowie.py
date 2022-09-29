@@ -218,17 +218,19 @@ def test_convert_winners():
         player_money_in_pot[name] = 0
 
     total_pot = 0
+
     # add blinds
     for blind in blinds:
         p_name = player_names_dict[blind.player_name]
-        amount = round(float(blind.amount[:1]), 2)
+        amount = round(float(blind.amount[1:]), 2)
         player_money_in_pot[p_name] += amount
         total_pot += amount
 
     for a in action_sequence:
         p_name = player_names_dict[a.player_name]
-        player_money_in_pot[p_name] += float(a.raise_amount)
-        total_pot += float(a.raise_amount)
+        if float(a.raise_amount) > 0:
+            player_money_in_pot[p_name] += float(a.raise_amount)
+            total_pot += float(a.raise_amount)
     biggest_contributor = max(player_money_in_pot, key=player_money_in_pot.get)
     biggest_contribution = player_money_in_pot.pop(biggest_contributor)
     second_biggest_or = max(player_money_in_pot, key=player_money_in_pot.get)
@@ -242,9 +244,10 @@ def test_convert_winners():
             p_name = player_names_dict[showdown_hand.name]
             cards = showdown_hand.cards.replace(" ", "")
             result += f"Showdown: {p_name} {cards}\n"
-        for winner in winners:
-            result += f"Winner: {player_names_dict[winner.name]} {total_pot}\n"
+    for winner in winners:
+        result += f"Winner: {player_names_dict[winner.name]} {round(total_pot, 2)}\n"
     # Assert
+    # todo urgent fix this and add assert expected
     print(result)
 
 
@@ -254,4 +257,4 @@ if __name__ == "__main__":
     test_convert_dealt_cards()
     test_convert_community_cards()
     test_convert_moves()
-    test_get_maybe_uncalled_bet()
+    test_convert_winners()
