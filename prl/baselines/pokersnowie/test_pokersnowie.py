@@ -105,52 +105,125 @@ def test_convert_moves():
         Action(stage='preflop', player_name='SirMarned', action_type=ActionType.CHECK_CALL, raise_amount='1.25'),
         Action(stage='preflop', player_name='max21rus1988', action_type=ActionType.FOLD, raise_amount=-1),
         Action(stage='preflop', player_name='Communist654', action_type=ActionType.FOLD, raise_amount=-1)],
-                     'flop': [Action(stage='flop', player_name='Becks Baker', action_type=ActionType.RAISE,
-                                     raise_amount='1.02'),
-                              Action(stage='flop', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
-                                     raise_amount='1.02')],
-                     'turn': [Action(stage='turn', player_name='Becks Baker', action_type=ActionType.CHECK_CALL,
-                                     raise_amount=-1),
-                              Action(stage='turn', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
-                                     raise_amount=-1)],
-                     'river': [Action(stage='river', player_name='Becks Baker', action_type=ActionType.CHECK_CALL,
-                                      raise_amount=-1),
-                               Action(stage='river', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
-                                      raise_amount=-1)],
-                     'as_sequence': [Action(stage='preflop', player_name='Becks Baker', action_type=ActionType.RAISE,
-                                            raise_amount='1.25'),
-                                     Action(stage='preflop', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
-                                            raise_amount='1.25'),
-                                     Action(stage='preflop', player_name='max21rus1988', action_type=ActionType.FOLD,
-                                            raise_amount=-1),
-                                     Action(stage='preflop', player_name='Communist654', action_type=ActionType.FOLD,
-                                            raise_amount=-1),
-                                     Action(stage='flop', player_name='Becks Baker', action_type=ActionType.RAISE,
-                                            raise_amount='1.02'),
-                                     Action(stage='flop', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
-                                            raise_amount='1.02'),
-                                     Action(stage='turn', player_name='Becks Baker', action_type=ActionType.CHECK_CALL,
-                                            raise_amount=-1),
-                                     Action(stage='turn', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
-                                            raise_amount=-1),
-                                     Action(stage='river', player_name='Becks Baker', action_type=ActionType.CHECK_CALL,
-                                            raise_amount=-1),
-                                     Action(stage='river', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
-                                            raise_amount=-1)]}
+        'flop': [Action(stage='flop', player_name='Becks Baker', action_type=ActionType.RAISE,
+                        raise_amount='1.02'),
+                 Action(stage='flop', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                        raise_amount='1.02')],
+        'turn': [Action(stage='turn', player_name='Becks Baker', action_type=ActionType.CHECK_CALL,
+                        raise_amount=-1),
+                 Action(stage='turn', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                        raise_amount=-1)],
+        'river': [Action(stage='river', player_name='Becks Baker', action_type=ActionType.CHECK_CALL,
+                         raise_amount=-1),
+                  Action(stage='river', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                         raise_amount=-1)],
+        'as_sequence': [Action(stage='preflop', player_name='Becks Baker', action_type=ActionType.RAISE,
+                               raise_amount='1.25'),
+                        Action(stage='preflop', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                               raise_amount='1.25'),
+                        Action(stage='preflop', player_name='max21rus1988', action_type=ActionType.FOLD,
+                               raise_amount=-1),
+                        Action(stage='preflop', player_name='Communist654', action_type=ActionType.FOLD,
+                               raise_amount=-1),
+                        Action(stage='flop', player_name='Becks Baker', action_type=ActionType.RAISE,
+                               raise_amount='1.02'),
+                        Action(stage='flop', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                               raise_amount='1.02'),
+                        Action(stage='turn', player_name='Becks Baker', action_type=ActionType.CHECK_CALL,
+                               raise_amount=-1),
+                        Action(stage='turn', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                               raise_amount=-1),
+                        Action(stage='river', player_name='Becks Baker', action_type=ActionType.CHECK_CALL,
+                               raise_amount=-1),
+                        Action(stage='river', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                               raise_amount=-1)]}
     action_sequence = actions_total['as_sequence']
-    expect = {'preflop': }
-    # Act
-    actions = ""
-    for a in action_sequence:
+    player_names_dict = {'SirMarned': 'hero',
+                         'max21rus1988': 'snowie2',
+                         'Communist654': 'snowie3',
+                         'Becks Baker': 'snowie4'}
+    expect = {
+        'preflop': 'Move: snowie4 raise_bet 1.25\nMove: hero call_check 1.25\nMove: snowie2 folds 0\nMove: snowie3 folds 0\n',
+        'flop': 'Move: snowie4 raise_bet 1.02\nMove: hero call_check 1.02\n',
+        'turn': 'Move: snowie4 call_check 0\nMove: hero call_check 0\n',
+        'river': 'Move: snowie4 call_check 0\nMove: hero call_check 0\n'}
 
+    # Act
+    moves = {'preflop': '',
+             'flop': '',
+             'turn': '',
+             'river': ''}
+    for a in action_sequence:
+        p_name = player_names_dict[a.player_name]
+        move = ['folds', 'call_check', 'raise_bet'][a.action_type]
+        amt = str(a.raise_amount) if float(a.raise_amount) > 0 else '0'
+        moves[a.stage] += f'Move: {p_name} {move} {amt}\n'
     # Assert
-    pass
+    assert expect == moves
 
 
 @whoami
 def test_get_maybe_uncalled_bet():
     # Arrange
+    actions_total = {'preflop': [
+        Action(stage='preflop', player_name='Becks Baker', action_type=ActionType.RAISE, raise_amount='1.25'),
+        Action(stage='preflop', player_name='SirMarned', action_type=ActionType.CHECK_CALL, raise_amount='1.25'),
+        Action(stage='preflop', player_name='max21rus1988', action_type=ActionType.FOLD, raise_amount=-1),
+        Action(stage='preflop', player_name='Communist654', action_type=ActionType.FOLD, raise_amount=-1)],
+        'flop': [Action(stage='flop', player_name='Becks Baker', action_type=ActionType.RAISE,
+                        raise_amount='1.02'),
+                 Action(stage='flop', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                        raise_amount='1.02')],
+        'turn': [Action(stage='turn', player_name='Becks Baker', action_type=ActionType.CHECK_CALL,
+                        raise_amount=-1),
+                 Action(stage='turn', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                        raise_amount=-1)],
+        'river': [Action(stage='river', player_name='Becks Baker', action_type=ActionType.CHECK_CALL,
+                         raise_amount=-1),
+                  Action(stage='river', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                         raise_amount=-1)],
+        'as_sequence': [Action(stage='preflop', player_name='Becks Baker', action_type=ActionType.RAISE,
+                               raise_amount='1.25'),
+                        Action(stage='preflop', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                               raise_amount='1.25'),
+                        Action(stage='preflop', player_name='max21rus1988', action_type=ActionType.FOLD,
+                               raise_amount=-1),
+                        Action(stage='preflop', player_name='Communist654', action_type=ActionType.FOLD,
+                               raise_amount=-1),
+                        Action(stage='flop', player_name='Becks Baker', action_type=ActionType.RAISE,
+                               raise_amount='1.02'),
+                        Action(stage='flop', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                               raise_amount='1.02'),
+                        Action(stage='turn', player_name='Becks Baker', action_type=ActionType.CHECK_CALL,
+                               raise_amount=-1),
+                        Action(stage='turn', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                               raise_amount=-1),
+                        Action(stage='river', player_name='Becks Baker', action_type=ActionType.CHECK_CALL,
+                               raise_amount=-1),
+                        Action(stage='river', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                               raise_amount=-1)]}
+    action_sequence = actions_total['as_sequence']
+    player_names_dict = {'SirMarned': 'hero',
+                         'max21rus1988': 'snowie2',
+                         'Communist654': 'snowie3',
+                         'Becks Baker': 'snowie4'}
+    player_money_in_pot = {}
+    for name in player_names_dict.values():
+        player_money_in_pot[name] = 0
     # Act
+    for a in action_sequence:
+        p_name = player_names_dict[a.player_name]
+        player_money_in_pot[p_name] += float(a.raise_amount)
+    biggest_contributor = max(player_money_in_pot, key=player_money_in_pot.get)
+    biggest_contribution = player_money_in_pot.pop(biggest_contributor)
+    second_biggest_or = max(player_money_in_pot, key=player_money_in_pot.get)
+    second_biggest_tion = player_money_in_pot[second_biggest_or]
+    if biggest_contribution > second_biggest_tion:
+        diff = round(biggest_contribution - second_biggest_tion, 2)
+        result = f"Move: {biggest_contributor} uncalled_bet {diff}\nWinner: {biggest_contributor} {diff}\n"
+    else:
+        # todo urgent handle showdown
+        pass
     # Assert
     pass
 

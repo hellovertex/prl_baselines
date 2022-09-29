@@ -120,12 +120,19 @@ class SnowieConverter:
 
     @staticmethod
     def _convert_moves(actions_total, player_names_dict):
-        ret = {}
-        # todo
-        return ret
+        moves = {'preflop': '',
+                 'flop': '',
+                 'turn': '',
+                 'river': ''}
+        for a in actions_total['as_sequence']:
+            p_name = player_names_dict[a.player_name]
+            move = ['folds', 'call_check', 'raise_bet'][a.action_type]
+            amt = str(a.raise_amount) if float(a.raise_amount) > 0 else '0'
+            moves[a.stage] += f'Move: {p_name} {move} {amt}\n'
+        return moves
 
     @staticmethod
-    def _get_maybe_uncalled_bet(episode, player_names_dict):
+    def _get_maybe_uncalled_bet(actions, player_names_dict):
         ret = ""
         # todo
         return ret
@@ -165,7 +172,11 @@ class SnowieConverter:
         Move: snowie4 folds 0
         """
         moves: dict = self._convert_moves(episode.actions_total, player_names_dict)
-        maybe_move_uncalled_bet = self._get_maybe_uncalled_bet(episode, player_names_dict)
+        """
+        Move: hero uncalled_bet 16
+        Winner: hero 16.00
+        """
+        maybe_move_uncalled_bet = self._get_maybe_uncalled_bet(episode.actions_total, player_names_dict)
         snowie_episode = f"GameStart\n" \
                          f"PokerClient: ExportFormat\n" \
                          f"Date: {datetime.date.strftime(datetime.date.today(), '%d/%m/%y')}\n" \
@@ -195,8 +206,7 @@ class SnowieConverter:
                          "GameEnd\n\n"
         return snowie_episode
 
-    def from_poker_episode(self, episode: PokerEpisode, hero_names: List[str] = None) -> List[
-        SnowieEpisode]:  # -> SnowieEpisode:
+    def from_poker_episode(self, episode: PokerEpisode, hero_names: List[str] = None) -> List[SnowieEpisode]:
         """
         Converts episode to string representation that can be imported from PokerSnowie if written to txt file.
         :param episode: Single hand played from start to finish
