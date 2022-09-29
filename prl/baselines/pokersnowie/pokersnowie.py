@@ -132,10 +132,39 @@ class SnowieConverter:
         return moves
 
     @staticmethod
-    def _get_maybe_uncalled_bet(actions, player_names_dict):
-        ret = ""
-        # todo
-        return ret
+    def _convert_winners(episode: PokerEpisode, player_names_dict):
+        player_money_in_pot = {}
+        for name in player_names_dict.values():
+            player_money_in_pot[name] = 0
+
+        total_pot = 0
+        # add blinds
+        for blind in episode.blinds:
+            p_name = player_names_dict[blind.player_name]
+            amount = round(float(blind.amount[:1]), 2)
+            player_money_in_pot[p_name] += amount
+            total_pot += amount
+
+        for a in episode.actions_total['as_sequence']:
+            p_name = player_names_dict[a.player_name]
+            player_money_in_pot[p_name] += float(a.raise_amount)
+            total_pot += float(a.raise_amount)
+        biggest_contributor = max(player_money_in_pot, key=player_money_in_pot.get)
+        biggest_contribution = player_money_in_pot.pop(biggest_contributor)
+        second_biggest_or = max(player_money_in_pot, key=player_money_in_pot.get)
+        second_biggest_tion = player_money_in_pot[second_biggest_or]
+        result = ""
+        if biggest_contribution > second_biggest_tion:
+            diff = round(biggest_contribution - second_biggest_tion, 2)
+            result += f"Move: {biggest_contributor} uncalled_bet {diff}\nWinner: {biggest_contributor} {diff}\n"
+        else:  # showdown
+            for showdown_hand in episode.showdown_players:
+                p_name = player_names_dict[showdown_hand.name]
+                cards = showdown_hand.cards.replace(" ", "")
+                result += f"Showdown: {p_name} {cards}\n"
+            for winner in episode.winners:
+                result += f"Winner: {player_names_dict[winner.name]} {total_pot}\n"
+        print(result)
 
     def _from_poker_episode(self, episode: PokerEpisode, hero_name: str = None):  # -> SnowieEpisode:
         """
@@ -176,7 +205,7 @@ class SnowieConverter:
         Move: hero uncalled_bet 16
         Winner: hero 16.00
         """
-        maybe_move_uncalled_bet = self._get_maybe_uncalled_bet(episode.actions_total, player_names_dict)
+        maybe_move_uncalled_bet = self._convert_winners(episode, player_names_dict)
         snowie_episode = f"GameStart\n" \
                          f"PokerClient: ExportFormat\n" \
                          f"Date: {datetime.date.strftime(datetime.date.today(), '%d/%m/%y')}\n" \

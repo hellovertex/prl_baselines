@@ -163,7 +163,7 @@ def test_convert_moves():
 
 
 @whoami
-def test_get_maybe_uncalled_bet():
+def test_convert_winners():
     # Arrange
     actions_total = {'preflop': [
         Action(stage='preflop', player_name='Becks Baker', action_type=ActionType.RAISE, raise_amount='1.25'),
@@ -203,29 +203,49 @@ def test_get_maybe_uncalled_bet():
                         Action(stage='river', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
                                raise_amount=-1)]}
     action_sequence = actions_total['as_sequence']
+    blinds = [Blind(player_name='max21rus1988', type='small blind', amount='$0.25'),
+              Blind(player_name='Communist654', type='big blind', amount='$0.50')]
     player_names_dict = {'SirMarned': 'hero',
                          'max21rus1988': 'snowie2',
                          'Communist654': 'snowie3',
                          'Becks Baker': 'snowie4'}
+    showdown_players = [PlayerWithCards(name='SirMarned', cards='[Js Ad]'),
+                        PlayerWithCards(name='Becks Baker', cards='[8d Kd]')]
+    winners = [PlayerWithCards(name='SirMarned', cards='[Js Ad]')]
+    # Act
     player_money_in_pot = {}
     for name in player_names_dict.values():
         player_money_in_pot[name] = 0
-    # Act
+
+    total_pot = 0
+    # add blinds
+    for blind in blinds:
+        p_name = player_names_dict[blind.player_name]
+        amount = round(float(blind.amount[:1]), 2)
+        player_money_in_pot[p_name] += amount
+        total_pot += amount
+
     for a in action_sequence:
         p_name = player_names_dict[a.player_name]
         player_money_in_pot[p_name] += float(a.raise_amount)
+        total_pot += float(a.raise_amount)
     biggest_contributor = max(player_money_in_pot, key=player_money_in_pot.get)
     biggest_contribution = player_money_in_pot.pop(biggest_contributor)
     second_biggest_or = max(player_money_in_pot, key=player_money_in_pot.get)
     second_biggest_tion = player_money_in_pot[second_biggest_or]
+    result = ""
     if biggest_contribution > second_biggest_tion:
         diff = round(biggest_contribution - second_biggest_tion, 2)
-        result = f"Move: {biggest_contributor} uncalled_bet {diff}\nWinner: {biggest_contributor} {diff}\n"
-    else:
-        # todo urgent handle showdown
-        pass
+        result += f"Move: {biggest_contributor} uncalled_bet {diff}\nWinner: {biggest_contributor} {diff}\n"
+    else:  # showdown
+        for showdown_hand in showdown_players:
+            p_name = player_names_dict[showdown_hand.name]
+            cards = showdown_hand.cards.replace(" ", "")
+            result += f"Showdown: {p_name} {cards}\n"
+        for winner in winners:
+            result += f"Winner: {player_names_dict[winner.name]} {total_pot}\n"
     # Assert
-    pass
+    print(result)
 
 
 if __name__ == "__main__":
