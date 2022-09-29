@@ -105,15 +105,18 @@ class SnowieConverter:
 
     @staticmethod
     def _convert_dealt_cards(showdown_hands, player_names_dict):
-        ret = ""
-        # todo
-        return ret
+        cards = "Dealt Cards: "
+        for k, v in player_names_dict.items():
+            if v == 'hero':
+                for player in showdown_hands:
+                    if player.name == k:
+                        return cards + player.cards.replace(" ", "") + "\n"
 
     @staticmethod
     def _convert_community_cards(board_cards):
-        ret = {}
-        # todo
-        return {}
+        return {'flop': 'FLOP Community Cards:[' + board_cards[1:9] + ']\n',
+                'turn': 'TURN Community Cards:[' + board_cards[1:12] + ']\n',
+                'river': 'RIVER Community Cards:[' + board_cards[1:15] + ']\n'}
 
     @staticmethod
     def _convert_moves(actions_total, player_names_dict):
@@ -192,7 +195,8 @@ class SnowieConverter:
                          "GameEnd\n\n"
         return snowie_episode
 
-    def from_poker_episode(self, episode: PokerEpisode, hero_names: List[str] = None) -> List[SnowieEpisode]:  # -> SnowieEpisode:
+    def from_poker_episode(self, episode: PokerEpisode, hero_names: List[str] = None) -> List[
+        SnowieEpisode]:  # -> SnowieEpisode:
         """
         Converts episode to string representation that can be imported from PokerSnowie if written to txt file.
         :param episode: Single hand played from start to finish

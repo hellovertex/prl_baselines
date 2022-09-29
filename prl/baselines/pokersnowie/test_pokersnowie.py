@@ -1,6 +1,13 @@
-from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, PlayerStack, PlayerWithCards
+from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, PlayerStack, PlayerWithCards, \
+    ActionType, Action
 
 
+def whoami(f):
+    print(f"Running {f.__name__}...\n")
+    return f
+
+
+@whoami
 def test_convert_seats():
     # Arrange
     player_stacks = [PlayerStack(seat_display_name='Seat 1', player_name='SirMarned', stack='$20'),
@@ -30,6 +37,7 @@ def test_convert_seats():
     assert expected_p_dict == player_names_dict
 
 
+@whoami
 def test_convert_blinds():
     # Arrange
     blinds = [Blind(player_name='max21rus1988', type='small blind', amount='$0.25'),
@@ -51,6 +59,7 @@ def test_convert_blinds():
     assert expect == computed
 
 
+@whoami
 def test_convert_dealt_cards():
     # Arrange
     showdown_hands = [PlayerWithCards(name='SirMarned', cards='[Js Ad]'),
@@ -59,25 +68,86 @@ def test_convert_dealt_cards():
                          'max21rus1988': 'snowie2',
                          'Communist654': 'snowie3',
                          'Becks Baker': 'snowie4'}
+    expected = "Dealt Cards: [JsAd]\n"
+
     # Act
+    cards = "Dealt Cards: "
+    for k, v in player_names_dict.items():
+        if v == 'hero':
+            for player in showdown_hands:
+                if player.name == k:
+                    cards += player.cards.replace(" ", "") + "\n"
+                    break
     # Assert
-    pass
+    assert expected == cards
 
 
+@whoami
 def test_convert_community_cards():
     # Arrange
+    board_cards = '[2s 2d 9h 9c Ac]'
+    expect = {'flop': 'FLOP Community Cards:[2s 2d 9h]\n',
+              'turn': 'TURN Community Cards:[2s 2d 9h 9c]\n',
+              'river': 'RIVER Community Cards:[2s 2d 9h 9c Ac]\n'}
     # Act
+    community_cards = {'flop': 'FLOP Community Cards:[' + board_cards[1:9] + ']\n',
+                       'turn': 'TURN Community Cards:[' + board_cards[1:12] + ']\n',
+                       'river': 'RIVER Community Cards:[' + board_cards[1:15] + ']\n'}
     # Assert
-    pass
+    assert expect == community_cards
 
 
+@whoami
 def test_convert_moves():
     # Arrange
+    actions_total = {'preflop': [
+        Action(stage='preflop', player_name='Becks Baker', action_type=ActionType.RAISE, raise_amount='1.25'),
+        Action(stage='preflop', player_name='SirMarned', action_type=ActionType.CHECK_CALL, raise_amount='1.25'),
+        Action(stage='preflop', player_name='max21rus1988', action_type=ActionType.FOLD, raise_amount=-1),
+        Action(stage='preflop', player_name='Communist654', action_type=ActionType.FOLD, raise_amount=-1)],
+                     'flop': [Action(stage='flop', player_name='Becks Baker', action_type=ActionType.RAISE,
+                                     raise_amount='1.02'),
+                              Action(stage='flop', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                                     raise_amount='1.02')],
+                     'turn': [Action(stage='turn', player_name='Becks Baker', action_type=ActionType.CHECK_CALL,
+                                     raise_amount=-1),
+                              Action(stage='turn', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                                     raise_amount=-1)],
+                     'river': [Action(stage='river', player_name='Becks Baker', action_type=ActionType.CHECK_CALL,
+                                      raise_amount=-1),
+                               Action(stage='river', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                                      raise_amount=-1)],
+                     'as_sequence': [Action(stage='preflop', player_name='Becks Baker', action_type=ActionType.RAISE,
+                                            raise_amount='1.25'),
+                                     Action(stage='preflop', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                                            raise_amount='1.25'),
+                                     Action(stage='preflop', player_name='max21rus1988', action_type=ActionType.FOLD,
+                                            raise_amount=-1),
+                                     Action(stage='preflop', player_name='Communist654', action_type=ActionType.FOLD,
+                                            raise_amount=-1),
+                                     Action(stage='flop', player_name='Becks Baker', action_type=ActionType.RAISE,
+                                            raise_amount='1.02'),
+                                     Action(stage='flop', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                                            raise_amount='1.02'),
+                                     Action(stage='turn', player_name='Becks Baker', action_type=ActionType.CHECK_CALL,
+                                            raise_amount=-1),
+                                     Action(stage='turn', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                                            raise_amount=-1),
+                                     Action(stage='river', player_name='Becks Baker', action_type=ActionType.CHECK_CALL,
+                                            raise_amount=-1),
+                                     Action(stage='river', player_name='SirMarned', action_type=ActionType.CHECK_CALL,
+                                            raise_amount=-1)]}
+    action_sequence = actions_total['as_sequence']
+    expect = {'preflop': }
     # Act
+    actions = ""
+    for a in action_sequence:
+
     # Assert
     pass
 
 
+@whoami
 def test_get_maybe_uncalled_bet():
     # Arrange
     # Act
