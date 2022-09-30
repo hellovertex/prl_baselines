@@ -212,7 +212,7 @@ def test_convert_winners():
     showdown_players = [PlayerWithCards(name='SirMarned', cards='[Js Ad]'),
                         PlayerWithCards(name='Becks Baker', cards='[8d Kd]')]
     winners = [PlayerWithCards(name='SirMarned', cards='[Js Ad]')]
-    expect="Showdown: hero [Js Ad]\nShowdown: snowie4 [8d Kd]\nWinner: hero 5.29\n"
+    expect = "Showdown: hero [Js Ad]\nShowdown: snowie4 [8d Kd]\nWinner: hero 5.29\n"
     # Act
     player_money_in_pot = {}
     for name in player_names_dict.values():
@@ -239,7 +239,7 @@ def test_convert_winners():
     result = ""
     if biggest_contribution > second_biggest_tion:
         diff = round(biggest_contribution - second_biggest_tion, 2)
-        result += f"Move: {biggest_contributor} uncalled_bet {diff}\nWinner: {biggest_contributor} {diff}\n"
+        result += f"Move: {biggest_contributor} uncalled_bet {diff}\nWinner: {biggest_contributor} {round(total_pot, 2) - diff}\n"
     else:  # showdown
         for showdown_hand in showdown_players:
             p_name = player_names_dict[showdown_hand.name]
@@ -251,6 +251,40 @@ def test_convert_winners():
     assert expect == result
 
 
+def parse_num(num: str):
+    # parse string represenation of float, such that
+    # it is rounded at most two digits
+    # but only to non-zero decimal places
+    # parse float
+    num = round(float(num), 2)
+    num = str(num).rstrip("0")
+    if num.endswith("."):
+        num = num[:].rstrip(".")
+    return num
+
+
+
+def test_parse_numbers():
+    num1 = '0.2500'
+    assert parse_num(num1) == '0.25'
+    num2 = '0.25'
+    assert parse_num(num2) == '0.25'
+    num3 = '0.200'
+    assert parse_num(num3) == '0.2'
+    num4 = '0.2'
+    assert parse_num(num4) == '0.2'
+    num5 = '2.2500'
+    assert parse_num(num5) == '2.25'
+    num6 = '2.25'
+    assert parse_num(num6) == '2.25'
+    num7 = '2.200'
+    assert parse_num(num7) == '2.2'
+    num8 = '2.2'
+    assert parse_num(num8) == '2.2'
+    num9 = '2.00'
+    assert parse_num(num9) == '2'
+
+
 if __name__ == "__main__":
     test_convert_seats()
     test_convert_blinds()
@@ -258,3 +292,4 @@ if __name__ == "__main__":
     test_convert_community_cards()
     test_convert_moves()
     test_convert_winners()
+    test_parse_numbers()

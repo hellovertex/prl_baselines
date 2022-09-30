@@ -60,8 +60,8 @@ SnowieEpisode = str
 
 
 class SnowieConverter:
-    @staticmethod
-    def _convert_seats(player_stacks: List[PlayerStack], hero_name: str) -> Tuple[str, Dict[str, str]]:
+
+    def _convert_seats(self, player_stacks: List[PlayerStack], hero_name: str) -> Tuple[str, Dict[str, str]]:
         """Internal representation:
         [PlayerStack(seat_display_name='Seat 1', player_name='Solovyova', stack='$50'),
          PlayerStack(seat_display_name='Seat 2', player_name='x elrubio x', stack='$64.22'),
@@ -90,18 +90,18 @@ class SnowieConverter:
             seat_id = int(p.seat_display_name[-1]) - 1
             name = "hero" if hero_name == p.player_name else f"snowie{ith_snowie_player}"
             stack = p.stack[1:]
-            ret += f"Seat {seat_id} {name} {stack}\n"
+            ret += f"Seat {seat_id} {name} {self.parse_num(stack)}\n"
             player_names_dict[p.player_name] = name
-            ith_snowie_player += 1
+            if name != "hero":
+                ith_snowie_player += 1
         return ret, player_names_dict
 
-    @staticmethod
-    def _convert_blinds(blinds: List[Blind], player_names_dict: Dict[str, str]) -> str:
+    def _convert_blinds(self, blinds: List[Blind], player_names_dict: Dict[str, str]) -> str:
         sb = blinds[0]
         bb = blinds[1]
         sb_name = player_names_dict[sb.player_name.split('\n')[-1]]
         bb_name = player_names_dict[bb.player_name.split('\n')[-1]]
-        return f"SmallBlind: {sb_name} {sb.amount[1:]}\nBigBlind: {bb_name} {bb.amount[1:]}\n"
+        return f"SmallBlind: {sb_name} {self.parse_num(sb.amount[1:])}\nBigBlind: {bb_name} {self.parse_num(sb.amount[1:])}\n"
 
     @staticmethod
     def _convert_dealt_cards(showdown_hands, player_names_dict):
@@ -118,8 +118,7 @@ class SnowieConverter:
                 'turn': 'TURN Community Cards:[' + board_cards[1:12] + ']\n',
                 'river': 'RIVER Community Cards:[' + board_cards[1:15] + ']\n'}
 
-    @staticmethod
-    def _convert_moves(actions_total, player_names_dict):
+    def _convert_moves(self, actions_total, player_names_dict):
         moves = {'preflop': '',
                  'flop': '',
                  'turn': '',
@@ -127,12 +126,11 @@ class SnowieConverter:
         for a in actions_total['as_sequence']:
             p_name = player_names_dict[a.player_name]
             move = ['folds', 'call_check', 'raise_bet'][a.action_type]
-            amt = str(a.raise_amount) if float(a.raise_amount) > 0 else '0'
+            amt = self.parse_num(str(a.raise_amount)) if float(a.raise_amount) > 0 else '0'
             moves[a.stage] += f'Move: {p_name} {move} {amt}\n'
         return moves
 
-    @staticmethod
-    def _convert_winners(episode: PokerEpisode, player_names_dict):
+    def _convert_winners(self, episode: PokerEpisode, player_names_dict):
         player_money_in_pot = {}
         for name in player_names_dict.values():
             player_money_in_pot[name] = 0
@@ -158,15 +156,27 @@ class SnowieConverter:
         result = ""
         if biggest_contribution > second_biggest_tion:
             diff = round(biggest_contribution - second_biggest_tion, 2)
-            result += f"Move: {biggest_contributor} uncalled_bet {diff}\nWinner: {biggest_contributor} {diff}\n"
+            result += f"Move: {biggest_contributor} uncalled_bet {self.parse_num(str(diff))}\nWinner: {biggest_contributor} {self.parse_num(str(total_pot))}\n"
         else:  # showdown
             for showdown_hand in episode.showdown_hands:
                 p_name = player_names_dict[showdown_hand.name]
                 cards = showdown_hand.cards
                 result += f"Showdown: {p_name} {cards}\n"
-        for winner in episode.winners:
-            result += f"Winner: {player_names_dict[winner.name]} {round(total_pot, 2)}\n"
+            for winner in episode.winners:
+                result += f"Winner: {player_names_dict[winner.name]} {self.parse_num(str(total_pot))}\n"
         return result
+
+    @staticmethod
+    def parse_num(num: str):
+        # parse string represenation of float, such that
+        # it is rounded at most two digits
+        # but only to non-zero decimal places
+        # parse float
+        num = round(float(num), 2)
+        num = str(num).rstrip("0")
+        if num.endswith("."):
+            num = num[:].rstrip(".")
+        return num
 
     def _from_poker_episode(self, episode: PokerEpisode, hero_name: str = None):  # -> SnowieEpisode:
         """
@@ -207,15 +217,27 @@ class SnowieConverter:
         Move: hero uncalled_bet 16
         Winner: hero 16.00
         """
+        if str(episode.hand_id) in ["233352635215", "233353992643", "223219756750", "233352891451"]:
+            # todo rundowns not supported yet
+            # todo: handle this scenario where showdown + uncalled_bet due to all in
+            """Move: snowie3 call_check 53.5
+            Move: hero uncalled_bet 5
+            Showdown: hero [Js 8s]
+            Showdown: snowie3 [Jc As]
+            Winner: snowie3 199.00
+            GameEnd"""
+            return ""
+        if str(episode.hand_id) in ['222455657718', '233352891451']:
+            print('inspect winners')
         maybe_move_uncalled_bet = self._convert_winners(episode, player_names_dict)
         snowie_episode = f"GameStart\n" \
                          f"PokerClient: ExportFormat\n" \
                          f"Date: {datetime.date.strftime(datetime.date.today(), '%d/%m/%y')}\n" \
                          f"TimeZone: GMT\n" \
                          f"Time: {dt.now().hour}:{dt.now().minute}:{dt.now().second}\n" \
-                         f"GameId: {str(episode.hand_id)}\n" \
-                         f"GameType: NoLimit\n" \
-                         f"GameCurrency: {episode.currency_symbol}\n" \
+                         f"GameId:{str(episode.hand_id)}\n" \
+                         f"GameType:NoLimit\n" \
+                         f"GameCurrency: $\n" \
                          f"SmallBlindStake: {episode.blinds[0].amount[1:]}\n" \
                          f"BigBlindStake: {episode.blinds[1].amount[1:]}\n" \
                          f"AnteStake: {episode.ante[1:]}\n" \

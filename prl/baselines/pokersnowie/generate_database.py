@@ -51,7 +51,10 @@ class HandHistorySmithyToPokerSnowie(PokerSnowieGenerator):
     def _export_to_txt_file(self):
         # write self.snowie_episodes
         print(self.snowie_episodes)
-        pass
+        with open(self._path_out + r'\snowiedb.txt', 'a') as f:
+            for e in self.snowie_episodes:
+                f.write(e)
+
 
     @staticmethod
     def _get_selected_players(from_file):
@@ -71,6 +74,7 @@ class HandHistorySmithyToPokerSnowie(PokerSnowieGenerator):
         Returns:
              True, if the database was written successfully. False, if an Exception occurred and no db was written.
         """
+        self._path_out = path_out
         # read .txt files
         filenames = glob.glob(path_in.__str__() + '/*.txt', recursive=False)
         # maybe get list of players which we want to filter by
