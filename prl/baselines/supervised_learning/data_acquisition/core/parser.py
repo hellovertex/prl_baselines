@@ -1,5 +1,5 @@
 """Module to parse .txt databases that contain Poker episodes crawled from Pokerstars."""
-from typing import NamedTuple, Iterable, List, Dict
+from typing import NamedTuple, Iterable, List, Dict, Optional
 import enum
 
 
@@ -22,7 +22,7 @@ class PlayerStack(NamedTuple):
 class Blind(NamedTuple):
     """Blind('HHnguyen15', 'small blind', '$1')"""
     player_name: str
-    type: str    # 'small blind' | 'big blind'
+    type: str  # 'small blind' | 'big blind'
     amount: str  # '$1', '$0.25', '€1', '€0.25'
 
 
@@ -43,6 +43,12 @@ class Action(NamedTuple):
     player_name: str
     action_type: ActionType
     raise_amount: float = -1
+
+
+class PlayerWinningsCollected(NamedTuple):
+    player_name: str
+    collected: str  # €78.20
+    rake: Optional[str] = ""  # how much rake e.g. '€0.70' from a total pot of 78.90
 
 
 class PokerEpisode(NamedTuple):
@@ -69,6 +75,7 @@ class PokerEpisode(NamedTuple):
     actions_total: Dict[str, List[Action]]
     winners: List[PlayerWithCards]
     showdown_hands: List[PlayerWithCards]
+    money_collected: List[PlayerWinningsCollected]
 
 
 class Parser:  # pylint: disable=too-few-public-methods

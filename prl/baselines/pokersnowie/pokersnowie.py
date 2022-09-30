@@ -54,12 +54,13 @@ import datetime
 from datetime import datetime as dt
 from typing import NamedTuple, List, Dict, Tuple
 
+from prl.baselines.pokersnowie.converter import Converter
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, PlayerStack, Blind
 
 SnowieEpisode = str
 
 
-class SnowieConverter:
+class SnowieConverter(Converter):
 
     def _convert_seats(self, player_stacks: List[PlayerStack], hero_name: str) -> Tuple[str, Dict[str, str]]:
         """Internal representation:
@@ -262,6 +263,7 @@ class SnowieConverter:
     def from_poker_episode(self, episode: PokerEpisode, hero_names: List[str] = None) -> List[SnowieEpisode]:
         """
         Converts episode to string representation that can be imported from PokerSnowie if written to txt file.
+        Uses PokerSnowies ExportFormat for episode-conversion.
         :param episode: Single hand played from start to finish
         :param hero_names: Player names which will be hero after conversion to snowie-episode.
         :return: String representation of PokerEpisode that can be imported from PokerSnowie if written to txt file

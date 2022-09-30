@@ -4,7 +4,8 @@
 import re
 from typing import List, Tuple, Dict, Iterator, Iterable, Generator
 
-from prl.baselines.supervised_learning.data_acquisition.core.parser import Parser, PokerEpisode, Action, ActionType, PlayerStack, Blind, PlayerWithCards
+from prl.baselines.supervised_learning.data_acquisition.core.parser import Parser, PokerEpisode, Action, ActionType, \
+    PlayerStack, Blind, PlayerWithCards, PlayerWinningsCollected
 
 # REGEX templates
 # PLAYER_NAME_TEMPLATE = r'([a-zA-Z0-9_.@#!-]+\s?[-@#!_.a-zA-Z0-9]*)'
@@ -288,6 +289,14 @@ class HSmithyParser(Parser):
             return res_ante[0]
         return currency_symbol + '0.00'
 
+    def get_money_collected(self, episode) -> List[PlayerWinningsCollected]:
+        pattern = re.compile(rf"{PLAYER_NAME_TEMPLATE} collected ([$€Â£￡]\d+.?\d*)", re.UNICODE)
+        rake = re.compile(rf"Rake ([$€Â£￡]\d+.?\d*)").findall(episode)[0]
+        collected = []
+        for found in pattern.findall(episode):
+            collected.append(PlayerWinningsCollected(player_name=found[0], collected=found[1], rake=rake))
+        return collected
+
     def _parse_episode(self, episode: str, showdown: str) -> PokerEpisode:
         """UnderConstruction"""
         # edge case that player leaves before rundown should be skipped
@@ -310,7 +319,7 @@ class HSmithyParser(Parser):
         btn_idx = self.get_btn_idx(player_stacks, btn)
         board_cards = self.get_board_cards(episode)
         actions_total = self._parse_actions(episode)
-
+        money_collected = self.get_money_collected(episode)
         return PokerEpisode(date='',  # todo
                             hand_id=hand_id,
                             variant=self._variant,
@@ -323,7 +332,8 @@ class HSmithyParser(Parser):
                             board_cards=board_cards,
                             actions_total=actions_total,
                             winners=winners,
-                            showdown_hands=showdown_hands)
+                            showdown_hands=showdown_hands,
+                            money_collected=money_collected)
 
     def _parse_hands(self, hands_played) -> Generator[PokerEpisode, None, None]:
         for current in hands_played:  # c for current_hand

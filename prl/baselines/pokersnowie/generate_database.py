@@ -2,7 +2,8 @@ import ast
 import glob
 from typing import List, Optional
 
-from prl.baselines.pokersnowie.pokersnowie import SnowieConverter
+from prl.baselines.pokersnowie.eighteighteight import EightEightEightConverter
+# from prl.baselines.pokersnowie.pokersnowie import SnowieConverter
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
 
@@ -22,7 +23,8 @@ class HandHistorySmithyToPokerSnowie(PokerSnowieGenerator):
         self._parser = parser
         self.smithy_episodes = []
         self.snowie_episodes = []
-        self._converter = SnowieConverter()
+        # self._converter = SnowieConverter()
+        self._converter = EightEightEightConverter()
 
     # def _translate(self, smithy_episodes: List[PokerEpisode]) -> List[str]:
     @staticmethod
