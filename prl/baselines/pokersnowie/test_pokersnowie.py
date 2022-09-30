@@ -212,6 +212,7 @@ def test_convert_winners():
     showdown_players = [PlayerWithCards(name='SirMarned', cards='[Js Ad]'),
                         PlayerWithCards(name='Becks Baker', cards='[8d Kd]')]
     winners = [PlayerWithCards(name='SirMarned', cards='[Js Ad]')]
+    expect="Showdown: hero [Js Ad]\nShowdown: snowie4 [8d Kd]\nWinner: hero 5.29\n"
     # Act
     player_money_in_pot = {}
     for name in player_names_dict.values():
@@ -242,13 +243,12 @@ def test_convert_winners():
     else:  # showdown
         for showdown_hand in showdown_players:
             p_name = player_names_dict[showdown_hand.name]
-            cards = showdown_hand.cards.replace(" ", "")
+            cards = showdown_hand.cards
             result += f"Showdown: {p_name} {cards}\n"
     for winner in winners:
         result += f"Winner: {player_names_dict[winner.name]} {round(total_pot, 2)}\n"
     # Assert
-    # todo urgent fix this and add assert expected
-    print(result)
+    assert expect == result
 
 
 if __name__ == "__main__":

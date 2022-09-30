@@ -99,8 +99,8 @@ class SnowieConverter:
     def _convert_blinds(blinds: List[Blind], player_names_dict: Dict[str, str]) -> str:
         sb = blinds[0]
         bb = blinds[1]
-        sb_name = player_names_dict[sb.player_name]
-        bb_name = player_names_dict[bb.player_name]
+        sb_name = player_names_dict[sb.player_name.split('\n')[-1]]
+        bb_name = player_names_dict[bb.player_name.split('\n')[-1]]
         return f"SmallBlind: {sb_name} {sb.amount[1:]}\nBigBlind: {bb_name} {bb.amount[1:]}\n"
 
     @staticmethod
@@ -138,17 +138,19 @@ class SnowieConverter:
             player_money_in_pot[name] = 0
 
         total_pot = 0
+
         # add blinds
         for blind in episode.blinds:
-            p_name = player_names_dict[blind.player_name]
-            amount = round(float(blind.amount[:1]), 2)
+            p_name = player_names_dict[blind.player_name.split('\n')[-1]]
+            amount = round(float(blind.amount[1:]), 2)
             player_money_in_pot[p_name] += amount
             total_pot += amount
 
         for a in episode.actions_total['as_sequence']:
             p_name = player_names_dict[a.player_name]
-            player_money_in_pot[p_name] += float(a.raise_amount)
-            total_pot += float(a.raise_amount)
+            if float(a.raise_amount) > 0:
+                player_money_in_pot[p_name] += float(a.raise_amount)
+                total_pot += float(a.raise_amount)
         biggest_contributor = max(player_money_in_pot, key=player_money_in_pot.get)
         biggest_contribution = player_money_in_pot.pop(biggest_contributor)
         second_biggest_or = max(player_money_in_pot, key=player_money_in_pot.get)
@@ -158,13 +160,13 @@ class SnowieConverter:
             diff = round(biggest_contribution - second_biggest_tion, 2)
             result += f"Move: {biggest_contributor} uncalled_bet {diff}\nWinner: {biggest_contributor} {diff}\n"
         else:  # showdown
-            for showdown_hand in episode.showdown_players:
+            for showdown_hand in episode.showdown_hands:
                 p_name = player_names_dict[showdown_hand.name]
-                cards = showdown_hand.cards.replace(" ", "")
+                cards = showdown_hand.cards
                 result += f"Showdown: {p_name} {cards}\n"
-            for winner in episode.winners:
-                result += f"Winner: {player_names_dict[winner.name]} {total_pot}\n"
-        print(result)
+        for winner in episode.winners:
+            result += f"Winner: {player_names_dict[winner.name]} {round(total_pot, 2)}\n"
+        return result
 
     def _from_poker_episode(self, episode: PokerEpisode, hero_name: str = None):  # -> SnowieEpisode:
         """
