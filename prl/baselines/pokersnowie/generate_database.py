@@ -30,33 +30,33 @@ class HandHistorySmithyToPokerSnowie(PokerSnowieGenerator):
     @staticmethod
     def _filter_criteria_matched(smithy_episode: PokerEpisode, filter_by: Optional[List[str]]):
         if not filter_by:
-            return True
+            return True, None
         showdown_players = [p.name for p in smithy_episode.showdown_hands]
         for player in filter_by:
             if player in showdown_players:
-                return True
-        return False
+                return True, player
+        return False, None
 
     def _parse_file(self, file_path, filter_by: Optional[List[str]]):
         """Appends to self.snowie_episodes all poker episodes contained in the .txt file.
         If selected_players is passed, only games where these players participated will be returned"""
         for smithy_episode in self._parser.parse_file(file_path):
-            if self._filter_criteria_matched(smithy_episode, filter_by):
-                self.smithy_episodes.append(smithy_episode)
+            proceed, player_name = self._filter_criteria_matched(smithy_episode, filter_by)
+            if proceed:
+                self.smithy_episodes.append((smithy_episode, [player_name]))
 
     def _translate_episodes(self):
-        for smithy_episode in self.smithy_episodes:
+        for smithy_episode, hero_names in self.smithy_episodes:
             # creates one episode per showdown player
-            snowie_hands: list = self._converter.from_poker_episode(smithy_episode)
+            snowie_hands: list = self._converter.from_poker_episode(smithy_episode, hero_names=hero_names)
             [self.snowie_episodes.append(s) for s in snowie_hands]
 
-    def _export_to_txt_file(self):
+    def _export_to_txt_file(self, n_written: int):
         # write self.snowie_episodes
         print(self.snowie_episodes)
-        with open(self._path_out + r'\snowiedb.txt', 'a') as f:
+        with open(self._path_out + rf'\snowiedb_{n_written}.txt', 'a') as f:
             for e in self.snowie_episodes:
                 f.write(e)
-
 
     @staticmethod
     def _get_selected_players(from_file):
@@ -77,6 +77,7 @@ class HandHistorySmithyToPokerSnowie(PokerSnowieGenerator):
              True, if the database was written successfully. False, if an Exception occurred and no db was written.
         """
         self._path_out = path_out
+
         # read .txt files
         filenames = glob.glob(path_in.__str__() + '/*.txt', recursive=False)
         # maybe get list of players which we want to filter by
@@ -86,13 +87,16 @@ class HandHistorySmithyToPokerSnowie(PokerSnowieGenerator):
         # parse .txt files
         # Note: potentially many 100k .txt files are present, which is why we parse them
         # one by one
+        files_written = 0
         for f in filenames:
             # populate self.smithy_episodes
             self._parse_file(f, filter_by=selected_players)
             # consume self.smithy_episodes and create PokerSnowie database from them
             if len(self.smithy_episodes) > n_out_episodes_per_file:
                 self._translate_episodes()  # convert to PokerSnowieEpisodes
-                self._export_to_txt_file()  # write PokerSnowie database to disk
+                self._export_to_txt_file(files_written)  # write PokerSnowie database to disk
+                files_written += 1
                 self.smithy_episodes = []
                 self.snowie_episodes = []
+        self._export_to_txt_file(files_written)
         return True

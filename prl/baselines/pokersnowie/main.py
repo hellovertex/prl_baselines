@@ -16,7 +16,12 @@ from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HS
 @click.option("--n_hands", default=500000,
               type=int,
               help="How many PokerSnowie hands should be written to a single .txt file")
-def main(path_in, path_out, n_hands):
+@click.option("--selected_players_file",
+              default="",
+              type=str,
+              help="Absolute path where dict with selected players is stored. "
+                   "See eda.py to generate it")
+def main(path_in, path_out, n_hands, selected_players_file):
     """Translates databases from https://www.hhsmithy.com/ to https://www.pokersnowie.com/ databases.
     These are .txt files in human-readable format """
     # Parses hhsmithy databases
@@ -26,7 +31,7 @@ def main(path_in, path_out, n_hands):
     db_gen = HandHistorySmithyToPokerSnowie(parser=parser)
 
     # writes PokerSnowie databses to .txt files
-    db_gen.generate_database(path_in, path_out, n_hands)
+    db_gen.generate_database(path_in, path_out, n_hands, selected_players_file)
 
 
 if __name__ == '__main__':

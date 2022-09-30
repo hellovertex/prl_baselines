@@ -65,11 +65,14 @@ class EightEightEightConverter(Converter):
         # it is rounded at most two digits
         # but only to non-zero decimal places
         # parse float
-        num = round(float(num), 2)
-        num = str(num).rstrip("0")
-        if num.endswith("."):
-            num = num[:].rstrip(".")
-        return num
+        if float(num).is_integer():
+            return str(int(num))
+        else:
+            ret = str(round(float(num), 2))
+            decimals = str(round(float(num), 2)).split(".")[1]
+            for i in range(2-len(decimals)):
+                ret += "0"
+            return ret
 
     def _convert_seats(self, episode):
         """
@@ -86,7 +89,7 @@ class EightEightEightConverter(Converter):
             ret += f"{seat.seat_display_name}: {seat.player_name} ( {stack} )\n"
         return ret
 
-    def _convert_blind(self, episode):
+    def _convert_blinds(self, episode):
         """
         walterilmago posts small blind [$0.01]
         Lutzmolch posts big blind [$0.02]
@@ -117,9 +120,9 @@ class EightEightEightConverter(Converter):
         ** Dealing turn ** [ 6c ]
         ** Dealing river ** [ Kh ]
         """
-        flop = f"[ {episode.board_cards[1:9].replace(' ', ', ')} ]\n"
-        turn = f"[ {episode.board_cards[10:12]} ]\n"
-        river = f"[ {episode.board_cards[13:15]} ]\n"
+        flop = f"[ {episode.board_cards[1:9].replace(' ', ', ')} ]"
+        turn = f"[ {episode.board_cards[10:12]} ]"
+        river = f"[ {episode.board_cards[13:15]} ]"
         return {'flop': f"** Dealing flop ** {flop}\n",
                 'turn': f"** Dealing turn ** {turn}\n",
                 'river': f"** Dealing river ** {river}\n"}
@@ -130,7 +133,7 @@ class EightEightEightConverter(Converter):
         if action.action_type == ActionType.FOLD:
             return 'folds'
         elif action.action_type == ActionType.CHECK_CALL:
-            if action.raise_amount > 0:
+            if float(action.raise_amount) > 0:
                 return 'calls'
             else:
                 return 'checks'
@@ -171,33 +174,15 @@ class EightEightEightConverter(Converter):
                  'river': ''}
         for a in episode.actions_total['as_sequence']:
             what = self._convert_move_what(a)
-            how_much = self.parse_num(a.raise_amount)
-            moves[a.stage] += f"{a.player_name} {what} [${how_much}]\n"
+            how_much = f" [${self.parse_num(a.raise_amount)}]" if what not in ["folds", "checks"] else ""
+            moves[a.stage] += f"{a.player_name} {what}{how_much}\n"
         return moves
 
     def _get_money_won(self, episode) -> dict:
-        money_won = {}
-        # init pot and contributions
-        player_money_in_pot = {}
-        for player in episode.player_stacks:
-            player_money_in_pot[player.player_name] = 0
-        total_pot = 0
-
-        # add blinds
-        for blind in episode.blinds:
-            p_name = blind.player_name
-            amount = round(float(blind.amount[1:]), 2)
-            player_money_in_pot[p_name] += amount
-            total_pot += amount
-
-        # add player contribs
-        for a in episode.actions_total['as_sequence']:
-            p_name = a.player_name
-            if float(a.raise_amount) > 0:
-                player_money_in_pot[p_name] += float(a.raise_amount)
-                total_pot += float(a.raise_amount)
         ret = {}
-        # subtract rake assuming 6.25% from total_pot
+        for player in episode.money_collected:
+            won = self.parse_num(player.collected[1:])
+            ret[player.player_name] = won
         return ret
 
     def _convert_summary(self, episode):
@@ -215,7 +200,7 @@ class EightEightEightConverter(Converter):
             ret += f"{player.name} shows {hand}\n"
         for winner in episode.winners:
             # f" [{'$' + self.parse_num(blind.amount[1:])}]\n"
-            ret += f"{winner.name} collected {self.parse_num(money_won[winner.name])}\n"
+            ret += f"{winner.name} collected [ ${self.parse_num(money_won[winner.name])} ]\n"
         return ret
 
     def _from_poker_episode(self, episode: PokerEpisode, hero_name: str = None):  # -> SnowieEpisode:
@@ -226,6 +211,8 @@ class EightEightEightConverter(Converter):
         sb = episode.blinds[0].amount[1:]
         bb = episode.blinds[1].amount[1:]
         btn = episode.player_stacks[episode.btn_idx]
+        seats = self._convert_seats(episode)
+        blinds = self._convert_blinds(episode)
         dealt_cards = self._convert_dealt_cards(episode, hero_name)
         community_cards: dict = self._convert_community_cards(episode)
         moves: dict = self._convert_moves(episode)
@@ -236,6 +223,8 @@ class EightEightEightConverter(Converter):
                       f"Table Curico 6 Max (Real Money)\n" \
                       f"{btn.seat_display_name} is the button\n" \
                       f"Total number of players : {len(episode.player_stacks)}\n" + \
+                      seats + \
+                      blinds + \
                       dealt_cards + \
                       moves['preflop'] + \
                       community_cards['flop'] + \
@@ -245,7 +234,7 @@ class EightEightEightConverter(Converter):
                       community_cards['river'] + \
                       moves['river'] + \
                       summary + \
-                      "\n\n"
+                      "\n\n\n"
         return episode_888
 
     def from_poker_episode(self, episode: PokerEpisode, hero_names: List[str] = None) -> List[SnowieEpisode]:

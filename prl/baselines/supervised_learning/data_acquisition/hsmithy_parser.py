@@ -62,7 +62,9 @@ class HSmithyParser(Parser):
         Seat 1: edmundtrebus (big blind) folded on the Flop
         Seat 2: XOZAIH folded before Flop (didn't bet)
         """
-
+    class PlayerCashedOutBeforeAwarded(ValueError):
+        """When the message (pot not awarded as player cashed out) appears,
+        the player cashed out before collecting the pot and we skip this game (happens very rarely)"""
     def __init__(self):
         # todo consider making HSmithyParser another abstract class and make derived PokerStars-Parser
         self._variant = None
@@ -294,7 +296,9 @@ class HSmithyParser(Parser):
         rake = re.compile(rf"Rake ([$€Â£￡]\d+.?\d*)").findall(episode)[0]
         collected = []
         for found in pattern.findall(episode):
-            collected.append(PlayerWinningsCollected(player_name=found[0], collected=found[1], rake=rake))
+            collected.append(PlayerWinningsCollected(player_name=found[0].split("\n")[-1], collected=found[1], rake=rake))
+        if not collected or "cashed out" in episode:
+            raise self.PlayerCashedOutBeforeAwarded()
         return collected
 
     def _parse_episode(self, episode: str, showdown: str) -> PokerEpisode:
@@ -304,8 +308,9 @@ class HSmithyParser(Parser):
             raise self._PlayerLeavesDuringPotContributionError
 
         hand_id = self.get_hand_id(episode)
-        if hand_id == 220253378490:
-            print('need breakpoint here')
+        # if hand_id == 223221309065:
+        #     print('need breakpoint here')
+
         currency_symbol = self.get_currency_symbol(episode)
         winners, showdown_hands = self.get_winner(showdown)
         # blinds = self.get_blinds(episode)
@@ -379,6 +384,8 @@ class HSmithyParser(Parser):
                 # We skip these games.
                 continue
             except self._ShowDownHappenedButNoSummaryDataExists:
+                continue
+            except self.PlayerCashedOutBeforeAwarded:
                 continue
 
     def parse_file(self, file_path) -> Generator[PokerEpisode, None, None]:
