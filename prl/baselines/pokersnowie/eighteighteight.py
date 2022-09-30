@@ -242,8 +242,9 @@ class EightEightEightConverter(Converter):
         Converts episode to string representation that can be imported from PokerSnowie if written to txt file.
         Format used is 888 format.
         :param episode: Single hand played from start to finish
-        :param hero_names: Player names which will be hero after conversion to snowie-episode.
-        :return: String representation of PokerEpisode that can be imported from PokerSnowie if written to txt file
+        :param hero_names: Player names which will be hero after conversion to snowie-episode. If none,
+        one episode per player in showdown is created.
+        :return: String representation of PokerEpisode that can be imported from PokerSnowie
         """
         if not hero_names:
             hero_names = [s.name for s in episode.showdown_hands]
