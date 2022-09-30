@@ -27,7 +27,7 @@ def run_games(n_episodes=100):
             # todo query agent that queries model [card_eval + fold_prob]
             # todo update_poker_episode
             break
-        # converted.append(episode)
+        # converted.append(converter.from_episode(episode))
 
     return converted
 
