@@ -1,4 +1,4 @@
-from typing import List, Type, Tuple
+from typing import List, Type, Tuple, TypeVar
 
 import numpy as np
 from prl.environment.Wrappers.prl_wrappers import Wrapper
@@ -28,10 +28,12 @@ DICT_SUITE = {'': -127,
               's': 2,
               'c': 3}
 
+ENV_WRAPPER = TypeVar('ENV_WRAPPER', bound=Wrapper)
+
 
 def init_wrapped_env(env_wrapper_cls: Type[Wrapper],
                      stack_sizes: List[float],
-                     multiply_by=100) -> Wrapper:  # Tuple[Wrapper, List[int]]:
+                     multiply_by=100) -> ENV_WRAPPER:  # Tuple[Wrapper, List[int]]:
     """
     Wrappes a NoLimitHoldEm instance with a custom wrapper class.
     Returns the initialized (not reset yet!) environment, together with
