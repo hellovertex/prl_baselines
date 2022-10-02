@@ -6,7 +6,28 @@ from prl.environment.Wrappers.prl_wrappers import AugmentObservationWrapper
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import build_cards_state_dict, \
     init_wrapped_env, make_player_cards, make_board_cards
 
-import prl.environment.steinberger.PokerRL.game._.look_up_table as lut
+
+def playground():
+    import prl.environment.steinberger.PokerRL.game._.look_up_table as lut
+    # lh = env.env.get_lut_holder()  # todo: rename env.env to env.base_env
+    # from prl.environment.steinberger.PokerRL.game._.cpp_wrappers.CppHandeval import CppHandeval
+    # cpp_poker = CppHandeval()
+    # player_hands = ['7d 2h', '2h 7d', 'Ac As', 'Kc Ks', '2h 2c']
+    # player_cards = make_player_cards(player_hands)
+    # board = '['' '' '' '' '']'
+    # board_cards = make_board_cards(board)
+    # lh.get_1d_card(player_cards[0])
+    # # b = np.array([[2, 0], [2, 3], [11, 1], [10, 2], [11, 2]], dtype=np.int8)
+    # # h = np.array([[11, 3], [5, 1]], dtype=np.int8)
+    # cpp_poker.get_hand_rank_52_holdem(hand_2d=np.array(player_cards[0]), board_2d=np.array(board_cards))
+    # rank_all_fn can actually compute an array of ranks with shape N_BOARDS, 1326
+    # wowzers
+    # rank_all_fn = env.env.get_hand_rank_all_hands_on_given_boards([lh.get_1d_card(card2d) for card2d in make_board_cards('[6h Ts Td 9c Jc]')], lh)
+
+    # since (50 choose 2) up to (50 choose 10) for 2 to 5 players does not scale very well (1k to 10B),
+    # if we wanted to include the board that would be (50 choose 15) = 2.25e12
+    # were just going to run monte-carlo simulations
+
 
 def get_ranking():
     """
@@ -27,6 +48,8 @@ def get_ranking():
     if result < threshold: fold
     :return:
     """
+    # todo: contra monte-carlo additional dependency on reuter repo
+    #  better: vectorize hand evaluation to compute ehs for multiple players
     # dear future me, if you can find the time, please watch
     # https://www.youtube.com/watch?v=TM_sMACxSzY 
     # and
@@ -35,6 +58,10 @@ def get_ranking():
     # .so blackbox magic 
     # use HS preflop (apparently no board info directly available so HS implicitly includes board info)
     # use EHS postflop as we now have the additional info of flop
+    # run monte carlo will be least effort
+    # equity: 210 total pot with ehs of .3 then you should have less than 63 chips in
+    # equity is a percentage 63 / 210 but that is equal to ehs so EHS = Equity
+    # EV is .3 * 147  - .7 * 63 an integer
 
 
 def get_cards(obs: np.array, feature_names=None) -> List[str]:
@@ -51,18 +78,28 @@ def test_get_cards():
     feature_names = list(env.obs_idx_dict.keys()) + ["button_index"]
     state_dict = {'deck_state_dict': cards_state_dict}
 
-    # TMP
-    lookup = env.env.get_lut_holder()  # todo: rename env.env to env.base_env
+    #TMP
+    import prl.environment.steinberger.PokerRL.game._.look_up_table as lut
+    lh = env.env.get_lut_holder()  # todo: rename env.env to env.base_env
     from prl.environment.steinberger.PokerRL.game._.cpp_wrappers.CppHandeval import CppHandeval
     cpp_poker = CppHandeval()
-    player_hands = ['7h 2s', '7d 2s', 'Ac As', 'Kc Ks', '2h 2c']
+    player_hands = ['7d 2h', '2h 7d', 'Ac As', 'Kc Ks', '2h 2c']
     player_cards = make_player_cards(player_hands)
     board = '['' '' '' '' '']'
     board_cards = make_board_cards(board)
+    lh.get_1d_card(player_cards[0])
     # b = np.array([[2, 0], [2, 3], [11, 1], [10, 2], [11, 2]], dtype=np.int8)
     # h = np.array([[11, 3], [5, 1]], dtype=np.int8)
     cpp_poker.get_hand_rank_52_holdem(hand_2d=np.array(player_cards[0]), board_2d=np.array(board_cards))
+    # rank_all_fn can actually compute an array of ranks with shape N_BOARDS, 1326
+    # wowzers
+    # rank_all_fn = env.env.get_hand_rank_all_hands_on_given_boards([lh.get_1d_card(card2d) for card2d in make_board_cards('[6h Ts Td 9c Jc]')], lh)
 
+    # since (50 choose 2) up to (50 choose 10) for 2 to 5 players does not scale very well (1k to 10B),
+    # if we wanted to include the board that would be (50 choose 15) = 2.25e12
+    # were just going to run monte-carlo simulations
+
+    # take any <7 cards, return integer and lookup integer for rank
     expected_cards_p0 = None
     expected_cards_p1 = None
     expected_cards_p2 = None
@@ -100,6 +137,7 @@ def inspect_lut_and_hs():
     #                 [[4, 5], [6,7]] ]  # second hand
     #
     pass
+
 
 if __name__ == "__main__":
     test_get_cards()
