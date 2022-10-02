@@ -31,7 +31,7 @@ DICT_SUITE = {'': -127,
 
 def init_wrapped_env(env_wrapper_cls: Type[Wrapper],
                      stack_sizes: List[float],
-                     multiply_by=100) -> Tuple[Wrapper, List[int]]:
+                     multiply_by=100) -> Wrapper:  # Tuple[Wrapper, List[int]]:
     """
     Wrappes a NoLimitHoldEm instance with a custom wrapper class.
     Returns the initialized (not reset yet!) environment, together with
@@ -57,7 +57,7 @@ def init_wrapped_env(env_wrapper_cls: Type[Wrapper],
                         env_args=args,
                         lut_holder=NoLimitHoldem.get_lut_holder())
     wrapped_env = env_wrapper_cls(env)
-    return wrapped_env, starting_stack_sizes_list
+    return wrapped_env  # todo urgent replace:, starting_stack_sizes_list
 
 
 def card_tokens(cards: str) -> List[str]:

@@ -176,7 +176,7 @@ class RLStateEncoder(Encoder):
         #
         # if episode.hand_id == 213304492236:
         #    debug = 1
-
+        # todo: remove key 'table' from config - not needed anymore
         state_dict = {'deck_state_dict': cards_state_dict, 'table': table}
         obs, _, done, _ = env.reset(config=state_dict)
         assert obs[-1] in [0, 1, 2, 3, 4, 5], f"obs[-1] = {obs[-1]}. " \
