@@ -76,6 +76,9 @@ def card_tokens(cards: str) -> List[str]:
 
     In: '3h 3c'
     Out: ['3h', '3c']
+
+    In: ''
+    Out: ['']
     """
     # '[6h Ts Td 9c Jc]'
     rm_brackets = cards.replace('[', '').replace(']', '')
@@ -86,6 +89,8 @@ def card_tokens(cards: str) -> List[str]:
 
 
 def card(token: str) -> List[int]:
+    if token == '':
+        return [DICT_RANK[''], DICT_SUITE['']]
     rank = DICT_RANK[token[0]]
     suite = DICT_SUITE[token[1]]
     return [rank, suite]
@@ -100,6 +105,22 @@ def make_board_cards(board: str) -> List[List[int]]:
     board_card_tokens = card_tokens(board)
     assert len(board_card_tokens) == 5
     return [card(token) for token in board_card_tokens]
+
+
+def make_player_cards(player_hands: List[str]):
+    """
+    Converts string representation of cards to integer representation as used by Steinbergers PokerEnv.
+    :param player_hands: List of player hands represented as single string,
+    e.g. ['3h 3c',  'Tc 9s', 'Jd Js', 'Kc Ks', 'Ac Ad']
+    :return: List[List[int]]
+    e.g. [  [[2, 0], [2, 3]], [[11, 1], [10, 2]], [[11, 2]], ..], ... ] dtype=np.int8)
+    """
+    # convert ['3h 3c',  'Tc 9s', 'Jd Js', 'Kc Ks', 'Ac Ad'] to List[List[int]]
+    hands = [card_tokens(hand) for hand in player_hands]
+    player_hands = []
+    for hand in hands:
+        player_hands.append([card(hand[0]), card(hand[1])])
+    return player_hands
 
 
 def build_cards_state_dict(board: str, player_hands: List[str]):
@@ -118,12 +139,7 @@ def build_cards_state_dict(board: str, player_hands: List[str]):
     # with the board cards that we have parsed
     deck = np.empty(shape=(13 * 4, 2), dtype=np.int8)
     deck[:len(board_cards)] = board_cards
-    # convert ['3h 3c',  'Tc 9s', 'Jd Js', 'Kc Ks', 'Ac Ad'] to List[List[int]]
-    hands = [card_tokens(hand) for hand in player_hands]
-    player_hands = []
-    for hand in hands:
-        player_hands.append([card(hand[0]), card(hand[1])])
     initial_board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
     return {'deck': {'deck_remaining': deck},  # np.ndarray(shape=(52-n_cards*num_players, 2))
             'board': initial_board,  # np.ndarray(shape=(n_cards, 2))
-            'hand': player_hands}  # List[[rank, suit]] with length equal to number of players
+            'hand': make_player_cards(player_hands)}  # List[[rank, suit]] with length equal to number of players
