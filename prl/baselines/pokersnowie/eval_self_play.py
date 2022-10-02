@@ -2,10 +2,23 @@
 # need card eval
 # need policy sampler that injects fold prob given hand strength
 # need component that is able to build PokerEpiosde from series of `obs`
-from typing import List
+import enum
+from typing import List, Union
+
+import numpy as np
+import torch
+from prl.environment.Wrappers.prl_wrappers import ActionSpace
 
 from prl.baselines.pokersnowie.eighteighteight import EightEightEightConverter
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode
+from prl.baselines.supervised_learning.models.nn_model import MLP
+
+N_FEATURES = 564
+
+
+class AgentModelType(enum.IntEnum):
+    MLP_2x512 = 10
+    RANDOM_FOREST = 20
 
 
 class Agent:
@@ -14,7 +27,33 @@ class Agent:
         self._card_evaluator = None
         self._policy = None
 
-    def load_model(self):
+    def load_model(self, model_type: AgentModelType):
+        if model_type == AgentModelType.MLP_2x512:
+            input_dim = N_FEATURES
+            classes = [ActionSpace.FOLD,
+                       ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED
+                       ActionSpace.RAISE_MIN_OR_3BB,
+                       ActionSpace.RAISE_HALF_POT,
+                       ActionSpace.RAISE_POT,
+                       ActionSpace.ALL_IN]
+            hidden_dim = [512, 512]
+            output_dim = len(classes)
+            net = MLP(input_dim, output_dim, hidden_dim)
+            # if running on GPU and we want to use cuda move model there
+            use_cuda = torch.cuda.is_available()
+            if use_cuda:
+                net = net.cuda()
+            self._model = net
+            return net
+        else:
+            raise NotImplementedError
+
+    def act(self, obs: Union[np.arary, List]):
+        # from obs, get cards
+        # from cards get ranking
+        # from ranking get fold prob
+        # from fold prob get policy
+        # from policy, return action
         pass
 
 

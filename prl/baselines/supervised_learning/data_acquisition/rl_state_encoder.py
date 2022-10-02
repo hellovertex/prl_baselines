@@ -5,28 +5,9 @@ from prl.environment.steinberger.PokerRL.game.Poker import Poker
 from prl.environment.steinberger.PokerRL.game.games import NoLimitHoldem
 
 from core.encoder import Encoder, PlayerInfo, Positions6Max
-from core.parser import PokerEpisode, Action, ActionType, Blind
-
-DICT_RANK = {'': -127,
-             '2': 0,
-             '3': 1,
-             '4': 2,
-             '5': 3,
-             '6': 4,
-             '7': 5,
-             '8': 6,
-             '9': 7,
-             'T': 8,
-             'J': 9,
-             'Q': 10,
-             'K': 11,
-             'A': 12}
-
-DICT_SUITE = {'': -127,
-              'h': 0,
-              'd': 1,
-              's': 2,
-              'c': 3}
+from core.parser import PokerEpisode, Action, ActionType, Blind, PlayerWithCards
+from prl.baselines.supervised_learning.data_acquisition.environment_utils import DICT_RANK, DICT_SUITE, \
+    make_board_cards, card_tokens, card
 
 
 class RLStateEncoder(Encoder):
@@ -88,21 +69,7 @@ class RLStateEncoder(Encoder):
         return int(float(sb.amount.split(self._currency_symbol)[1]) * multiply_by), \
                int(float(bb.amount.split(self._currency_symbol)[1]) * multiply_by)
 
-    def make_board_cards(self, board_cards: str):
-        """Return 5 cards that we can prepend to the card deck so that the board will be drawn.
-      Args:
-        board_cards: for example '[6h Ts Td 9c Jc]'
-      Returns:
-        representation of board_cards that is understood by rl_env
-        Example:
-    """
-        # '[6h Ts Td 9c Jc]' to ['6h', 'Ts', 'Td', '9c', 'Jc']
-        card_list = self.str_cards_to_list(board_cards)
-        assert len(card_list) == 5
-
-        return [[DICT_RANK[card[0]], DICT_SUITE[card[1]]] for card in card_list]
-
-    def make_showdown_hands(self, table, showdown):
+    def make_showdown_hands(self, table: Tuple[PlayerInfo], showdown: List[PlayerWithCards]):
         """Under Construction. """
         # initialize default hands
         default_card = [Poker.CARD_NOT_DEALT_TOKEN_1D, Poker.CARD_NOT_DEALT_TOKEN_1D]  # rank, suit
@@ -113,9 +80,9 @@ class RLStateEncoder(Encoder):
             for final_player in showdown:
                 if seat.player_name == final_player.name:
                     # '[6h Ts]' to ['6h', 'Ts']
-                    showdown_cards = self.str_cards_to_list(final_player.cards)
+                    showdown_cards = card_tokens(final_player.cards)
                     # ['6h', 'Ts'] to [[5,3], [5,0]]
-                    hand = [[DICT_RANK[card[0]], DICT_SUITE[card[1]]] for card in showdown_cards]
+                    hand = [card(token) for token in showdown_cards]
                     # overwrite [[-127,127],[-127,-127]] with [[5,3], [5,0]]
                     player_hands[int(seat.position_index)] = hand
         return player_hands
@@ -167,7 +134,7 @@ class RLStateEncoder(Encoder):
 
     def _build_cards_state_dict(self, table: Tuple[PlayerInfo], episode: PokerEpisode):
         """Under Construction."""
-        board_cards = self.make_board_cards(episode.board_cards)
+        board_cards = make_board_cards(episode.board_cards)
         # --- set deck ---
         # cards are drawn without ghost cards, so we simply replace the first 5 cards of the deck
         # with the board cards that we have parsed
@@ -175,21 +142,17 @@ class RLStateEncoder(Encoder):
         deck[:len(board_cards)] = board_cards
         # make hands: np.ndarray(shape=(n_players, 2, 2))
         player_hands = self.make_showdown_hands(table, episode.showdown_hands)
-        board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
+        initial_board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
         return {'deck': {'deck_remaining': deck},  # np.ndarray(shape=(52-n_cards*num_players, 2))
-                'board': board,  # np.ndarray(shape=(n_cards, 2))
+                'board': initial_board,  # np.ndarray(shape=(n_cards, 2))
                 'hand': player_hands}
 
-    def _init_wrapped_env(self, table: Tuple[PlayerInfo], ante, multiply_by=100):
+    def _init_wrapped_env(self, stack_sizes: List[float]):
         """Initializes environment used to generate observations.
         Assumes Btn is at index 0."""
-        # get starting stacks, starting with button at index 0
-        stacks = [player.stack_size for player in table]
-        starting_stack_sizes_list = [int(float(stack) * multiply_by) for stack in stacks]
-
         # make args for env
-        args = NoLimitHoldem.ARGS_CLS(n_seats=len(table),
-                                      starting_stack_sizes_list=starting_stack_sizes_list)
+        args = NoLimitHoldem.ARGS_CLS(n_seats=len(stack_sizes),
+                                      starting_stack_sizes_list=stack_sizes)
         # return wrapped env instance
         env = NoLimitHoldem(is_evaluating=True,
                             env_args=args,
@@ -197,7 +160,6 @@ class RLStateEncoder(Encoder):
         self._wrapped_env = self.env_wrapper_cls(env)
         # will be used for naming feature index in training data vector
         self._feature_names = list(self._wrapped_env.obs_idx_dict.keys()) + ["button_index"]
-        return starting_stack_sizes_list
 
     def _make_ante(self, ante: str, multiply_by=100) -> float:
         """Converts ante string to float, e.g. '$0.00' -> float(0.00)"""
@@ -301,7 +263,10 @@ class RLStateEncoder(Encoder):
 
         # Initialize environment for simulation of PokerEpisode
         # todo: pass env_cls as argument (N_BOARD_CARDS etc. gets accessible)
-        starting_stack_sizes_list = self._init_wrapped_env(table, ante=episode.ante)
+        # get starting stacks, starting with button at index 0
+        stacks = [player.stack_size for player in table]
+        starting_stack_sizes_list = [int(float(stack) * 100) for stack in stacks]
+        self._init_wrapped_env(starting_stack_sizes_list)
 
         self._wrapped_env.env.SMALL_BLIND, self._wrapped_env.env.BIG_BLIND = self.make_blinds(episode.blinds,
                                                                                               multiply_by=100)
