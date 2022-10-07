@@ -1,5 +1,5 @@
 """Use this on virutal machines to get the BulkHands.zip from google drive.
-Useful before running eda.py"""
+Useful before running select_players.py"""
 import click
 import gdown
 

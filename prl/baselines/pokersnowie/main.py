@@ -21,7 +21,7 @@ from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HS
               default="",
               type=str,
               help="Absolute path where dict with selected players is stored. "
-                   "See eda.py to generate it")
+                   "See select_players.py to generate it")
 def main(path_in, path_out, n_hands, selected_players_file):
     """Translates databases from https://www.hhsmithy.com/ to https://www.pokersnowie.com/ databases.
     These are .txt files in human-readable format """

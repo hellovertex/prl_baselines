@@ -1,3 +1,4 @@
+# todo consider converting this to .ipynb and move to scripts/
 import ast
 import glob
 import json

@@ -1,5 +1,5 @@
 """Use this on virutal machines to unzip BulkHands.zip.
-Useful before running eda.py"""
+Useful before running select_players.py"""
 import glob
 import io
 import os
