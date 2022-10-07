@@ -51,6 +51,10 @@ class Agent:
     def act(self, obs: Union[np.arary, List]):
         # from obs, get cards
         # from cards get ranking
+        # todo: preflop - n player lookup (equities do)
+        #  flop: compute [Flop, 1326] and rank hero vs 1325 => equity estimate
+        #  test this using known hand and board combinations
+        #  assume Rank(.,.) is quick and correct for now
         # from ranking get fold prob
         # from fold prob get policy
         # from policy, return action

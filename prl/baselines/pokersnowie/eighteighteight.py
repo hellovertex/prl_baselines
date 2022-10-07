@@ -49,7 +49,7 @@ instance to .txt file for import in PokerSnowie.
 import datetime
 from typing import List
 
-from prl.baselines.pokersnowie.converter import Converter
+from prl.baselines.pokersnowie.core.converter import PokerSnowieConverter
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Action, \
     ActionType
 
@@ -58,7 +58,8 @@ SnowieEpisode = str
 action_types = ['folds', 'checks', 'calls', 'bets', 'raises']
 
 
-class EightEightEightConverter(Converter):
+class EightEightEightConverter(PokerSnowieConverter):
+    """Converts to PokerSnowie using 888-ExportFormat"""
     @staticmethod
     def parse_num(num):
         # parse string represenation of float, such that

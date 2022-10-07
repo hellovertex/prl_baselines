@@ -5,7 +5,7 @@ from prl.baselines.supervised_learning.data_acquisition.core.parser import Poker
 SnowieEpisode = str
 
 
-class Converter:
+class PokerSnowieConverter:
     """
     PokerSnowie software internally stores played hands as text files.
     Our internal representation of played hands is given by PokerEpisode - instances.

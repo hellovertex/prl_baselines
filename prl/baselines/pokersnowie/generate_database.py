@@ -1,29 +1,25 @@
 import ast
 import glob
-from typing import List, Optional
+from typing import List, Optional, TypeVar
 
+from prl.baselines.pokersnowie.core.converter import PokerSnowieConverter
+from prl.baselines.pokersnowie.core.db_generator import PokerSnowieGenerator
 from prl.baselines.pokersnowie.eighteighteight import EightEightEightConverter
-# from prl.baselines.pokersnowie.pokersnowie import SnowieConverter
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
 
-
-class PokerSnowieGenerator:
-    def generate_database(self, *args, **kwargs):
-        """
-        Generate https://www.pokersnowie.com/ databases
-        """
+POKER_SNOWIE_CONVERTER_INSTANCE = TypeVar('POKER_SNOWIE_CONVERTER_INSTANCE', bound=PokerSnowieConverter)
 
 
 class HandHistorySmithyToPokerSnowie(PokerSnowieGenerator):
     """Translates databases from https://www.hhsmithy.com/ to https://www.pokersnowie.com/ databases.
     These are .txt files in human-readable format """
 
-    def __init__(self, parser: HSmithyParser):
+    def __init__(self, parser: HSmithyParser, converter: POKER_SNOWIE_CONVERTER_INSTANCE):
         self._parser = parser
         self.smithy_episodes = []
         self.snowie_episodes = []
-        # self._converter = SnowieConverter()
+        self._path_out = None
         self._converter = EightEightEightConverter()
 
     # def _translate(self, smithy_episodes: List[PokerEpisode]) -> List[str]:

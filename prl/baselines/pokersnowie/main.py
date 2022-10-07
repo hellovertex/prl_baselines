@@ -1,5 +1,6 @@
 import click
 
+from prl.baselines.pokersnowie.eighteighteight import EightEightEightConverter
 from prl.baselines.pokersnowie.generate_database import HandHistorySmithyToPokerSnowie
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
 
@@ -27,10 +28,11 @@ def main(path_in, path_out, n_hands, selected_players_file):
     # Parses hhsmithy databases
     parser = HSmithyParser()
 
-    # Translates to PokerSnowie databases
-    db_gen = HandHistorySmithyToPokerSnowie(parser=parser)
+    # Converts parsed hhsmithy databases to PokerSnowie databases using 888-Format
+    converter = EightEightEightConverter()
 
     # writes PokerSnowie databses to .txt files
+    db_gen = HandHistorySmithyToPokerSnowie(parser=parser, converter=converter)
     db_gen.generate_database(path_in, path_out, n_hands, selected_players_file)
 
 
