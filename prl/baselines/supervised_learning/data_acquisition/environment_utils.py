@@ -99,11 +99,11 @@ def card(token: str) -> List[int]:
 def make_board_cards(board: str) -> List[List[int]]:
     """
     Return representation of board_cards that is understood by Steinberger NoLimitHoldem environment.
-    :param board: String representation of (full!) board, e.g. '[6h Ts Td 9c Jc]'
+    :param board: String representation of board, e.g. '[6h Ts Td 9c  ]' on Turn
     :return: List of cards, where each card is a list of two integers, one for rank and one for suit.
     """
     board_card_tokens = card_tokens(board)
-    assert len(board_card_tokens) == 5
+    # assert len(board_card_tokens) == 5
     return [card(token) for token in board_card_tokens]
 
 

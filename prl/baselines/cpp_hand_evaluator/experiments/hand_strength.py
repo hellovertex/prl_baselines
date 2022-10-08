@@ -1,7 +1,9 @@
 """WIP - UNDER HEAVY CONSTRUCTION"""
 from typing import List
+from numba import jit, njit
 
 import numpy as np
+import random
 from prl.environment.Wrappers.prl_wrappers import AugmentObservationWrapper
 from prl.environment.steinberger.PokerRL.game._.cpp_wrappers.CppHandeval import CppHandeval
 
@@ -75,6 +77,7 @@ botrank = cpp_poker.get_hand_rank_52_holdem(hand_2d=np.array(player_cards[2]), b
 # flop comes 0,12, 29
 
 # rank([4,22], [0,12,29])
+@njit
 def mc(hero_cards_1d, board_cards_1d, n_iter, n_villains):
     """
     Returns estimated Effective Hand Strength after running n_iter Monte Carlo rollouts.
@@ -85,26 +88,29 @@ def mc(hero_cards_1d, board_cards_1d, n_iter, n_villains):
     :return: The Effective Hand Strength Pr(win), i.e. Pr(win) = HS x (1 - NPot) + (1 - HS) x PPot
     where HS is computed as in [LINK HAND STRENGTH]
     """
-    #  // integer from 0 (resp. Ace of Spades) to 51 (resp. Two of Clubs) inclusive.
-    #   // The higher the rank the better the hand. Two hands of equal rank tie.
-    # As Ah Ad Ac Ks ... 2s 2h 2d 2c
-    # SHDC
+
     # https: // github.com / kennethshackleton / SKPokerEval / blob / develop / tests / FiveEval.h
     deck = []
     for i in range(51):
         if i not in hero_cards_1d and i not in board_cards_1d:
             deck.append(i)
+    deck = np.array(deck)
     won = 0
     lost = 0
     to_deal = 5 - len(board_cards_1d)
     for i in range(n_iter):
-        # draw n villain + to_deal board cards without replacement
-        # split cards to villain and board cards
-        # if rank(v0, board) > rank(hero, board) {lost += 1;}
-        # else {won += 1;}
-        pass
+        cards = np.random.choice(deck, [2 for _ in range(n_villains)] + [to_deal], replace=False)
+        board = cards[-to_deal:]
+        # hero_rank = rank(hero_cards_1d, board)
+        for i in range(0, n_villains+1, 2):
+            # if rank([cards[i]+cards[i+1], board) > hero_rank:
+            #     {lost+=1} else {won += 1}
+            pass
 
-    lookup_1d_to_32bit = {0: ""}  # store mapping of int cards to values
+        #     # todo call RANK FROM CLIB using pybind
+        #     # todo might have to use CFFI as this is definitely supported as shown in the DOCs
+        #     # todo look at how to speed up vectorizer by using jit
 
 
-mc([42, 0], [11, 22, 33, 44], 1000, 2)  # river yet to come)
+if __name__ == "__main__":
+    mc([42, 0], [11, 22, 33, 44], 1000, 2)  # river yet to come)

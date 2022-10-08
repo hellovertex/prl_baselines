@@ -5,7 +5,7 @@ seaborn
 click
 gdown
 sklearn
-numpy
+numpy==1.22.0
 pandas
 pydantic
 tianshou
