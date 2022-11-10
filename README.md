@@ -1,3 +1,4 @@
+todo: move pokersnowie/eval_self_play.py to designated agent_folder/
 # prl_baselines
 
 ## Installation
