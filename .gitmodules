@@ -1,0 +1,4 @@
+[submodule "prl/baselines/cpp_hand_evaluator/cpp/ext/pybind11"]
+	path = prl/baselines/cpp_hand_evaluator/cpp/ext/pybind11
+	url = https://github.com/pybind/pybind11.git
+	branch = stable
