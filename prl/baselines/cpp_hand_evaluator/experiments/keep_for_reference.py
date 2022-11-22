@@ -6,15 +6,11 @@ import numpy as np
 import random
 from prl.environment.Wrappers.prl_wrappers import AugmentObservationWrapper
 from prl.environment.steinberger.PokerRL.game._.cpp_wrappers.CppHandeval import CppHandeval
-# from prl.baselines.cpp_hand_evaluator.cpp.ext.scripts.rank import rank
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import build_cards_state_dict, \
     init_wrapped_env, make_player_cards, make_board_cards
-
+from hand_evaluator import rank
 # from prl.environment.steinberger.PokerRL.game._.cpp_wrappers.CppLUT import CppLibHoldemLuts
-
-cpp_poker = CppHandeval()
-
-
+# cpp_poker = CppHandeval()
 # luts = CppLibHoldemLuts()
 
 
@@ -54,8 +50,8 @@ print(c2)
 print(c3)
 print(c4)
 
-toprank = cpp_poker.get_hand_rank_52_holdem(hand_2d=np.array(player_cards[0]), board_2d=np.array(board_cards))
-botrank = cpp_poker.get_hand_rank_52_holdem(hand_2d=np.array(player_cards[2]), board_2d=np.array(board_cards))
+# toprank = cpp_poker.get_hand_rank_52_holdem(hand_2d=np.array(player_cards[0]), board_2d=np.array(board_cards))
+# botrank = cpp_poker.get_hand_rank_52_holdem(hand_2d=np.array(player_cards[2]), board_2d=np.array(board_cards))
 
 
 # draw three hands wo replacement
