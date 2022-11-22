@@ -238,31 +238,31 @@ def create_wrapped_environment(stacks):
 
 def run_games(starting_stack_sizes: List[int], n_episodes=100):
     # setup
-    wrapped_env = create_wrapped_environment(starting_stack_sizes)
-    agent = Agent(env=wrapped_env)
-    converter = EightEightEightConverter()
+    env = create_wrapped_environment(starting_stack_sizes)
+    agent = Agent(env=env)
+    snowie_converter = EightEightEightConverter()
     converted = []
 
     for i in range(n_episodes):
-        obs, _, done, _ = wrapped_env.reset()
+        obs, _, done, _ = env.reset()
         # episode = init_poker_episode(env_config, obs)
         while not done:
             # query agent that queries model [card_eval + fold_prob]
 
-            obs, _, done, _ = wrapped_env.step((1,-1))
-            obs, _, done, _ = wrapped_env.step((1,-1))
-            obs, _, done, _ = wrapped_env.step((1,-1))
-            obs, _, done, _ = wrapped_env.step((1,-1))
-            obs, _, done, _ = wrapped_env.step((1,-1))
-            obs, _, done, _ = wrapped_env.step((1,-1))
-            obs, _, done, _ = wrapped_env.step((1,-1))
-            obs, _, done, _ = wrapped_env.step((1,-1))
-            obs, _, done, _ = wrapped_env.step((1,-1))
-            obs, _, done, _ = wrapped_env.step((1,-1))
-            obs, _, done, _ = wrapped_env.step((1,-1))
-            obs, _, done, _ = wrapped_env.step((1,-1))
+            obs, _, done, _ = env.step((1,-1))
+            obs, _, done, _ = env.step((1,-1))
+            obs, _, done, _ = env.step((1,-1))
+            obs, _, done, _ = env.step((1,-1))
+            obs, _, done, _ = env.step((1,-1))
+            obs, _, done, _ = env.step((1,-1))
+            obs, _, done, _ = env.step((1,-1))
+            obs, _, done, _ = env.step((1,-1))
+            obs, _, done, _ = env.step((1,-1))
+            obs, _, done, _ = env.step((1,-1))
+            obs, _, done, _ = env.step((1,-1))
+            obs, _, done, _ = env.step((1,-1))
             action = agent.act(obs)
-            obs, _, done, _ = wrapped_env.step(action)
+            obs, _, done, _ = env.step(action)
             # todo update_poker_episode
             break
         # converted.append(converter.from_episode(episode))

@@ -6651,5 +6651,4 @@ offsets = [
 ]
 
 def rank(x):
-    return ranks[offsets[(x & FACE_BIT_MASK) >> RANK_OFFSET_SHIFT]
-            + (x & RANK_HASH_MOD)]
+    return ranks[offsets[(x & FACE_BIT_MASK) >> RANK_OFFSET_SHIFT] + (x & RANK_HASH_MOD)]

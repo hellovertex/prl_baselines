@@ -1,4 +1,4 @@
-from hand_eval import *
+from hand_evaluator import *
 
 
 # 1, 41, 18, 19, 16, 20, 24 must return 5586

@@ -6,7 +6,7 @@ import numpy as np
 import random
 from prl.environment.Wrappers.prl_wrappers import AugmentObservationWrapper
 from prl.environment.steinberger.PokerRL.game._.cpp_wrappers.CppHandeval import CppHandeval
-
+# from prl.baselines.cpp_hand_evaluator.cpp.ext.scripts.rank import rank
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import build_cards_state_dict, \
     init_wrapped_env, make_player_cards, make_board_cards
 
@@ -101,7 +101,7 @@ def mc(hero_cards_1d, board_cards_1d, n_iter, n_villains):
     for i in range(n_iter):
         cards = np.random.choice(deck, [2 for _ in range(n_villains)] + [to_deal], replace=False)
         board = cards[-to_deal:]
-        # hero_rank = rank(hero_cards_1d, board)
+        hero_rank = rank(hero_cards_1d, board)
         for i in range(0, n_villains+1, 2):
             # if rank([cards[i]+cards[i+1], board) > hero_rank:
             #     {lost+=1} else {won += 1}
