@@ -1,21 +1,13 @@
-# need game loop
-# need card eval
-# need policy sampler that injects fold prob given hand strength
-# need component that is able to build PokerEpiosde from series of `obs`
 import enum
 from typing import List, Union, Tuple
 
 import numpy as np
 import torch
-from numba import njit
-from numba.typed import Dict
-from prl.environment.Wrappers.prl_wrappers import ActionSpace, AugmentObservationWrapper
+from prl.environment.Wrappers.prl_wrappers import ActionSpace
 
-from prl.baselines.cpp_hand_evaluator.experiments.hand_strength import mc
-from prl.baselines.pokersnowie.eighteighteight import EightEightEightConverter
-from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode
-from prl.baselines.supervised_learning.data_acquisition.environment_utils import init_wrapped_env
 from prl.baselines.supervised_learning.models.nn_model import MLP
+from prl.baselines.cpp_hand_evaluator.monte_carlo import HandEvaluator_MonteCarlo
+from  ray.rllib.policy.policy import Policy
 
 IDX_C0_0 = 167  # feature_names.index('0th_player_card_0_rank_0')
 IDX_C0_1 = 184  # feature_names.index('0th_player_card_1_rank_0')
@@ -23,7 +15,7 @@ IDX_C1_0 = 184  # feature_names.index('0th_player_card_1_rank_0')
 IDX_C1_1 = 201  # feature_names.index('1th_player_card_0_rank_0')
 IDX_BOARD_START = 82  #
 IDX_BOARD_END = 167  #
-N_FEATURES = 564
+N_FEATURES = 564  #
 CARD_BITS = np.array(['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', 'h', 'd', 's', 'c'])
 BOARD_BITS = np.array(['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A',
                        'h', 'd', 's', 'c', '2', '3', '4', '5', '6', '7', '8', '9', 'T',
@@ -145,15 +137,24 @@ class AgentModelType(enum.IntEnum):
     RANDOM_FOREST = 20
 
 
+class MCPolicy(Policy):
+    # todo take rllib policy base and implement custom policy that uses the fold prob sampling method
+    # todo give it a reasonable name
+    pass
+
+
 class Agent:
+    # todo consider taking rllib agent base
     def __init__(self, env=None):
+        # todo build config dict
         self._model = None
-        self._card_evaluator = None
+        self._card_evaluator = HandEvaluator_MonteCarlo()
         self._policy = None
         self._env = env
         self._feature_names = None
         self._sklansky = 1
         self._initialize()
+        self._mc_iters = 5000
 
     def _initialize(self):
         if self._env:
@@ -163,7 +164,7 @@ class Agent:
         if model_type == AgentModelType.MLP_2x512:
             input_dim = N_FEATURES
             classes = [ActionSpace.FOLD,
-                       ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED
+                       ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED in CHECK_CALL
                        ActionSpace.RAISE_MIN_OR_3BB,
                        ActionSpace.RAISE_HALF_POT,
                        ActionSpace.RAISE_POT,
@@ -180,33 +181,36 @@ class Agent:
         else:
             raise NotImplementedError
 
-    @staticmethod
-    def look_at_cards(obs: np.array, feature_names=None) -> Tuple[List[int], List[int]]:
-        #  // integer from 0 (resp. Ace of Spades) to 51 (resp. Two of Clubs) inclusive.
-        #   // The higher the rank the better the hand. Two hands of equal rank tie.
-        # As Ah Ad Ac Ks ... 2s 2h 2d 2c
-        # SHDC
-        # Player Cards
-        c0 = obs[IDX_C0_0:IDX_C0_1].astype(bool)
-        c1 = obs[IDX_C1_0:IDX_C1_1].astype(bool)
+    def card_bit_mask_to_int(self, c0: np.array, c1: np.array, board_mask: np.array) -> Tuple[List[int], List[int]]:
+        # todo: docstring and test
         c0_1d = DICT_CARDS_HAND_EVALUATOR[CARD_BITS[c0][0] + CARD_BITS[c0][1]]
         c1_1d = DICT_CARDS_HAND_EVALUATOR[CARD_BITS[c1][0] + CARD_BITS[c1][1]]
-        board_mask = obs[IDX_BOARD_START:IDX_BOARD_END].astype(int)
         board = BOARD_BITS[board_mask.astype(bool)]
+
         board_cards = []
-        for i in range(0, sum(board_mask)-1, 2):  # sum is 6,8,10 for flop turn river resp.
-            board_cards.append(DICT_CARDS_HAND_EVALUATOR[board[i] + board[i+1]])
+        for i in range(0, sum(board_mask) - 1, 2):  # sum is 6,8,10 for flop turn river resp.
+            board_cards.append(DICT_CARDS_HAND_EVALUATOR[board[i] + board[i + 1]])
 
         return [c0_1d, c1_1d], board_cards
 
+    def look_at_cards(self, obs: np.array, feature_names=None) -> Tuple[List[int], List[int]]:
+        # todo: docstring and test
+        c0 = obs[IDX_C0_0:IDX_C0_1].astype(bool)  # bit representation
+        c1 = obs[IDX_C1_0:IDX_C1_1].astype(bool)  # bit representation
+        board_mask = obs[IDX_BOARD_START:IDX_BOARD_END].astype(int)  # bit representation
+        return self.card_bit_mask_to_int(c0, c1, board_mask)
+
     def _fold_prob(self, win_prob):
-        return self._sklansky * win_prob
+        # todo change later using sklansky values
+        return self._sklansky - win_prob
+        # return self._sklansky * win_prob
 
     def act(self, obs: Union[np.array, List]):
         # from obs, get cards
         hero_cards_1d, board_cards_1d = self.look_at_cards(obs, self._feature_names)
         # from cards get winning probability
-        win_prob = mc(hero_cards_1d, board_cards_1d, n_iter=100000, n_villains=2)
+        mc_dict = self._card_evaluator.run_mc(hero_cards_1d, board_cards_1d, 2, n_iter=self._mc_iters)
+        win_prob = float(mc_dict['won'] / self._mc_iters)
         # todo: preflop - n player lookup (equities do)
         #  flop: compute [Flop, 1326] and rank hero vs 1325 => equity estimate
         #  test this using known hand and board combinations
@@ -216,72 +220,3 @@ class Agent:
         # from fold prob get policy and from policy, return action
         action = self._policy.sample(obs, fold_prob)
 
-
-def create_wrapped_environment(stacks):
-    wrapped_env: AugmentObservationWrapper = init_wrapped_env(env_wrapper_cls=AugmentObservationWrapper,
-                                                              stack_sizes=stacks)
-    return wrapped_env
-
-
-# Consider using this:
-# class Runner:
-#     def __init__(self):
-#         self._agent = None
-#         self._env = None
-#         self._converter = None
-#
-#     def reset(self):
-#         self._agent = Agent()  # is stateless
-#         self._env = create_wrapped_environment()
-#         self._converter = EightEightEightConverter()
-
-
-def run_games(starting_stack_sizes: List[int], n_episodes=100):
-    # setup
-    env = create_wrapped_environment(starting_stack_sizes)
-    agent = Agent(env=env)
-    snowie_converter = EightEightEightConverter()
-    converted = []
-
-    for i in range(n_episodes):
-        obs, _, done, _ = env.reset()
-        # episode = init_poker_episode(env_config, obs)
-        while not done:
-            # query agent that queries model [card_eval + fold_prob]
-
-            obs, _, done, _ = env.step((1,-1))
-            obs, _, done, _ = env.step((1,-1))
-            obs, _, done, _ = env.step((1,-1))
-            obs, _, done, _ = env.step((1,-1))
-            obs, _, done, _ = env.step((1,-1))
-            obs, _, done, _ = env.step((1,-1))
-            obs, _, done, _ = env.step((1,-1))
-            obs, _, done, _ = env.step((1,-1))
-            obs, _, done, _ = env.step((1,-1))
-            obs, _, done, _ = env.step((1,-1))
-            obs, _, done, _ = env.step((1,-1))
-            obs, _, done, _ = env.step((1,-1))
-            action = agent.act(obs)
-            obs, _, done, _ = env.step(action)
-            # todo update_poker_episode
-            break
-        # converted.append(converter.from_episode(episode))
-
-    return converted
-
-
-def init_poker_episode(env_conf, init_obs) -> PokerEpisode:
-    pass
-
-
-def update_poker_episode(env, obs):
-    pass
-
-
-def export(episodes: List[PokerEpisode]):
-    pass
-
-
-if __name__ == "__main__":
-    result = run_games(starting_stack_sizes=[100, 110, 120, 130, 140, 150])
-    export(result)

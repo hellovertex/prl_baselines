@@ -1,30 +1,8 @@
-import time
-
-import numba
-from hand_evaluator import rank
-from typing import List
-from numba import jit, njit
-import numba as nb
-import numpy as np
-from prl.environment.Wrappers.prl_wrappers import AugmentObservationWrapper
-from prl.baselines.supervised_learning.data_acquisition.environment_utils import build_cards_state_dict, \
-    init_wrapped_env, make_player_cards, make_board_cards
 import random
+from hand_evaluator import rank
 
 
-def setup(board: str, player_hands: List[str]):
-    cards_state_dict = build_cards_state_dict(board, player_hands)
-    env: AugmentObservationWrapper = init_wrapped_env(env_wrapper_cls=AugmentObservationWrapper,
-                                                      stack_sizes=[100, 110, 120, 130, 140, 150])
-    state_dict = {'deck_state_dict': cards_state_dict}
-    return env, state_dict
-
-
-hand_size = 2
-numba.vectorize()
-
-
-class MonteCarlo_HandEvaluator:
+class HandEvaluator_MonteCarlo:
 
     # def mc(self, id_caller_thread, deck, hero_cards_1d, board_cards_1d, n_opponents, n_iter):
     def mc(self, deck, hero_cards_1d, board_cards_1d, n_opponents, n_iter):
@@ -51,7 +29,7 @@ class MonteCarlo_HandEvaluator:
             player_still_winning = True
             ties = 0
             for opp in range(n_opponents):
-                opp_hand = [drawn_cards_1d[hand_size * opp], drawn_cards_1d[hand_size * opp + 1]] + board
+                opp_hand = [drawn_cards_1d[2 * opp], drawn_cards_1d[2 * opp + 1]] + board
                 opp_rank = rank(*opp_hand)
                 if opp_rank > hero_rank:
                     player_still_winning = False
@@ -70,7 +48,7 @@ class MonteCarlo_HandEvaluator:
                 raise ValueError("Hero can tie against at most n_opponents, not more. Aborting MC Simulation...")
         return {'won': won, 'lost': lost, 'tied': tied}
 
-    def run_mc(self, hero_cards_1d, board_cards_1d, n_opponents, n_iter=1000000):
+    def run_mc(self, hero_cards_1d, board_cards_1d, n_opponents, n_iter=1000000) -> dict:
         """
         Returns estimated Effective Hand Strength after running n_iter Monte Carlo rollouts.
         :param hero_cards_1d: n * 4-byte representations of cards where n is the number of cards
@@ -90,14 +68,10 @@ class MonteCarlo_HandEvaluator:
         return self.mc(deck, hero_cards_1d, board_cards_1d, n_opponents, n_iter)
 
 
-if __name__ == "__main__":
-    # mc([42, 0], [11, 22, 33, 44], 1000, 2)  # river yet to come)
-    # 1, 41, 18, 19, 16, 20, 24 must return 5586
-    # 51, 47, 43, 39, 35, 0, 1 must return a lower value than random num
-    print(rank(1, 41, 18, 19, 16, 20, 24))
-    mc = MonteCarlo_HandEvaluator()
-    for i in range(10):
-        s0 = time.time()
-        result_dict = mc.run_mc([1, 41], [18, 19, 16, 20, 24], 2, 5000)
-        # mc.run_mc([1, 41], [-1, -1, -1, -1, -1], 2, 100000)
-        print(time.time() - s0)
+def test_flush_better_than_three_pair():
+    pass
+
+
+def test_three_pair_better():
+    pass
+
