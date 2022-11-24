@@ -35,7 +35,7 @@ def init_wrapped_env(env_wrapper_cls: Type[Wrapper],
                      stack_sizes: List[float],
                      multiply_by=100) -> ENV_WRAPPER:  # Tuple[Wrapper, List[int]]:
     """
-    Wrappes a NoLimitHoldEm instance with a custom wrapper class.
+    Wraps a NoLimitHoldEm instance with a custom wrapper class.
     Returns the initialized (not reset yet!) environment, together with
     a list of integer starting stacks.
     i) Use multiplier of 100 to convert two-decimal floats to integer

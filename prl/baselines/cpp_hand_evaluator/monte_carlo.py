@@ -69,9 +69,11 @@ class HandEvaluator_MonteCarlo:
 
 
 def test_flush_better_than_three_pair():
+    # https://www.poker.org/poker-hands-ranking-chart/
     pass
 
 
 def test_three_pair_better():
+    # https://www.poker.org/poker-hands-ranking-chart/
     pass
 

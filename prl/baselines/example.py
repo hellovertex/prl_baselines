@@ -1,26 +1,27 @@
 import os
 import random
-from typing import Union, List, Optional, Dict
+from functools import partial
+from typing import Union, List, Optional, Dict, Type
 
 import gym
 import ray
+from prl.environment.Wrappers.prl_wrappers import AugmentObservationWrapper
 from ray import tune
 from ray.rllib import MultiAgentEnv, Policy
-from ray.rllib.agents.dqn import ApexTrainer
+from ray.rllib.algorithms.apex_dqn import ApexDQN, ApexDQNConfig
 from ray.rllib.algorithms import AlgorithmConfig, Algorithm
-from ray.rllib.algorithms.apex_dqn import ApexDQNConfig, ApexDQN
 from ray.rllib.algorithms.callbacks import DefaultCallbacks
 from ray.rllib.algorithms.simple_q import SimpleQ
+from ray.rllib.env import EnvContext
+from ray.rllib.env.multi_agent_env import make_multi_agent
 from ray.rllib.evaluation import Episode
 from ray.rllib.evaluation.collectors.simple_list_collector import SimpleListCollector
-from ray.rllib.examples import rock_paper_scissors_multiagent
-from ray.rllib.examples.policy.rock_paper_scissors_dummies import AlwaysSameHeuristic
 from ray.rllib.models import MODEL_DEFAULTS
 from ray.rllib.policy.policy import PolicySpec
 from ray.rllib.utils.typing import TrainerConfigDict, TensorStructType, TensorType
-
-tune.run("PPO",
-         config={"env": "CartPole-v1"})
+from gym import spaces
+from prl.baselines.supervised_learning.data_acquisition.environment_utils import init_wrapped_env
+from prl.environment.steinberger.PokerRL.game._.rl_env.base.PokerEnv import spaces
 
 COMMON_CONFIG: TrainerConfigDict = {
     # === Settings for Rollout Worker processes ===
@@ -503,36 +504,50 @@ COMMON_CONFIG: TrainerConfigDict = {
     "_disable_execution_plan_api": False,
 }
 
+n_players = 3
+starting_stack_size = 2000
 
-# todo -- later move to prl_environment (?)
-class RLLibSteinbergerEnv(MultiAgentEnv):
-    # https://docs.ray.io/en/releases-1.11.0/rllib/rllib-env.html
-    def __init__(self):
-        # todo (!) : must implement these before calling super() (!)
-        self.action_space = None
-        self.observation_space = None
-        super().__init__()
+
+class RLLibSteinbergerEnv(gym.Env):
+    """Single Env that will be passed to rllib.env.MultiAgentEnv
+    which internally creates n copies and decorates each env-copy with @ray.remote."""
+    def __init__(self, env_config:dict):
+        self._env_cls = env_config['env_wrapper_cls']
+        self._env = init_wrapped_env(self._env_cls, [starting_stack_size for _ in range(n_players)])
+        self._action_space = self._env.action_space
+        self._observation_space = self._env.observation_space
 
     def reset(self):
-        pass
+        return self._env.reset(config=None)  # config=None because we don't manually initialize deck and player cards
 
     def step(self, action):
-        pass
+        return self._env.step(action)
 
     def render(self, mode='human'):
         pass
 
+    @property
+    def action_space(self):
+        return self._action_space
 
-# todo implement this first -- later move to agent.py
-class BaselineAgentAlgorithmConfig(AlgorithmConfig):
-    """
-    AlgorithmConfig.build() -> Algorithm(config=self.to_dict()) -> deepcopy(vars(self))
-    `vars` get set on each chaining call e.g. `AlgorithmConfig.environment(...vars_to_set)`
+    @property
+    def observation_space(self):
+        return self._observation_space
 
-    # Given BaselineAlgorithm we get the config almost for free, except for what happens if the
-    # ressources are set differently here than in rainbow? for multi agent learning?
-    """
-    pass
+def steinberger_to_gym_env(config: EnvContext, steinberger_config: dict):
+    return RLLibSteinbergerEnv
+
+
+# # todo verify we dont need this but only policies
+# class BaselineAgentAlgorithmConfig(AlgorithmConfig):
+#     """
+#     AlgorithmConfig.build() -> Algorithm(config=self.to_dict()) -> deepcopy(vars(self))
+#     `vars` get set on each chaining call e.g. `AlgorithmConfig.environment(...vars_to_set)`
+#
+#     # Given BaselineAlgorithm we get the config almost for free, except for what happens if the
+#     # ressources are set differently here than in rainbow? for multi agent learning?
+#     """
+#     pass
 
 
 class BaselineAgentPolicy(Policy):
@@ -665,3 +680,8 @@ def run_heuristic_vs_learned(args, use_lstm=False, algorithm="PG"):
 #                  "lr": tune.grid_search([0.01, 0.001, 0.0001]),
 #              },
 #              )
+if __name__ == '__main__':
+    env_cfg = {'env_wrapper_cls': AugmentObservationWrapper}
+    make_env_fn = partial(steinberger_to_gym_env, steinberger_config=env_cfg)
+    env = make_multi_agent(make_env_fn)()
+    print(env)
