@@ -1,3 +1,5 @@
+import os
+import random
 from typing import Union, List, Optional, Dict
 
 import gym
@@ -6,12 +8,15 @@ from ray import tune
 from ray.rllib import MultiAgentEnv, Policy
 from ray.rllib.agents.dqn import ApexTrainer
 from ray.rllib.algorithms import AlgorithmConfig, Algorithm
-from ray.rllib.algorithms.apex_dqn import ApexDQNConfig
+from ray.rllib.algorithms.apex_dqn import ApexDQNConfig, ApexDQN
 from ray.rllib.algorithms.callbacks import DefaultCallbacks
 from ray.rllib.algorithms.simple_q import SimpleQ
 from ray.rllib.evaluation import Episode
 from ray.rllib.evaluation.collectors.simple_list_collector import SimpleListCollector
+from ray.rllib.examples import rock_paper_scissors_multiagent
+from ray.rllib.examples.policy.rock_paper_scissors_dummies import AlwaysSameHeuristic
 from ray.rllib.models import MODEL_DEFAULTS
+from ray.rllib.policy.policy import PolicySpec
 from ray.rllib.utils.typing import TrainerConfigDict, TensorStructType, TensorType
 
 tune.run("PPO",
@@ -570,24 +575,93 @@ class BaselineAgentPolicy(Policy):
 # todo implement this second -- later move to agent.py
 class BaselineAgentAlgorithm(Algorithm):
     # https://docs.ray.io/en/releases-1.11.0/rllib/rllib-concepts.html
+    # todo updated: probably dont even need this class (according to the rockpaperscissors example
     # todo implement train(), evaluate(), save() and restore()
-    # todo three STRG+LEFT MOUSE on Algorithm base class
+    # todo three STRG+LEFT MOUSE on Algorithm base class -- check all methods
     #  and inspect how other algos implement Algorithm (how many and which methods do they overwrite?)
     # compare to how SimpleQ implemented base
     pass
 
 
+# can also debug at select_policy to determine how the id is constructed
+# todo: read  https://github.com/ray-project/ray/blob/master/rllib/examples/rock_paper_scissors_multiagent.py
 config = ApexDQNConfig().to_dict()
 # todo update config with remaining rainbow hyperparams
 config['num_atoms'] = 51
+
+
 # todo build MC-agent custom policy via:
 # https://docs.ray.io/en/releases-1.11.0/rllib/rllib-concepts.html
-ray.tune.run(ApexTrainer,
-             # config=config,  # todo check whether bottom config overwrites ApexDqnConfig
-             config={
-                 "env": "CartPole-v0",  # todo check how to set our env
-                 "num_gpus": 0,
-                 "num_workers": 1,
-                 "lr": tune.grid_search([0.01, 0.001, 0.0001]),
-             },
-             )
+
+def run_heuristic_vs_learned(args, use_lstm=False, algorithm="PG"):
+    """Run heuristic policies vs a learned agent.
+
+    The learned agent should eventually reach a reward of ~5 with
+    use_lstm=False, and ~7 with use_lstm=True. The reason the LSTM policy
+    can perform better is since it can distinguish between the always_same vs
+    beat_last heuristics.
+    """
+
+    def select_policy(agent_id, episode, **kwargs):
+        if agent_id == "player_0":
+            return "ApexDqnRainbow"
+        else:
+            return "BaselinePolicy"
+
+    config = {
+        "env": "RockPaperScissors",
+        "gamma": 0.9,
+        # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
+        "num_gpus": int(os.environ.get("RLLIB_NUM_GPUS", "0")),
+        "num_workers": 0,
+        "num_envs_per_worker": 4,
+        "rollout_fragment_length": 10,
+        "train_batch_size": 200,
+        "metrics_num_episodes_for_smoothing": 200,
+        "multiagent": {
+            "policies_to_train": ["ApexDqnRainbow"],
+            "policies": {
+                "BaselinePolicy": PolicySpec(policy_class=BaselineAgentPolicy),
+                "ApexDqnRainbow": PolicySpec(
+                    config={
+                        "model": {"use_lstm": False},
+                        "framework": args.framework,
+                    }
+                ),
+            },
+            "policy_mapping_fn": select_policy,
+        },
+        "framework": args.framework,
+    }
+
+    algo = ApexDQN(config=config)
+    for _ in range(args.stop_iters):
+        results = algo.train()
+        # Timesteps reached.
+        if "policy_always_same_reward" not in results["hist_stats"]:
+            reward_diff = 0
+            continue
+        reward_diff = sum(results["hist_stats"]["policy_learned_reward"])
+        if results["timesteps_total"] > args.stop_timesteps:
+            break
+        # Reward (difference) reached -> all good, return.
+        elif reward_diff > args.stop_reward:
+            return
+
+    # Reward (difference) not reached: Error if `as_test`.
+    if args.as_test:
+        raise ValueError(
+            "Desired reward difference ({}) not reached! Only got to {}.".format(
+                args.stop_reward, reward_diff
+            )
+        )
+
+# ray.tune.run(ApexTrainer,
+#              # config=config,  # todo check whether bottom config overwrites ApexDqnConfig
+#              config={
+#                  "env": "CartPole-v0",  # todo check how to set our env
+#                  "num_gpus": 0,
+#                  "num_workers": 1,
+#                  "lr": tune.grid_search([0.01, 0.001, 0.0001]),
+#              },
+#              )
