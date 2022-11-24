@@ -1,12 +1,18 @@
+from typing import Union, List, Optional, Dict
+
+import gym
 import ray
 from ray import tune
+from ray.rllib import MultiAgentEnv, Policy
 from ray.rllib.agents.dqn import ApexTrainer
 from ray.rllib.algorithms import AlgorithmConfig, Algorithm
 from ray.rllib.algorithms.apex_dqn import ApexDQNConfig
 from ray.rllib.algorithms.callbacks import DefaultCallbacks
+from ray.rllib.algorithms.simple_q import SimpleQ
+from ray.rllib.evaluation import Episode
 from ray.rllib.evaluation.collectors.simple_list_collector import SimpleListCollector
 from ray.rllib.models import MODEL_DEFAULTS
-from ray.rllib.utils.typing import TrainerConfigDict
+from ray.rllib.utils.typing import TrainerConfigDict, TensorStructType, TensorType
 
 tune.run("PPO",
          config={"env": "CartPole-v1"})
@@ -492,16 +498,83 @@ COMMON_CONFIG: TrainerConfigDict = {
     "_disable_execution_plan_api": False,
 }
 
+
+# todo -- later move to prl_environment (?)
+class RLLibSteinbergerEnv(MultiAgentEnv):
+    # https://docs.ray.io/en/releases-1.11.0/rllib/rllib-env.html
+    def __init__(self):
+        # todo (!) : must implement these before calling super() (!)
+        self.action_space = None
+        self.observation_space = None
+        super().__init__()
+
+    def reset(self):
+        pass
+
+    def step(self, action):
+        pass
+
+    def render(self, mode='human'):
+        pass
+
+
 # todo implement this first -- later move to agent.py
 class BaselineAgentAlgorithmConfig(AlgorithmConfig):
+    """
+    AlgorithmConfig.build() -> Algorithm(config=self.to_dict()) -> deepcopy(vars(self))
+    `vars` get set on each chaining call e.g. `AlgorithmConfig.environment(...vars_to_set)`
+
+    # Given BaselineAlgorithm we get the config almost for free, except for what happens if the
+    # ressources are set differently here than in rainbow? for multi agent learning?
+    """
     pass
+
+
+class BaselineAgentPolicy(Policy):
+    """Example of a custom policy written from scratch.
+
+    You might find it more convenient to use the `build_tf_policy` and
+    `build_torch_policy` helpers instead for a real policy, which are
+    described in the next sections.
+    """
+
+    def __init__(self, observation_space, action_space, config):
+        Policy.__init__(self, observation_space, action_space, config)
+        # example parameter
+        self.w = 1.0
+
+    def compute_actions(self, obs_batch: Union[List[TensorStructType], TensorStructType],
+                        state_batches: Optional[List[TensorType]] = None,
+                        prev_action_batch: Union[List[TensorStructType], TensorStructType] = None,
+                        prev_reward_batch: Union[List[TensorStructType], TensorStructType] = None,
+                        info_batch: Optional[Dict[str, list]] = None,
+                        episodes: Optional[List["Episode"]] = None,
+                        explore: Optional[bool] = None,
+                        timestep: Optional[int] = None,
+                        **kwargs, ):
+        # return action batch, RNN states, extra values to include in batch
+        # todo update
+        return [self.action_space.sample() for _ in obs_batch], [], {}
+
+    def learn_on_batch(self, samples):
+        # implement your learning code here
+        return {}  # return stats
+
+    def get_weights(self):
+        return {"w": self.w}
+
+    def set_weights(self, weights):
+        self.w = weights["w"]
+
 
 # todo implement this second -- later move to agent.py
 class BaselineAgentAlgorithm(Algorithm):
+    # https://docs.ray.io/en/releases-1.11.0/rllib/rllib-concepts.html
+    # todo implement train(), evaluate(), save() and restore()
+    # todo three STRG+LEFT MOUSE on Algorithm base class
+    #  and inspect how other algos implement Algorithm (how many and which methods do they overwrite?)
+    # compare to how SimpleQ implemented base
     pass
-
-# todo create custom Env and register this -- later move to prl_environment (?)
-class
 
 
 config = ApexDQNConfig().to_dict()
