@@ -1,7 +1,7 @@
 from typing import List, Type, Tuple, TypeVar
 
 import numpy as np
-from prl.environment.Wrappers.prl_wrappers import Wrapper
+from prl.environment.Wrappers.prl_wrappers import EnvWrapperBase
 from prl.environment.steinberger.PokerRL import NoLimitHoldem, Poker
 
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import PlayerInfo
@@ -28,10 +28,10 @@ DICT_SUITE = {'': -127,
               's': 2,
               'c': 3}
 
-ENV_WRAPPER = TypeVar('ENV_WRAPPER', bound=Wrapper)
+ENV_WRAPPER = TypeVar('ENV_WRAPPER', bound=EnvWrapperBase)
 
 
-def init_wrapped_env(env_wrapper_cls: Type[Wrapper],
+def init_wrapped_env(env_wrapper_cls: Type[EnvWrapperBase],
                      stack_sizes: List[float],
                      multiply_by=100) -> ENV_WRAPPER:  # Tuple[Wrapper, List[int]]:
     """

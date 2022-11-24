@@ -6,6 +6,7 @@ from typing import Union, List, Optional, Dict, Type
 import gym
 import numpy as np
 import ray
+from gym.spaces import Box
 from prl.environment.Wrappers.prl_wrappers import AugmentObservationWrapper
 from ray import tune
 from ray.rllib import MultiAgentEnv, Policy
@@ -524,9 +525,10 @@ def make_rl_env(env_config):
             self._num_envs = env_config['num_envs']
             self.envs = [self._single_env() for _ in range(self._num_envs)]
             self.action_space = self.envs[0].action_space  # not batched, rllib wants that to be for single env
-            self.observation_space = self.envs[
-                0].observation_space  # not batched, rllib wants that to be for single env
-            self.observation_space.dtype = np.float32
+            # self.observation_space = self.envs[
+            #     0].observation_space  # not batched, rllib wants that to be for single env
+            # self.observation_space.dtype = np.float32
+            self.observation_space = Box(low=0.0, high=6.0, shape=(564, ), dtype=np.float64)
             self._agent_ids = set(range(self._num_envs))  # _agent_ids name is enforced by rllib
 
             MultiAgentEnv.__init__(self)
@@ -538,16 +540,19 @@ def make_rl_env(env_config):
         @override(MultiAgentEnv)
         def reset(self):
             self.dones = set()
-            return {i: env.reset() for i, env in enumerate(self.envs)}
+            return {i: env.reset()[0] for i, env in enumerate(self.envs)}
 
         @override(MultiAgentEnv)
         def step(self, action_dict):
+            # agent A acts a --> step(a) --> obs, rew;  rew to A, obs to B?
             obs, rew, done, info = {}, {}, {}, {}
             for i, action in action_dict.items():
                 obs[i], rew[i], done[i], info[i] = self.envs[i].step(action)
                 if done[i]:
                     self.dones.add(i)
             done["__all__"] = len(self.dones) == len(self.envs)
+            # do we have to do a vector of cumulative rewards and select the right one to return?
+            # e.g.  return the added 20 from [10,20,-5,30] and reset it to [10,0,-5,30] etc?
             return obs, rew, done, info
 
         @override(MultiAgentEnv)
@@ -569,7 +574,6 @@ def make_rl_env(env_config):
             if agent_ids is None:
                 agent_ids = list(range(len(self.envs)))
             actions = {agent_id: self.action_space.sample() for agent_id in agent_ids}
-
             return actions
 
         @override(MultiAgentEnv)
