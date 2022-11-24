@@ -18,7 +18,8 @@ from ray.rllib.evaluation import Episode
 from ray.rllib.evaluation.collectors.simple_list_collector import SimpleListCollector
 from ray.rllib.models import MODEL_DEFAULTS
 from ray.rllib.policy.policy import PolicySpec
-from ray.rllib.utils.typing import TrainerConfigDict, TensorStructType, TensorType
+from ray.rllib.utils import override
+from ray.rllib.utils.typing import TrainerConfigDict, TensorStructType, TensorType, MultiAgentDict
 from gym import spaces
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL.game._.rl_env.base.PokerEnv import spaces
@@ -508,46 +509,81 @@ n_players = 3
 starting_stack_size = 2000
 
 
-class RLLibSteinbergerEnv(gym.Env):
-    """Single Env that will be passed to rllib.env.MultiAgentEnv
-    which internally creates n copies and decorates each env-copy with @ray.remote."""
-    def __init__(self, env_config:dict):
-        self._env_cls = env_config['env_wrapper_cls']
-        self._env = init_wrapped_env(self._env_cls, [starting_stack_size for _ in range(n_players)])
-        self._action_space = self._env.action_space
-        self._observation_space = self._env.observation_space
+def make_rl_env(env_config):
+    class _RLLibSteinbergerEnv(MultiAgentEnv):
+        """Single Env that will be passed to rllib.env.MultiAgentEnv
+        which internally creates n copies and decorates each env-copy with @ray.remote."""
 
-    def reset(self):
-        return self._env.reset(config=None)  # config=None because we don't manually initialize deck and player cards
+        def __init__(self, config: EnvContext):
 
-    def step(self, action):
-        return self._env.step(action)
+            self._n_players = env_config['n_players']
+            self._starting_stack_size = env_config['starting_stack_size']
+            self._env_cls = env_config['env_wrapper_cls']
+            self._num_envs = env_config['num_envs']
+            self.envs = [self._single_env() for _ in range(self._num_envs)]
+            self.action_space = self.envs[0].action_space  # not batched, rllib wants that to be for single env
+            self.observation_space = self.envs[
+                0].observation_space  # not batched, rllib wants that to be for single env
+            self._env_ids = set(range(self._num_envs))
 
-    def render(self, mode='human'):
-        pass
+            MultiAgentEnv.__init__(self)
+            self.dones = set()
 
-    @property
-    def action_space(self):
-        return self._action_space
+        def _single_env(self):
+            return init_wrapped_env(self._env_cls, [self._starting_stack_size for _ in range(self._n_players)])
 
-    @property
-    def observation_space(self):
-        return self._observation_space
+        @override(MultiAgentEnv)
+        def reset(self):
+            self.dones = set()
+            return {i: env.reset() for i, env in enumerate(self.envs)}
 
-def steinberger_to_gym_env(config: EnvContext, steinberger_config: dict):
-    return RLLibSteinbergerEnv
+        @override(MultiAgentEnv)
+        def step(self, action_dict):
+            obs, rew, done, info = {}, {}, {}, {}
+            for i, action in action_dict.items():
+                obs[i], rew[i], done[i], info[i] = self.envs[i].step(action)
+                if done[i]:
+                    self.dones.add(i)
+            done["__all__"] = len(self.dones) == len(self.envs)
+            return obs, rew, done, info
 
+        @override(MultiAgentEnv)
+        def render(self, mode='human'):
+            pass
 
-# # todo verify we dont need this but only policies
-# class BaselineAgentAlgorithmConfig(AlgorithmConfig):
-#     """
-#     AlgorithmConfig.build() -> Algorithm(config=self.to_dict()) -> deepcopy(vars(self))
-#     `vars` get set on each chaining call e.g. `AlgorithmConfig.environment(...vars_to_set)`
-#
-#     # Given BaselineAlgorithm we get the config almost for free, except for what happens if the
-#     # ressources are set differently here than in rainbow? for multi agent learning?
-#     """
-#     pass
+        @override(MultiAgentEnv)
+        def observation_space_sample(self, agent_ids: list = None) -> MultiAgentDict:
+            """The name 'agent_ids' is taken from rllib's core fn, although I think env_ids would be better"""
+            if agent_ids is None:
+                agent_ids = list(range(len(self.envs)))
+            obs = {agent_id: self.observation_space.sample() for agent_id in agent_ids}
+
+            return obs
+
+        @override(MultiAgentEnv)
+        def action_space_sample(self, agent_ids: list = None) -> MultiAgentDict:
+            """The name 'agent_ids' is taken from rllib's core fn, although I think env_ids would be better"""
+            if agent_ids is None:
+                agent_ids = list(range(len(self.envs)))
+            actions = {agent_id: self.action_space.sample() for agent_id in agent_ids}
+
+            return actions
+
+        @override(MultiAgentEnv)
+        def action_space_contains(self, x: MultiAgentDict) -> bool:
+            """The name 'agent_ids' is taken from rllib's core fn, although I think env_ids would be better"""
+            if not isinstance(x, dict):
+                return False
+            return all(self.action_space.contains(val) for val in x.values())
+
+        @override(MultiAgentEnv)
+        def observation_space_contains(self, x: MultiAgentDict) -> bool:
+            """The name 'agent_ids' is taken from rllib's core fn, although I think env_ids would be better"""
+            if not isinstance(x, dict):
+                return False
+            return all(self.observation_space.contains(val) for val in x.values())
+
+    return _RLLibSteinbergerEnv
 
 
 class BaselineAgentPolicy(Policy):
@@ -587,28 +623,19 @@ class BaselineAgentPolicy(Policy):
         self.w = weights["w"]
 
 
-# todo implement this second -- later move to agent.py
-class BaselineAgentAlgorithm(Algorithm):
-    # https://docs.ray.io/en/releases-1.11.0/rllib/rllib-concepts.html
-    # todo updated: probably dont even need this class (according to the rockpaperscissors example
-    # todo implement train(), evaluate(), save() and restore()
-    # todo three STRG+LEFT MOUSE on Algorithm base class -- check all methods
-    #  and inspect how other algos implement Algorithm (how many and which methods do they overwrite?)
-    # compare to how SimpleQ implemented base
-    pass
-
-
 # can also debug at select_policy to determine how the id is constructed
 # todo: read  https://github.com/ray-project/ray/blob/master/rllib/examples/rock_paper_scissors_multiagent.py
 config = ApexDQNConfig().to_dict()
 # todo update config with remaining rainbow hyperparams
 config['num_atoms'] = 51
 
-
 # todo build MC-agent custom policy via:
 # https://docs.ray.io/en/releases-1.11.0/rllib/rllib-concepts.html
+RAINBOW_POLICY = "ApexDqnRainbow"
+BASELINE_POLICY = "BaselinePolicy"
 
-def run_heuristic_vs_learned(args, use_lstm=False, algorithm="PG"):
+
+def run_rainbow_vs_baseline_example(env_cls):
     """Run heuristic policies vs a learned agent.
 
     The learned agent should eventually reach a reward of ~5 with
@@ -619,12 +646,12 @@ def run_heuristic_vs_learned(args, use_lstm=False, algorithm="PG"):
 
     def select_policy(agent_id, episode, **kwargs):
         if agent_id == "player_0":
-            return "ApexDqnRainbow"
+            return RAINBOW_POLICY
         else:
-            return "BaselinePolicy"
+            return BASELINE_POLICY
 
     config = {
-        "env": "RockPaperScissors",
+        "env": env_cls,
         "gamma": 0.9,
         # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
         "num_gpus": int(os.environ.get("RLLIB_NUM_GPUS", "0")),
@@ -636,40 +663,33 @@ def run_heuristic_vs_learned(args, use_lstm=False, algorithm="PG"):
         "multiagent": {
             "policies_to_train": ["ApexDqnRainbow"],
             "policies": {
-                "BaselinePolicy": PolicySpec(policy_class=BaselineAgentPolicy),
-                "ApexDqnRainbow": PolicySpec(
-                    config={
+                BASELINE_POLICY: PolicySpec(policy_class=BaselineAgentPolicy),
+                RAINBOW_POLICY: PolicySpec(
+                    config={  # todo make this a complete rainbow policy
                         "model": {"use_lstm": False},
-                        "framework": args.framework,
+                        "framework": "torch",
                     }
                 ),
             },
             "policy_mapping_fn": select_policy,
         },
-        "framework": args.framework,
+        "framework": "torch",
     }
 
     algo = ApexDQN(config=config)
-    for _ in range(args.stop_iters):
+    for _ in range(100000):
         results = algo.train()
         # Timesteps reached.
         if "policy_always_same_reward" not in results["hist_stats"]:
             reward_diff = 0
             continue
         reward_diff = sum(results["hist_stats"]["policy_learned_reward"])
-        if results["timesteps_total"] > args.stop_timesteps:
+        if results["timesteps_total"] > 100000:
             break
         # Reward (difference) reached -> all good, return.
-        elif reward_diff > args.stop_reward:
+        elif reward_diff > 1000:
             return
 
-    # Reward (difference) not reached: Error if `as_test`.
-    if args.as_test:
-        raise ValueError(
-            "Desired reward difference ({}) not reached! Only got to {}.".format(
-                args.stop_reward, reward_diff
-            )
-        )
 
 # ray.tune.run(ApexTrainer,
 #              # config=config,  # todo check whether bottom config overwrites ApexDqnConfig
@@ -681,7 +701,20 @@ def run_heuristic_vs_learned(args, use_lstm=False, algorithm="PG"):
 #              },
 #              )
 if __name__ == '__main__':
-    env_cfg = {'env_wrapper_cls': AugmentObservationWrapper}
-    make_env_fn = partial(steinberger_to_gym_env, steinberger_config=env_cfg)
-    env = make_multi_agent(make_env_fn)()
-    print(env)
+    env_cfg = {'env_wrapper_cls': AugmentObservationWrapper,
+               'n_players': 2,
+               'starting_stack_size': 1000,
+               'num_envs': 2
+               }
+    env_cls = make_rl_env(env_cfg)
+    # dummy_ctx = EnvContext(env_config={},
+    #                        worker_index=0,  # 0 for local worker, >0 for remote workers.
+    #                        vector_index=0,  # uniquely identify env when there are multiple envs per worker
+    #                        remote=False,  # individual sub-envvs should be @ray.remote actors
+    #                        num_workers=0,  # 0 for only local
+    #                        recreated_worker=False
+    #                        )
+    # env = env_cls(dummy_ctx)
+    # print(env)
+    run_rainbow_vs_baseline_example(env_cls)
+
