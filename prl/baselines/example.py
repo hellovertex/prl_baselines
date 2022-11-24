@@ -4,6 +4,7 @@ from functools import partial
 from typing import Union, List, Optional, Dict, Type
 
 import gym
+import numpy as np
 import ray
 from prl.environment.Wrappers.prl_wrappers import AugmentObservationWrapper
 from ray import tune
@@ -19,7 +20,8 @@ from ray.rllib.evaluation.collectors.simple_list_collector import SimpleListColl
 from ray.rllib.models import MODEL_DEFAULTS
 from ray.rllib.policy.policy import PolicySpec
 from ray.rllib.utils import override
-from ray.rllib.utils.typing import TrainerConfigDict, TensorStructType, TensorType, MultiAgentDict
+from ray.rllib.utils.typing import TrainerConfigDict, TensorStructType, TensorType, MultiAgentDict, AlgorithmConfigDict, \
+    EnvCreator
 from gym import spaces
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL.game._.rl_env.base.PokerEnv import spaces
@@ -524,7 +526,8 @@ def make_rl_env(env_config):
             self.action_space = self.envs[0].action_space  # not batched, rllib wants that to be for single env
             self.observation_space = self.envs[
                 0].observation_space  # not batched, rllib wants that to be for single env
-            self._env_ids = set(range(self._num_envs))
+            self.observation_space.dtype = np.float32
+            self._agent_ids = set(range(self._num_envs))  # _agent_ids name is enforced by rllib
 
             MultiAgentEnv.__init__(self)
             self.dones = set()
@@ -608,13 +611,11 @@ class BaselineAgentPolicy(Policy):
                         explore: Optional[bool] = None,
                         timestep: Optional[int] = None,
                         **kwargs, ):
-        # return action batch, RNN states, extra values to include in batch
-        # todo update
+        # todo add MC + fold_prob update here
         return [self.action_space.sample() for _ in obs_batch], [], {}
 
     def learn_on_batch(self, samples):
-        # implement your learning code here
-        return {}  # return stats
+        return None  # we don't train the baseline, it was trained previously
 
     def get_weights(self):
         return {"w": self.w}
@@ -633,6 +634,8 @@ config['num_atoms'] = 51
 # https://docs.ray.io/en/releases-1.11.0/rllib/rllib-concepts.html
 RAINBOW_POLICY = "ApexDqnRainbow"
 BASELINE_POLICY = "BaselinePolicy"
+
+DistributedRainbow = ApexDQN
 
 
 def run_rainbow_vs_baseline_example(env_cls):
@@ -676,7 +679,7 @@ def run_rainbow_vs_baseline_example(env_cls):
         "framework": "torch",
     }
 
-    algo = ApexDQN(config=config)
+    algo = DistributedRainbow(config=config)
     for _ in range(100000):
         results = algo.train()
         # Timesteps reached.
@@ -717,4 +720,3 @@ if __name__ == '__main__':
     # env = env_cls(dummy_ctx)
     # print(env)
     run_rainbow_vs_baseline_example(env_cls)
-
