@@ -533,6 +533,8 @@ def make_rl_env(env_config):
 
             MultiAgentEnv.__init__(self)
             self.dones = set()
+            self.rewards = {}
+            self.acting_seat=None
 
         def _single_env(self):
             return init_wrapped_env(self._env_cls, [self._starting_stack_size for _ in range(self._n_players)])
@@ -540,19 +542,41 @@ def make_rl_env(env_config):
         @override(MultiAgentEnv)
         def reset(self):
             self.dones = set()
+            self.rewards = {}
+            # return only obs nothing else, for each env
+            self.acting_seat = 0
             return {i: env.reset()[0] for i, env in enumerate(self.envs)}
 
+        def cumulate_rewards(self, rew):
+            # update per agent reward
+            if not self.acting_seat in self.rewards:
+                self.rewards[self.acting_seat] = rew
+            else:
+                # update rew of agent on every sub env
+                for key in self.rewards[self.acting_seat].keys():
+                    self.rewards[self.acting_seat][key] += rew[key]
         @override(MultiAgentEnv)
         def step(self, action_dict):
             # agent A acts a --> step(a) --> obs, rew;  rew to A, obs to B?
             obs, rew, done, info = {}, {}, {}, {}
+
             for i, action in action_dict.items():
                 obs[i], rew[i], done[i], info[i] = self.envs[i].step(action)
+                if i in self.rewards:
+                    self.rewards[i] += rew[i]
+                else:
+                    self.rewards[i] = rew[i]
                 if done[i]:
                     self.dones.add(i)
             done["__all__"] = len(self.dones) == len(self.envs)
+
             # do we have to do a vector of cumulative rewards and select the right one to return?
             # e.g.  return the added 20 from [10,20,-5,30] and reset it to [10,0,-5,30] etc?
+            # todo: fix the rewarding of agents AFTER having debug setup ready
+            # self.cumulate_rewards(rew)
+            # self.acting_seat = (self.acting_seat + 1) % self._n_players
+            # rew = self.rewards[self.acting_seat]
+            # self.rewards[self.acting_seat]
             return obs, rew, done, info
 
         @override(MultiAgentEnv)
