@@ -16,6 +16,6 @@ int rank(int c0, int c1,  // player cards
 }
 
 PYBIND11_MODULE(hand_evaluator, handle) {
-    handle.doc() = "This function runs monte carlo simulation to determine a 7-card rank.";
+    handle.doc() = "This function a 7-card Texas Hold-EM Poker card rank.";
     handle.def("rank", &rank);
 }
