@@ -1,5 +1,5 @@
 import click
-from prl.environment.Wrappers.prl_wrappers import AugmentObservationWrapper
+from prl.environment.Wrappers.augment import AugmentObservationWrapper
 
 from csv_writer import CSVWriter
 from hsmithy_parser import HSmithyParser

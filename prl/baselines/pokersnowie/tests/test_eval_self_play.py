@@ -1,7 +1,7 @@
 from typing import List
 
 import numpy as np
-from prl.environment.Wrappers.prl_wrappers import AugmentObservationWrapper
+from prl.environment.Wrappers.augment import AugmentObservationWrapper
 
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import build_cards_state_dict, \
     init_wrapped_env, make_player_cards, make_board_cards

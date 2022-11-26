@@ -1,11 +1,8 @@
-from typing import List, Type, Tuple, TypeVar
+from typing import List, Type, TypeVar
 
 import numpy as np
 from prl.environment.Wrappers.prl_wrappers import EnvWrapperBase
 from prl.environment.steinberger.PokerRL import NoLimitHoldem, Poker
-
-from prl.baselines.supervised_learning.data_acquisition.core.encoder import PlayerInfo
-from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode
 
 DICT_RANK = {'': -127,
              '2': 0,
