@@ -1,0 +1,123 @@
+GameStart
+PokerClient: ExportFormat
+Date: 24/09/2022
+TimeZone: GMT
+Time: 14:20:39
+GameId:40978514
+GameType:NoLimit
+GameCurrency: $
+SmallBlindStake: 1
+BigBlindStake: 2
+AnteStake: 0
+TableName: Table
+Max number of players: 6
+MyPlayerName: hero
+DealerPosition: 5
+Seat 0 snowie1 100
+Seat 1 snowie2 100
+Seat 2 hero 100
+Seat 3 snowie3 100
+Seat 4 snowie4 100
+Seat 5 snowie5 100
+SmallBlind: snowie1 1
+BigBlind: snowie2 2
+Dealt Cards: [Tc5c]
+Move: hero folds 0
+Move: snowie3 raise_bet 4
+Move: snowie4 folds 0
+Move: snowie5 folds 0
+Move: snowie1 folds 0
+Move: snowie2 call_check 2
+FLOP Community Cards:[Jc 7c 2c]
+Move: snowie2 raise_bet 2
+Move: snowie3 call_check 2
+TURN Community Cards:[Jc 7c 2c 5d]
+Move: snowie2 call_check 0
+Move: snowie3 call_check 0
+RIVER Community Cards:[Jc 7c 2c 5d 3d]
+Move: snowie2 raise_bet 3
+Move: snowie3 raise_bet 41
+Move: snowie2 folds 0
+Move: snowie3 uncalled_bet 38
+Winner: snowie3 19.00
+GameEnd
+
+
+GameStart
+PokerClient: ExportFormat
+Date: 24/09/2022
+TimeZone: GMT
+Time: 14:20:48
+GameId:40978522
+GameType:NoLimit
+GameCurrency: $
+SmallBlindStake: 1
+BigBlindStake: 2
+AnteStake: 0
+TableName: Table
+Max number of players: 6
+MyPlayerName: hero
+DealerPosition: 0
+Seat 0 snowie1 99
+Seat 1 snowie2 91
+Seat 2 hero 100
+Seat 3 snowie3 110
+Seat 4 snowie4 100
+Seat 5 snowie5 100
+SmallBlind: snowie2 1
+BigBlind: hero 2
+Dealt Cards: [KdQc]
+Move: snowie3 folds 0
+Move: snowie4 raise_bet 4
+Move: snowie5 folds 0
+Move: snowie1 raise_bet 10
+Move: snowie2 folds 0
+Move: hero call_check 8
+Move: snowie4 folds 0
+FLOP Community Cards:[4c 9h 2h]
+Move: hero call_check 0
+Move: snowie1 call_check 0
+TURN Community Cards:[4c 9h 2h 4s]
+Move: hero raise_bet 25
+Move: snowie1 folds 0
+Move: hero uncalled_bet 25
+Winner: hero 25.00
+GameEnd
+
+
+GameStart
+PokerClient: ExportFormat
+Date: 24/09/2022
+TimeZone: GMT
+Time: 14:21:18
+GameId:40978557
+GameType:NoLimit
+GameCurrency: $
+SmallBlindStake: 1
+BigBlindStake: 2
+AnteStake: 0
+TableName: Table
+Max number of players: 6
+MyPlayerName: hero
+DealerPosition: 1
+Seat 0 snowie1 89
+Seat 1 snowie2 90
+Seat 2 hero 115
+Seat 3 snowie3 110
+Seat 4 snowie4 96
+Seat 5 snowie5 100
+SmallBlind: hero 1
+BigBlind: snowie3 2
+Dealt Cards: [6s6c]
+Move: snowie4 folds 0
+Move: snowie5 folds 0
+Move: snowie1 folds 0
+Move: snowie2 raise_bet 7
+Move: hero raise_bet 23
+Move: snowie3 folds 0
+Move: snowie2 folds 0
+Move: hero uncalled_bet 16
+Winner: hero 16.00
+GameEnd
+
+
