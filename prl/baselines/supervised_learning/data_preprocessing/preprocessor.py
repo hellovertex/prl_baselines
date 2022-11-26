@@ -3,7 +3,7 @@ import os
 from functools import partial
 
 import pandas as pd
-from prl.environment.Wrappers.prl_wrappers import ActionSpace
+from prl.environment.Wrappers.augment import ActionSpace
 from sklearn.utils import resample
 
 from prl.baselines.supervised_learning.config import DATA_DIR

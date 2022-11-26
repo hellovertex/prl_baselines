@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from prefetch_generator import BackgroundGenerator
-from prl.environment.Wrappers.prl_wrappers import ActionSpace
+from prl.environment.Wrappers.augment import ActionSpace
 from tensorboardX import SummaryWriter
 from torch import nn
 from torch.utils.data import random_split, DataLoader
