@@ -1,7 +1,7 @@
 from typing import List, Type, TypeVar
 
 import numpy as np
-from prl.environment.Wrappers.prl_wrappers import EnvWrapperBase
+from prl.environment.Wrappers.base import EnvWrapperBase
 from prl.environment.steinberger.PokerRL import NoLimitHoldem, Poker
 
 DICT_RANK = {'': -127,

@@ -9,7 +9,7 @@ import torch
 import torch.nn.functional as F
 from matplotlib import pyplot as plt
 from prefetch_generator import BackgroundGenerator
-from prl.environment.Wrappers.prl_wrappers import ActionSpace
+from prl.environment.Wrappers.base import ActionSpace
 from sklearn.metrics import confusion_matrix
 from tensorboardX import SummaryWriter
 from torch import nn
