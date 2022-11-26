@@ -3,7 +3,7 @@ from typing import List, Union, Tuple
 
 import numpy as np
 import torch
-from prl.environment.Wrappers.prl_wrappers import ActionSpace
+from prl.environment.Wrappers.base import ActionSpace
 
 from prl.baselines.supervised_learning.models.nn_model import MLP
 from prl.baselines.cpp_hand_evaluator.monte_carlo import HandEvaluator_MonteCarlo

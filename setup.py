@@ -22,5 +22,5 @@ setup(
         "Intended Audience :: Science/Research",
         "Operating System :: OS Independent",
     ],
-    packages=find_namespace_packages(),
+    packages=find_namespace_packages(include=["prl.*"]),
 )
