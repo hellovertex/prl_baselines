@@ -1,31 +1,18 @@
 import os
 from typing import Dict, Union, Optional
 
-import numpy as np
-from gym.spaces import Box
+from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.multi_agent.utils import make_multi_agent_env
+from ray.rllib import RolloutWorker, BaseEnv
 from ray.rllib.algorithms.callbacks import DefaultCallbacks
 from ray.rllib.algorithms.simple_q import SimpleQ
 from ray.rllib.evaluation import Episode
 from ray.rllib.evaluation.episode_v2 import EpisodeV2
-
-from prl.baselines.agents.policies import RandomPolicy, CallingStation, AlwaysMinRaise
-from prl.environment.Wrappers.augment import AugmentObservationWrapper
-from prl.environment.Wrappers.utils import init_wrapped_env
-from ray.rllib import MultiAgentEnv, RolloutWorker, BaseEnv
-from ray.rllib.algorithms.apex_dqn import ApexDQN, ApexDQNConfig
-from ray.rllib.env import EnvContext
 from ray.rllib.policy.policy import PolicySpec, Policy
-from ray.rllib.utils import override
-from ray.rllib.utils.typing import MultiAgentDict, PolicyID
+from ray.rllib.utils.typing import PolicyID
 
-n_players = 3
-starting_stack_size = 2000
+from prl.baselines.agents.policies import AlwaysMinRaise, StakeLevelImitationPolicy
 
-# todo update config with remaining rainbow hyperparams
-# config = ApexDQNConfig().to_dict()
-# config['num_atoms'] = 51
-# config['log_level'] = "DEBUG"
 RAINBOW_POLICY = "SimpleQ"
 BASELINE_POLICY = "AlwaysMinRaise"
 
@@ -67,7 +54,6 @@ class OurRllibCallbacks(DefaultCallbacks):
         """
         print(f'FROM WITHIN EPISODE END CB')
         print(f"EPISODE = {episode}")
-
 
     def on_episode_step(
             self,
@@ -143,7 +129,7 @@ def run_rainbow_vs_baseline_example(env_cls):
                         "framework": "torch",
                     }
                 ),
-                BASELINE_POLICY: PolicySpec(policy_class=AlwaysMinRaise),
+                BASELINE_POLICY: PolicySpec(policy_class=StakeLevelImitationPolicy),
             },
             "policy_mapping_fn": select_policy,
         },
@@ -164,7 +150,6 @@ def run_rainbow_vs_baseline_example(env_cls):
         # Reward (difference) reached -> all good, return.
         elif reward_diff > 1000:
             return
-
 
 
 BASELINE_AGENT = "Baseline"
