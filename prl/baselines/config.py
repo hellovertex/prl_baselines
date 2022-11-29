@@ -77,7 +77,7 @@ COMMON_CONFIG: TrainerConfigDict = {
     # === Environment Settings ===
     # Number of steps after which the episode is forced to terminate. Defaults
     # to `env.spec.max_episode_steps` (if present) for Gym envs.
-    "horizon": None,
+    "horizon": 100,
     # Calculate rewards but don't reset the environment when the horizon is
     # hit. This allows value estimation and RNN state to span across logical
     # episodes denoted by horizon. This only has an effect if horizon != inf.

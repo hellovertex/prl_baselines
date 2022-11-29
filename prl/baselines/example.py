@@ -68,6 +68,7 @@ class OurRllibCallbacks(DefaultCallbacks):
         print(f'FROM WITHIN EPISODE END CB')
         print(f"EPISODE = {episode}")
 
+
     def on_episode_step(
             self,
             *,
@@ -98,6 +99,7 @@ class OurRllibCallbacks(DefaultCallbacks):
         """
         print(f'FROM WITHIN EPISODE STEP CB')
         print(f"EPISODE = {episode}")
+        # pass
 
 
 def run_rainbow_vs_baseline_example(env_cls):
@@ -126,8 +128,9 @@ def run_rainbow_vs_baseline_example(env_cls):
         "num_envs_per_worker": 4,
         "rollout_fragment_length": 10,
         "train_batch_size": 200,
-        "metrics_num_episodes_for_smoothing": 200,
+        "metrics_num_episodes_for_smoothing": 20,
         "log_level": "DEBUG",
+        "horizon": 100,
         "callbacks": OurRllibCallbacks,
         "replay_buffer_config": {**SimpleQ.get_default_config()["replay_buffer_config"],
                                  "capacity": 1000},
@@ -163,6 +166,10 @@ def run_rainbow_vs_baseline_example(env_cls):
             return
 
 
+
+BASELINE_AGENT = "Baseline"
+TRAINABLE_AGENT = "Trainable"
+
 # ray.tune.run(ApexTrainer,
 #              # config=config,  # todo check whether bottom config overwrites ApexDqnConfig
 #              config={
@@ -174,6 +181,8 @@ def run_rainbow_vs_baseline_example(env_cls):
 #              )
 if __name__ == '__main__':
     env_cfg = {'env_wrapper_cls': AugmentObservationWrapper,
+               'agents': {0: BASELINE_AGENT,
+                          1: TRAINABLE_AGENT},
                'n_players': 2,
                'starting_stack_size': 1000,
                'num_envs': 2
