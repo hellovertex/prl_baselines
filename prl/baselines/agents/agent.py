@@ -7,7 +7,7 @@ from prl.environment.Wrappers.base import ActionSpace
 
 from prl.baselines.supervised_learning.models.nn_model import MLP
 from prl.baselines.cpp_hand_evaluator.monte_carlo import HandEvaluator_MonteCarlo
-from  ray.rllib.policy.policy import Policy
+from ray.rllib.policy.policy import Policy
 
 IDX_C0_0 = 167  # feature_names.index('0th_player_card_0_rank_0')
 IDX_C0_1 = 184  # feature_names.index('0th_player_card_1_rank_0')
@@ -219,4 +219,3 @@ class Agent:
         fold_prob = self._fold_prob(win_prob)
         # from fold prob get policy and from policy, return action
         action = self._policy.sample(obs, fold_prob)
-

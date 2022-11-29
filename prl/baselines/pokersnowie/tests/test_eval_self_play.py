@@ -1,11 +1,9 @@
 from typing import List
 
 import numpy as np
+from prl.baselines.supervised_learning.data_acquisition.environment_utils import build_cards_state_dict
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
-
-from prl.baselines.supervised_learning.data_acquisition.environment_utils import build_cards_state_dict, \
-    init_wrapped_env, make_player_cards, make_board_cards
-
+from prl.environment.Wrappers.utils import init_wrapped_env
 
 IDX_C0_0 = 167  # feature_names.index('0th_player_card_0_rank_0')
 IDX_C0_1 = 184  # feature_names.index('0th_player_card_1_rank_0')
@@ -203,10 +201,10 @@ def test_get_cards():
     state_dict = {'deck_state_dict': cards_state_dict}
 
     obs, _, done, _ = env.reset(config=state_dict)
-    obs, _, done, _ = env.step((1,-1))
-    obs, _, done, _ = env.step((1,-1))
-    obs, _, done, _ = env.step((1,-1))
-    obs, _, done, _ = env.step((1,-1))
+    obs, _, done, _ = env.step((1, -1))
+    obs, _, done, _ = env.step((1, -1))
+    obs, _, done, _ = env.step((1, -1))
+    obs, _, done, _ = env.step((1, -1))
 
     # Act
     board_mask = obs[IDX_BOARD_START:IDX_BOARD_END].astype(int)

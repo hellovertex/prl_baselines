@@ -25,40 +25,6 @@ DICT_SUITE = {'': -127,
               's': 2,
               'c': 3}
 
-ENV_WRAPPER = TypeVar('ENV_WRAPPER', bound=EnvWrapperBase)
-
-
-def init_wrapped_env(env_wrapper_cls: Type[EnvWrapperBase],
-                     stack_sizes: List[float],
-                     multiply_by=100) -> ENV_WRAPPER:  # Tuple[Wrapper, List[int]]:
-    """
-    Wraps a NoLimitHoldEm instance with a custom wrapper class.
-    Returns the initialized (not reset yet!) environment, together with
-    a list of integer starting stacks.
-    i) Use multiplier of 100 to convert two-decimal floats to integer
-    ii) Assumes Btn is at stack_sizes index 0.
-    :param env_wrapper_cls: Custom implementation of NoLimitHoldem-Wrapper
-    :param stack_sizes: List of starting stack sizes. Starts with Button.
-
-    # keep this to make sure nobody forgets removing the decimals
-    :param multiply_by: Default is 100 to convert two-decimal floats to int.
-    :return: Returns the initialized (not reset yet!) environment, together with
-    a list of starting stacks. Starting stacks begin with the BTN.
-    """
-    # get starting stacks, starting with button at index 0
-    starting_stack_sizes_list = [int(float(stack) * multiply_by) for stack in stack_sizes]
-
-    # make args for env
-    args = NoLimitHoldem.ARGS_CLS(n_seats=len(stack_sizes),
-                                  starting_stack_sizes_list=starting_stack_sizes_list)
-    # return wrapped env instance
-    env = NoLimitHoldem(is_evaluating=True,
-                        env_args=args,
-                        lut_holder=NoLimitHoldem.get_lut_holder())
-    wrapped_env = env_wrapper_cls(env)
-    return wrapped_env  # todo urgent replace:, starting_stack_sizes_list
-
-
 def card_tokens(cards: str) -> List[str]:
     """
     Examples:
