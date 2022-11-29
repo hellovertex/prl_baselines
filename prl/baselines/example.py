@@ -1,30 +1,103 @@
 import os
+from typing import Dict, Union, Optional
 
 import numpy as np
 from gym.spaces import Box
 from prl.environment.multi_agent.utils import make_multi_agent_env
+from ray.rllib.algorithms.callbacks import DefaultCallbacks
+from ray.rllib.algorithms.simple_q import SimpleQ
+from ray.rllib.evaluation import Episode
+from ray.rllib.evaluation.episode_v2 import EpisodeV2
 
-from prl.baselines.agents.policies import RandomPolicy
+from prl.baselines.agents.policies import RandomPolicy, CallingStation, AlwaysMinRaise
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
-from ray.rllib import MultiAgentEnv
+from ray.rllib import MultiAgentEnv, RolloutWorker, BaseEnv
 from ray.rllib.algorithms.apex_dqn import ApexDQN, ApexDQNConfig
 from ray.rllib.env import EnvContext
-from ray.rllib.policy.policy import PolicySpec
+from ray.rllib.policy.policy import PolicySpec, Policy
 from ray.rllib.utils import override
-from ray.rllib.utils.typing import MultiAgentDict
+from ray.rllib.utils.typing import MultiAgentDict, PolicyID
 
 n_players = 3
 starting_stack_size = 2000
 
-
 # todo update config with remaining rainbow hyperparams
-config = ApexDQNConfig().to_dict()
-config['num_atoms'] = 51
-RAINBOW_POLICY = "ApexDqnRainbow"
-BASELINE_POLICY = "RandomPolicy"
+# config = ApexDQNConfig().to_dict()
+# config['num_atoms'] = 51
+# config['log_level'] = "DEBUG"
+RAINBOW_POLICY = "SimpleQ"
+BASELINE_POLICY = "AlwaysMinRaise"
 
-DistributedRainbow = ApexDQN
+DistributedRainbow = SimpleQ
+
+
+class OurRllibCallbacks(DefaultCallbacks):
+    def on_episode_end(
+            self,
+            *,
+            worker: "RolloutWorker",
+            base_env: BaseEnv,
+            policies: Dict[PolicyID, Policy],
+            episode: Union[Episode, EpisodeV2, Exception],
+            env_index: Optional[int] = None,
+            **kwargs,
+    ) -> None:
+        """Runs when an episode is done.
+
+        Args:
+            worker: Reference to the current rollout worker.
+            base_env: BaseEnv running the episode. The underlying
+                sub environment objects can be retrieved by calling
+                `base_env.get_sub_environments()`.
+            policies: Mapping of policy id to policy
+                objects. In single agent mode there will only be a single
+                "default_policy".
+            episode: Episode object which contains episode
+                state. You can use the `episode.user_data` dict to store
+                temporary data, and `episode.custom_metrics` to store custom
+                metrics for the episode.
+                In case of environment failures, episode may also be an Exception
+                that gets thrown from the environment before the episode finishes.
+                Users of this callback may then handle these error cases properly
+                with their custom logics.
+            env_index: The index of the sub-environment that ended the episode
+                (within the vector of sub-environments of the BaseEnv).
+            kwargs: Forward compatibility placeholder.
+        """
+        print(f'FROM WITHIN EPISODE END CB')
+        print(f"EPISODE = {episode}")
+
+    def on_episode_step(
+            self,
+            *,
+            worker: "RolloutWorker",
+            base_env: BaseEnv,
+            policies: Optional[Dict[PolicyID, Policy]] = None,
+            episode: Union[Episode, EpisodeV2],
+            env_index: Optional[int] = None,
+            **kwargs,
+    ) -> None:
+        """Runs on each episode step.
+
+        Args:
+            worker: Reference to the current rollout worker.
+            base_env: BaseEnv running the episode. The underlying
+                sub environment objects can be retrieved by calling
+                `base_env.get_sub_environments()`.
+            policies: Mapping of policy id to policy objects.
+                In single agent mode there will only be a single
+                "default_policy".
+            episode: Episode object which contains episode
+                state. You can use the `episode.user_data` dict to store
+                temporary data, and `episode.custom_metrics` to store custom
+                metrics for the episode.
+            env_index: The index of the sub-environment that stepped the episode
+                (within the vector of sub-environments of the BaseEnv).
+            kwargs: Forward compatibility placeholder.
+        """
+        print(f'FROM WITHIN EPISODE STEP CB')
+        print(f"EPISODE = {episode}")
 
 
 def run_rainbow_vs_baseline_example(env_cls):
@@ -37,7 +110,9 @@ def run_rainbow_vs_baseline_example(env_cls):
     """
 
     def select_policy(agent_id, episode, **kwargs):
-        if agent_id == "player_0":
+        # if "player" not in agent_id:
+        #     raise ValueError("WRONG AGENT ID")
+        if agent_id == 0:
             return RAINBOW_POLICY
         else:
             return BASELINE_POLICY
@@ -52,16 +127,20 @@ def run_rainbow_vs_baseline_example(env_cls):
         "rollout_fragment_length": 10,
         "train_batch_size": 200,
         "metrics_num_episodes_for_smoothing": 200,
+        "log_level": "DEBUG",
+        "callbacks": OurRllibCallbacks,
+        "replay_buffer_config": {**SimpleQ.get_default_config()["replay_buffer_config"],
+                                 "capacity": 1000},
         "multiagent": {
-            "policies_to_train": ["ApexDqnRainbow"],
+            "policies_to_train": [RAINBOW_POLICY],
             "policies": {
-                BASELINE_POLICY: PolicySpec(policy_class=RandomPolicy),
                 RAINBOW_POLICY: PolicySpec(
                     config={  # todo make this a complete rainbow policy
                         "model": {"use_lstm": False},
                         "framework": "torch",
                     }
                 ),
+                BASELINE_POLICY: PolicySpec(policy_class=AlwaysMinRaise),
             },
             "policy_mapping_fn": select_policy,
         },
@@ -69,7 +148,8 @@ def run_rainbow_vs_baseline_example(env_cls):
     }
 
     algo = DistributedRainbow(config=config)
-    for _ in range(100000):
+
+    for _ in range(3):
         results = algo.train()
         # Timesteps reached.
         if "policy_always_same_reward" not in results["hist_stats"]:

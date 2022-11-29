@@ -128,9 +128,8 @@ DICT_CARDS_HAND_EVALUATOR = {'As': 0,
                              '2c': 51}
 
 
-
 def playground():
-    import prl.environment.steinberger.PokerRL.game._.look_up_table as lut
+    pass
     # lh = env.env.get_lut_holder()  # todo: rename env.env to env.base_env
     # from prl.environment.steinberger.PokerRL.game._.cpp_wrappers.CppHandeval import CppHandeval
     # cpp_poker = CppHandeval()

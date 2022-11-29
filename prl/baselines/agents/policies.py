@@ -22,6 +22,21 @@ class CallingStation(BaselinePolicy_Base):
         return [np.int64(1) for _ in obs_batch], [], {}
 
 
+class AlwaysMinRaise(BaselinePolicy_Base):
+    """Policy that always min-raises"""
+
+    def compute_actions(self, obs_batch: Union[List[TensorStructType], TensorStructType],
+                        state_batches: Optional[List[TensorType]] = None,
+                        prev_action_batch: Union[List[TensorStructType], TensorStructType] = None,
+                        prev_reward_batch: Union[List[TensorStructType], TensorStructType] = None,
+                        info_batch: Optional[Dict[str, list]] = None,
+                        episodes: Optional[List["Episode"]] = None,
+                        explore: Optional[bool] = None,
+                        timestep: Optional[int] = None,
+                        **kwargs, ):
+        return [np.int64(2) for _ in obs_batch], [], {}
+
+
 class RandomPolicy(BaselinePolicy_Base):
     """Policy that returns Random Actions"""
 
