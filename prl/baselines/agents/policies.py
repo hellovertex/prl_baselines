@@ -11,6 +11,7 @@ from ray.rllib.utils.typing import TensorStructType, TensorType
 from prl.baselines.agents.core.policy_base import BaselinePolicy_Base
 from prl.baselines.cpp_hand_evaluator.monte_carlo import HandEvaluator_MonteCarlo
 from prl.baselines.supervised_learning.models.nn_model import MLP
+from prl.baselines.cpp_hand_evaluator.rank import dict_str_to_sk
 
 IDX_C0_0 = 167  # feature_names.index('0th_player_card_0_rank_0')
 IDX_C0_1 = 184  # feature_names.index('0th_player_card_1_rank_0')
@@ -26,12 +27,6 @@ BOARD_BITS = np.array(['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K
                        '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', 'h',
                        'd', 's', 'c', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J',
                        'Q', 'K', 'A', 'h', 'd', 's', 'c'])
-DICT_CARDS_HAND_EVALUATOR = {'As': 0, 'Ah': 1, 'Ad': 2, 'Ac': 3, 'Ks': 4, 'Kh': 5, 'Kd': 6, 'Kc': 7, 'Qs': 8, 'Qh': 9,
-                             'Qd': 10, 'Qc': 11, 'Js': 12, 'Jh': 13, 'Jd': 14, 'Jc': 15, 'Ts': 16, 'Th': 17, 'Td': 18,
-                             'Tc': 19, '9s': 20, '9h': 21, '9d': 22, '9c': 23, '8s': 24, '8h': 25, '8d': 26, '8c': 27,
-                             '7s': 28, '7h': 29, '7d': 30, '7c': 31, '6s': 32, '6h': 33, '6d': 34, '6c': 35, '5s': 36,
-                             '5h': 37, '5d': 38, '5c': 39, '4s': 40, '4h': 41, '4d': 42, '4c': 43, '3s': 44, '3h': 45,
-                             '3d': 46, '3c': 47, '2s': 48, '2h': 49, '2d': 50, '2c': 51}
 
 
 class ModelType(enum.IntEnum):
@@ -64,13 +59,13 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
 
     def card_bit_mask_to_int(self, c0: np.array, c1: np.array, board_mask: np.array) -> Tuple[List[int], List[int]]:
         # todo: docstring and test
-        c0_1d = DICT_CARDS_HAND_EVALUATOR[CARD_BITS[c0][0] + CARD_BITS[c0][1]]
-        c1_1d = DICT_CARDS_HAND_EVALUATOR[CARD_BITS[c1][0] + CARD_BITS[c1][1]]
+        c0_1d = dict_str_to_sk[CARD_BITS[c0][0] + CARD_BITS[c0][1]]
+        c1_1d = dict_str_to_sk[CARD_BITS[c1][0] + CARD_BITS[c1][1]]
         board = BOARD_BITS[board_mask.astype(bool)]
 
         board_cards = []
         for i in range(0, sum(board_mask) - 1, 2):  # sum is 6,8,10 for flop turn river resp.
-            board_cards.append(DICT_CARDS_HAND_EVALUATOR[board[i] + board[i + 1]])
+            board_cards.append(dict_str_to_sk[board[i] + board[i + 1]])
 
         return [c0_1d, c1_1d], board_cards
 
