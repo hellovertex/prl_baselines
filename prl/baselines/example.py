@@ -11,7 +11,7 @@ from ray.rllib.evaluation.episode_v2 import EpisodeV2
 from ray.rllib.policy.policy import PolicySpec, Policy
 from ray.rllib.utils.typing import PolicyID
 
-from prl.baselines.agents.policies import AlwaysMinRaise, StakeLevelImitationPolicy
+from prl.baselines.agents.policies import StakeLevelImitationPolicy
 
 RAINBOW_POLICY = "SimpleQ"
 BASELINE_POLICY = "AlwaysMinRaise"

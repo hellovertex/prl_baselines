@@ -8,55 +8,9 @@ from prl.environment.Wrappers.base import ActionSpace
 from ray.rllib.evaluation import Episode
 from ray.rllib.utils.typing import TensorStructType, TensorType
 
-from prl.baselines.agents.core.policies.policy_base import BaselinePolicy_Base
+from prl.baselines.agents.core.policy_base import BaselinePolicy_Base
 from prl.baselines.cpp_hand_evaluator.monte_carlo import HandEvaluator_MonteCarlo
 from prl.baselines.supervised_learning.models.nn_model import MLP
-
-
-class CallingStation(BaselinePolicy_Base):
-    """Policy that always calls"""
-
-    def compute_actions(self, obs_batch: Union[List[TensorStructType], TensorStructType],
-                        state_batches: Optional[List[TensorType]] = None,
-                        prev_action_batch: Union[List[TensorStructType], TensorStructType] = None,
-                        prev_reward_batch: Union[List[TensorStructType], TensorStructType] = None,
-                        info_batch: Optional[Dict[str, list]] = None,
-                        episodes: Optional[List["Episode"]] = None,
-                        explore: Optional[bool] = None,
-                        timestep: Optional[int] = None,
-                        **kwargs, ):
-        return [np.int64(1) for _ in obs_batch], [], {}
-
-
-class AlwaysMinRaise(BaselinePolicy_Base):
-    """Policy that always min-raises"""
-
-    def compute_actions(self, obs_batch: Union[List[TensorStructType], TensorStructType],
-                        state_batches: Optional[List[TensorType]] = None,
-                        prev_action_batch: Union[List[TensorStructType], TensorStructType] = None,
-                        prev_reward_batch: Union[List[TensorStructType], TensorStructType] = None,
-                        info_batch: Optional[Dict[str, list]] = None,
-                        episodes: Optional[List["Episode"]] = None,
-                        explore: Optional[bool] = None,
-                        timestep: Optional[int] = None,
-                        **kwargs, ):
-        return [np.int64(2) for _ in obs_batch], [], {}
-
-
-class RandomPolicy(BaselinePolicy_Base):
-    """Policy that returns Random Actions"""
-
-    def compute_actions(self, obs_batch: Union[List[TensorStructType], TensorStructType],
-                        state_batches: Optional[List[TensorType]] = None,
-                        prev_action_batch: Union[List[TensorStructType], TensorStructType] = None,
-                        prev_reward_batch: Union[List[TensorStructType], TensorStructType] = None,
-                        info_batch: Optional[Dict[str, list]] = None,
-                        episodes: Optional[List["Episode"]] = None,
-                        explore: Optional[bool] = None,
-                        timestep: Optional[int] = None,
-                        **kwargs, ):
-        return [self.action_space.sample() for _ in obs_batch], [], {}
-
 
 IDX_C0_0 = 167  # feature_names.index('0th_player_card_0_rank_0')
 IDX_C0_1 = 184  # feature_names.index('0th_player_card_1_rank_0')
@@ -120,7 +74,7 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
 
         return [c0_1d, c1_1d], board_cards
 
-    def look_at_cards(self, obs: np.array, feature_names=None) -> Tuple[List[int], List[int]]:
+    def look_at_cards(self, obs: np.array) -> Tuple[List[int], List[int]]:
         # todo: docstring and test
         c0 = obs[IDX_C0_0:IDX_C0_1].astype(bool)  # bit representation
         c1 = obs[IDX_C1_0:IDX_C1_1].astype(bool)  # bit representation
@@ -128,7 +82,7 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
         return self.card_bit_mask_to_int(c0, c1, board_mask)
 
     def compute_action(self, obs: Union[List, np.ndarray]):
-        hero_cards_1d, board_cards_1d = self.look_at_cards(obs, self._feature_names)
+        hero_cards_1d, board_cards_1d = self.look_at_cards(obs)
         # from cards get winning probability
         mc_dict = self._card_evaluator.run_mc(hero_cards_1d, board_cards_1d, 2, n_iter=self._mc_iters)
         # {won: 0, lost: 0, tied: 0}
