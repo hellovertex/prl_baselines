@@ -1,12 +1,12 @@
 import random
 from hand_evaluator import rank
 
-
+LEN_DECK_WITHOUT_HERO_AND_BOARD_CARDS = 45  # 52 - 2 - 5
 class HandEvaluator_MonteCarlo:
 
     # def mc(self, id_caller_thread, deck, hero_cards_1d, board_cards_1d, n_opponents, n_iter):
     def mc(self, deck, hero_cards_1d, board_cards_1d, n_opponents, n_iter):
-        n_missing_board_cards = len(deck) - 45
+        n_missing_board_cards = len(deck) - LEN_DECK_WITHOUT_HERO_AND_BOARD_CARDS
         cards_to_sample = 2 * n_opponents + n_missing_board_cards
 
         won = 0
@@ -19,7 +19,7 @@ class HandEvaluator_MonteCarlo:
             if n_missing_board_cards == 0:
                 board = board_cards_1d
             else:
-                board = board_cards_1d[:-n_missing_board_cards] + drawn_cards_1d[-n_missing_board_cards:]
+                board = board_cards_1d + drawn_cards_1d[-n_missing_board_cards:]
 
             # rank hero hand
             hero_hand = hero_cards_1d + board
