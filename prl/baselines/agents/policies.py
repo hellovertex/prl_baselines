@@ -122,8 +122,13 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
         # 3. if EHS < .5 and random(0,1) > tightness: fold
         # 4. if acceptance_level < max(model(obs)): return argmax(model(obs)))
         # 5. else: return fold or return max(fold*tightness, max(model(obs)))
-
+        if type(obs_batch) == dict or type(obs_batch[0]) == dict:
+            raise NotImplementedError("Expected flattened observation. If observation is dictionary, e.g."
+                                      "containing 'legal_moves' mask, make sure to enable rllib preprocessor"
+                                      "api or set 'mask_legal_moves':False in the environment config.")
         # the legal moves are the first three bits of each observation, as of rllib v2.1.0
+        # Tuple and Dict observations are flattened by the preprocessor
+        # we postpone implementing our own and use this implicit conversion for now
         self._legal_moves = obs_batch[:, :3]
         # extract legal move bits to obtain original observations
         obs_batch = obs_batch[:, 3:]
