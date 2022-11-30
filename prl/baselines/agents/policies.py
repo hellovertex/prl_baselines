@@ -122,18 +122,18 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
         # 3. if EHS < .5 and random(0,1) > tightness: fold
         # 4. if acceptance_level < max(model(obs)): return argmax(model(obs)))
         # 5. else: return fold or return max(fold*tightness, max(model(obs)))
-        if type(obs_batch) == dict or type(obs_batch[0]) == dict:
-            raise NotImplementedError("Expected flattened observation. If observation is dictionary, e.g."
-                                      "containing 'legal_moves' mask, make sure to enable rllib preprocessor"
-                                      "api or set 'mask_legal_moves':False in the environment config.")
+        if not (type(obs_batch) == dict or type(obs_batch[0]) == dict):
+            raise NotImplementedError("Observation should be dictionary, i.e."
+                                      "containing 'legal_moves' mask. Make sure to disable rllib preprocessor"
+                                      "api in the environment config to avoid auto-flattening observation.")
         # the legal moves are the first three bits of each observation, as of rllib v2.1.0
         # Tuple and Dict observations are flattened by the preprocessor
         # we postpone implementing our own and use this implicit conversion for now
-        self._legal_moves = obs_batch[:, :3]
+        self._legal_moves = obs_batch['legal_moves']
         # extract legal move bits to obtain original observations
-        obs_batch = obs_batch[:, 3:]
-        self._predictions = torch.argmax(self._model(torch.Tensor(obs_batch)), axis=1)
-        return [self.compute_action(aid, obs) for aid, obs in enumerate(obs_batch)], [], {}
+        observations = obs_batch['obs']
+        self._predictions = torch.argmax(self._model(torch.Tensor(observations)), axis=1)
+        return [self.compute_action(aid, obs) for aid, obs in enumerate(observations)], [], {}
 
     def load_model(self, model_type: BaselineModelType = BaselineModelType.MLP_2x512):
         if model_type == BaselineModelType.MLP_2x512:
