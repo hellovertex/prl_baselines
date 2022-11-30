@@ -32,7 +32,7 @@ RANK = 0
 SUITE = 1
 
 
-class ModelType(enum.IntEnum):
+class BaselineModelType(enum.IntEnum):
     MLP_2x512 = 10
     RANDOM_FOREST = 20
 
@@ -135,8 +135,8 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
         self._predictions = torch.argmax(self._model(torch.Tensor(obs_batch)), axis=1)
         return [self.compute_action(aid, obs) for aid, obs in enumerate(obs_batch)], [], {}
 
-    def load_model(self, model_type: ModelType = ModelType.MLP_2x512):
-        if model_type == ModelType.MLP_2x512:
+    def load_model(self, model_type: BaselineModelType = BaselineModelType.MLP_2x512):
+        if model_type == BaselineModelType.MLP_2x512:
             input_dim = len(FeatureEnum)
             classes = [ActionSpace.FOLD,
                        ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED in CHECK_CALL
