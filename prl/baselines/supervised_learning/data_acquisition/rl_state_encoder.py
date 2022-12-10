@@ -9,6 +9,8 @@ from core.parser import PokerEpisode, Action, ActionType, Blind, PlayerWithCards
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import DICT_RANK, DICT_SUITE, \
     make_board_cards, card_tokens, card
 
+MULTIPLY_BY = 100  # because env expects Integers, we convert $2,58 to $258
+
 
 class RLStateEncoder(Encoder):
     Observations = Optional[List[List]]
@@ -55,19 +57,19 @@ class RLStateEncoder(Encoder):
         return card_list
 
     @staticmethod
-    def build_action(action: Action, multiply_by=100):
+    def build_action(action: Action):
         """Under Construction."""
-        return action.action_type.value, round(float(action.raise_amount) * multiply_by)
+        return action.action_type.value, round(float(action.raise_amount) * MULTIPLY_BY)
 
-    def make_blinds(self, blinds: List[Blind], multiply_by: int = 100):
+    def make_blinds(self, blinds: List[Blind]):
         """Under Construction."""
         assert len(blinds) == 2
         sb = blinds[0]
         assert sb.type == 'small blind'
         bb = blinds[1]
         assert bb.type == 'big blind'
-        return int(float(sb.amount.split(self._currency_symbol)[1]) * multiply_by), \
-               int(float(bb.amount.split(self._currency_symbol)[1]) * multiply_by)
+        return int(float(sb.amount.split(self._currency_symbol)[1]) * MULTIPLY_BY), \
+            int(float(bb.amount.split(self._currency_symbol)[1]) * MULTIPLY_BY)
 
     def make_showdown_hands(self, table: Tuple[PlayerInfo], showdown: List[PlayerWithCards]):
         """Under Construction. """
@@ -119,7 +121,7 @@ class RLStateEncoder(Encoder):
         for seat_idx, seat in enumerate(episode.player_stacks):
             seat_number = int(seat.seat_display_name[5])
             player_name = seat.player_name
-            stack_size = float(seat.stack[1:])
+            stack_size = float(seat.stack[1:]) * MULTIPLY_BY
             position_index = rolled_position_indices[seat_idx]
             position = Positions6Max(position_index).name
             player_info[position] = PlayerInfo(seat_number,  # 2
@@ -161,9 +163,9 @@ class RLStateEncoder(Encoder):
         # will be used for naming feature index in training data vector
         self._feature_names = list(self._wrapped_env.obs_idx_dict.keys()) + ["button_index"]
 
-    def _make_ante(self, ante: str, multiply_by=100) -> float:
+    def _make_ante(self, ante: str) -> float:
         """Converts ante string to float, e.g. '$0.00' -> float(0.00)"""
-        return float(ante.split(self._currency_symbol)[1]) * multiply_by
+        return float(ante.split(self._currency_symbol)[1]) * MULTIPLY_BY
 
     def _simulate_environment(self, env, episode, cards_state_dict, table, starting_stack_sizes_list,
                               selected_players=None):
@@ -268,8 +270,7 @@ class RLStateEncoder(Encoder):
         starting_stack_sizes_list = [int(float(stack) * 100) for stack in stacks]
         self._init_wrapped_env(starting_stack_sizes_list)
 
-        self._wrapped_env.env.SMALL_BLIND, self._wrapped_env.env.BIG_BLIND = self.make_blinds(episode.blinds,
-                                                                                              multiply_by=100)
+        self._wrapped_env.env.SMALL_BLIND, self._wrapped_env.env.BIG_BLIND = self.make_blinds(episode.blinds)
         self._wrapped_env.env.ANTE = self._make_ante(episode.ante)
         cards_state_dict = self._build_cards_state_dict(table, episode)
 
