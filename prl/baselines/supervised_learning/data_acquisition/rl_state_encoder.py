@@ -58,7 +58,12 @@ class RLStateEncoder(Encoder):
 
     @staticmethod
     def build_action(action: Action):
-        """Under Construction."""
+        """Be careful with float-to-int conversion:
+        >>> round(8.62 * 100)
+        862
+        >>> int(8.62 * 100)
+        861
+        """
         return action.action_type.value, round(float(action.raise_amount) * MULTIPLY_BY)
 
     def make_blinds(self, blinds: List[Blind]):
@@ -68,8 +73,8 @@ class RLStateEncoder(Encoder):
         assert sb.type == 'small blind'
         bb = blinds[1]
         assert bb.type == 'big blind'
-        return int(float(sb.amount.split(self._currency_symbol)[1]) * MULTIPLY_BY), \
-            int(float(bb.amount.split(self._currency_symbol)[1]) * MULTIPLY_BY)
+        return round(float(sb.amount.split(self._currency_symbol)[1]) * MULTIPLY_BY), \
+            round(float(bb.amount.split(self._currency_symbol)[1]) * MULTIPLY_BY)
 
     def make_showdown_hands(self, table: Tuple[PlayerInfo], showdown: List[PlayerWithCards]):
         """Under Construction. """
@@ -121,7 +126,7 @@ class RLStateEncoder(Encoder):
         for seat_idx, seat in enumerate(episode.player_stacks):
             seat_number = int(seat.seat_display_name[5])
             player_name = seat.player_name
-            stack_size = float(seat.stack[1:]) * MULTIPLY_BY
+            stack_size = round(float(seat.stack[1:]) * MULTIPLY_BY)
             position_index = rolled_position_indices[seat_idx]
             position = Positions6Max(position_index).name
             player_info[position] = PlayerInfo(seat_number,  # 2
@@ -267,8 +272,7 @@ class RLStateEncoder(Encoder):
         # todo: pass env_cls as argument (N_BOARD_CARDS etc. gets accessible)
         # get starting stacks, starting with button at index 0
         stacks = [player.stack_size for player in table]
-        starting_stack_sizes_list = [int(float(stack) * 100) for stack in stacks]
-        self._init_wrapped_env(starting_stack_sizes_list)
+        self._init_wrapped_env(stacks)
 
         self._wrapped_env.env.SMALL_BLIND, self._wrapped_env.env.BIG_BLIND = self.make_blinds(episode.blinds)
         self._wrapped_env.env.ANTE = self._make_ante(episode.ante)
@@ -280,7 +284,7 @@ class RLStateEncoder(Encoder):
                                               episode=episode,
                                               cards_state_dict=cards_state_dict,
                                               table=table,
-                                              starting_stack_sizes_list=starting_stack_sizes_list,
+                                              starting_stack_sizes_list=stacks,
                                               selected_players=selected_players)
         except self._EnvironmentEdgeCaseEncounteredError:
             return None, None
