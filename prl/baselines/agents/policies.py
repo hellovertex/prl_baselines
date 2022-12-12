@@ -32,6 +32,51 @@ RANK = 0
 SUITE = 1
 
 
+class RandomPolicy(BaselinePolicy_Base):
+    """Policy that returns Random Actions"""
+
+    def compute_actions(self, obs_batch: Union[List[TensorStructType], TensorStructType],
+                        state_batches: Optional[List[TensorType]] = None,
+                        prev_action_batch: Union[List[TensorStructType], TensorStructType] = None,
+                        prev_reward_batch: Union[List[TensorStructType], TensorStructType] = None,
+                        info_batch: Optional[Dict[str, list]] = None,
+                        episodes: Optional[List["Episode"]] = None,
+                        explore: Optional[bool] = None,
+                        timestep: Optional[int] = None,
+                        **kwargs, ):
+        return [self.action_space.sample() for _ in obs_batch], [], {}
+
+
+class CallingStation(BaselinePolicy_Base):
+    """Policy that always calls"""
+
+    def compute_actions(self, obs_batch: Union[List[TensorStructType], TensorStructType],
+                        state_batches: Optional[List[TensorType]] = None,
+                        prev_action_batch: Union[List[TensorStructType], TensorStructType] = None,
+                        prev_reward_batch: Union[List[TensorStructType], TensorStructType] = None,
+                        info_batch: Optional[Dict[str, list]] = None,
+                        episodes: Optional[List["Episode"]] = None,
+                        explore: Optional[bool] = None,
+                        timestep: Optional[int] = None,
+                        **kwargs, ):
+        return [np.int64(1) for _ in obs_batch], [], {}
+
+
+class AlwaysMinRaise(BaselinePolicy_Base):
+    """Policy that always min-raises"""
+
+    def compute_actions(self, obs_batch: Union[List[TensorStructType], TensorStructType],
+                        state_batches: Optional[List[TensorType]] = None,
+                        prev_action_batch: Union[List[TensorStructType], TensorStructType] = None,
+                        prev_reward_batch: Union[List[TensorStructType], TensorStructType] = None,
+                        info_batch: Optional[Dict[str, list]] = None,
+                        episodes: Optional[List["Episode"]] = None,
+                        explore: Optional[bool] = None,
+                        timestep: Optional[int] = None,
+                        **kwargs, ):
+        return [np.int64(2) for _ in obs_batch], [], {}
+
+
 class BaselineModelType(enum.IntEnum):
     MLP_2x512 = 10
     RANDOM_FOREST = 20
@@ -133,7 +178,7 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
         # extract legal move bits to obtain original observations
         observations = obs_batch['obs']
         self._predictions = torch.argmax(self._model(torch.Tensor(observations)), axis=1)
-        return [self.compute_action(aid, obs) for aid, obs in enumerate(observations)], [], {}
+        return [self.compute_action(idx, obs) for idx, obs in enumerate(observations)], [], {}
 
     def load_model(self, model_type: BaselineModelType = BaselineModelType.MLP_2x512):
         if model_type == BaselineModelType.MLP_2x512:
