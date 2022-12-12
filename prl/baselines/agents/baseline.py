@@ -53,7 +53,7 @@ def _get_player_stacks(obs, num_players, normalization_sum) -> List[PlayerStack]
     for i in range(num_players):
         seat_display_name = pos_rel_to_observer[i]
         player_name = f'Player_{i}'
-        stack = stacks[i] * normalization_sum
+        stack = round(obs[stacks[i]] * normalization_sum, 2)
         player_stacks.append(PlayerStack(seat_display_name,
                                          player_name,
                                          stack))
@@ -63,7 +63,7 @@ def _get_player_stacks(obs, num_players, normalization_sum) -> List[PlayerStack]
 def _get_blinds(obs, num_players, normalization_sum) -> List[Blind]:
     """
     observing player sits relative to button. this offset is given by
-    >>> obs[COLS.Btn_idx]
+    # >>> obs[COLS.Btn_idx]
     the button position determines which players post the small and the big blind.
     For games with more than 2 pl. the small blind is posted by the player who acts after the button.
     When only two players remain, the button posts the small blind.
@@ -114,14 +114,14 @@ if __name__ == '__main__':
         # episode initialization
         blinds = _get_blinds(obs, num_players, normalization_sum)
         ante = obs[COLS.Ante] * normalization_sum
-        # todo update player_stacks
-        player_stacks = _get_player_stacks(obs, num_players)
-
+        player_stacks = _get_player_stacks(obs, num_players, normalization_sum)
+        btn_idx = 3 if num_players > 2 else 0
         # game loop
         legal_moves = env.env.get_legal_actions()
         observation = {'obs': [obs], 'legal_moves': [legal_moves]}
         agent_idx = 0
         action_vec = agents[agent_idx].act(observation)
+        # noinspection PyRedeclaration
         action = int(action_vec[0][0].numpy())
         while not done:
             obs, _, done, _ = env.step(action)
@@ -132,7 +132,14 @@ if __name__ == '__main__':
             action = int(action_vec[0][0].numpy())
             # todo update poker episode with action
             #  update actions_total
+            # stage, player_name, action_type, raise_amount
             done = True
+            # env.env.cards2str(env.env.get_hole_cards_of_player(0))
         # todo get board cards from env
+        board = ''
+        for card in env.env.board:
+            board += env.env.cards2str(cards)
         #  get showdown hands
         #  get money collected
+        # todo: make this the sanity check if very tight agent performs better vs calling station
+        #  and the second ipynb should evaluate the agent purely in self play

@@ -59,7 +59,7 @@ class CallingStation(BaselinePolicy_Base):
                         explore: Optional[bool] = None,
                         timestep: Optional[int] = None,
                         **kwargs, ):
-        return [np.int64(1) for _ in obs_batch], [], {}
+        return [torch.tensor(1) for _ in obs_batch], [], {}
 
 
 class AlwaysMinRaise(BaselinePolicy_Base):
@@ -74,7 +74,7 @@ class AlwaysMinRaise(BaselinePolicy_Base):
                         explore: Optional[bool] = None,
                         timestep: Optional[int] = None,
                         **kwargs, ):
-        return [np.int64(2) for _ in obs_batch], [], {}
+        return [torch.tensor(2) for _ in obs_batch], [], {}
 
 
 class BaselineModelType(enum.IntEnum):
@@ -102,7 +102,7 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
                  observation_space,
                  action_space,
                  config,
-                 tightness: float = 0.8,
+                 tightness: float = 0.9,
                  acceptance_level: float = 0.7):
         BaselinePolicy_Base.__init__(self, observation_space, action_space, config)
         self._path_to_torch_model_state_dict = config['path_to_torch_model_state_dict']
@@ -139,17 +139,17 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
         mc_dict = self._card_evaluator.run_mc(hero_cards_1d, board_cards_1d, 2, n_iter=self._mc_iters)
         # {won: 0, lost: 0, tied: 0}
         win_prob = float(mc_dict['won'] / self._mc_iters)
-        if win_prob < .5 and random() > self.tightness:
-            return ActionSpace.FOLD.value
+        if win_prob < .5 and random() < self.tightness:
+            return torch.tensor(ActionSpace.FOLD.value)
         else:
             prediction = self._predictions[agent_id]
             # return raise of size at most the predicted size bucket
             if self._legal_moves[agent_id][min(prediction, 2)]:
                 return prediction
             elif self._legal_moves[agent_id][ActionSpace.CHECK_CALL]:
-                return ActionSpace.CHECK_CALL.value
+                return torch.tensor(ActionSpace.CHECK_CALL.value)
             else:
-                return ActionSpace.FOLD.value
+                return torch.tensor(ActionSpace.FOLD.value)
 
     def compute_actions(self,
                         obs_batch: Union[List[TensorStructType], TensorStructType],
