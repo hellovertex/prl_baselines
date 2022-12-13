@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from typing import List
 
@@ -84,14 +85,22 @@ def _get_blinds(obs, num_players, normalization_sum) -> List[Blind]:
             Blind(bb_name, 'big_blind', bb_amount)]
 
 
+class Dummy:
+    def f(self):
+        print('hello dummy')
+
+
 @gin.configurable
-def evaluate_baseline(n_episodes=100,
-                      path_to_torch_model_state_dict="/home/sascha/Documents/github.com/prl_baselines/prl/baselines/agents/experiments/ckpt.pt"
+def evaluate_baseline(path_to_torch_model_state_dict,
+                      n_episodes,
+                      test_gin_register=None
                       ):
     env = create_wrapped_environment([1000, 1000])
     observation_space = env.observation_space
     action_space = env.action_space
-    print(f'n_episodes = {n_episodes}')
+    print(f' test = {test_gin_register}')
+    test_gin_register().f()
+    # print(f'n_episodes = {n_episodes}')
     # policy_config = {'path_to_torch_model_state_dict': path_to_torch_model_state_dict}
     # baseline_policy = StakeLevelImitationPolicy(observation_space, action_space, policy_config)
     # reference_policy = CallingStation(observation_space, action_space, policy_config)
@@ -150,4 +159,6 @@ def evaluate_baseline(n_episodes=100,
 
 if __name__ == '__main__':
     # configure run
+    gin.config.external_configurable(Dummy)
+    gin.parse_config_file(os.environ['PRL_BASELINES_ROOT_DIR'] + '/config.gin')
     evaluate_baseline()

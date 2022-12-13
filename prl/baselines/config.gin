@@ -1,0 +1,4 @@
+
+evaluate_baseline.n_episodes = 50
+evaluate_baseline.path_to_torch_model_state_dict="/home/sascha/Documents/github.com/prl_baselines/prl/baselines/agents/experiments/ckpt.pt"
+evaluate_baseline.test_gin_register = @Dummy
