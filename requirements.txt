@@ -10,3 +10,4 @@ pandas
 pydantic
 tianshou
 ray[rllib]
+gin-config
