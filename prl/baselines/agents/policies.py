@@ -9,7 +9,7 @@ from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns 
 from ray.rllib.evaluation import Episode
 from ray.rllib.utils.typing import TensorStructType, TensorType
 
-from prl.baselines.agents.core.policy_base import BaselinePolicy_Base
+from prl.baselines.agents.core.base_policy import BaselinePolicy_Base
 from prl.baselines.cpp_hand_evaluator.monte_carlo import HandEvaluator_MonteCarlo
 from prl.baselines.supervised_learning.models.nn_model import MLP
 from prl.baselines.cpp_hand_evaluator.rank import dict_str_to_sk

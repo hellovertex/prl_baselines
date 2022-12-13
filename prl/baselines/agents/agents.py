@@ -10,6 +10,8 @@ from prl.baselines.agents.core.base_agent import Agent
 from prl.baselines.agents.policies import StakeLevelImitationPolicy, CallingStation
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, PlayerStack
 
+import gin
+
 
 class BaselineAgent(Agent):
     def reset(self, config):
@@ -82,64 +84,70 @@ def _get_blinds(obs, num_players, normalization_sum) -> List[Blind]:
             Blind(bb_name, 'big_blind', bb_amount)]
 
 
-if __name__ == '__main__':
-    # configure run
-    n_episodes = 100
-    path_to_torch_model_state_dict = "/home/sascha/Documents/github.com/prl_baselines/prl/baselines/agents/experiments/ckpt.pt"
+@gin.configurable
+def evaluate_baseline(n_episodes=100,
+                      path_to_torch_model_state_dict="/home/sascha/Documents/github.com/prl_baselines/prl/baselines/agents/experiments/ckpt.pt"
+                      ):
     env = create_wrapped_environment([1000, 1000])
     observation_space = env.observation_space
     action_space = env.action_space
+    print(f'n_episodes = {n_episodes}')
+    # policy_config = {'path_to_torch_model_state_dict': path_to_torch_model_state_dict}
+    # baseline_policy = StakeLevelImitationPolicy(observation_space, action_space, policy_config)
+    # reference_policy = CallingStation(observation_space, action_space, policy_config)
+    #
+    # baseline_agent = BaselineAgent({'rllib_policy': baseline_policy})
+    # reference_agent = BaselineAgent({'rllib_policy': reference_policy})
+    # agents = [baseline_agent, reference_agent]
+    # n_agents = len(agents)
+    #
+    # variant = "HUNL"
+    # currency_symbol = "$"
+    # normalization_sum = float(
+    #     sum([s.starting_stack_this_episode for s in env.env.seats])
+    # ) / env.env.N_SEATS
+    #
+    # num_players = 2
+    # for i in range(n_episodes):
+    #     date = str(datetime.now())
+    #     hand_id = i
+    #
+    #     obs, _, done, _ = env.reset()
+    #     # episode initialization
+    #     blinds = _get_blinds(obs, num_players, normalization_sum)
+    #     ante = obs[COLS.Ante] * normalization_sum
+    #     player_stacks = _get_player_stacks(obs, num_players, normalization_sum)
+    #     # todo fix this
+    #     btn_idx = 3 if num_players > 2 else 0
+    #     # game loop
+    #     legal_moves = env.env.get_legal_actions()
+    #     observation = {'obs': [obs], 'legal_moves': [legal_moves]}
+    #     agent_idx = 0
+    #     action_vec = agents[agent_idx].act(observation)
+    #     # noinspection PyRedeclaration
+    #     action = int(action_vec[0][0].numpy())
+    #     while not done:
+    #         obs, _, done, _ = env.step(action)
+    #         legal_moves = env.env.get_legal_actions()
+    #         observation = {'obs': [obs], 'legal_moves': [legal_moves]}
+    #         agent_idx = (agent_idx + 1) % n_agents
+    #         action_vec = agents[agent_idx].act(observation)
+    #         action = int(action_vec[0][0].numpy())
+    #         # todo update poker episode with action
+    #         #  update actions_total
+    #         # stage, player_name, action_type, raise_amount
+    #         done = True
+    #         # env.env.cards2str(env.env.get_hole_cards_of_player(0))
+    #     # todo get board cards from env
+    #     board = ''
+    #     for card in env.env.board:
+    #         board += env.env.cards2str(card)
+    #     #  get showdown hands
+    #     #  get money collected
+    #     # todo: make this the sanity check if very tight agent performs better vs calling station
+    #     #  and the second ipynb should evaluate the agent purely in self play
 
-    policy_config = {'path_to_torch_model_state_dict': path_to_torch_model_state_dict}
-    baseline_policy = StakeLevelImitationPolicy(observation_space, action_space, policy_config)
-    reference_policy = CallingStation(observation_space, action_space, policy_config)
 
-    baseline_agent = BaselineAgent({'rllib_policy': baseline_policy})
-    reference_agent = BaselineAgent({'rllib_policy': reference_policy})
-    agents = [baseline_agent, reference_agent]
-    n_agents = len(agents)
-
-    variant = "HUNL"
-    currency_symbol = "$"
-    normalization_sum = float(
-        sum([s.starting_stack_this_episode for s in env.env.seats])
-    ) / env.env.N_SEATS
-
-    num_players = 2
-    for i in range(n_episodes):
-        date = str(datetime.now())
-        hand_id = i
-
-        obs, _, done, _ = env.reset()
-        # episode initialization
-        blinds = _get_blinds(obs, num_players, normalization_sum)
-        ante = obs[COLS.Ante] * normalization_sum
-        player_stacks = _get_player_stacks(obs, num_players, normalization_sum)
-        btn_idx = 3 if num_players > 2 else 0
-        # game loop
-        legal_moves = env.env.get_legal_actions()
-        observation = {'obs': [obs], 'legal_moves': [legal_moves]}
-        agent_idx = 0
-        action_vec = agents[agent_idx].act(observation)
-        # noinspection PyRedeclaration
-        action = int(action_vec[0][0].numpy())
-        while not done:
-            obs, _, done, _ = env.step(action)
-            legal_moves = env.env.get_legal_actions()
-            observation = {'obs': [obs], 'legal_moves': [legal_moves]}
-            agent_idx = (agent_idx + 1) % n_agents
-            action_vec = agents[agent_idx].act(observation)
-            action = int(action_vec[0][0].numpy())
-            # todo update poker episode with action
-            #  update actions_total
-            # stage, player_name, action_type, raise_amount
-            done = True
-            # env.env.cards2str(env.env.get_hole_cards_of_player(0))
-        # todo get board cards from env
-        board = ''
-        for card in env.env.board:
-            board += env.env.cards2str(cards)
-        #  get showdown hands
-        #  get money collected
-        # todo: make this the sanity check if very tight agent performs better vs calling station
-        #  and the second ipynb should evaluate the agent purely in self play
+if __name__ == '__main__':
+    # configure run
+    evaluate_baseline()
