@@ -3,15 +3,14 @@ import glob
 from typing import List, Optional, TypeVar
 
 from prl.baselines.pokersnowie.core.converter import PokerSnowieConverter
-from prl.baselines.pokersnowie.core.db_generator import PokerSnowieGenerator
-from prl.baselines.pokersnowie.eighteighteight import EightEightEightConverter
+from prl.baselines.pokersnowie.core.db_generator import PokerSnowieExporteur
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
 
 POKER_SNOWIE_CONVERTER_INSTANCE = TypeVar('POKER_SNOWIE_CONVERTER_INSTANCE', bound=PokerSnowieConverter)
 
 
-class HandHistorySmithyToPokerSnowie(PokerSnowieGenerator):
+class HandHistorySmithyToPokerSnowie(PokerSnowieExporteur):
     """Translates databases from https://www.hhsmithy.com/ to https://www.pokersnowie.com/ databases.
     These are .txt files in human-readable format """
 
@@ -20,7 +19,7 @@ class HandHistorySmithyToPokerSnowie(PokerSnowieGenerator):
         self.smithy_episodes = []
         self.snowie_episodes = []
         self._path_out = None
-        self._converter = EightEightEightConverter()
+        self._converter = converter
 
     # def _translate(self, smithy_episodes: List[PokerEpisode]) -> List[str]:
     @staticmethod

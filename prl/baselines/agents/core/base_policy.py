@@ -1,10 +1,8 @@
-from typing import Union, List, Optional, Dict, Tuple
+from typing import Union, List, Optional, Dict
 
-import numpy as np
-from ray.rllib import Policy, SampleBatch
+from ray.rllib import Policy
 from ray.rllib.evaluation import Episode
-from ray.rllib.models import ModelV2, ActionDistribution
-from ray.rllib.utils.typing import TensorStructType, TensorType, ModelGradients
+from ray.rllib.utils.typing import TensorStructType, TensorType
 
 
 class BaselinePolicy_Base(Policy):

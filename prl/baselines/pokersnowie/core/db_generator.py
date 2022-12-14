@@ -1,4 +1,4 @@
-class PokerSnowieGenerator:
+class PokerSnowieExporteur:
     def generate_database(self, *args, **kwargs):
         """
         todo: update docstrings

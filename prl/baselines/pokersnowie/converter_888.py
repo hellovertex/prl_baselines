@@ -58,7 +58,7 @@ SnowieEpisode = str
 action_types = ['folds', 'checks', 'calls', 'bets', 'raises']
 
 
-class EightEightEightConverter(PokerSnowieConverter):
+class Converter888(PokerSnowieConverter):
     """Converts to PokerSnowie using 888-ExportFormat"""
     @staticmethod
     def parse_num(num):

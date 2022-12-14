@@ -52,15 +52,15 @@ instance to .txt file for import in PokerSnowie.
 """
 import datetime
 from datetime import datetime as dt
-from typing import NamedTuple, List, Dict, Tuple
+from typing import List, Dict, Tuple
 
-from prl.baselines.pokersnowie.converter import Converter
+from prl.baselines.pokersnowie.core.converter import PokerSnowieConverter
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, PlayerStack, Blind
 
 SnowieEpisode = str
 
 
-class SnowieConverter(Converter):
+class SnowieConverter(PokerSnowieConverter):
 
     def _convert_seats(self, player_stacks: List[PlayerStack], hero_name: str) -> Tuple[str, Dict[str, str]]:
         """Internal representation:

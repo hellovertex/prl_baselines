@@ -1,10 +1,11 @@
 import os
 from datetime import datetime
-from typing import List
+from typing import List, Dict
 
+import gin
 import numpy as np
-from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as COLS
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
+from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as COLS
 from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL import Poker
 
@@ -12,8 +13,6 @@ from prl.baselines.agents.core.base_agent import Agent
 from prl.baselines.agents.policies import StakeLevelImitationPolicy, CallingStation
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, PlayerStack, ActionType, Action, \
     PokerEpisode, PlayerWithCards, PlayerWinningsCollected
-
-import gin
 
 
 class BaselineAgent(Agent):
@@ -107,52 +106,24 @@ def make_agents(env, path_to_torch_model_state_dict):
     return [baseline_agent, baseline_agent]
 
 
-def initialize_episode(env, obs, num_players, ep_id):
-    normalization_sum = float(
-        sum([s.starting_stack_this_episode for s in env.env.seats])
-    ) / env.env.N_SEATS
-    blinds = _get_blinds(obs, num_players, normalization_sum)
-    ante = obs[COLS.Ante] * normalization_sum
-    player_stacks = _get_player_stacks(obs, num_players, normalization_sum)
-    btn_idx = 0
-    actions_total = {'preflop': [],
-                     'flop': [],
-                     'turn': [],
-                     'river': []}
-    return PokerEpisode(date=str(datetime.now()),
-                        hand_id=ep_id,
-                        variant="HUNL",
-                        currency_symbol="$",
-                        num_players=num_players,
-                        blinds=blinds,
-                        ante=ante,
-                        player_stacks=player_stacks,
-                        btn_idx=0,
-                        board_cards='',
-                        actions_total=actions_total,
-                        winners=[],
-                        showdown_hands=[],
-                        money_collected=[])
-
-
-def _get_winners(initial_player_stacks, payouts: dict):
+def _get_winners(showdown_players: List[PlayerWithCards], payouts: dict) -> List[PlayerWithCards]:
     winners = []
     for pid, money_won in payouts.items():
-        winners.append(PlayerStack(seat_display_name=f'{pid}',
-                                   player_name=POSITIONS[pid],
-                                   stack=initial_player_stacks[pid] + money_won))
+        for p in showdown_players:
+            # look for winning player in showdown players and append its stats to winners
+            if POSITIONS[pid] == p.name:
+                winners.append(PlayerWithCards(name=p.name,
+                                               cards=p.cards))
     return winners
 
 
-def _get_board_cards(env):
-    board = ''
-    for card in env.env.board:
-        board += env.env.cards2str(card)
-    return board
-
-
-def _get_money_collected() -> List[PlayerWinningsCollected]:
-    pass
+def _get_money_collected(payouts: Dict[int, str]) -> List[PlayerWinningsCollected]:
+    money_collected = []
+    for pid, payout in payouts.items():
+        money_collected.append(PlayerWinningsCollected(player_name=POSITIONS[pid],
+                                                       collected="$" + str(payout),
+                                                       rake=None))
+    return money_collected
 
 
 def _parse_cards(cards):
@@ -193,48 +164,73 @@ def evaluate_baseline(path_to_torch_model_state_dict,
 
     total_actions_dict = {0: 0, 1: 0, 2: 0}
     for ep_id in range(n_episodes):
-        # reset environment
+        # -------- Reset environment ------------
         obs, _, done, _ = env.reset()
-        player_hands = [env.env.get_hole_cards_of_player(i) for i in range(num_players)]
-        showdown_players = None
-        ep = initialize_episode(env, obs, num_players, ep_id)
+        showdown_hands = None
+        normalization_sum = float(
+            sum([s.starting_stack_this_episode for s in env.env.seats])
+        ) / env.env.N_SEATS
+        blinds = _get_blinds(obs, num_players, normalization_sum)
+        ante = obs[COLS.Ante] * normalization_sum
+        player_stacks = _get_player_stacks(obs, num_players, normalization_sum)
+        actions_total = {'preflop': [],
+                         'flop': [],
+                         'turn': [],
+                         'river': []}
         # make obs
         legal_moves = env.env.get_legal_actions()
         observation = {'obs': [obs], 'legal_moves': [legal_moves]}
         agent_idx = 0
-        agent_name = 'utg' if num_players > 2 else 'btn'
 
         while not done:
-            # step agent
+            # -------- COMPUTE ACTION -----------
             action_vec = agents[agent_idx].act(observation)
             # Record action to episodes actions
             action = int(action_vec[0][0].numpy())
-            agent_name = POSITIONS[-int(obs[COLS.Btn_idx])]
-            agent_idx = agent_idx % num_players
+            agent_that_acted = POSITIONS[-int(obs[COLS.Btn_idx])]
+
             stage = Poker.INT2STRING_ROUND[env.env.current_round]
             action_type = ACTION_TYPES[min(action, 2)]
             raise_amount = env.env.last_action[1]
             episode_action = Action(stage=stage,
-                                    player_name=agent_name,
+                                    player_name=agent_that_acted,
                                     action_type=action_type,
                                     raise_amount=raise_amount)
-            ep.actions_total[stage].append(episode_action)
+            actions_total[stage].append(episode_action)
             remaining_players = _get_remaining_players(env)
+
+            # -------- STEP ENVIRONMENT -----------
             obs, _, done, info = env.step(action)
             # if not done, prepare next turn
             if done:
-                showdown_players = remaining_players
+                showdown_hands = remaining_players
                 print(ep_id)
             legal_moves = env.env.get_legal_actions()
             observation = {'obs': [obs], 'legal_moves': [legal_moves]}
+
+            # -------- SET NEXT AGENT -----------
             agent_idx += 1
+            agent_idx = agent_idx % num_players
 
             # env.env.cards2str(env.env.get_hole_cards_of_player(0))
         a = "debug"
-        ep.board_cards += _get_board_cards(env)
-        winners = _get_winners(initial_player_stacks=ep.player_stacks, payouts=info['payouts'])
-        money_collected = _get_money_collected()
-
+        winners = _get_winners(showdown_players=showdown_hands, payouts=info['payouts'])
+        money_collected = _get_money_collected(payouts=info['payouts'])
+        episode = PokerEpisode(date=str(datetime.now()),
+                               hand_id=ep_id,
+                               variant="HUNL",
+                               currency_symbol="$",
+                               num_players=num_players,
+                               blinds=blinds,
+                               ante=ante,
+                               player_stacks=player_stacks,
+                               btn_idx=0,
+                               board_cards=env.env.cards2str(env.env.board),
+                               actions_total=actions_total,
+                               winners=winners,
+                               showdown_hands=showdown_hands,
+                               money_collected=money_collected)
+        debug = 'set breakpoint here'
     print(total_actions_dict)
 
     # todo: make this the sanity check if very tight agent performs better vs calling station
