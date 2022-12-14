@@ -1,4 +1,4 @@
-from prl.baselines.agents.experiments.eval.core.experiment import PokerExperiment
+from prl.baselines.agents.eval.core.experiment import PokerExperiment
 
 
 class PokerExperimentEvaluator:

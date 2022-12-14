@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from typing import List, Dict
 
@@ -7,9 +8,9 @@ from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns 
 from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL import Poker
 
-from prl.baselines.agents.experiments.eval.core.evaluator import PokerExperimentEvaluator
-from prl.baselines.agents.experiments.eval.core.experiment import PokerExperiment
-from prl.baselines.agents.experiments.eval.utils import make_agents, make_participants
+from prl.baselines.agents.eval.core.evaluator import PokerExperimentEvaluator
+from prl.baselines.agents.eval.core.experiment import PokerExperiment
+from prl.baselines.agents.eval.utils import make_agents, make_participants
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, PlayerStack, ActionType, \
     PlayerWithCards, PlayerWinningsCollected, Action, PokerEpisode
 
@@ -198,19 +199,20 @@ if __name__ == '__main__':
                                    stack_sizes=stacks,
                                    multiply_by=1)
     max_episodes = 10
-    path_to_baseline_torch_model_state_dict = "/home/sascha/Documents/github.com/prl_baselines/prl/baselines/agents/experiments/ckpt.pt"
+    path_to_baseline_torch_model_state_dict = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt.pt"
     agent_list = make_agents(env_wrapped, path_to_baseline_torch_model_state_dict)
     participants = make_participants(agent_list, starting_stack_size)
-    experiment = PokerExperiment(
-        env=env_wrapped,
-        participants=participants,
-        max_episodes=max_episodes,
-        agents=agent_list,
-        current_episode=0,
-        cbs_plots=[],
-        cbs_misc=[],
-        cbs_metrics=[]
-    )
 
     evaluator = BaselineEvaluator()
-    evaluator.evaluate(experiment)
+    evaluator.evaluate(
+        PokerExperiment(
+            env=env_wrapped,
+            participants=participants,
+            max_episodes=max_episodes,
+            agents=agent_list,
+            current_episode=0,
+            cbs_plots=[],
+            cbs_misc=[],
+            cbs_metrics=[]
+        )
+    )

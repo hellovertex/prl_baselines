@@ -1,7 +1,7 @@
 from typing import List, Dict
 
 from prl.baselines.agents.agents import BaselineAgent
-from prl.baselines.agents.experiments.eval.core.experiment import PokerExperimentParticipant, AGENT
+from prl.baselines.agents.eval.core.experiment import PokerExperimentParticipant, AGENT
 from prl.baselines.agents.policies import CallingStation, StakeLevelImitationPolicy
 
 

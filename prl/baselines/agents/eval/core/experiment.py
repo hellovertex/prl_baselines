@@ -1,5 +1,6 @@
-from typing import NamedTuple, TypeVar, List, Optional, Union, Dict, Callable
 from dataclasses import dataclass
+from typing import TypeVar, List, Optional, Union, Dict, Callable
+
 from prl.environment.Wrappers.base import EnvWrapperBase
 from prl.environment.steinberger.PokerRL import NoLimitHoldem
 from ray.rllib import Policy
