@@ -51,5 +51,16 @@ def test_episode_matches_environment_states_and_actions():
     state_dict = make_state_dict(player_hands, board)
 
     # 2. need action sequence that results in showdown (any will do, e.g. all in and call)
+    actions = [(2, 500),  # p0 bets his AhKh
+               (1, -1),   # p1 calls with his crap hand
+               (1, -1),  # p0 checks on flop
+               (1, -1),  # p1 checks on flop
+               (1, -1),  # p1 checks on turn
+               (1, -1),  # p1 checks on turn
+               (1, -1),  # p1 checks on river
+               (1, -1),  # p1 checks on river
+               ]
+
     # 3. assert expected outcome is really PokerEpisode
+
     pass
