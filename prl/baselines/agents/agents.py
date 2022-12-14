@@ -25,6 +25,10 @@ class BaselineAgent(Agent):
         super().__init__(config, *args, **kwargs)
         self._rllib_policy = config['rllib_policy']
 
+    @property
+    def policy(self):
+        return self._rllib_policy
+
     def act(self, observation):
         """Wraps rllib policy."""
         assert isinstance(observation, dict)
@@ -101,7 +105,7 @@ def make_agents(env, path_to_torch_model_state_dict):
     baseline_policy = StakeLevelImitationPolicy(env.observation_space, env.action_space, policy_config)
     reference_policy = CallingStation(env.observation_space, env.action_space, policy_config)
 
-    baseline_agent = BaselineAgent({'rllib_policy': baseline_policy})
+    baseline_agent = ({'rllib_policy': baseline_policy})
     reference_agent = BaselineAgent({'rllib_policy': reference_policy})
     return [baseline_agent, baseline_agent]
 
