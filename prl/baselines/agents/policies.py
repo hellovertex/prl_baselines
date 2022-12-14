@@ -118,7 +118,7 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
         c0_1d = dict_str_to_sk[CARD_BITS_TO_STR[c0][RANK] + CARD_BITS_TO_STR[c0][SUITE]]
         c1_1d = dict_str_to_sk[CARD_BITS_TO_STR[c1][RANK] + CARD_BITS_TO_STR[c1][SUITE]]
         board = BOARD_BITS_TO_STR[board_mask.astype(bool)]
-
+        # board = array(['A', 'c', '2', 'h', '8', 'd'], dtype='<U1')
         board_cards = []
         for i in range(0, sum(board_mask) - 1, 2):  # sum is 6,8,10 for flop turn river resp.
             board_cards.append(dict_str_to_sk[board[i] + board[i + 1]])
@@ -137,16 +137,16 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
         hero_cards_1d, board_cards_1d = self.look_at_cards(obs)
         # from cards get winning probability
         mc_dict = self._card_evaluator.run_mc(hero_cards_1d, board_cards_1d, 2, n_iter=self._mc_iters)
-        # {won: 0, lost: 0, tied: 0}
+        # {won: 0, lost: 0, tied: 0}[
         win_prob = float(mc_dict['won'] / self._mc_iters)
         if win_prob < .5 and random() < self.tightness:
             return torch.tensor(ActionSpace.FOLD.value)
         else:
             prediction = self._predictions[agent_id]
             # return raise of size at most the predicted size bucket
-            if self._legal_moves[agent_id][min(prediction, 2)]:
+            if min(int(prediction), 2) in self._legal_moves[agent_id]:
                 return prediction
-            elif self._legal_moves[agent_id][ActionSpace.CHECK_CALL]:
+            elif ActionSpace.CHECK_CALL in self._legal_moves[agent_id]:
                 return torch.tensor(ActionSpace.CHECK_CALL.value)
             else:
                 return torch.tensor(ActionSpace.FOLD.value)
