@@ -14,6 +14,11 @@ ENV_WRAPPER = TypeVar('ENV_WRAPPER', bound=EnvWrapperBase)
 
 
 @dataclass
+class PokerExperimentEvaluation:
+    pass
+
+
+@dataclass
 class PokerExperimentParticipant:
     """Might change in the future"""
     id: int

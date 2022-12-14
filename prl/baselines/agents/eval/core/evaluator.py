@@ -1,6 +1,11 @@
 from prl.baselines.agents.eval.core.experiment import PokerExperiment
 
 
+DEFAULT_DATE = "2022-12-24"
+DEFAULT_VARIANT = "HUNL"
+DEFAULT_CURRENCY = "$"
+
+
 class PokerExperimentEvaluator:
     """Base class for experiment evaluators"""
     # Note to self:

@@ -6,7 +6,10 @@ from typing import Dict, Any, List
 import numpy as np
 from prl.environment.steinberger.PokerRL import Poker
 
+from prl.baselines.agents.eval.core.evaluator import DEFAULT_CURRENCY, DEFAULT_DATE, DEFAULT_VARIANT
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import PlayerInfo, Positions6Max
+from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Blind, PlayerStack, ActionType, \
+    Action, PlayerWithCards, PlayerWinningsCollected
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import card_tokens, card
 from prl.baselines.supervised_learning.data_acquisition.rl_state_encoder import RLStateEncoder
 
@@ -52,7 +55,7 @@ def test_episode_matches_environment_states_and_actions():
 
     # 2. need action sequence that results in showdown (any will do, e.g. all in and call)
     actions = [(2, 500),  # p0 bets his AhKh
-               (1, -1),   # p1 calls with his crap hand
+               (1, -1),  # p1 calls with his crap hand
                (1, -1),  # p0 checks on flop
                (1, -1),  # p1 checks on flop
                (1, -1),  # p1 checks on turn
@@ -60,7 +63,36 @@ def test_episode_matches_environment_states_and_actions():
                (1, -1),  # p1 checks on river
                (1, -1),  # p1 checks on river
                ]
+    actions = {'preflop': [Action('preflop', 'Player_0', ActionType.RAISE, 500.0),
+                           Action('preflop', 'Player_1', ActionType.CHECK_CALL, -1)],
+               'flop': [Action('flop', 'Player_0', ActionType.CHECK_CALL, -1),
+                        Action('flop', 'Player_0', ActionType.CHECK_CALL, -1)],
+               'turn': [Action('turn', 'Player_0', ActionType.CHECK_CALL, -1),
+                        Action('turn', 'Player_1', ActionType.CHECK_CALL, -1)],
+               'river': [Action('river', 'Player_0', ActionType.CHECK_CALL, -1),
+                         Action('river', 'Player_1', ActionType.CHECK_CALL, -1)]}
+    # 3. construct PokerEpisode that we expect
+    expected_episode = PokerEpisode(date=DEFAULT_DATE,
+                                    hand_id=0,
+                                    variant=DEFAULT_VARIANT,
+                                    currency_symbol=DEFAULT_CURRENCY,
+                                    num_players=num_players,
+                                    blinds=[Blind("Player_0", 'small blind', '$50'),
+                                            Blind("Player_1", 'big blind', '$100')],
+                                    ante='$0.00',
+                                    player_stacks=[PlayerStack('btn', 'Player_0', '$950'),
+                                                   PlayerStack('btn', 'Player_1', '$900')],
+                                    btn_idx=0,
+                                    board_cards=f'[{board}]',
+                                    actions_total=actions,
+                                    winners=[PlayerWithCards('Player_0', f'[{hand_0}]')],
+                                    showdown_hands=[PlayerWithCards('Player_0', f'[{hand_0}]'),
+                                                    PlayerWithCards('Player_1', f'[{hand_1}]')],
+                                    money_collected=[PlayerWinningsCollected('Player_0', "$550.0", None)]
+                                    )
+    # todo 1: refactor evaluator -> runner
+    #  implement evaluator and runner base classes
+    #  experiment -runner.run-> List[PokerEpisode] -evaluator.evaluate-> Evaluation
 
-    # 3. assert expected outcome is really PokerEpisode
-
+    # todo 2: assert expected_episode == returned_episodes[0]
     pass

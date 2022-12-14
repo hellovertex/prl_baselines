@@ -8,19 +8,21 @@ from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns 
 from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL import Poker
 
-from prl.baselines.agents.eval.core.evaluator import PokerExperimentEvaluator
+from prl.baselines.agents.eval.core.evaluator import PokerExperimentEvaluator, DEFAULT_CURRENCY, DEFAULT_VARIANT, \
+    DEFAULT_DATE
 from prl.baselines.agents.eval.core.experiment import PokerExperiment
 from prl.baselines.agents.eval.utils import make_agents, make_participants
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, PlayerStack, ActionType, \
     PlayerWithCards, PlayerWinningsCollected, Action, PokerEpisode
 
+POSITIONS_HEADS_UP = ['btn', 'bb']  # button is small blind in Heads Up situations
 POSITIONS = ['btn', 'sb', 'bb', 'utg', 'mp', 'co']
 STAGES = [Poker.PREFLOP, Poker.FLOP, Poker.TURN, Poker.RIVER]
 ACTION_TYPES = [ActionType.FOLD, ActionType.CHECK_CALL, ActionType.RAISE]
 
 
-class BaselineEvaluator(PokerExperimentEvaluator):
-
+class ExperimentRunner(PokerExperimentEvaluator):
+    # run experiments using
     @staticmethod
     def _get_player_stacks(obs, num_players, normalization_sum) -> List[PlayerStack]:
         """ Stacks at the beginning of every episode, not during or after."""
@@ -31,7 +33,8 @@ class BaselineEvaluator(PokerExperimentEvaluator):
         # BB: Player_2
         # ...
         # Cut-off: Player_5
-        pos_rel_to_observer = np.roll(['btn', 'sb', 'bb', 'utg', 'mp', 'co'], obs[COLS.Btn_idx])
+        pos_rel_to_observer = np.roll(POSITIONS, obs[COLS.Btn_idx]) if num_players > 2 else np.roll(POSITIONS,
+                                                                                                    obs[COLS.Btn_idx])
         stacks = [COLS.Stack_p0,
                   COLS.Stack_p1,
                   COLS.Stack_p2,
@@ -39,8 +42,8 @@ class BaselineEvaluator(PokerExperimentEvaluator):
                   COLS.Stack_p4,
                   COLS.Stack_p5]
         for i in range(num_players):
-            player_name = pos_rel_to_observer[i]
-            seat_display_name = player_name
+            player_name = f'Player_{i}'
+            seat_display_name = pos_rel_to_observer[i]
             stack = round(obs[stacks[i]] * normalization_sum, 2)
             player_stacks.append(PlayerStack(seat_display_name,
                                              player_name,
@@ -111,7 +114,8 @@ class BaselineEvaluator(PokerExperimentEvaluator):
                                                              cards=self._parse_cards(cards)))
         return remaining_players
 
-    def evaluate(self, experiment: PokerExperiment):
+    def evaluate(self, experiment: PokerExperiment) -> List[PokerEpisode]:
+        poker_episodes = []
         n_episodes = experiment.max_episodes
         env = experiment.env
         agents = experiment.agents
@@ -169,24 +173,23 @@ class BaselineEvaluator(PokerExperimentEvaluator):
             a = "debug"
             winners = self._get_winners(showdown_players=showdown_hands, payouts=info['payouts'])
             money_collected = self._get_money_collected(payouts=info['payouts'])
-            episode = PokerEpisode(date=str(datetime.now()),
-                                   hand_id=ep_id,
-                                   variant="HUNL",
-                                   currency_symbol="$",
-                                   num_players=num_players,
-                                   blinds=blinds,
-                                   ante=ante,
-                                   player_stacks=player_stacks,
-                                   btn_idx=0,
-                                   board_cards=env.env.cards2str(env.env.board),
-                                   actions_total=actions_total,
-                                   winners=winners,
-                                   showdown_hands=showdown_hands,
-                                   money_collected=money_collected)
+            poker_episodes.append(PokerEpisode(date=DEFAULT_DATE,
+                                               hand_id=ep_id,
+                                               variant=DEFAULT_VARIANT,
+                                               currency_symbol=DEFAULT_CURRENCY,
+                                               num_players=num_players,
+                                               blinds=blinds,
+                                               ante=ante,
+                                               player_stacks=player_stacks,
+                                               btn_idx=0,
+                                               board_cards=env.env.cards2str(env.env.board),
+                                               actions_total=actions_total,
+                                               winners=winners,
+                                               showdown_hands=showdown_hands,
+                                               money_collected=money_collected))
             debug = 'set breakpoint here'
         print(total_actions_dict)
-
-        pass
+        return poker_episodes
 
 
 if __name__ == '__main__':
