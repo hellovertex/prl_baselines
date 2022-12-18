@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import TypeVar, List, Optional, Union, Dict, Callable, Tuple
+from typing import TypeVar, List, Optional, Union, Dict, Callable, Tuple, Any
 
 from prl.environment.Wrappers.base import EnvWrapperBase
 from prl.environment.steinberger.PokerRL import NoLimitHoldem
@@ -33,10 +33,10 @@ class PokerExperimentParticipant:
 class PokerExperiment:
     """Might change in the future"""
     env: Union[ENV_WRAPPER, NoLimitHoldem]
+    env_config: Optional[Dict[str, Any]]
     # candidates to add
     participants: Dict[int, PokerExperimentParticipant]
     max_episodes: int
-    agents: List[AGENT]  # wrapper for POLICY
     # should PokerExperiments be updated?
     current_episode: Optional[int]
     # callbacks

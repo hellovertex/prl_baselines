@@ -8,7 +8,7 @@ from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns 
 from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL import Poker
 
-from prl.baselines.agents.eval.core.evaluator import PokerExperimentEvaluator, DEFAULT_CURRENCY, DEFAULT_VARIANT, \
+from prl.baselines.agents.eval.core.runner import ExperimentRunner, DEFAULT_CURRENCY, DEFAULT_VARIANT, \
     DEFAULT_DATE
 from prl.baselines.agents.eval.core.experiment import PokerExperiment
 from prl.baselines.agents.eval.utils import make_agents, make_participants
@@ -21,7 +21,7 @@ STAGES = [Poker.PREFLOP, Poker.FLOP, Poker.TURN, Poker.RIVER]
 ACTION_TYPES = [ActionType.FOLD, ActionType.CHECK_CALL, ActionType.RAISE]
 
 
-class ExperimentRunner(PokerExperimentEvaluator):
+class PokerExperimentRunner(ExperimentRunner):
     # run experiments using
     @staticmethod
     def _get_player_stacks(obs, num_players, normalization_sum) -> List[PlayerStack]:
@@ -114,15 +114,24 @@ class ExperimentRunner(PokerExperimentEvaluator):
                                                              cards=self._parse_cards(cards)))
         return remaining_players
 
-    def evaluate(self, experiment: PokerExperiment) -> List[PokerEpisode]:
+    def run(self, experiment: PokerExperiment) -> List[PokerEpisode]:
         poker_episodes = []
         n_episodes = experiment.max_episodes
         env = experiment.env
-        agents = experiment.agents
-        total_actions_dict = {0: 0, 1: 0, 2: 0}
+        total_actions_dict = {ActionType.FOLD.value: 0,
+                              ActionType.CHECK_CALL.value: 0,
+                              ActionType.RAISE.value: 0}
+        # init action generators
+        if experiment.from_action_plan:
+            participants = []
+            iter_actions = iter(experiment.from_action_plan)
+        else:
+            participants = experiment.participants
+            iter_actions = iter([])
+
         for ep_id in range(n_episodes):
             # -------- Reset environment ------------
-            obs, _, done, _ = env.reset()
+            obs, _, done, _ = env.reset(experiment.env_config)
             showdown_hands = None
             normalization_sum = float(
                 sum([s.starting_stack_this_episode for s in env.env.seats])
@@ -140,10 +149,17 @@ class ExperimentRunner(PokerExperimentEvaluator):
             agent_idx = 0
 
             while not done:
-                # -------- COMPUTE ACTION -----------
-                action_vec = agents[agent_idx].act(observation)
-                # Record action to episodes actions
-                action = int(action_vec[0][0].numpy())
+                # -------- ACT -----------
+                if experiment.from_action_plan:
+                    action = next(iter_actions)
+                else:
+                    action_vec = participants[agent_idx].agent.act(observation)
+                    action = int(action_vec[0][0].numpy())
+                remaining_players = self._get_remaining_players(env)
+                # -------- STEP ENVIRONMENT -----------
+                obs, _, done, info = env.step(action)
+
+                # -------- RECORD LAST ACTION ---------
                 agent_that_acted = POSITIONS[-int(obs[COLS.Btn_idx])]
 
                 stage = Poker.INT2STRING_ROUND[env.env.current_round]
@@ -154,10 +170,7 @@ class ExperimentRunner(PokerExperimentEvaluator):
                                         action_type=action_type,
                                         raise_amount=raise_amount)
                 actions_total[stage].append(episode_action)
-                remaining_players = self._get_remaining_players(env)
 
-                # -------- STEP ENVIRONMENT -----------
-                obs, _, done, info = env.step(action)
                 # if not done, prepare next turn
                 if done:
                     showdown_hands = remaining_players
@@ -206,16 +219,19 @@ if __name__ == '__main__':
     agent_list = make_agents(env_wrapped, path_to_baseline_torch_model_state_dict)
     participants = make_participants(agent_list, starting_stack_size)
 
-    evaluator = BaselineEvaluator()
-    evaluator.evaluate(
+    runner = PokerExperimentRunner()
+    poker_episodes = runner.run(
         PokerExperiment(
             env=env_wrapped,
+            env_config=None,
             participants=participants,
             max_episodes=max_episodes,
-            agents=agent_list,
             current_episode=0,
             cbs_plots=[],
             cbs_misc=[],
-            cbs_metrics=[]
+            cbs_metrics=[],
+            from_action_plan=None
         )
     )
+    # todo: after implementing tests, run this and convert the PokerEpisodes to PokerSnowie eps
+    print(poker_episodes)

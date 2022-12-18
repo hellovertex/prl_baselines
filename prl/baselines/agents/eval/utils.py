@@ -24,4 +24,4 @@ def make_participants(agents: List[AGENT], starting_stack_size: int) -> Dict[int
                                                      starting_stack=starting_stack_size,
                                                      agent=agent,
                                                      config={})
-        return participants
+    return participants

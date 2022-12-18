@@ -4,9 +4,13 @@
 from typing import Dict, Any, List
 
 import numpy as np
+from prl.environment.Wrappers.augment import AugmentObservationWrapper
+from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL import Poker
 
 from prl.baselines.agents.eval.core.evaluator import DEFAULT_CURRENCY, DEFAULT_DATE, DEFAULT_VARIANT
+from prl.baselines.agents.eval.core.experiment import PokerExperiment
+from prl.baselines.agents.eval.eval_baseline_agent import PokerExperimentRunner
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import PlayerInfo, Positions6Max
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Blind, PlayerStack, ActionType, \
     Action, PlayerWithCards, PlayerWinningsCollected
@@ -37,6 +41,7 @@ def make_state_dict(player_hands: List[str], board_cards: str) -> Dict[str, Any]
 
 
 def test_episode_matches_environment_states_and_actions():
+    # todo rename to test_PokerExperimentRunner
     # setup
     encoder = RLStateEncoder()  # to parse human-readable cards to 2d arrays
     num_players = 2
@@ -51,8 +56,10 @@ def test_episode_matches_environment_states_and_actions():
     hand_1 = '[7s 2c]'
     player_hands = [hand_0, hand_1]
     board = 'Qh Jh Th 9h 8h'
-    state_dict = make_state_dict(player_hands, board)
-
+    env_config = {'deck_state_dict': make_state_dict(player_hands, board)}
+    test_env = init_wrapped_env(AugmentObservationWrapper,
+                                [starting_stack_size for _ in range(num_players)],
+                                multiply_by=1)
     # 2. need action sequence that results in showdown (any will do, e.g. all in and call)
     actions = [(2, 500),  # p0 bets his AhKh
                (1, -1),  # p1 calls with his crap hand
@@ -63,7 +70,7 @@ def test_episode_matches_environment_states_and_actions():
                (1, -1),  # p1 checks on river
                (1, -1),  # p1 checks on river
                ]
-    actions = {'preflop': [Action('preflop', 'Player_0', ActionType.RAISE, 500.0),
+    actions_total = {'preflop': [Action('preflop', 'Player_0', ActionType.RAISE, 500.0),
                            Action('preflop', 'Player_1', ActionType.CHECK_CALL, -1)],
                'flop': [Action('flop', 'Player_0', ActionType.CHECK_CALL, -1),
                         Action('flop', 'Player_0', ActionType.CHECK_CALL, -1)],
@@ -84,11 +91,24 @@ def test_episode_matches_environment_states_and_actions():
                                                    PlayerStack('btn', 'Player_1', '$900')],
                                     btn_idx=0,
                                     board_cards=f'[{board}]',
-                                    actions_total=actions,
+                                    actions_total=actions_total,
                                     winners=[PlayerWithCards('Player_0', f'[{hand_0}]')],
                                     showdown_hands=[PlayerWithCards('Player_0', f'[{hand_0}]'),
                                                     PlayerWithCards('Player_1', f'[{hand_1}]')],
                                     money_collected=[PlayerWinningsCollected('Player_0', "$550.0", None)]
                                     )
-    # todo 1: assert expected_episode == returned_episodes[0]
-    pass
+    experiment = PokerExperiment(env=test_env,
+                                 env_config=env_config,
+                                 participants={},  # no agents since we run from action list
+                                 max_episodes=1,
+                                 current_episode=0,
+                                 cbs_plots=[],
+                                 cbs_misc=[],
+                                 cbs_metrics=[],
+                                 from_action_plan=actions
+                                 )
+    runner = PokerExperimentRunner()
+    returned_episodes = runner.run(experiment)
+    assert expected_episode ==  returned_episodes[0]
+
+
