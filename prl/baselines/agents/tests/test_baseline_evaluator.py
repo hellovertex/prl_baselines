@@ -90,9 +90,5 @@ def test_episode_matches_environment_states_and_actions():
                                                     PlayerWithCards('Player_1', f'[{hand_1}]')],
                                     money_collected=[PlayerWinningsCollected('Player_0', "$550.0", None)]
                                     )
-    # todo 1: refactor evaluator -> runner
-    #  implement evaluator and runner base classes
-    #  experiment -runner.run-> List[PokerEpisode] -evaluator.evaluate-> Evaluation
-
-    # todo 2: assert expected_episode == returned_episodes[0]
+    # todo 1: assert expected_episode == returned_episodes[0]
     pass
