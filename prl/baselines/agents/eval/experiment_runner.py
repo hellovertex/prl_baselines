@@ -16,6 +16,10 @@ STAGES = [Poker.PREFLOP, Poker.FLOP, Poker.TURN, Poker.RIVER]
 ACTION_TYPES = [ActionType.FOLD, ActionType.CHECK_CALL, ActionType.RAISE]
 
 
+def _make_board(board: str) -> str:
+    return f"[{board.replace(',', '').rstrip()}]"
+
+
 class PokerExperimentRunner(ExperimentRunner):
     # run experiments using
     @staticmethod
@@ -101,9 +105,6 @@ class PokerExperimentRunner(ExperimentRunner):
                                                              cards=self._parse_cards(cards)))
         return remaining_players
 
-    def _make_board(self, board: str) -> str:
-        return f"[{board.replace(',', '').rstrip()}]"
-
     def run(self, experiment: PokerExperiment) -> List[PokerEpisode]:
         poker_episodes = []
         n_episodes = experiment.max_episodes
@@ -134,7 +135,8 @@ class PokerExperimentRunner(ExperimentRunner):
             actions_total = {'preflop': [],
                              'flop': [],
                              'turn': [],
-                             'river': []}
+                             'river': [],
+                             'as_sequence': []}
             # make obs
             legal_moves = env.env.get_legal_actions()
             observation = {'obs': [obs], 'legal_moves': [legal_moves]}
@@ -164,6 +166,8 @@ class PokerExperimentRunner(ExperimentRunner):
                                         action_type=ACTION_TYPES[a[0]],
                                         raise_amount=raise_amount)
                 actions_total[stage].append(episode_action)
+                actions_total['as_sequence'].append(episode_action)
+                total_actions_dict[a[0]] += 1
 
                 # if not done, prepare next turn
                 if done:
@@ -179,7 +183,7 @@ class PokerExperimentRunner(ExperimentRunner):
                 # env.env.cards2str(env.env.get_hole_cards_of_player(0))
             winners = self._get_winners(showdown_players=showdown_hands, payouts=info['payouts'])
             money_collected = self._get_money_collected(payouts=info['payouts'])
-            board = self._make_board(env.env.cards2str(env.env.board))
+            board = _make_board(env.env.cards2str(env.env.board))
             poker_episodes.append(PokerEpisode(date=DEFAULT_DATE,
                                                hand_id=ep_id,
                                                variant=DEFAULT_VARIANT,

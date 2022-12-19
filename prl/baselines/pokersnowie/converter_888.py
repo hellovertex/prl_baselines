@@ -67,7 +67,7 @@ class Converter888(PokerSnowieConverter):
         # but only to non-zero decimal places
         # parse float
         if float(num).is_integer():
-            return str(int(num))
+            return str(int(float(num)))
         else:
             ret = str(round(float(num), 2))
             decimals = str(round(float(num), 2)).split(".")[1]
