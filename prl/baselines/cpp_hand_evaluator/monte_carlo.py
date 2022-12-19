@@ -2,6 +2,8 @@ import random
 from hand_evaluator import rank
 
 LEN_DECK_WITHOUT_HERO_AND_BOARD_CARDS = 45  # 52 - 2 - 5
+
+
 class HandEvaluator_MonteCarlo:
 
     # def mc(self, id_caller_thread, deck, hero_cards_1d, board_cards_1d, n_opponents, n_iter):

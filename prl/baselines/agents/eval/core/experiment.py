@@ -32,6 +32,7 @@ class PokerExperimentParticipant:
 @dataclass
 class PokerExperiment:
     """Might change in the future"""
+    num_players: int  # 2 <= num_players <= 6
     env: Union[ENV_WRAPPER, NoLimitHoldem]
     env_config: Optional[Dict[str, Any]]
     # candidates to add

@@ -1,6 +1,3 @@
-# what is required, in order to safely say that the evaluation results are correct?
-# agents pick action based on correct observation vector --> assume obs is correct FOR NOW, later we can
-# assert obs == obs'
 from typing import Dict, Any, List
 
 import numpy as np
@@ -10,21 +7,12 @@ from prl.environment.steinberger.PokerRL import Poker
 
 from prl.baselines.agents.eval.core.evaluator import DEFAULT_CURRENCY, DEFAULT_DATE, DEFAULT_VARIANT
 from prl.baselines.agents.eval.core.experiment import PokerExperiment
-from prl.baselines.agents.eval.eval_baseline_agent import PokerExperimentRunner
+from prl.baselines.agents.eval.experiment_runner import PokerExperimentRunner
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import PlayerInfo, Positions6Max
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Blind, PlayerStack, ActionType, \
     Action, PlayerWithCards, PlayerWinningsCollected
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import card_tokens, card
 from prl.baselines.supervised_learning.data_acquisition.rl_state_encoder import RLStateEncoder
-
-
-def setup_1():
-    """Heads up: Player 0 vs Player 1
-    Player 0:
-    """
-    deck = {}
-    actions = []
-    return deck, actions
 
 
 def make_state_dict(player_hands: List[str], board_cards: str) -> Dict[str, Any]:
@@ -71,13 +59,13 @@ def test_episode_matches_environment_states_and_actions():
                (1, -1),  # p1 checks on river
                ]
     actions_total = {'preflop': [Action('preflop', 'Player_0', ActionType.RAISE, 500.0),
-                           Action('preflop', 'Player_1', ActionType.CHECK_CALL, -1)],
-               'flop': [Action('flop', 'Player_0', ActionType.CHECK_CALL, -1),
-                        Action('flop', 'Player_0', ActionType.CHECK_CALL, -1)],
-               'turn': [Action('turn', 'Player_0', ActionType.CHECK_CALL, -1),
-                        Action('turn', 'Player_1', ActionType.CHECK_CALL, -1)],
-               'river': [Action('river', 'Player_0', ActionType.CHECK_CALL, -1),
-                         Action('river', 'Player_1', ActionType.CHECK_CALL, -1)]}
+                                 Action('preflop', 'Player_1', ActionType.CHECK_CALL, -1)],
+                     'flop': [Action('flop', 'Player_1', ActionType.CHECK_CALL, -1),
+                              Action('flop', 'Player_0', ActionType.CHECK_CALL, -1)],
+                     'turn': [Action('turn', 'Player_1', ActionType.CHECK_CALL, -1),
+                              Action('turn', 'Player_0', ActionType.CHECK_CALL, -1)],
+                     'river': [Action('river', 'Player_1', ActionType.CHECK_CALL, -1),
+                               Action('river', 'Player_0', ActionType.CHECK_CALL, -1)]}
     # 3. construct PokerEpisode that we expect
     expected_episode = PokerEpisode(date=DEFAULT_DATE,
                                     hand_id=0,
@@ -87,17 +75,18 @@ def test_episode_matches_environment_states_and_actions():
                                     blinds=[Blind("Player_0", 'small blind', '$50'),
                                             Blind("Player_1", 'big blind', '$100')],
                                     ante='$0.00',
-                                    player_stacks=[PlayerStack('btn', 'Player_0', '$950'),
-                                                   PlayerStack('btn', 'Player_1', '$900')],
+                                    player_stacks=[PlayerStack('Seat 0', 'Player_0', '$950'),
+                                                   PlayerStack('Seat 1', 'Player_1', '$900')],
                                     btn_idx=0,
                                     board_cards=f'[{board}]',
                                     actions_total=actions_total,
-                                    winners=[PlayerWithCards('Player_0', f'[{hand_0}]')],
-                                    showdown_hands=[PlayerWithCards('Player_0', f'[{hand_0}]'),
-                                                    PlayerWithCards('Player_1', f'[{hand_1}]')],
-                                    money_collected=[PlayerWinningsCollected('Player_0', "$550.0", None)]
+                                    winners=[PlayerWithCards('Player_0', f'{hand_0}')],
+                                    showdown_hands=[PlayerWithCards('Player_0', f'{hand_0}'),
+                                                    PlayerWithCards('Player_1', f'{hand_1}')],
+                                    money_collected=[PlayerWinningsCollected('Player_0', "$1000.0", None)]
                                     )
-    experiment = PokerExperiment(env=test_env,
+    experiment = PokerExperiment(num_players=num_players,
+                                 env=test_env,
                                  env_config=env_config,
                                  participants={},  # no agents since we run from action list
                                  max_episodes=1,
@@ -109,6 +98,9 @@ def test_episode_matches_environment_states_and_actions():
                                  )
     runner = PokerExperimentRunner()
     returned_episodes = runner.run(experiment)
-    assert expected_episode ==  returned_episodes[0]
+    ret_dict = returned_episodes[0]._asdict()
+    for k, v in expected_episode._asdict().items():
+        print(f'k: {k}, \nv: {v}, \n'
+              f'vx: {ret_dict[k]}')
 
-
+    assert expected_episode == returned_episodes[0]

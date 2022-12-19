@@ -4,8 +4,8 @@ import numpy as np
 from prl.environment.steinberger.PokerRL.game.Poker import Poker
 from prl.environment.steinberger.PokerRL.game.games import NoLimitHoldem
 
-from core.encoder import Encoder, PlayerInfo, Positions6Max
-from core.parser import PokerEpisode, Action, ActionType, Blind, PlayerWithCards
+from prl.baselines.supervised_learning.data_acquisition.core.encoder import Encoder, PlayerInfo, Positions6Max
+from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Action, ActionType, Blind, PlayerWithCards
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import DICT_RANK, DICT_SUITE, \
     make_board_cards, card_tokens, card
 

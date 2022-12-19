@@ -1,19 +1,14 @@
-import os
-from datetime import datetime
 from typing import List, Dict
 
-import numpy as np
-from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as COLS
-from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL import Poker
 
+from prl.baselines.agents.eval.core.experiment import PokerExperiment
 from prl.baselines.agents.eval.core.runner import ExperimentRunner, DEFAULT_CURRENCY, DEFAULT_VARIANT, \
     DEFAULT_DATE
-from prl.baselines.agents.eval.core.experiment import PokerExperiment
-from prl.baselines.agents.eval.utils import make_agents, make_participants
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, PlayerStack, ActionType, \
     PlayerWithCards, PlayerWinningsCollected, Action, PokerEpisode
+from prl.baselines.utils.num_parsers import parse_num
 
 POSITIONS_HEADS_UP = ['btn', 'bb']  # button is small blind in Heads Up situations
 POSITIONS = ['btn', 'sb', 'bb', 'utg', 'mp', 'co']
@@ -27,14 +22,6 @@ class PokerExperimentRunner(ExperimentRunner):
     def _get_player_stacks(obs, num_players, normalization_sum) -> List[PlayerStack]:
         """ Stacks at the beginning of every episode, not during or after."""
         player_stacks = []
-        # Name the players, according to their offset to the button:
-        # Button: Player_0
-        # SB: Player_1
-        # BB: Player_2
-        # ...
-        # Cut-off: Player_5
-        pos_rel_to_observer = np.roll(POSITIONS, obs[COLS.Btn_idx]) if num_players > 2 else np.roll(POSITIONS,
-                                                                                                    obs[COLS.Btn_idx])
         stacks = [COLS.Stack_p0,
                   COLS.Stack_p1,
                   COLS.Stack_p2,
@@ -43,8 +30,8 @@ class PokerExperimentRunner(ExperimentRunner):
                   COLS.Stack_p5]
         for i in range(num_players):
             player_name = f'Player_{i}'
-            seat_display_name = pos_rel_to_observer[i]
-            stack = round(obs[stacks[i]] * normalization_sum, 2)
+            seat_display_name = f'Seat {i}'
+            stack = "$" + str(parse_num(round(obs[stacks[i]] * normalization_sum, 2)))
             player_stacks.append(PlayerStack(seat_display_name,
                                              player_name,
                                              stack))
@@ -66,11 +53,11 @@ class PokerExperimentRunner(ExperimentRunner):
             sb_name = "Player_0"
             bb_name = "Player_1"
 
-        sb_amount = COLS.Small_blind * normalization_sum
-        bb_amount = COLS.Big_blind * normalization_sum
+        sb_amount = "$" + str(parse_num(round(obs[COLS.Small_blind] * normalization_sum, 2)))
+        bb_amount = "$" + str(parse_num(round(obs[COLS.Big_blind] * normalization_sum, 2)))
 
         return [Blind(sb_name, 'small blind', sb_amount),
-                Blind(bb_name, 'big_blind', bb_amount)]
+                Blind(bb_name, 'big blind', bb_amount)]
 
     @staticmethod
     def _get_winners(showdown_players: List[PlayerWithCards], payouts: dict) -> List[PlayerWithCards]:
@@ -78,8 +65,8 @@ class PokerExperimentRunner(ExperimentRunner):
         for pid, money_won in payouts.items():
             for p in showdown_players:
                 # look for winning player in showdown players and append its stats to winners
-                if POSITIONS[pid] == p.name:
-                    winners.append(PlayerWithCards(name=p.name,
+                if f'Player_{pid}' == p.name:
+                    winners.append(PlayerWithCards(name=f'Player_{pid}',
                                                    cards=p.cards))
         return winners
 
@@ -87,8 +74,8 @@ class PokerExperimentRunner(ExperimentRunner):
     def _get_money_collected(payouts: Dict[int, str]) -> List[PlayerWinningsCollected]:
         money_collected = []
         for pid, payout in payouts.items():
-            money_collected.append(PlayerWinningsCollected(player_name=POSITIONS[pid],
-                                                           collected="$" + str(payout),
+            money_collected.append(PlayerWinningsCollected(player_name=f'Player_{pid}',
+                                                           collected="$" + str(float(payout)),
                                                            rake=None))
         return money_collected
 
@@ -99,7 +86,7 @@ class PokerExperimentRunner(ExperimentRunner):
         tokens = cards.split(',')  # ['3h', ' 9d', ' ']
         c0 = tokens[0].replace(' ', '')
         c1 = tokens[1].replace(' ', '')
-        return f'[{c0},  {c1}]'
+        return f'[{c0} {c1}]'
 
     def _get_remaining_players(self, env) -> List[PlayerWithCards]:
         # make player cards
@@ -110,13 +97,17 @@ class PokerExperimentRunner(ExperimentRunner):
             if not env.env.seats[i].folded_this_episode:
                 if env.env.seats[i].stack > 0 or env.env.seats[i].is_allin:
                     cards = env.env.cards2str(env.env.get_hole_cards_of_player(i))
-                    remaining_players.append(PlayerWithCards(name=POSITIONS[i],
+                    remaining_players.append(PlayerWithCards(name=f'Player_{i}',
                                                              cards=self._parse_cards(cards)))
         return remaining_players
+
+    def _make_board(self, board: str) -> str:
+        return f"[{board.replace(',', '').rstrip()}]"
 
     def run(self, experiment: PokerExperiment) -> List[PokerEpisode]:
         poker_episodes = []
         n_episodes = experiment.max_episodes
+        num_players = experiment.num_players
         env = experiment.env
         total_actions_dict = {ActionType.FOLD.value: 0,
                               ActionType.CHECK_CALL.value: 0,
@@ -137,7 +128,8 @@ class PokerExperimentRunner(ExperimentRunner):
                 sum([s.starting_stack_this_episode for s in env.env.seats])
             ) / env.env.N_SEATS
             blinds = self._get_blinds(obs, num_players, normalization_sum)
-            ante = obs[COLS.Ante] * normalization_sum
+            ante = '$0.00'
+            assert obs[COLS.Ante] == 0  # games with ante not supported
             player_stacks = self._get_player_stacks(obs, num_players, normalization_sum)
             actions_total = {'preflop': [],
                              'flop': [],
@@ -152,22 +144,24 @@ class PokerExperimentRunner(ExperimentRunner):
                 # -------- ACT -----------
                 if experiment.from_action_plan:
                     action = next(iter_actions)
+                    # if isinstance(action, tuple):
+                    #     action =
                 else:
                     action_vec = participants[agent_idx].agent.act(observation)
                     action = int(action_vec[0][0].numpy())
+                    # todo convert ActionSpace (integer repr) to Action (tuple repr)
+                    action = env.int_action_to_tuple_action(action)
+
                 remaining_players = self._get_remaining_players(env)
+                stage = Poker.INT2STRING_ROUND[env.env.current_round]
                 # -------- STEP ENVIRONMENT -----------
                 obs, _, done, info = env.step(action)
-
                 # -------- RECORD LAST ACTION ---------
-                agent_that_acted = POSITIONS[-int(obs[COLS.Btn_idx])]
-
-                stage = Poker.INT2STRING_ROUND[env.env.current_round]
-                action_type = ACTION_TYPES[min(action, 2)]
-                raise_amount = env.env.last_action[1]
+                a = env.env.last_action
+                raise_amount = float(a[1]) if a[0] == ActionType.RAISE else -1
                 episode_action = Action(stage=stage,
-                                        player_name=agent_that_acted,
-                                        action_type=action_type,
+                                        player_name=f'Player_{a[2]}',
+                                        action_type=ACTION_TYPES[a[0]],
                                         raise_amount=raise_amount)
                 actions_total[stage].append(episode_action)
 
@@ -183,9 +177,9 @@ class PokerExperimentRunner(ExperimentRunner):
                 agent_idx = agent_idx % num_players
 
                 # env.env.cards2str(env.env.get_hole_cards_of_player(0))
-            a = "debug"
             winners = self._get_winners(showdown_players=showdown_hands, payouts=info['payouts'])
             money_collected = self._get_money_collected(payouts=info['payouts'])
+            board = self._make_board(env.env.cards2str(env.env.board))
             poker_episodes.append(PokerEpisode(date=DEFAULT_DATE,
                                                hand_id=ep_id,
                                                variant=DEFAULT_VARIANT,
@@ -195,7 +189,7 @@ class PokerExperimentRunner(ExperimentRunner):
                                                ante=ante,
                                                player_stacks=player_stacks,
                                                btn_idx=0,
-                                               board_cards=env.env.cards2str(env.env.board),
+                                               board_cards=board,
                                                actions_total=actions_total,
                                                winners=winners,
                                                showdown_hands=showdown_hands,
@@ -203,35 +197,3 @@ class PokerExperimentRunner(ExperimentRunner):
             debug = 'set breakpoint here'
         print(total_actions_dict)
         return poker_episodes
-
-
-if __name__ == '__main__':
-    # move this to example.py or main.py
-    # Construct Experiment
-    starting_stack_size = 1000
-    num_players = 2
-    stacks = [starting_stack_size for _ in range(num_players)]
-    env_wrapped = init_wrapped_env(env_wrapper_cls=AugmentObservationWrapper,
-                                   stack_sizes=stacks,
-                                   multiply_by=1)
-    max_episodes = 10
-    path_to_baseline_torch_model_state_dict = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt.pt"
-    agent_list = make_agents(env_wrapped, path_to_baseline_torch_model_state_dict)
-    participants = make_participants(agent_list, starting_stack_size)
-
-    runner = PokerExperimentRunner()
-    poker_episodes = runner.run(
-        PokerExperiment(
-            env=env_wrapped,
-            env_config=None,
-            participants=participants,
-            max_episodes=max_episodes,
-            current_episode=0,
-            cbs_plots=[],
-            cbs_misc=[],
-            cbs_metrics=[],
-            from_action_plan=None
-        )
-    )
-    # todo: after implementing tests, run this and convert the PokerEpisodes to PokerSnowie eps
-    print(poker_episodes)

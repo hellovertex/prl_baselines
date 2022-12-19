@@ -47,7 +47,7 @@ This module is supposed to convert a `prl.baselines.supervised_learning.data_acq
 instance to .txt file for import in PokerSnowie.
 """
 import datetime
-from typing import List
+from typing import List, Optional
 
 from prl.baselines.pokersnowie.core.converter import PokerSnowieConverter
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Action, \
@@ -238,7 +238,7 @@ class Converter888(PokerSnowieConverter):
                       "\n\n\n"
         return episode_888
 
-    def from_poker_episode(self, episode: PokerEpisode, hero_names: List[str] = None) -> List[SnowieEpisode]:
+    def from_poker_episode(self, episode: PokerEpisode, hero_names: Optional[List[str]] = None) -> List[SnowieEpisode]:
         """
         Converts episode to string representation that can be imported from PokerSnowie if written to txt file.
         Format used is 888 format.
