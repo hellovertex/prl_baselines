@@ -116,6 +116,14 @@ class PokerExperimentRunner(ExperimentRunner):
                 showdown_hands.append(p)
         return showdown_hands
 
+    def _update_cumulative_stacks(self, money_collected: List[PlayerWinningsCollected]):
+        for p in money_collected:
+            self.money_from_last_round[p.player_name] += float(p.collected[1:])
+
+    def _subtract_blinds_from_stacks(self, blinds: List[Blind]):
+        for b in blinds:
+            self.money_from_last_round[b.player_name] -= float(b.amount[1:])
+
     def run(self, experiment: PokerExperiment) -> List[PokerEpisode]:
         poker_episodes = []
         n_episodes = experiment.max_episodes
@@ -132,6 +140,14 @@ class PokerExperimentRunner(ExperimentRunner):
             participants = experiment.participants
             iter_actions = iter([])
 
+        self.money_from_last_round = {'Player_0': 0,
+                                      'Player_1': 0,
+                                      'Player_2': 0,
+                                      'Player_3': 0,
+                                      'Player_4': 0,
+                                      'Player_5': 0,
+                                      }
+        # ----- RUN EPISODES -----
         for ep_id in range(n_episodes):
             # -------- Reset environment ------------
             obs, _, done, _ = env.reset(experiment.env_config)
@@ -141,6 +157,7 @@ class PokerExperimentRunner(ExperimentRunner):
                 sum([s.starting_stack_this_episode for s in env.env.seats])
             ) / env.env.N_SEATS
             blinds = self._get_blinds(obs, num_players, normalization_sum, agent_idx)
+            self._subtract_blinds_from_stacks(blinds)
             ante = '$0.00'
             assert obs[COLS.Ante] == 0  # games with ante not supported
             player_stacks = self._get_player_stacks(obs, num_players, normalization_sum, agent_idx)
@@ -149,10 +166,11 @@ class PokerExperimentRunner(ExperimentRunner):
                              'turn': [],
                              'river': [],
                              'as_sequence': []}
+
             # make obs
             legal_moves = env.env.get_legal_actions()
             observation = {'obs': [obs], 'legal_moves': [legal_moves]}
-
+            # ---- RUN GAME ----
             while not done:
                 # -------- ACT -----------
                 if experiment.from_action_plan:
@@ -165,9 +183,9 @@ class PokerExperimentRunner(ExperimentRunner):
                     # todo convert ActionSpace (integer repr) to Action (tuple repr)
                     action = env.int_action_to_tuple_action(action)
 
-                stage = Poker.INT2STRING_ROUND[env.env.current_round]
                 # -------- STEP ENVIRONMENT -----------
                 remaining_players = self._get_remaining_players(env)
+                stage = Poker.INT2STRING_ROUND[env.env.current_round]
                 obs, _, done, info = env.step(action)
                 # -------- RECORD LAST ACTION ---------
                 a = env.env.last_action
@@ -176,6 +194,7 @@ class PokerExperimentRunner(ExperimentRunner):
                                         player_name=f'Player_{a[2]}',
                                         action_type=ACTION_TYPES[a[0]],
                                         raise_amount=raise_amount)
+                self.money_from_last_round[f'Player_{a[2]}'] -= float(a[1])
                 actions_total[stage].append(episode_action)
                 actions_total['as_sequence'].append(episode_action)
                 total_actions_dict[a[0]] += 1
@@ -192,6 +211,7 @@ class PokerExperimentRunner(ExperimentRunner):
                 # env.env.cards2str(env.env.get_hole_cards_of_player(0))
             winners = self._get_winners(showdown_players=showdown_hands, payouts=info['payouts'])
             money_collected = self._get_money_collected(payouts=info['payouts'])
+            money_from_last_round = self._update_cumulative_stacks(money_collected)
             board = _make_board(env.env.cards2str(env.env.board))
             poker_episodes.append(PokerEpisode(date=DEFAULT_DATE,
                                                hand_id=ep_id,
