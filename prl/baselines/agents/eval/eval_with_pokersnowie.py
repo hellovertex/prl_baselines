@@ -9,7 +9,7 @@ from prl.baselines.pokersnowie.exporteur import PokerExperimentToPokerSnowie
 if __name__ == '__main__':
     # move this to example.py or main.py
     # Construct Experiment
-    starting_stack_size = 1000
+    starting_stack_size = 10
     num_players = 2
     stacks = [starting_stack_size for _ in range(num_players)]
     env_wrapped = init_wrapped_env(env_wrapper_cls=AugmentObservationWrapper,

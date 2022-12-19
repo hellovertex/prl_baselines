@@ -36,8 +36,8 @@ class PersistentStorage:
                 n_files_written += 1
                 write_buffer = []
             write_buffer.append(e)
-            self._write(write_buffer,
-                        path_out)
+        self._write(write_buffer,
+                    path_out)
 
 
 class HandHistorySmithyToPokerSnowie(PokerSnowieExporteur):
