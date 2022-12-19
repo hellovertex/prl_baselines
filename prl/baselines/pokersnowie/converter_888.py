@@ -60,6 +60,7 @@ action_types = ['folds', 'checks', 'calls', 'bets', 'raises']
 
 class Converter888(PokerSnowieConverter):
     """Converts to PokerSnowie using 888-ExportFormat"""
+
     @staticmethod
     def parse_num(num):
         # parse string represenation of float, such that
@@ -71,7 +72,7 @@ class Converter888(PokerSnowieConverter):
         else:
             ret = str(round(float(num), 2))
             decimals = str(round(float(num), 2)).split(".")[1]
-            for i in range(2-len(decimals)):
+            for i in range(2 - len(decimals)):
                 ret += "0"
             return ret
 
@@ -191,7 +192,7 @@ class Converter888(PokerSnowieConverter):
             ret[player.player_name] = won
         return ret
 
-    def _convert_summary(self, episode):
+    def _convert_summary(self, episode, hero_name):
         """
         ** Summary **
         Michaelcorb shows [ 9c, 6h ]
@@ -199,11 +200,15 @@ class Converter888(PokerSnowieConverter):
         Merodan collected [ $0.04 ]
         """
         ret = "** Summary **\n"
+        if len(episode.showdown_hands) <= 2:  # only one player left at the end
+            # do not show hands
+            ret += f"{episode.showdown_hands[0].name} did not show his hand\n"
+        else:
+            for player in episode.showdown_hands:
+                # '[As Th]' to '[ As, Th ]'
+                hand = player.cards.replace(" ", ", ").replace("[", "[ ").replace("]", " ]")
+                ret += f"{player.name} shows {hand}\n"
         money_won = self._get_money_won(episode)
-        for player in episode.showdown_hands:
-            # '[As Th]' to '[ As, Th ]'
-            hand = player.cards.replace(" ", ", ").replace("[", "[ ").replace("]", " ]")
-            ret += f"{player.name} shows {hand}\n"
         for winner in episode.winners:
             # f" [{'$' + self.parse_num(blind.amount[1:])}]\n"
             ret += f"{winner.name} collected [ ${self.parse_num(money_won[winner.name])} ]\n"
@@ -222,7 +227,7 @@ class Converter888(PokerSnowieConverter):
         dealt_cards = self._convert_dealt_cards(episode, hero_name)
         community_cards: dict = self._convert_community_cards(episode)
         moves: dict = self._convert_moves(episode)
-        summary = self._convert_summary(episode)
+        summary = self._convert_summary(episode, hero_name)
         episode_888 = f"#Game No : {episode.hand_id}\n" \
                       f"***** 888.de Snap Poker Hand History for Game {episode.hand_id} *****\n" \
                       f"${sb}/${bb} Blinds No Limit Holdem - *** {t}\n" \

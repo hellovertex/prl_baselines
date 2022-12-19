@@ -154,7 +154,7 @@ class PokerExperimentRunner(ExperimentRunner):
                     # todo convert ActionSpace (integer repr) to Action (tuple repr)
                     action = env.int_action_to_tuple_action(action)
 
-                remaining_players = self._get_remaining_players(env)
+
                 stage = Poker.INT2STRING_ROUND[env.env.current_round]
                 # -------- STEP ENVIRONMENT -----------
                 obs, _, done, info = env.step(action)
@@ -168,7 +168,7 @@ class PokerExperimentRunner(ExperimentRunner):
                 actions_total[stage].append(episode_action)
                 actions_total['as_sequence'].append(episode_action)
                 total_actions_dict[a[0]] += 1
-
+                remaining_players = self._get_remaining_players(env)
                 # if not done, prepare next turn
                 if done:
                     showdown_hands = remaining_players
