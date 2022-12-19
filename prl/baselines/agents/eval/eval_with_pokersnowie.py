@@ -32,7 +32,7 @@ if __name__ == '__main__':
         from_action_plan=None
     )
     db_gen = PokerExperimentToPokerSnowie()
-    db_gen.generate_database(path_out='/home/sascha/Documents/github.com/prl_baselines/prl/baselines/agents/eval/Pokersnowie.txt',
+    db_gen.generate_database(path_out='/home/sascha/Documents/github.com/prl_baselines/prl/baselines/agents/eval/Pokersnowie2.txt',
                              experiment=experiment,
                              max_episodes_per_file=500)
 

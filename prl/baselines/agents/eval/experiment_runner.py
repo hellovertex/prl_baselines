@@ -140,7 +140,7 @@ class PokerExperimentRunner(ExperimentRunner):
             # make obs
             legal_moves = env.env.get_legal_actions()
             observation = {'obs': [obs], 'legal_moves': [legal_moves]}
-            agent_idx = 0
+            agent_idx = (0 + ep_id) % num_players  # always move button to the right
 
             while not done:
                 # -------- ACT -----------

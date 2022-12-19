@@ -117,16 +117,21 @@ class Converter888(PokerSnowieConverter):
     @staticmethod
     def _convert_community_cards(episode):
         """
+        episode.board_cards == '[3s Ks 8c 6c Kh]'
         ** Dealing flop ** [ 3s, Ks, 8c ]
         ** Dealing turn ** [ 6c ]
         ** Dealing river ** [ Kh ]
         """
-        flop = f"[ {episode.board_cards[1:9].replace(' ', ', ')} ]"
-        turn = f"[ {episode.board_cards[10:12]} ]"
-        river = f"[ {episode.board_cards[13:15]} ]"
-        return {'flop': f"** Dealing flop ** {flop}\n",
-                'turn': f"** Dealing turn ** {turn}\n",
-                'river': f"** Dealing river ** {river}\n"}
+        flop_len = 10  # length of '[3s Ks 8c]'
+        turn_len = 13  # length of '[3s Ks 8c 6c]'
+        river_len = 16  # length of '[3s Ks 8c 6c Kh]'
+        len_board = len(episode.board_cards)
+        flop = "" if len_board < flop_len else f"[ {episode.board_cards[1:9].replace(' ', ', ')} ]"
+        turn = "" if len_board < turn_len else f"[ {episode.board_cards[10:12]} ]"
+        river = "" if len_board < river_len else f"[ {episode.board_cards[13:15]} ]"
+        return {'flop': "" if len_board < flop_len else f"** Dealing flop ** {flop}\n",
+                'turn': "" if len_board < turn_len else f"** Dealing turn ** {turn}\n",
+                'river': "" if len_board < river_len else f"** Dealing river ** {river}\n"}
 
     @staticmethod
     def _convert_move_what(action: Action) -> str:
