@@ -5,9 +5,12 @@ from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL import Poker
 
+from prl.baselines.agents.agents import BaselineAgent
 from prl.baselines.agents.eval.core.evaluator import DEFAULT_CURRENCY, DEFAULT_DATE, DEFAULT_VARIANT
 from prl.baselines.agents.eval.core.experiment import PokerExperiment
 from prl.baselines.agents.eval.experiment_runner import PokerExperimentRunner
+from prl.baselines.agents.eval.utils import make_participants
+from prl.baselines.agents.policies import CallingStation
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import PlayerInfo, Positions6Max
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Blind, PlayerStack, ActionType, \
     Action, PlayerWithCards, PlayerWinningsCollected
@@ -47,6 +50,7 @@ def test_episode_matches_environment_states_and_actions():
     env_config = {'deck_state_dict': make_state_dict(player_hands, board)}
     test_env = init_wrapped_env(AugmentObservationWrapper,
                                 [starting_stack_size for _ in range(num_players)],
+                                blinds=[50, 100],
                                 multiply_by=1)
     # 2. need action sequence that results in showdown (any will do, e.g. all in and call)
     actions = [(2, 500),  # p0 bets his AhKh
@@ -58,6 +62,14 @@ def test_episode_matches_environment_states_and_actions():
                (1, -1),  # p1 checks on river
                (1, -1),  # p1 checks on river
                ]
+    action_list = [Action('preflop', 'Player_0', ActionType.RAISE, 500.0),
+                   Action('preflop', 'Player_1', ActionType.CHECK_CALL, -1),
+                   Action('flop', 'Player_1', ActionType.CHECK_CALL, -1),
+                   Action('flop', 'Player_0', ActionType.CHECK_CALL, -1),
+                   Action('turn', 'Player_1', ActionType.CHECK_CALL, -1),
+                   Action('turn', 'Player_0', ActionType.CHECK_CALL, -1),
+                   Action('river', 'Player_1', ActionType.CHECK_CALL, -1),
+                   Action('river', 'Player_0', ActionType.CHECK_CALL, -1)]
     actions_total = {'preflop': [Action('preflop', 'Player_0', ActionType.RAISE, 500.0),
                                  Action('preflop', 'Player_1', ActionType.CHECK_CALL, -1)],
                      'flop': [Action('flop', 'Player_1', ActionType.CHECK_CALL, -1),
@@ -65,7 +77,8 @@ def test_episode_matches_environment_states_and_actions():
                      'turn': [Action('turn', 'Player_1', ActionType.CHECK_CALL, -1),
                               Action('turn', 'Player_0', ActionType.CHECK_CALL, -1)],
                      'river': [Action('river', 'Player_1', ActionType.CHECK_CALL, -1),
-                               Action('river', 'Player_0', ActionType.CHECK_CALL, -1)]}
+                               Action('river', 'Player_0', ActionType.CHECK_CALL, -1)],
+                     'as_sequence': action_list}
     # 3. construct PokerEpisode that we expect
     expected_episode = PokerEpisode(date=DEFAULT_DATE,
                                     hand_id=0,
@@ -104,3 +117,37 @@ def test_episode_matches_environment_states_and_actions():
               f'vx: {ret_dict[k]}')
 
     assert expected_episode == returned_episodes[0]
+
+
+def test_blinds_alternate():
+    num_players = 2
+    starting_stack_size = 1000
+    test_env = init_wrapped_env(AugmentObservationWrapper,
+                                [starting_stack_size for _ in range(num_players)],
+                                blinds=[50, 100],
+                                multiply_by=1)
+    reference_policy = CallingStation(test_env.observation_space, test_env.action_space, {})
+    reference_agent = BaselineAgent({'rllib_policy': reference_policy})
+    agents = [reference_agent, reference_agent]
+    experiment = PokerExperiment(num_players=num_players,
+                                 env=test_env,
+                                 env_config=None,
+                                 participants=make_participants(agents, starting_stack_size),
+                                 max_episodes=5,
+                                 current_episode=0,
+                                 cbs_plots=[],
+                                 cbs_misc=[],
+                                 cbs_metrics=[],
+                                 from_action_plan=None
+                                 )
+    runner = PokerExperimentRunner()
+    returned_episodes = runner.run(experiment)
+    # make sure blinds are alternating
+    assert returned_episodes[0].blinds[0].player_name == 'Player_0'
+    assert returned_episodes[1].blinds[0].player_name == 'Player_1'
+    assert returned_episodes[2].blinds[0].player_name == 'Player_0'
+    assert returned_episodes[3].blinds[0].player_name == 'Player_1'
+    assert returned_episodes[4].blinds[0].player_name == 'Player_0'
+
+def test_player_stacks():
+    pass

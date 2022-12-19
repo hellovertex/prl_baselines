@@ -141,11 +141,15 @@ class PokerExperimentToPokerSnowie(PokerSnowieExporteur):
                           path_out: Union[str, Path],
                           experiment: PokerExperiment,
                           max_episodes_per_file=500):
+        # execute Experiment to generate list of poker episodes
         poker_episodes = self._runner.run(experiment)
         snowie_episodes = []
+        # parse list of poker episodes to snowie-formatted string
         for ep in poker_episodes:
+            # showdown_eps is a list of the same episode from different angles relative to observer
             showdown_eps = self._converter.from_poker_episode(ep, None)
             for observer_relative in showdown_eps:
                 snowie_episodes.append(observer_relative)
+        # write snowie-formatted string to text file
         self._storage.export_to_text_file(snowie_episodes=snowie_episodes,
                                           path_out=path_out)

@@ -200,7 +200,7 @@ class Converter888(PokerSnowieConverter):
         Merodan collected [ $0.04 ]
         """
         ret = "** Summary **\n"
-        if len(episode.showdown_hands) <= 2:  # only one player left at the end
+        if len(episode.showdown_hands) < 2:  # only one player left at the end
             # do not show hands
             ret += f"{episode.showdown_hands[0].name} did not show his hand\n"
         else:
