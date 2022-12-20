@@ -24,26 +24,20 @@ def _make_board(board: str) -> str:
 class PokerExperimentRunner(ExperimentRunner):
     # run experiments using
     @staticmethod
-    def _get_player_stacks(obs, num_players, normalization_sum, offset) -> List[PlayerStack]:
+    def _get_player_stacks(seats, num_players, offset) -> List[PlayerStack]:
         """ Stacks at the beginning of every episode, not during or after."""
         player_stacks = []
-        stacks = [COLS.Stack_p0,
-                  COLS.Stack_p1,
-                  COLS.Stack_p2,
-                  COLS.Stack_p3,
-                  COLS.Stack_p4,
-                  COLS.Stack_p5]
-        for i in range(num_players):
-            player_name = f'Player_{i}'
-            seat_display_name = f'Seat {i}'
-            stack = "$" + str(parse_num(round(obs[np.roll(stacks[:num_players], -offset)[i]] * normalization_sum, 2)))
+        for seat_id, seat in enumerate(seats):
+            player_name = f'Player_{(seat_id + offset) % num_players}'
+            seat_display_name = f'Seat {seat_id}'
+            stack = "$" + str(seat.stack)
             player_stacks.append(PlayerStack(seat_display_name,
                                              player_name,
                                              stack))
         return player_stacks
 
     @staticmethod
-    def _get_blinds(obs, num_players, normalization_sum, offset) -> List[Blind]:
+    def _get_blinds(num_players, offset, bb, sb) -> List[Blind]:
         """
         observing player sits relative to button. this offset is given by
         # >>> obs[COLS.Btn_idx]
@@ -58,8 +52,8 @@ class PokerExperimentRunner(ExperimentRunner):
             sb_name = f"Player_{offset % num_players}"
             bb_name = f"Player_{(1 + offset) % num_players}"
 
-        sb_amount = "$" + str(parse_num(round(obs[COLS.Small_blind] * normalization_sum, 2)))
-        bb_amount = "$" + str(parse_num(round(obs[COLS.Big_blind] * normalization_sum, 2)))
+        sb_amount = "$" + str(parse_num(sb))
+        bb_amount = "$" + str(parse_num(bb))
 
         return [Blind(sb_name, 'small blind', sb_amount),
                 Blind(bb_name, 'big blind', bb_amount)]
@@ -80,7 +74,7 @@ class PokerExperimentRunner(ExperimentRunner):
         money_collected = []
         for pid, payout in payouts.items():
             money_collected.append(PlayerWinningsCollected(player_name=f'Player_{pid}',
-                                                           collected="$" + str(float(payout)),
+                                                           collected="$" + str(int(payout)),
                                                            rake=None))
         return money_collected
 
@@ -118,11 +112,11 @@ class PokerExperimentRunner(ExperimentRunner):
 
     def _update_cumulative_stacks(self, money_collected: List[PlayerWinningsCollected]):
         for p in money_collected:
-            self.money_from_last_round[p.player_name] += float(p.collected[1:])
+            self.money_from_last_round[p.player_name] += int(p.collected[1:])
 
     def _subtract_blinds_from_stacks(self, blinds: List[Blind]):
         for b in blinds:
-            self.money_from_last_round[b.player_name] -= float(b.amount[1:])
+            self.money_from_last_round[b.player_name] -= int(b.amount[1:])
 
     def _get_stack_sizes(self, experiment: PokerExperiment):
         # returns cumulative stack sizes if all players have stacks > 0
@@ -132,7 +126,7 @@ class PokerExperimentRunner(ExperimentRunner):
         for pname, money in self.money_from_last_round.items():
             if money == -default_stack_size:
                 return [default_stack_size for _ in range(experiment.num_players)]
-            stack_sizes_list.append(round(default_stack_size) + round(money))
+            stack_sizes_list.append(int(default_stack_size) + int(money))
         return stack_sizes_list
 
     def run(self, experiment: PokerExperiment) -> List[PokerEpisode]:
@@ -158,20 +152,22 @@ class PokerExperimentRunner(ExperimentRunner):
         for ep_id in range(n_episodes):
             # -------- Reset environment ------------
             stack_sizes_list = self._get_stack_sizes(experiment)
+            for stack in stack_sizes_list:
+                if stack < env.env.SMALL_BLIND:
+                    break
             env.env.set_stack_size(stack_sizes_list)
             obs, _, done, _ = env.reset(experiment.env_config)
             agent_idx = button_index = ep_id % num_players  # always move button to the right
             showdown_hands = None
-            normalization_sum = float(
+            normalization_sum = round(float(
                 sum([s.starting_stack_this_episode for s in env.env.seats])
-            ) / env.env.N_SEATS
-            blinds = self._get_blinds(obs, num_players, normalization_sum, agent_idx)
+            ) / env.env.N_SEATS)
+            blinds = self._get_blinds(num_players, agent_idx, env.env.BIG_BLIND, env.env.SMALL_BLIND)
             self._subtract_blinds_from_stacks(blinds)
             ante = '$0.00'
             assert obs[COLS.Ante] == 0  # games with ante not supported
-            player_stacks = self._get_player_stacks(obs,
+            player_stacks = self._get_player_stacks(env.env.seats,
                                                     num_players,
-                                                    normalization_sum,
                                                     agent_idx)
             actions_total = {'preflop': [],
                              'flop': [],
@@ -201,7 +197,7 @@ class PokerExperimentRunner(ExperimentRunner):
                 obs, _, done, info = env.step(action)
                 # -------- RECORD LAST ACTION ---------
                 a = env.env.last_action
-                raise_amount = float(a[1])  # if a[0] == ActionType.RAISE else -1
+                raise_amount = max(a[1], 0) # if a[0] == ActionType.RAISE else -1
                 # set raise amount to zero if it is preflop, the acting player is the big blind
                 # and the action is call with amount equal to big blind
                 # then we actually have to make it a check
