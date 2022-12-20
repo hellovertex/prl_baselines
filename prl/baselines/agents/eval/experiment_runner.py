@@ -124,9 +124,10 @@ class PokerExperimentRunner(ExperimentRunner):
         default_stack_size = experiment.env.normalization
         stack_sizes_list = []
         for pname, money in self.money_from_last_round.items():
-            if money == -default_stack_size:
-                return [default_stack_size for _ in range(experiment.num_players)]
             stack_sizes_list.append(int(default_stack_size) + int(money))
+        for stack in stack_sizes_list:
+            if stack < experiment.env.env.SMALL_BLIND:
+                return [default_stack_size for _ in range(experiment.num_players)]
         return stack_sizes_list
 
     def run(self, experiment: PokerExperiment) -> List[PokerEpisode]:
@@ -152,9 +153,6 @@ class PokerExperimentRunner(ExperimentRunner):
         for ep_id in range(n_episodes):
             # -------- Reset environment ------------
             stack_sizes_list = self._get_stack_sizes(experiment)
-            for stack in stack_sizes_list:
-                if stack < env.env.SMALL_BLIND:
-                    break
             env.env.set_stack_size(stack_sizes_list)
             obs, _, done, _ = env.reset(experiment.env_config)
             agent_idx = button_index = ep_id % num_players  # always move button to the right
