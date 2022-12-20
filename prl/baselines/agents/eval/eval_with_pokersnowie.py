@@ -11,7 +11,7 @@ if __name__ == '__main__':
     # Construct Experiment
     # todo fix showdown players always only one player
     # todo fix player stack equal to 0
-    starting_stack_size = 10
+    starting_stack_size = 5000
     num_players = 2
     stacks = [starting_stack_size for _ in range(num_players)]
     env_wrapped = init_wrapped_env(env_wrapper_cls=AugmentObservationWrapper,

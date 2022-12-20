@@ -1,5 +1,5 @@
 from typing import List, Dict
-
+from collections import OrderedDict
 import numpy as np
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as COLS
 from prl.environment.steinberger.PokerRL import Poker
@@ -36,7 +36,7 @@ class PokerExperimentRunner(ExperimentRunner):
         for i in range(num_players):
             player_name = f'Player_{i}'
             seat_display_name = f'Seat {i}'
-            stack = "$" + str(parse_num(round(obs[np.roll(stacks, -offset)[i]] * normalization_sum, 2)))
+            stack = "$" + str(parse_num(round(obs[np.roll(stacks[:num_players], -offset)[i]] * normalization_sum, 2)))
             player_stacks.append(PlayerStack(seat_display_name,
                                              player_name,
                                              stack))
@@ -124,6 +124,17 @@ class PokerExperimentRunner(ExperimentRunner):
         for b in blinds:
             self.money_from_last_round[b.player_name] -= float(b.amount[1:])
 
+    def _get_stack_sizes(self, experiment: PokerExperiment):
+        # returns cumulative stack sizes if all players have stacks > 0
+        # otherwise returns default stack sizes starting list
+        default_stack_size = experiment.env.normalization
+        stack_sizes_list = []
+        for pname, money in self.money_from_last_round.items():
+            if money == -default_stack_size:
+                return [default_stack_size for _ in range(experiment.num_players)]
+            stack_sizes_list.append(round(default_stack_size) + round(money))
+        return stack_sizes_list
+
     def run(self, experiment: PokerExperiment) -> List[PokerEpisode]:
         poker_episodes = []
         n_episodes = experiment.max_episodes
@@ -140,18 +151,16 @@ class PokerExperimentRunner(ExperimentRunner):
             participants = experiment.participants
             iter_actions = iter([])
 
-        self.money_from_last_round = {'Player_0': 0,
-                                      'Player_1': 0,
-                                      'Player_2': 0,
-                                      'Player_3': 0,
-                                      'Player_4': 0,
-                                      'Player_5': 0,
-                                      }
-        # ----- RUN EPISODES -----
+        self.money_from_last_round = OrderedDict()
+        for i in range(num_players):
+            self.money_from_last_round[f'Player_{i}'] = 0
+            # ----- RUN EPISODES -----
         for ep_id in range(n_episodes):
             # -------- Reset environment ------------
+            stack_sizes_list = self._get_stack_sizes(experiment)
+            env.env.set_stack_size(stack_sizes_list)
             obs, _, done, _ = env.reset(experiment.env_config)
-            agent_idx = ep_id % num_players  # always move button to the right
+            agent_idx = button_index = ep_id % num_players  # always move button to the right
             showdown_hands = None
             normalization_sum = float(
                 sum([s.starting_stack_this_episode for s in env.env.seats])
@@ -160,7 +169,10 @@ class PokerExperimentRunner(ExperimentRunner):
             self._subtract_blinds_from_stacks(blinds)
             ante = '$0.00'
             assert obs[COLS.Ante] == 0  # games with ante not supported
-            player_stacks = self._get_player_stacks(obs, num_players, normalization_sum, agent_idx)
+            player_stacks = self._get_player_stacks(obs,
+                                                    num_players,
+                                                    normalization_sum,
+                                                    agent_idx)
             actions_total = {'preflop': [],
                              'flop': [],
                              'turn': [],
@@ -189,12 +201,12 @@ class PokerExperimentRunner(ExperimentRunner):
                 obs, _, done, info = env.step(action)
                 # -------- RECORD LAST ACTION ---------
                 a = env.env.last_action
-                raise_amount = float(a[1]) if a[0] == ActionType.RAISE else -1
+                raise_amount = float(a[1])  # if a[0] == ActionType.RAISE else -1
                 episode_action = Action(stage=stage,
-                                        player_name=f'Player_{a[2]}',
+                                        player_name=f'Player_{agent_idx}',
                                         action_type=ACTION_TYPES[a[0]],
                                         raise_amount=raise_amount)
-                self.money_from_last_round[f'Player_{a[2]}'] -= float(a[1])
+                self.money_from_last_round[f'Player_{a[2]}'] -= a[1]
                 actions_total[stage].append(episode_action)
                 actions_total['as_sequence'].append(episode_action)
                 total_actions_dict[a[0]] += 1
@@ -211,7 +223,7 @@ class PokerExperimentRunner(ExperimentRunner):
                 # env.env.cards2str(env.env.get_hole_cards_of_player(0))
             winners = self._get_winners(showdown_players=showdown_hands, payouts=info['payouts'])
             money_collected = self._get_money_collected(payouts=info['payouts'])
-            money_from_last_round = self._update_cumulative_stacks(money_collected)
+            self._update_cumulative_stacks(money_collected)
             board = _make_board(env.env.cards2str(env.env.board))
             poker_episodes.append(PokerEpisode(date=DEFAULT_DATE,
                                                hand_id=ep_id,
@@ -221,7 +233,7 @@ class PokerExperimentRunner(ExperimentRunner):
                                                blinds=blinds,
                                                ante=ante,
                                                player_stacks=player_stacks,
-                                               btn_idx=0,
+                                               btn_idx=button_index,
                                                board_cards=board,
                                                actions_total=actions_total,
                                                winners=winners,

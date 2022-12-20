@@ -71,7 +71,7 @@ def test_episode_matches_environment_states_and_actions():
                    Action('river', 'Player_1', ActionType.CHECK_CALL, -1),
                    Action('river', 'Player_0', ActionType.CHECK_CALL, -1)]
     actions_total = {'preflop': [Action('preflop', 'Player_0', ActionType.RAISE, 500.0),
-                                 Action('preflop', 'Player_1', ActionType.CHECK_CALL, -1)],
+                                 Action('preflop', 'Player_1', ActionType.CHECK_CALL, 500)],
                      'flop': [Action('flop', 'Player_1', ActionType.CHECK_CALL, -1),
                               Action('flop', 'Player_0', ActionType.CHECK_CALL, -1)],
                      'turn': [Action('turn', 'Player_1', ActionType.CHECK_CALL, -1),
