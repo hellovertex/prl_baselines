@@ -63,21 +63,21 @@ def test_episode_matches_environment_states_and_actions():
                (1, -1),  # p1 checks on river
                ]
     action_list = [Action('preflop', 'Player_0', ActionType.RAISE, 500.0),
-                   Action('preflop', 'Player_1', ActionType.CHECK_CALL, -1),
-                   Action('flop', 'Player_1', ActionType.CHECK_CALL, -1),
-                   Action('flop', 'Player_0', ActionType.CHECK_CALL, -1),
-                   Action('turn', 'Player_1', ActionType.CHECK_CALL, -1),
-                   Action('turn', 'Player_0', ActionType.CHECK_CALL, -1),
-                   Action('river', 'Player_1', ActionType.CHECK_CALL, -1),
-                   Action('river', 'Player_0', ActionType.CHECK_CALL, -1)]
+                   Action('preflop', 'Player_1', ActionType.CHECK_CALL, 500.0),
+                   Action('flop', 'Player_1', ActionType.CHECK_CALL, 0.0),
+                   Action('flop', 'Player_0', ActionType.CHECK_CALL, 0.0),
+                   Action('turn', 'Player_1', ActionType.CHECK_CALL, 0.0),
+                   Action('turn', 'Player_0', ActionType.CHECK_CALL, 0.0),
+                   Action('river', 'Player_1', ActionType.CHECK_CALL, 0.0),
+                   Action('river', 'Player_0', ActionType.CHECK_CALL, 0.0)]
     actions_total = {'preflop': [Action('preflop', 'Player_0', ActionType.RAISE, 500.0),
-                                 Action('preflop', 'Player_1', ActionType.CHECK_CALL, 500)],
-                     'flop': [Action('flop', 'Player_1', ActionType.CHECK_CALL, -1),
-                              Action('flop', 'Player_0', ActionType.CHECK_CALL, -1)],
-                     'turn': [Action('turn', 'Player_1', ActionType.CHECK_CALL, -1),
-                              Action('turn', 'Player_0', ActionType.CHECK_CALL, -1)],
-                     'river': [Action('river', 'Player_1', ActionType.CHECK_CALL, -1),
-                               Action('river', 'Player_0', ActionType.CHECK_CALL, -1)],
+                                 Action('preflop', 'Player_1', ActionType.CHECK_CALL, 500.0)],
+                     'flop': [Action('flop', 'Player_1', ActionType.CHECK_CALL, 0.0),
+                              Action('flop', 'Player_0', ActionType.CHECK_CALL, 0.0)],
+                     'turn': [Action('turn', 'Player_1', ActionType.CHECK_CALL, 0.0),
+                              Action('turn', 'Player_0', ActionType.CHECK_CALL, 0.0)],
+                     'river': [Action('river', 'Player_1', ActionType.CHECK_CALL, 0.0),
+                               Action('river', 'Player_0', ActionType.CHECK_CALL, 0.0)],
                      'as_sequence': action_list}
     # 3. construct PokerEpisode that we expect
     expected_episode = PokerEpisode(date=DEFAULT_DATE,

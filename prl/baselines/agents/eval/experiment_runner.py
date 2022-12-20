@@ -202,11 +202,17 @@ class PokerExperimentRunner(ExperimentRunner):
                 # -------- RECORD LAST ACTION ---------
                 a = env.env.last_action
                 raise_amount = float(a[1])  # if a[0] == ActionType.RAISE else -1
+                # set raise amount to zero if it is preflop, the acting player is the big blind
+                # and the action is call with amount equal to big blind
+                # then we actually have to make it a check
+                if a[2] == env.env.BB_POS and a[1] == env.env.BIG_BLIND and a[0] == 1:
+                    if stage == 'preflop':
+                        raise_amount = 0
                 episode_action = Action(stage=stage,
                                         player_name=f'Player_{agent_idx}',
                                         action_type=ACTION_TYPES[a[0]],
                                         raise_amount=raise_amount)
-                self.money_from_last_round[f'Player_{a[2]}'] -= a[1]
+                self.money_from_last_round[f'Player_{agent_idx}'] -= raise_amount
                 actions_total[stage].append(episode_action)
                 actions_total['as_sequence'].append(episode_action)
                 total_actions_dict[a[0]] += 1
@@ -214,11 +220,12 @@ class PokerExperimentRunner(ExperimentRunner):
                 if done:
                     showdown_hands = self._get_showdown_hands(remaining_players, a)
                     print(ep_id)
+                    break
                 legal_moves = env.env.get_legal_actions()
                 observation = {'obs': [obs], 'legal_moves': [legal_moves]}
 
                 # -------- SET NEXT AGENT -----------
-                agent_idx = env.current_player.seat_id
+                agent_idx = (agent_idx + 1) % num_players
 
                 # env.env.cards2str(env.env.get_hole_cards_of_player(0))
             winners = self._get_winners(showdown_players=showdown_hands, payouts=info['payouts'])
