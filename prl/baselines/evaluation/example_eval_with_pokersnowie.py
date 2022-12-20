@@ -3,23 +3,26 @@ from typing import List, Dict
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
 
-from prl.baselines.agents.agents import BaselineAgent
-from prl.baselines.agents.policies import StakeLevelImitationPolicy, CallingStation
-from prl.baselines.evaluation.core.experiment import AGENT, PokerExperimentParticipant, PokerExperiment
+from prl.baselines.agents.agents import BaselineAgent, CallingStation
+from prl.baselines.agents.core.base_agent import Agent, RllibAgent
+from prl.baselines.agents.policies import StakeLevelImitationPolicy, AlwaysCallingPolicy
+from prl.baselines.evaluation.core.experiment import AGENT, PokerExperiment, PokerExperimentParticipant
 from prl.baselines.evaluation.pokersnowie.export import PokerExperimentToPokerSnowie
 
 
 def make_agents(env, path_to_torch_model_state_dict):
+    path_to_baseline_torch_model_state_dict = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt.pt"
+
     policy_config = {'path_to_torch_model_state_dict': path_to_torch_model_state_dict}
     baseline_policy = StakeLevelImitationPolicy(env.observation_space, env.action_space, policy_config)
-    reference_policy = CallingStation(env.observation_space, env.action_space, policy_config)
+    reference_policy = AlwaysCallingPolicy(env.observation_space, env.action_space, policy_config)
 
-    baseline_agent = BaselineAgent({'rllib_policy': baseline_policy})
-    reference_agent = BaselineAgent({'rllib_policy': reference_policy})
+    baseline_agent =
+    reference_agent = BaselineAgent({'rllib_policy_cls': AlwaysCallingPolicy})
     return [baseline_agent, baseline_agent]
 
 
-def make_participants(agents: List[AGENT], starting_stack_size: int) -> Dict[int, PokerExperimentParticipant]:
+def make_participants(agents: List[RllibAgent], starting_stack_size: int) -> Dict[int, PokerExperimentParticipant]:
     participants = {}
     for i, agent in enumerate(agents):
         participants[i] = PokerExperimentParticipant(id=i,
@@ -38,17 +41,21 @@ if __name__ == '__main__':
     # todo fix player stack equal to 0
     starting_stack_size = 5000
     num_players = 2
-    stacks = [starting_stack_size for _ in range(num_players)]
-    env_wrapped = init_wrapped_env(env_wrapper_cls=AugmentObservationWrapper,
-                                   stack_sizes=stacks,
-                                   multiply_by=1)
     max_episodes = 100
-    path_to_baseline_torch_model_state_dict = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt.pt"
-    agent_list = make_agents(env_wrapped, path_to_baseline_torch_model_state_dict)
-    participants = make_participants(agent_list, starting_stack_size)
+    env_wrapped = init_wrapped_env(env_wrapper_cls=AugmentObservationWrapper,
+                                   stack_sizes=[5000, 5000],
+                                   multiply_by=1)
+
+    agents = [
+        CallingStation,
+        CallingStation
+    ]
+    participants = make_participants(agents, starting_stack_size)
+
     experiment = PokerExperiment(
-        env=env_wrapped,  # single environment to run sequential games on
         num_players=num_players,
+        env_wrapper_cls=AugmentObservationWrapper,  # single environment to run sequential games on
+        starting_stack_size=5000,
         env_config=None,  # can pass {'deck_state_dict': Dict[str, Any]} to init the deck and player cards
         participants=participants,  # wrapper around agents that hold rllib policies that act given observation
         max_episodes=max_episodes,  # number of games to run
@@ -59,6 +66,6 @@ if __name__ == '__main__':
         from_action_plan=None  # compute action from fixed series of actions instead of calls to agent.act
     )
     db_gen = PokerExperimentToPokerSnowie().generate_database(
-        path_out='/prl/baselines/agents/eval/Pokersnowie2.txt',
+        path_out='/home/sascha/Documents/github.com/prl_baselines/prl/baselines/evaluation/Pokersnowie2.txt',
         experiment=experiment,
         max_episodes_per_file=500)

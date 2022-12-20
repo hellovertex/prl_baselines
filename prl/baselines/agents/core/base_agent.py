@@ -49,3 +49,19 @@ class Agent(object):
             - tba, see PokerEnv
         """
         raise NotImplementedError("Not implemented in Abstract Base class")
+
+
+class RllibAgent(Agent):
+    def __init__(self, config, *args, **kwargs):
+        super().__init__(config, *args, **kwargs)
+        self._rllib_policy = None
+
+    @property
+    def policy(self):
+        return self._rllib_policy
+
+    def act(self, observation):
+        raise NotImplementedError
+
+    def reset(self, config):
+        raise NotImplementedError

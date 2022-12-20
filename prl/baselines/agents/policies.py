@@ -47,7 +47,7 @@ class RandomPolicy(BaselinePolicy_Base):
         return [self.action_space.sample() for _ in obs_batch], [], {}
 
 
-class CallingStation(BaselinePolicy_Base):
+class AlwaysCallingPolicy(BaselinePolicy_Base):
     """Policy that always calls"""
 
     def compute_actions(self, obs_batch: Union[List[TensorStructType], TensorStructType],

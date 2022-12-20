@@ -16,7 +16,7 @@ POKER_SNOWIE_CONVERTER_INSTANCE = TypeVar('POKER_SNOWIE_CONVERTER_INSTANCE', bou
 
 class PersistentStorage:
     def _write(self, episodes, path_out):
-        with open(path_out, 'a') as f:
+        with open(path_out, 'a+') as f:
             for e in episodes:
                 f.write(e)
 

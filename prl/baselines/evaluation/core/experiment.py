@@ -37,10 +37,14 @@ class PokerExperimentParticipant:
 class PokerExperiment:
     """Might change in the future"""
     num_players: int  # 2 <= num_players <= 6
-    env: Union[ENV_WRAPPER, NoLimitHoldem]
+    env_cls = NoLimitHoldem
+    env_wrapper_cls: ENV_WRAPPER
+    stack_sizes_list: Optional[List[int]]
+    starting_stack_size: int  # convenient access single source of truth
     env_config: Optional[Dict[str, Any]]
     # candidates to add
-    participants: Dict[int, PokerExperimentParticipant]
+    participants: Optional[Dict[int, PokerExperimentParticipant]]
+    # agents: List[AGENT]
     max_episodes: int
     # should PokerExperiments be updated?
     current_episode: Optional[int]
@@ -48,5 +52,7 @@ class PokerExperiment:
     cbs_metrics: Optional[List[Callable]]
     cbs_plots: Optional[List[Callable]]
     cbs_misc: Optional[List[Callable]]
-    # from_state_dict: Optional[Dict]  # if hand cards and board cards should be predetermined -- is set via env
-    from_action_plan: Optional[List[Union[Action, Tuple]]]  # if actions should be predetermined (e.g. during testing)
+    # When no participants are passed, you can use an action plan instead.
+    # An action plan contains a single ordered list of actions to execute per episode
+    # This means len(from_action_plan) == max_episodes
+    from_action_plan: Optional[List[List[Action]]]
