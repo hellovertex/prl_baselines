@@ -1,11 +1,11 @@
 from dataclasses import dataclass
-from typing import TypeVar, List, Optional, Union, Dict, Callable, Tuple, Any
+from typing import TypeVar, List, Optional, Union, Dict, Callable, Tuple, Any, Type
 
 from prl.environment.Wrappers.base import EnvWrapperBase
 from prl.environment.steinberger.PokerRL import NoLimitHoldem
 from ray.rllib import Policy
 
-from prl.baselines.agents.core.base_agent import Agent
+from prl.baselines.agents.core.base_agent import Agent, RllibAgent
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Action
 
 POLICY = TypeVar('POLICY', bound=Policy)
@@ -29,7 +29,7 @@ class PokerExperimentParticipant:
     name: str
     alias: Optional[str]
     starting_stack: Union[int, float]
-    agent: AGENT
+    agent: Type[RllibAgent]
     config: Optional[Dict]
 
 
@@ -38,10 +38,9 @@ class PokerExperiment:
     """Might change in the future"""
     num_players: int  # 2 <= num_players <= 6
     env_cls = NoLimitHoldem
-    env_wrapper_cls: ENV_WRAPPER
-    stack_sizes_list: Optional[List[int]]
-    starting_stack_size: int  # convenient access single source of truth
+    env_wrapper_cls: Type[EnvWrapperBase]
     env_config: Optional[Dict[str, Any]]
+    starting_stack_sizes: Optional[List[int]]
     # candidates to add
     participants: Optional[Dict[int, PokerExperimentParticipant]]
     # agents: List[AGENT]

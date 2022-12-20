@@ -2,6 +2,7 @@ from collections import OrderedDict
 from typing import List, Dict
 
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as COLS
+from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL import Poker
 
 from prl.baselines.evaluation.core.experiment import PokerExperiment, DEFAULT_DATE, DEFAULT_VARIANT, DEFAULT_CURRENCY
@@ -182,7 +183,6 @@ class PokerExperimentRunner(ExperimentRunner):
             # -------- SET NEXT AGENT -----------
             agent_idx = (agent_idx + 1) % num_players
 
-
     def _run_single_episode(self, experiment, env, num_players, ep_id) -> PokerEpisode:
         # --- SETUP AND RESET ENVIRONMENT ---
         obs, _, done, _ = env.reset(experiment.env_config)
@@ -190,8 +190,8 @@ class PokerExperimentRunner(ExperimentRunner):
         showdown_hands = None
         ante, blinds = self.post_blinds(obs, num_players, agent_idx, env)
         initial_player_stacks = self._get_player_stacks(env.env.seats,
-                                                num_players,
-                                                agent_idx)
+                                                        num_players,
+                                                        agent_idx)
         # --- SOURCE OF ACTIONS ---
         actions_total = {'preflop': [],
                          'flop': [],
@@ -205,8 +205,7 @@ class PokerExperimentRunner(ExperimentRunner):
         legal_moves = env.env.get_legal_actions()
         observation = {'obs': [obs], 'legal_moves': [legal_moves]}
 
-            # env.env.cards2str(env.env.get_hole_cards_of_player(0))
-
+        # env.env.cards2str(env.env.get_hole_cards_of_player(0))
 
         winners = self._get_winners(showdown_players=showdown_hands, payouts=info['payouts'])
         money_collected = self._get_money_collected(payouts=info['payouts'])
@@ -272,6 +271,8 @@ class PokerExperimentRunner(ExperimentRunner):
             self.money_from_last_round[f'Player_{i}'] = 0
 
         print(self.total_actions_dict)
-        #self.env =
+        self.env = init_wrapped_env(env_wrapper_cls=AugmentObservationWrapper,
+                                    stack_sizes=stacks,
+                                    multiply_by=1)
 
         return self._run_episodes(experiment)
