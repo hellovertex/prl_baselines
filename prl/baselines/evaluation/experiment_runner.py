@@ -1,12 +1,11 @@
-from typing import List, Dict
 from collections import OrderedDict
-import numpy as np
+from typing import List, Dict
+
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as COLS
 from prl.environment.steinberger.PokerRL import Poker
 
-from prl.baselines.agents.eval.core.experiment import PokerExperiment
-from prl.baselines.agents.eval.core.runner import ExperimentRunner, DEFAULT_CURRENCY, DEFAULT_VARIANT, \
-    DEFAULT_DATE
+from prl.baselines.evaluation.core.experiment import PokerExperiment, DEFAULT_DATE, DEFAULT_VARIANT, DEFAULT_CURRENCY
+from prl.baselines.evaluation.core.runner import ExperimentRunner
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, PlayerStack, ActionType, \
     PlayerWithCards, PlayerWinningsCollected, Action, PokerEpisode
 from prl.baselines.utils.num_parsers import parse_num
@@ -195,7 +194,7 @@ class PokerExperimentRunner(ExperimentRunner):
                 obs, _, done, info = env.step(action)
                 # -------- RECORD LAST ACTION ---------
                 a = env.env.last_action
-                raise_amount = max(a[1], 0) # if a[0] == ActionType.RAISE else -1
+                raise_amount = max(a[1], 0)  # if a[0] == ActionType.RAISE else -1
                 # set raise amount to zero if it is preflop, the acting player is the big blind
                 # and the action is call with amount equal to big blind
                 # then we actually have to make it a check

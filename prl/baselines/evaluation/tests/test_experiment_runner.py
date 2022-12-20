@@ -6,9 +6,9 @@ from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL import Poker
 
 from prl.baselines.agents.agents import BaselineAgent
-from prl.baselines.agents.eval.core.evaluator import DEFAULT_CURRENCY, DEFAULT_DATE, DEFAULT_VARIANT
-from prl.baselines.agents.eval.core.experiment import PokerExperiment
-from prl.baselines.agents.eval.experiment_runner import PokerExperimentRunner
+from prl.baselines.evaluation.core.evaluator import DEFAULT_CURRENCY, DEFAULT_DATE, DEFAULT_VARIANT
+from prl.baselines.evaluation.core.experiment import PokerExperiment
+from prl.baselines.evaluation.experiment_runner import PokerExperimentRunner
 from prl.baselines.agents.eval.utils import make_participants
 from prl.baselines.agents.policies import CallingStation
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import PlayerInfo, Positions6Max

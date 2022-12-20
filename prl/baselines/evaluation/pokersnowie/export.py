@@ -3,11 +3,11 @@ import glob
 from pathlib import Path
 from typing import List, Optional, TypeVar, Union
 
-from prl.baselines.agents.eval.core.experiment import PokerExperiment
-from prl.baselines.agents.eval.experiment_runner import PokerExperimentRunner
-from prl.baselines.pokersnowie.converter_888 import Converter888
-from prl.baselines.pokersnowie.core.converter import PokerSnowieConverter, SnowieEpisode
-from prl.baselines.pokersnowie.core.db_generator import PokerSnowieExporteur
+from prl.baselines.evaluation.core.experiment import PokerExperiment
+from prl.baselines.evaluation.experiment_runner import PokerExperimentRunner
+from prl.baselines.evaluation.pokersnowie.converter_888 import Converter888
+from prl.baselines.evaluation.pokersnowie.core.converter import PokerSnowieConverter, SnowieEpisode
+from prl.baselines.evaluation.pokersnowie.core.db_generator import PokerSnowieExporteur
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
 

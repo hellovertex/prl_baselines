@@ -1,7 +1,7 @@
 import click
 
-from prl.baselines.pokersnowie.converter_888 import Converter888
-from prl.baselines.pokersnowie.export import HandHistorySmithyToPokerSnowie
+from prl.baselines.evaluation.pokersnowie.converter_888 import Converter888
+from prl.baselines.evaluation.pokersnowie.export import HandHistorySmithyToPokerSnowie
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
 
 

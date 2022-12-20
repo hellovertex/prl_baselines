@@ -54,7 +54,7 @@ import datetime
 from datetime import datetime as dt
 from typing import List, Dict, Tuple
 
-from prl.baselines.pokersnowie.core.converter import PokerSnowieConverter
+from prl.baselines.evaluation.pokersnowie.core.converter import PokerSnowieConverter
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, PlayerStack, Blind
 
 SnowieEpisode = str

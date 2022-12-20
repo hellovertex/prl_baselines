@@ -49,7 +49,7 @@ instance to .txt file for import in PokerSnowie.
 import datetime
 from typing import List, Optional
 
-from prl.baselines.pokersnowie.core.converter import PokerSnowieConverter
+from prl.baselines.evaluation.pokersnowie.core.converter import PokerSnowieConverter
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Action, \
     ActionType
 
@@ -135,7 +135,7 @@ class Converter888(PokerSnowieConverter):
                 'river': "" if len_board < river_len else f"** Dealing river ** {river}\n"}
 
     @staticmethod
-    def _convert_move_what(action: Action) -> str:
+    def _convert_move_what(action: Action, episode: PokerEpisode) -> str:
         """ActionType to ['folds', 'checks', 'calls', 'bets', 'raises']"""
         if action.action_type == ActionType.FOLD:
             return 'folds'
@@ -145,9 +145,15 @@ class Converter888(PokerSnowieConverter):
             else:
                 return 'checks'
         elif action.action_type == ActionType.RAISE:
-            # todo if always returning 'bets' does not work the ntry 'raises'
-            #  if that does not work either, then use previous actions to determine bet or raise
-            return 'bets'
+            stage = action.stage
+            stage_actions = episode.actions_total[stage]
+            ret = 'bet'  # after second bet it is always called raise
+            for a in stage_actions:
+                if a.player_name != action.player_name and a.action_type == ActionType.RAISE:
+                    return 'raises'
+                elif a.player_name == action.player_name and a.action_type == ActionType.RAISE:
+                    return 'bets'
+            raise AssertionError("Raise Action not found")
 
     def _convert_moves(self, episode):
         """
@@ -180,7 +186,7 @@ class Converter888(PokerSnowieConverter):
                  'turn': '',
                  'river': ''}
         for a in episode.actions_total['as_sequence']:
-            what = self._convert_move_what(a)
+            what = self._convert_move_what(a, episode)
             how_much = f" [${self.parse_num(a.raise_amount)}]" if what not in ["folds", "checks"] else ""
             moves[a.stage] += f"{a.player_name} {what}{how_much}\n"
         return moves

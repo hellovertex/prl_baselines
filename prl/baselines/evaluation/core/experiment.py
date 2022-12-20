@@ -12,6 +12,10 @@ POLICY = TypeVar('POLICY', bound=Policy)
 AGENT = TypeVar('AGENT', bound=Agent)
 ENV_WRAPPER = TypeVar('ENV_WRAPPER', bound=EnvWrapperBase)
 
+DEFAULT_DATE = "2022-12-24"
+DEFAULT_VARIANT = "HUNL"
+DEFAULT_CURRENCY = "$"
+
 
 @dataclass
 class PokerExperimentEvaluation:

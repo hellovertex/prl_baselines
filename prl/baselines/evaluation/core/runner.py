@@ -1,11 +1,7 @@
 from typing import List
 
-from prl.baselines.agents.eval.core.experiment import PokerExperiment
+from prl.baselines.evaluation.core.experiment import PokerExperiment
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode
-
-DEFAULT_DATE = "2022-12-24"
-DEFAULT_VARIANT = "HUNL"
-DEFAULT_CURRENCY = "$"
 
 
 class ExperimentRunner:
