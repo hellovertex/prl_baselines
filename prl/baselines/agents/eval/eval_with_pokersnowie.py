@@ -17,7 +17,7 @@ if __name__ == '__main__':
     env_wrapped = init_wrapped_env(env_wrapper_cls=AugmentObservationWrapper,
                                    stack_sizes=stacks,
                                    multiply_by=1)
-    max_episodes = 10
+    max_episodes = 500
     path_to_baseline_torch_model_state_dict = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt.pt"
     agent_list = make_agents(env_wrapped, path_to_baseline_torch_model_state_dict)
     participants = make_participants(agent_list, starting_stack_size)

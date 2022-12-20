@@ -121,7 +121,7 @@ class PokerExperimentRunner(ExperimentRunner):
     def _get_stack_sizes(self, experiment: PokerExperiment):
         # returns cumulative stack sizes if all players have stacks > 0
         # otherwise returns default stack sizes starting list
-        default_stack_size = experiment.env.normalization
+        default_stack_size = int(experiment.env.normalization)
         stack_sizes_list = []
         for pname, money in self.money_from_last_round.items():
             stack_sizes_list.append(int(default_stack_size) + int(money))
