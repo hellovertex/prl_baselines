@@ -162,5 +162,59 @@ def test_blinds_alternate():
     assert returned_episodes[4].blinds[0].player_name == 'Player_0'
 
 
-def test_player_stacks():
-    pass
+def test_player_stacks_update_correctly():
+    # see who wins first checkdown and if the money collected is correctly added to its stack
+    num_players = 2
+    starting_stack_size = 1000
+    sb = 50
+    bb = 100
+    starting_stack_sizes = [starting_stack_size for _ in range(num_players)]
+    test_env = init_wrapped_env(AugmentObservationWrapper,
+                                starting_stack_sizes,
+                                blinds=[sb, bb],
+                                multiply_by=1)
+    agent_init_components = [
+        (CallingStation, {}, starting_stack_size),  # agent_cls, policy_config, stack
+        (CallingStation, {}, starting_stack_size)  # agent_cls, policy_config, stack
+    ]
+    participants = make_participants(agent_init_components,
+                                     observation_space=test_env.observation_space,
+                                     action_space=test_env.action_space)
+    experiment = PokerExperiment(num_players=num_players,
+                                 env=test_env,
+                                 env_reset_config=None,
+                                 starting_stack_sizes=starting_stack_sizes,
+                                 participants=participants,
+                                 max_episodes=2,
+                                 current_episode=0,
+                                 cbs_plots=[],
+                                 cbs_misc=[],
+                                 cbs_metrics=[],
+                                 from_action_plan=None
+                                 )
+    runner = PokerExperimentRunner()
+
+    # loop until there is single winner and no split pot (multiple winners)
+    while True:
+        returned_episodes = runner.run(experiment)
+        ep0 = returned_episodes[0]
+        if len(ep0.money_collected) == 1:
+            break
+
+    winner_ep0 = ep0.money_collected[0]
+    winner_name = winner_ep0.player_name
+    winner_collected = int(winner_ep0.collected[1:])
+
+    # Get winners initial stack and money he collected in episode 0
+    winner_initial_stack = 0
+    for pstack in ep0.player_stacks:
+        if pstack.player_name == winner_name:
+            winner_initial_stack = int(pstack.stack[1:])
+
+    # Starting stack at next episode must be equal to initial stack + money won
+    ep1 = returned_episodes[1]
+    for pstack in ep1.player_stacks:
+        if pstack.player_name == winner_name:
+            assert int(pstack.stack[1:]) == winner_initial_stack + winner_collected
+
+
