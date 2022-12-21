@@ -57,7 +57,7 @@ class HandHistorySmithyToPokerSnowie(PokerSnowieExporteur):
 
     # def _translate(self, smithy_episodes: List[PokerEpisode]) -> List[str]:
     @staticmethod
-    def _filter_criteria_matched(smithy_episode: PokerEpisode, filter_by: Optional[List[str]]):
+    def _filter_players(smithy_episode: PokerEpisode, filter_by: Optional[List[str]]):
         if not filter_by:
             return True, None
         showdown_players = [p.name for p in smithy_episode.showdown_hands]
@@ -70,7 +70,7 @@ class HandHistorySmithyToPokerSnowie(PokerSnowieExporteur):
         """Appends to self.snowie_episodes all poker episodes contained in the .txt file.
         If selected_players is passed, only games where these players participated will be returned"""
         for smithy_episode in self._parser.parse_file(file_path):
-            proceed, player_name = self._filter_criteria_matched(smithy_episode, filter_by)
+            proceed, player_name = self._filter_players(smithy_episode, filter_by)
             if proceed:
                 self.smithy_episodes.append((smithy_episode, [player_name]))
 

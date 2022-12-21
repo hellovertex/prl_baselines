@@ -29,7 +29,7 @@ class PokerExperimentParticipant:
     name: str
     alias: Optional[str]
     starting_stack: Union[int, float]
-    agent: Type[RllibAgent]
+    agent: RllibAgent
     config: Optional[Dict]
 
 
@@ -38,8 +38,8 @@ class PokerExperiment:
     """Might change in the future"""
     num_players: int  # 2 <= num_players <= 6
     env_cls = NoLimitHoldem
-    env_wrapper_cls: Type[EnvWrapperBase]
-    env_config: Optional[Dict[str, Any]]
+    env: ENV_WRAPPER
+    env_reset_config: Optional[Dict[str, Any]]
     starting_stack_sizes: Optional[List[int]]
     # candidates to add
     participants: Optional[Dict[int, PokerExperimentParticipant]]

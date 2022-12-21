@@ -23,12 +23,23 @@ def _make_board(board: str) -> str:
 
 class PokerExperimentRunner(ExperimentRunner):
     # run experiments using
+    def __init__(self):
+        self.money_from_last_round = None
+        self.iter_action_plan = None
+        self.participants = None
+        self.run_from_action_plan = None
+        self.total_actions_dict = None
+        self.num_players = None
+
     @staticmethod
-    def _get_player_stacks(seats, num_players, offset) -> List[PlayerStack]:
+    def _get_player_stacks(seats, num_players, btn_idx) -> List[PlayerStack]:
         """ Stacks at the beginning of every episode, not during or after."""
+        # seats are gotten from the environment and start with the button
+        # our agent who has the button can be at a different index than 0 in our agent list
+        # We must roll the seats, such that [BTN, ...] -> [...,BTN,...]
         player_stacks = []
         for seat_id, seat in enumerate(seats):
-            player_name = f'Player_{(seat_id + offset) % num_players}'
+            player_name = f'Player_{(seat_id + btn_idx) % num_players}'
             seat_display_name = f'Seat {seat_id}'
             stack = "$" + str(seat.stack)
             player_stacks.append(PlayerStack(seat_display_name,
@@ -37,7 +48,7 @@ class PokerExperimentRunner(ExperimentRunner):
         return player_stacks
 
     @staticmethod
-    def _get_blinds(num_players, offset, bb, sb) -> List[Blind]:
+    def _get_blinds(num_players, btn_idx, bb, sb) -> List[Blind]:
         """
         observing player sits relative to button. this offset is given by
         # >>> obs[COLS.Btn_idx]
@@ -46,11 +57,11 @@ class PokerExperimentRunner(ExperimentRunner):
         When only two players remain, the button posts the small blind.
         """
         # btn_offset = int(obs[COLS.Btn_idx])
-        sb_name = f"Player_{(1 + offset) % num_players}"
-        bb_name = f"Player_{(2 + offset) % num_players}"
+        sb_name = f"Player_{(1 + btn_idx) % num_players}"
+        bb_name = f"Player_{(2 + btn_idx) % num_players}"
         if num_players == 2:
-            sb_name = f"Player_{offset % num_players}"
-            bb_name = f"Player_{(1 + offset) % num_players}"
+            sb_name = f"Player_{btn_idx}"
+            bb_name = f"Player_{(1 + btn_idx) % num_players}"
 
         sb_amount = "$" + str(parse_num(sb))
         bb_amount = "$" + str(parse_num(bb))
@@ -69,11 +80,12 @@ class PokerExperimentRunner(ExperimentRunner):
                                                    cards=p.cards))
         return winners
 
-    @staticmethod
-    def _get_money_collected(payouts: Dict[int, str]) -> List[PlayerWinningsCollected]:
+    def _get_money_collected(self,
+                             payouts: Dict[int, str],
+                             btn_idx:int) -> List[PlayerWinningsCollected]:
         money_collected = []
         for pid, payout in payouts.items():
-            money_collected.append(PlayerWinningsCollected(player_name=f'Player_{pid}',
+            money_collected.append(PlayerWinningsCollected(player_name=f'Player_{(pid+btn_idx) % self.num_players}',
                                                            collected="$" + str(int(payout)),
                                                            rake=None))
         return money_collected
@@ -87,7 +99,7 @@ class PokerExperimentRunner(ExperimentRunner):
         c1 = tokens[1].replace(' ', '')
         return f'[{c0} {c1}]'
 
-    def _get_remaining_players(self, env) -> List[PlayerWithCards]:
+    def _get_remaining_players(self, env, btn_idx) -> List[PlayerWithCards]:
         # make player cards
         remaining_players = []
         for i in range(env.env.N_SEATS):
@@ -96,17 +108,20 @@ class PokerExperimentRunner(ExperimentRunner):
             if not env.env.seats[i].folded_this_episode:
                 if env.env.seats[i].stack > 0 or env.env.seats[i].is_allin:
                     cards = env.env.cards2str(env.env.get_hole_cards_of_player(i))
-                    remaining_players.append(PlayerWithCards(name=f'Player_{i}',
+                    remaining_players.append(PlayerWithCards(name=f'Player_{(i+btn_idx) % self.num_players}',
                                                              cards=self._parse_cards(cards)))
         return remaining_players
 
-    def _has_folded(self, p: PlayerWithCards, last_action) -> bool:
-        return last_action[0] == 0 and f'Player_{last_action[2]}' == p.name
+    def _has_folded(self, p: PlayerWithCards, last_action, btn_idx) -> bool:
+        return last_action[0] == 0 and f'Player_{(last_action[2] + btn_idx) % self.num_players}' == p.name
 
-    def _get_showdown_hands(self, remaining_players, last_action) -> List[PlayerWithCards]:
+    def _get_showdown_hands(self,
+                            remaining_players: List[PlayerWithCards],
+                            last_action,
+                            btn_idx) -> List[PlayerWithCards]:
         showdown_hands = []
         for p in remaining_players:
-            if not self._has_folded(p, last_action):
+            if not self._has_folded(p, last_action, btn_idx):
                 showdown_hands.append(p)
         return showdown_hands
 
@@ -130,17 +145,33 @@ class PokerExperimentRunner(ExperimentRunner):
                 return [default_stack_size for _ in range(experiment.num_players)]
         return stack_sizes_list
 
-    def post_blinds(self, obs, num_players, agent_idx, env):
-        blinds = self._get_blinds(num_players, agent_idx, env.env.BIG_BLIND, env.env.SMALL_BLIND)
+    def post_blinds(self, obs, num_players, btn_idx, env):
+        blinds = self._get_blinds(num_players, btn_idx, env.env.BIG_BLIND, env.env.SMALL_BLIND)
         self._subtract_blinds_from_stacks(blinds)
         ante = '$0.00'
         assert obs[COLS.Ante] == 0  # games with ante not supported
         return ante, blinds
 
-    def _run_game(self):
+    def update_stack_sizes_from_last_round(self, experiment: PokerExperiment):
+        updated_stacks = self._get_stack_sizes(experiment)
+        return experiment.env.env.set_stack_size(updated_stacks)
+
+    def _run_game(self, env, initial_observation, btn_idx):
+        done = False
+        showdown_hands = None
+        info = None
+        observation = initial_observation
+        # determine who goes first
+        agent_idx = btn_idx if self.num_players <= 2 else (btn_idx + 2) % self.num_players
+        # --- SOURCE OF ACTIONS ---
+        actions_total = {'preflop': [],
+                         'flop': [],
+                         'turn': [],
+                         'river': [],
+                         'as_sequence': []}
         while not done:
             # -------- ACT -----------
-            if experiment.from_action_plan:
+            if self.run_from_action_plan:
                 a = next(self.iter_actions)
                 action = a.action_type, a.raise_amount
                 # if isinstance(action, tuple):
@@ -152,7 +183,7 @@ class PokerExperimentRunner(ExperimentRunner):
                 action = env.int_action_to_tuple_action(action)
 
             # -------- STEP ENVIRONMENT -----------
-            remaining_players = self._get_remaining_players(env)
+            remaining_players = self._get_remaining_players(env, btn_idx)
             stage = Poker.INT2STRING_ROUND[env.env.current_round]
             obs, _, done, info = env.step(action)
             # -------- RECORD LAST ACTION ---------
@@ -175,40 +206,41 @@ class PokerExperimentRunner(ExperimentRunner):
             # if not done, prepare next turn
             if done:
                 showdown_hands = self._get_showdown_hands(remaining_players, a)
-                print(ep_id)
+
                 break
             legal_moves = env.env.get_legal_actions()
             observation = {'obs': [obs], 'legal_moves': [legal_moves]}
 
             # -------- SET NEXT AGENT -----------
-            agent_idx = (agent_idx + 1) % num_players
+            agent_idx = (agent_idx + 1) % self.num_players
+        return actions_total, showdown_hands, info
 
-    def _run_single_episode(self, experiment, env, num_players, ep_id) -> PokerEpisode:
+    def _run_single_episode(self,
+                            env,
+                            env_reset_config,
+                            num_players,
+                            btn_idx,
+                            ep_id) -> PokerEpisode:
         # --- SETUP AND RESET ENVIRONMENT ---
-        obs, _, done, _ = env.reset(experiment.env_config)
-        agent_idx = button_index = ep_id % num_players  # always move button to the right
-        showdown_hands = None
-        ante, blinds = self.post_blinds(obs, num_players, agent_idx, env)
+        obs, _, done, _ = env.reset(env_reset_config)
+        ante, blinds = self.post_blinds(obs, num_players, btn_idx, env)
         initial_player_stacks = self._get_player_stacks(env.env.seats,
                                                         num_players,
-                                                        agent_idx)
-        # --- SOURCE OF ACTIONS ---
-        actions_total = {'preflop': [],
-                         'flop': [],
-                         'turn': [],
-                         'river': [],
-                         'as_sequence': []}
-
-        self.iter_actions = iter(next(self.iter_action_plan))
+                                                        btn_idx)
+        if self.run_from_action_plan:
+            self.iter_actions = iter(next(self.iter_action_plan))
 
         # --- RUN GAME ---
         legal_moves = env.env.get_legal_actions()
-        observation = {'obs': [obs], 'legal_moves': [legal_moves]}
-
-        # env.env.cards2str(env.env.get_hole_cards_of_player(0))
+        initial_observation = {'obs': [obs], 'legal_moves': [legal_moves]}
+        actions_total, showdown_hands, info = self._run_game(env,
+                                                             initial_observation,
+                                                             btn_idx)
+        assert showdown_hands is not None
+        assert info is not None
 
         winners = self._get_winners(showdown_players=showdown_hands, payouts=info['payouts'])
-        money_collected = self._get_money_collected(payouts=info['payouts'])
+        money_collected = self._get_money_collected(payouts=info['payouts'], btn_idx)
         self._update_cumulative_stacks(money_collected)
         board = _make_board(env.env.cards2str(env.env.board))
         return PokerEpisode(date=DEFAULT_DATE,
@@ -219,31 +251,34 @@ class PokerExperimentRunner(ExperimentRunner):
                             blinds=blinds,
                             ante=ante,
                             player_stacks=initial_player_stacks,
-                            btn_idx=button_index,
+                            btn_idx=btn_idx,
                             board_cards=board,
                             actions_total=actions_total,
                             winners=winners,
                             showdown_hands=showdown_hands,
                             money_collected=money_collected)
 
-    def update_stack_sizes_from_last_round(self, experiment: PokerExperiment):
-        updated_stacks = self._get_stack_sizes(experiment)
-        return experiment.env.env.set_stack_size(updated_stacks)
-
     def _run_episodes(self, experiment: PokerExperiment) -> List[PokerEpisode]:
 
         env = experiment.env
+        env_reset_config = experiment.env_reset_config
         num_players = experiment.num_players
         n_episodes = experiment.max_episodes
 
         poker_episodes = []
         # ----- RUN EPISODES -----
         for ep_id in range(n_episodes):
+            print(ep_id)
+            btn_idx = ep_id % num_players  # always move button to the right
             # -------- Reset environment ------------
-            episode = self._run_single_episode(experiment, env, num_players, ep_id)
+            episode = self._run_single_episode(env,
+                                               env_reset_config,
+                                               num_players,
+                                               btn_idx,
+                                               ep_id)
             self.update_stack_sizes_from_last_round(experiment)
             poker_episodes.append(episode)
-            return poker_episodes
+        return poker_episodes
 
     def run(self, experiment: PokerExperiment) -> List[PokerEpisode]:
         # for testing,
@@ -251,6 +286,7 @@ class PokerExperimentRunner(ExperimentRunner):
         # 1) provide hands and boards
         # 2) provide action sequence
         #
+        self.num_players = experiment.num_players
         self.total_actions_dict = {ActionType.FOLD.value: 0,
                                    ActionType.CHECK_CALL.value: 0,
                                    ActionType.RAISE.value: 0}
@@ -258,9 +294,11 @@ class PokerExperimentRunner(ExperimentRunner):
         # 1) Using agents <--> participant.agent.act
         # 2) Using a predefined action list <--> next() on an iterator over actions
         if experiment.from_action_plan:
+            self.run_from_action_plan = True
             self.participants = []
             self.iter_action_plan = iter(experiment.from_action_plan)
         else:
+            self.run_from_action_plan = False
             self.participants = experiment.participants
             self.iter_action_plan = iter([])
         # the environment is reset after each episode
@@ -271,8 +309,5 @@ class PokerExperimentRunner(ExperimentRunner):
             self.money_from_last_round[f'Player_{i}'] = 0
 
         print(self.total_actions_dict)
-        self.env = init_wrapped_env(env_wrapper_cls=AugmentObservationWrapper,
-                                    stack_sizes=stacks,
-                                    multiply_by=1)
 
         return self._run_episodes(experiment)

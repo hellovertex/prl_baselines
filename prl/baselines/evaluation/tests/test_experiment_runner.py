@@ -1,42 +1,21 @@
 from typing import Dict, Any, List
 
+import gym
 import numpy as np
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL import Poker
 
-from prl.baselines.agents.agents import BaselineAgent
+from prl.baselines.agents.agents import CallingStation
 from prl.baselines.evaluation.core.experiment import PokerExperiment, AGENT, PokerExperimentParticipant, DEFAULT_DATE, \
     DEFAULT_VARIANT, DEFAULT_CURRENCY
+from prl.baselines.evaluation.example_eval_with_pokersnowie import make_participants
 from prl.baselines.evaluation.experiment_runner import PokerExperimentRunner
-from prl.baselines.agents.policies import CallingStation, StakeLevelImitationPolicy
-from prl.baselines.supervised_learning.data_acquisition.core.encoder import PlayerInfo, Positions6Max
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Blind, PlayerStack, ActionType, \
     Action, PlayerWithCards, PlayerWinningsCollected
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import card_tokens, card
-from prl.baselines.supervised_learning.data_acquisition.rl_state_encoder import RLStateEncoder
 
 
-def make_agents(env, path_to_torch_model_state_dict):
-    policy_config = {'path_to_torch_model_state_dict': path_to_torch_model_state_dict}
-    baseline_policy = StakeLevelImitationPolicy(env.observation_space, env.action_space, policy_config)
-    reference_policy = CallingStation(env.observation_space, env.action_space, policy_config)
-
-    baseline_agent = BaselineAgent({'rllib_policy': baseline_policy})
-    reference_agent = BaselineAgent({'rllib_policy': reference_policy})
-    return [baseline_agent, baseline_agent]
-
-
-def make_participants(agents: List[AGENT], starting_stack_size: int) -> Dict[int, PokerExperimentParticipant]:
-    participants = {}
-    for i, agent in enumerate(agents):
-        participants[i] = PokerExperimentParticipant(id=i,
-                                                     name=f'{type(agent.policy)}',
-                                                     alias=f'Agent_{i}',
-                                                     starting_stack=starting_stack_size,
-                                                     agent=agent,
-                                                     config={})
-    return participants
 
 
 def make_state_dict(player_hands: List[str], board_cards: str) -> Dict[str, Any]:
@@ -89,8 +68,9 @@ def test_episode_matches_environment_states_and_actions():
     player_hands = [hand_0, hand_1]
     board = 'Qh Jh Th 9h 8h'
     env_config = {'deck_state_dict': make_state_dict(player_hands, board)}
+    starting_stack_sizes = [starting_stack_size for _ in range(num_players)]
     test_env = init_wrapped_env(AugmentObservationWrapper,
-                                [starting_stack_size for _ in range(num_players)],
+                                starting_stack_sizes,
                                 blinds=[50, 100],
                                 multiply_by=1)
     # 2. need action sequence that results in showdown (any will do, e.g. all in and call)
@@ -123,7 +103,8 @@ def test_episode_matches_environment_states_and_actions():
                                     )
     experiment = PokerExperiment(num_players=num_players,
                                  env=test_env,
-                                 env_config=env_config,
+                                 env_reset_config=env_config,
+                                 starting_stack_sizes=starting_stack_sizes,
                                  participants={},  # no agents since we run from action list
                                  max_episodes=1,
                                  current_episode=0,
@@ -145,17 +126,23 @@ def test_episode_matches_environment_states_and_actions():
 def test_blinds_alternate():
     num_players = 2
     starting_stack_size = 1000
+    starting_stack_sizes = [starting_stack_size for _ in range(num_players)]
     test_env = init_wrapped_env(AugmentObservationWrapper,
-                                [starting_stack_size for _ in range(num_players)],
+                                starting_stack_sizes,
                                 blinds=[50, 100],
                                 multiply_by=1)
-    reference_policy = CallingStation(test_env.observation_space, test_env.action_space, {})
-    reference_agent = BaselineAgent({'rllib_policy': reference_policy})
-    agents = [reference_agent, reference_agent]
+    agent_init_components = [
+        (CallingStation, {}, starting_stack_size),  # agent_cls, policy_config, stack
+        (CallingStation, {}, starting_stack_size)  # agent_cls, policy_config, stack
+    ]
+    participants = make_participants(agent_init_components,
+                                     observation_space=test_env.observation_space,
+                                     action_space=test_env.action_space)
     experiment = PokerExperiment(num_players=num_players,
                                  env=test_env,
-                                 env_config=None,
-                                 participants=make_participants(agents, starting_stack_size),
+                                 env_reset_config=None,
+                                 starting_stack_sizes=starting_stack_sizes,
+                                 participants=participants,
                                  max_episodes=5,
                                  current_episode=0,
                                  cbs_plots=[],
