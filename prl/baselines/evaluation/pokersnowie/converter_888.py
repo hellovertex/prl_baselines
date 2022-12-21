@@ -147,10 +147,15 @@ class Converter888(PokerSnowieConverter):
         elif action.action_type == ActionType.RAISE:
             stage = action.stage
             stage_actions = episode.actions_total[stage]
-            ret = 'bet'  # after second bet it is always called raise
+            # since betting against blinds is a raise, every bet preflop is a raise
+            if stage == 'preflop':
+                return 'raises'
+
             for a in stage_actions:
+                # someone bet previously, we raise
                 if a.player_name != action.player_name and a.action_type == ActionType.RAISE:
                     return 'raises'
+                # we are first to bet this round
                 elif a.player_name == action.player_name and a.action_type == ActionType.RAISE:
                     return 'bets'
             raise AssertionError("Raise Action not found")

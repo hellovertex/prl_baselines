@@ -140,14 +140,15 @@ class PokerExperimentToPokerSnowie(PokerSnowieExporteur):
     def generate_database(self,
                           path_out: Union[str, Path],
                           experiment: PokerExperiment,
-                          max_episodes_per_file=500):
+                          max_episodes_per_file=500,
+                          hero_names: Optional[List[str]] = None):
         # execute Experiment to generate list of poker episodes
         poker_episodes = self._runner.run(experiment)
         snowie_episodes = []
         # parse list of poker episodes to snowie-formatted string
         for ep in poker_episodes:
             # showdown_eps is a list of the same episode from different angles relative to observer
-            showdown_eps = self._converter.from_poker_episode(ep, None)
+            showdown_eps = self._converter.from_poker_episode(ep, hero_names)
             for observer_relative in showdown_eps:
                 snowie_episodes.append(observer_relative)
         # write snowie-formatted string to text file

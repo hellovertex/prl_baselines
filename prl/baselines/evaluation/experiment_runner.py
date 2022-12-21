@@ -272,6 +272,7 @@ class PokerExperimentRunner(ExperimentRunner):
                                                btn_idx,
                                                ep_id)
             poker_episodes.append(episode)
+        print(self.total_actions_dict)
         return poker_episodes
 
     def run(self, experiment: PokerExperiment) -> List[PokerEpisode]:
@@ -295,7 +296,5 @@ class PokerExperimentRunner(ExperimentRunner):
             self.run_from_action_plan = False
             self.participants = experiment.participants
             self.iter_action_plan = iter([])
-
-        print(self.total_actions_dict)
 
         return self._run_episodes(experiment)
