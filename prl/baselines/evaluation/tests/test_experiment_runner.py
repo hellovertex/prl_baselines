@@ -76,8 +76,8 @@ def test_episode_matches_environment_states_and_actions():
                                 blinds=[50, 100],
                                 multiply_by=1)
     # 2. need action sequence that results in showdown (any will do, e.g. all in and call)
-    action_list = [Action('preflop', 'Player_0', ActionType.RAISE, 500),
-                   Action('preflop', 'Player_1', ActionType.CHECK_CALL, 500),
+    action_list = [Action('preflop', 'Player_0', ActionType.RAISE, 500),  # sb adds 450
+                   Action('preflop', 'Player_1', ActionType.CHECK_CALL, 500),  # bb calls for extra 400
                    Action('flop', 'Player_1', ActionType.CHECK_CALL, 0),
                    Action('flop', 'Player_0', ActionType.CHECK_CALL, 0),
                    Action('turn', 'Player_1', ActionType.CHECK_CALL, 0),
@@ -101,7 +101,7 @@ def test_episode_matches_environment_states_and_actions():
                                     winners=[PlayerWithCards('Player_0', f'{hand_0}')],
                                     showdown_hands=[PlayerWithCards('Player_0', f'{hand_0}'),
                                                     PlayerWithCards('Player_1', f'{hand_1}')],
-                                    money_collected=[PlayerWinningsCollected('Player_0', "$1000", None)]
+                                    money_collected=[PlayerWinningsCollected('Player_0', "$500", None)]
                                     )
     experiment = PokerExperiment(num_players=num_players,
                                  env=test_env,

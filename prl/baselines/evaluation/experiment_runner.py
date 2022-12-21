@@ -82,12 +82,19 @@ class PokerExperimentRunner(ExperimentRunner):
 
     def _get_money_collected(self,
                              env,
+                             initial_stacks: List[PlayerStack],
                              payouts: Dict[int, str],
                              btn_idx: int) -> List[PlayerWinningsCollected]:
         money_collected = []
+        # env.env.seats always start with the button
+        # initial_stacks are our fixed agents, where anyone could have the button
+        # agent_idx relative to button
         for pid, payout in payouts.items():
+            # Note: indices are relative to button
+            gain = env.env.seats[pid].stack - int(initial_stacks[(pid-btn_idx) % self.num_players].stack[1:])
+            # Note: indices are reversed relative to our agents
             money_collected.append(PlayerWinningsCollected(player_name=f'Player_{(pid + btn_idx) % self.num_players}',
-                                                           collected="$" + str(int(payout)),
+                                                           collected="$" + str(int(gain)),
                                                            rake=None))
         return money_collected
 
@@ -221,7 +228,7 @@ class PokerExperimentRunner(ExperimentRunner):
         winners = self._get_winners(showdown_players=showdown_hands,
                                     payouts=info['payouts'],
                                     btn_idx=btn_idx)
-        money_collected = self._get_money_collected(env, payouts=info['payouts'], btn_idx=btn_idx)
+        money_collected = self._get_money_collected(env, initial_player_stacks, payouts=info['payouts'], btn_idx=btn_idx)
 
         board = _make_board(env.env.cards2str(env.env.board))
         return PokerEpisode(date=DEFAULT_DATE,
@@ -251,7 +258,7 @@ class PokerExperimentRunner(ExperimentRunner):
         for ep_id in range(n_episodes):
             print(ep_id)
             btn_idx = ep_id % num_players  # always move button to the right
-            new_starting_stacks = np.roll([p.stack for p in env.env.seats], btn_idx).tolist()
+            new_starting_stacks = np.roll([p.stack for p in env.env.seats], btn_idx).astype(int).tolist()
             env.env.set_stack_size(new_starting_stacks)
             # -------- Reset environment ------------
             episode = self._run_single_episode(env,
