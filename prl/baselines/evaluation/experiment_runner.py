@@ -69,14 +69,15 @@ class PokerExperimentRunner(ExperimentRunner):
         return [Blind(sb_name, 'small blind', sb_amount),
                 Blind(bb_name, 'big blind', bb_amount)]
 
-    @staticmethod
-    def _get_winners(showdown_players: List[PlayerWithCards], payouts: dict) -> List[PlayerWithCards]:
+    def _get_winners(self, showdown_players: List[PlayerWithCards],
+                     payouts: dict,
+                     btn_idx: int) -> List[PlayerWithCards]:
         winners = []
         for pid, money_won in payouts.items():
             for p in showdown_players:
                 # look for winning player in showdown players and append its stats to winners
-                if f'Player_{pid}' == p.name:
-                    winners.append(PlayerWithCards(name=f'Player_{pid}',
+                if f'Player_{(pid+btn_idx) % self.num_players}' == p.name:
+                    winners.append(PlayerWithCards(name=p.name,
                                                    cards=p.cards))
         return winners
 
@@ -205,14 +206,17 @@ class PokerExperimentRunner(ExperimentRunner):
             self.total_actions_dict[a[0]] += 1
             # if not done, prepare next turn
             if done:
-                showdown_hands = self._get_showdown_hands(remaining_players, a)
+                showdown_hands = self._get_showdown_hands(remaining_players, a, btn_idx)
 
                 break
             legal_moves = env.env.get_legal_actions()
             observation = {'obs': [obs], 'legal_moves': [legal_moves]}
 
             # -------- SET NEXT AGENT -----------
-            agent_idx = (agent_idx + 1) % self.num_players
+            # btn_idx is the index of the button relative to our agent list
+            # seat_id is relative to the button
+            # so to translate seat_id to agent_idx, we must roll this by btn_idx
+            agent_idx = (btn_idx + env.env.current_player.seat_id) % self.num_players
         return actions_total, showdown_hands, info
 
     def _run_single_episode(self,
@@ -239,8 +243,10 @@ class PokerExperimentRunner(ExperimentRunner):
         assert showdown_hands is not None
         assert info is not None
 
-        winners = self._get_winners(showdown_players=showdown_hands, payouts=info['payouts'])
-        money_collected = self._get_money_collected(payouts=info['payouts'], btn_idx)
+        winners = self._get_winners(showdown_players=showdown_hands,
+                                    payouts=info['payouts'],
+                                    btn_idx=btn_idx)
+        money_collected = self._get_money_collected(payouts=info['payouts'], btn_idx=btn_idx)
         self._update_cumulative_stacks(money_collected)
         board = _make_board(env.env.cards2str(env.env.board))
         return PokerEpisode(date=DEFAULT_DATE,

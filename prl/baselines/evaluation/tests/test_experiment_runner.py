@@ -54,9 +54,11 @@ def get_actions_total(actions: List[Action]) -> Dict[str, List[Action]]:
     actions_total = {'preflop': [],
                      'flop': [],
                      'turn': [],
-                     'river': []}
+                     'river': [],
+                     'as_sequence': []}
     for a in actions:
         actions_total[a.stage].append(a)
+        actions_total['as_sequence'].append(a)
     return actions_total
 
 
