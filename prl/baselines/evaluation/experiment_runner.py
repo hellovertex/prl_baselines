@@ -37,8 +37,9 @@ class PokerExperimentRunner(ExperimentRunner):
         # our agent who has the button can be at a different index than 0 in our agent list
         # We must roll the seats, such that [BTN, ...] -> [...,BTN,...]
         player_stacks = []
+        seats = list(np.roll(seats, btn_idx))
         for seat_id, seat in enumerate(seats):
-            player_name = f'Player_{(seat_id + btn_idx) % num_players}'
+            player_name = f'Player_{seat_id}'
             seat_display_name = f'Seat {seat_id}'
             stack = "$" + str(seat.stack)
             player_stacks.append(PlayerStack(seat_display_name,
