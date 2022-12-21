@@ -168,6 +168,7 @@ class PokerExperimentRunner(ExperimentRunner):
             # -------- STEP ENVIRONMENT -----------
             remaining_players = self._get_remaining_players(env, btn_idx)
             stage = Poker.INT2STRING_ROUND[env.env.current_round]
+            current_bet_before_action = env.current_player.current_bet
             obs, _, done, info = env.step(action)
             # -------- RECORD LAST ACTION ---------
             a = env.env.last_action
@@ -181,7 +182,10 @@ class PokerExperimentRunner(ExperimentRunner):
             episode_action = Action(stage=stage,
                                     player_name=f'Player_{agent_idx}',
                                     action_type=ACTION_TYPES[a[0]],
-                                    raise_amount=raise_amount)
+                                    raise_amount=raise_amount,
+                                    info={
+                                        'total_call_or_bet_amt_minus_current_bet': raise_amount - current_bet_before_action
+                                    })
 
             actions_total[stage].append(episode_action)
             actions_total['as_sequence'].append(episode_action)

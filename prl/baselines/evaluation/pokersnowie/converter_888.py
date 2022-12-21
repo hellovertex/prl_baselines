@@ -187,7 +187,10 @@ class Converter888(PokerSnowieConverter):
                  'river': ''}
         for a in episode.actions_total['as_sequence']:
             what = self._convert_move_what(a, episode)
-            how_much = f" [${self.parse_num(a.raise_amount)}]" if what not in ["folds", "checks"] else ""
+            amt = a.raise_amount
+            if what in ['calls', 'raises']:
+                amt = a.info['total_call_or_bet_amt_minus_current_bet']
+            how_much = f" [${self.parse_num(amt)}]" if what not in ["folds", "checks"] else ""
             moves[a.stage] += f"{a.player_name} {what}{how_much}\n"
         return moves
 

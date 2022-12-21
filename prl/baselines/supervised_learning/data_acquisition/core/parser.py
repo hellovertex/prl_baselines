@@ -43,6 +43,7 @@ class Action(NamedTuple):
     player_name: str
     action_type: ActionType
     raise_amount: float = -1
+    info: Optional[Dict] = None
 
 
 class PlayerWinningsCollected(NamedTuple):
@@ -76,6 +77,7 @@ class PokerEpisode(NamedTuple):
     winners: List[PlayerWithCards]
     showdown_hands: List[PlayerWithCards]
     money_collected: List[PlayerWinningsCollected]
+    info: Optional[Dict] = None
 
 
 class Parser:  # pylint: disable=too-few-public-methods
