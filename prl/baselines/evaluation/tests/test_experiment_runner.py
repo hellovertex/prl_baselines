@@ -166,8 +166,8 @@ def test_player_stacks_update_correctly():
     # see who wins first checkdown and if the money collected is correctly added to its stack
     num_players = 2
     starting_stack_size = 1000
-    sb = 50
-    bb = 100
+    sb = 25
+    bb = 50
     starting_stack_sizes = [starting_stack_size for _ in range(num_players)]
     test_env = init_wrapped_env(AugmentObservationWrapper,
                                 starting_stack_sizes,

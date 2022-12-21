@@ -81,6 +81,7 @@ class PokerExperimentRunner(ExperimentRunner):
         return winners
 
     def _get_money_collected(self,
+                             env,
                              payouts: Dict[int, str],
                              btn_idx: int) -> List[PlayerWinningsCollected]:
         money_collected = []
@@ -220,7 +221,7 @@ class PokerExperimentRunner(ExperimentRunner):
         winners = self._get_winners(showdown_players=showdown_hands,
                                     payouts=info['payouts'],
                                     btn_idx=btn_idx)
-        money_collected = self._get_money_collected(payouts=info['payouts'], btn_idx=btn_idx)
+        money_collected = self._get_money_collected(env, payouts=info['payouts'], btn_idx=btn_idx)
 
         board = _make_board(env.env.cards2str(env.env.board))
         return PokerEpisode(date=DEFAULT_DATE,

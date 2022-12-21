@@ -49,10 +49,13 @@ def make_participants(agent_init_components: List[AGENT_INIT_COMPONENTS],
 
 if __name__ == '__main__':
     starting_stack_size = 1000
+    sb = 25
+    bb = 50
     num_players = 2
     max_episodes = 100
     env = init_wrapped_env(env_wrapper_cls=AugmentObservationWrapper,
                            stack_sizes=[starting_stack_size, starting_stack_size],
+                           blinds=[sb, bb],
                            multiply_by=1)
 
     agent_init_components = [
