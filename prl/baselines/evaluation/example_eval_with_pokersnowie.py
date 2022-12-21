@@ -48,11 +48,11 @@ def make_participants(agent_init_components: List[AGENT_INIT_COMPONENTS],
 
 
 if __name__ == '__main__':
-    starting_stack_size = 5000
+    starting_stack_size = 1000
     num_players = 2
     max_episodes = 100
     env = init_wrapped_env(env_wrapper_cls=AugmentObservationWrapper,
-                           stack_sizes=[5000, 5000],
+                           stack_sizes=[starting_stack_size, starting_stack_size],
                            multiply_by=1)
 
     agent_init_components = [
@@ -67,7 +67,7 @@ if __name__ == '__main__':
         # env
         env=env,  # single environment to run sequential games on
         num_players=num_players,
-        starting_stack_sizes=[5000, 5000],
+        starting_stack_sizes=[starting_stack_size, starting_stack_size],
         env_reset_config=None,  # can pass {'deck_state_dict': Dict[str, Any]} to init the deck and player cards
         # run
         max_episodes=max_episodes,  # number of games to run
