@@ -42,7 +42,7 @@ class PokerExperiment:
     env_reset_config: Optional[Dict[str, Any]]
     starting_stack_sizes: Optional[List[int]]
     # candidates to add
-    participants: Optional[Dict[int, PokerExperimentParticipant]]
+    participants: Optional[Tuple[PokerExperimentParticipant]]
     # agents: List[AGENT]
     max_episodes: int
     # should PokerExperiments be updated?

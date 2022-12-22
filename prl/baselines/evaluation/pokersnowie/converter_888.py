@@ -242,24 +242,29 @@ class Converter888(PokerSnowieConverter):
         community_cards: dict = self._convert_community_cards(episode)
         moves: dict = self._convert_moves(episode)
         summary = self._convert_summary(episode, hero_name)
-        episode_888 = f"#Game No : {episode.hand_id}\n" \
-                      f"***** 888.de Snap Poker Hand History for Game {episode.hand_id} *****\n" \
-                      f"${sb}/${bb} Blinds No Limit Holdem - *** {t}\n" \
-                      f"Table Curico 6 Max (Real Money)\n" \
-                      f"{btn.seat_display_name} is the button\n" \
-                      f"Total number of players : {len(episode.player_stacks)}\n" + \
-                      seats + \
-                      blinds + \
-                      dealt_cards + \
-                      moves['preflop'] + \
-                      community_cards['flop'] + \
-                      moves['flop'] + \
-                      community_cards['turn'] + \
-                      moves['turn'] + \
-                      community_cards['river'] + \
-                      moves['river'] + \
-                      summary + \
-                      "\n\n\n"
+        episode_888 = ""
+        try:
+            episode_888 = f"#Game No : {episode.hand_id}\n" \
+                          f"***** 888.de Snap Poker Hand History for Game {episode.hand_id} *****\n" \
+                          f"${sb}/${bb} Blinds No Limit Holdem - *** {t}\n" \
+                          f"Table Curico 6 Max (Real Money)\n" \
+                          f"{btn.seat_display_name} is the button\n" \
+                          f"Total number of players : {len(episode.player_stacks)}\n" + \
+                          seats + \
+                          blinds + \
+                          dealt_cards + \
+                          moves['preflop'] + \
+                          community_cards['flop'] + \
+                          moves['flop'] + \
+                          community_cards['turn'] + \
+                          moves['turn'] + \
+                          community_cards['river'] + \
+                          moves['river'] + \
+                          summary + \
+                          "\n\n\n"
+        except TypeError:
+            # skip None Values for turns of opponent
+            pass
         return episode_888
 
     def from_poker_episode(self, episode: PokerEpisode, hero_names: Optional[List[str]] = None) -> List[SnowieEpisode]:

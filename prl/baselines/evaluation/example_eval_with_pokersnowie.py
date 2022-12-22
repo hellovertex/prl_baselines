@@ -30,21 +30,20 @@ AGENT_INIT_COMPONENTS = Tuple[AGENT_CLS, POLICY_CONFIG, STARTING_STACK]
 
 def make_participants(agent_init_components: List[AGENT_INIT_COMPONENTS],
                       observation_space: gym.Space,
-                      action_space: gym.Space) -> Dict[int, PokerExperimentParticipant]:
-    participants = {}
-    # todo
+                      action_space: gym.Space) -> Tuple[PokerExperimentParticipant]:
+    participants = []
     for i, (agent_cls, policy_config, stack) in enumerate(agent_init_components):
         agent_config = {'observation_space': observation_space,
                         'action_space': action_space,
                         'policy_config': policy_config}
         agent = agent_cls(agent_config)
-        participants[i] = PokerExperimentParticipant(id=i,
-                                                     name=f'{agent_cls.__name__}',
-                                                     alias=f'Agent_{i}',
-                                                     starting_stack=stack,
-                                                     agent=agent,
-                                                     config={})
-    return participants
+        participants.append(PokerExperimentParticipant(id=i,
+                                                       name=f'{agent_cls.__name__}_Seat_{i}',
+                                                       alias=f'Agent_{i}',
+                                                       starting_stack=stack,
+                                                       agent=agent,
+                                                       config={}))
+    return tuple(participants)
 
 
 if __name__ == '__main__':
@@ -70,8 +69,11 @@ if __name__ == '__main__':
     ]
     # todo rake
     # todo 3+ players
-    # todo player names
-    # todo pass heronames
+    # [x] todo player names
+    # [x] todo pass heronames
+    # todo use with pokersnowie
+    # todo how does it perform vs callingstation in terms of bb/100
+
     participants = make_participants(agent_init_components,
                                      observation_space=env.observation_space,
                                      action_space=env.action_space)
@@ -96,5 +98,5 @@ if __name__ == '__main__':
         path_out='/home/sascha/Documents/github.com/prl_baselines/prl/baselines/evaluation/Pokersnowie3.txt',
         experiment=experiment,
         max_episodes_per_file=500,
-        hero_names=["Player_0"]
+        hero_names=["StakePlayerImitator_Seat_0"]
     )

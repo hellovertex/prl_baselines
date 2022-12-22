@@ -23,6 +23,7 @@ def _make_board(board: str) -> str:
 class PokerExperimentRunner(ExperimentRunner):
     # run experiments using
     def __init__(self):
+        self.player_names = None
         self.money_from_last_round = None
         self.iter_action_plan = None
         self.participants = None
@@ -30,8 +31,7 @@ class PokerExperimentRunner(ExperimentRunner):
         self.total_actions_dict = None
         self.num_players = None
 
-    @staticmethod
-    def _get_player_stacks(seats, num_players, btn_idx) -> List[PlayerStack]:
+    def _get_player_stacks(self, seats, num_players, btn_idx) -> List[PlayerStack]:
         """ Stacks at the beginning of every episode, not during or after."""
         # seats are gotten from the environment and start with the button
         # our agent who has the button can be at a different index than 0 in our agent list
@@ -39,7 +39,7 @@ class PokerExperimentRunner(ExperimentRunner):
         player_stacks = []
         seats = list(np.roll(seats, btn_idx))
         for seat_id, seat in enumerate(seats):
-            player_name = f'Player_{seat_id}'
+            player_name = f'{self.player_names[seat_id]}'
             seat_display_name = f'Seat {seat_id}'
             stack = "$" + str(seat.stack)
             player_stacks.append(PlayerStack(seat_display_name,
@@ -47,8 +47,7 @@ class PokerExperimentRunner(ExperimentRunner):
                                              stack))
         return player_stacks
 
-    @staticmethod
-    def _get_blinds(num_players, btn_idx, bb, sb) -> List[Blind]:
+    def _get_blinds(self, num_players, btn_idx, bb, sb) -> List[Blind]:
         """
         observing player sits relative to button. this offset is given by
         # >>> obs[COLS.Btn_idx]
@@ -57,11 +56,11 @@ class PokerExperimentRunner(ExperimentRunner):
         When only two players remain, the button posts the small blind.
         """
         # btn_offset = int(obs[COLS.Btn_idx])
-        sb_name = f"Player_{(1 + btn_idx) % num_players}"
-        bb_name = f"Player_{(2 + btn_idx) % num_players}"
+        sb_name = f"{self.player_names[(1 + btn_idx) % num_players]}"
+        bb_name = f"{self.player_names[(2 + btn_idx) % num_players]}"
         if num_players == 2:
-            sb_name = f"Player_{btn_idx}"
-            bb_name = f"Player_{(1 + btn_idx) % num_players}"
+            sb_name = f"{self.player_names[btn_idx]}"
+            bb_name = f"{self.player_names[(1 + btn_idx) % num_players]}"
 
         sb_amount = "$" + str(parse_num(sb))
         bb_amount = "$" + str(parse_num(bb))
@@ -76,7 +75,7 @@ class PokerExperimentRunner(ExperimentRunner):
         for pid, money_won in payouts.items():
             for p in showdown_players:
                 # look for winning player in showdown players and append its stats to winners
-                if f'Player_{(pid + btn_idx) % self.num_players}' == p.name:
+                if f'{self.player_names[(pid + btn_idx) % self.num_players]}' == p.name:
                     winners.append(PlayerWithCards(name=p.name,
                                                    cards=p.cards))
         return winners
@@ -92,11 +91,12 @@ class PokerExperimentRunner(ExperimentRunner):
         # agent_idx relative to button
         for pid, payout in payouts.items():
             # Note: indices are relative to button
-            gain = env.env.seats[pid].stack - int(initial_stacks[(pid-btn_idx) % self.num_players].stack[1:])
+            gain = env.env.seats[pid].stack - int(initial_stacks[(pid - btn_idx) % self.num_players].stack[1:])
             # Note: indices are reversed relative to our agents
-            money_collected.append(PlayerWinningsCollected(player_name=f'Player_{(pid + btn_idx) % self.num_players}',
-                                                           collected="$" + str(int(gain)),
-                                                           rake=None))
+            money_collected.append(
+                PlayerWinningsCollected(player_name=f'{self.player_names[(pid + btn_idx) % self.num_players]}',
+                                        collected="$" + str(int(gain)),
+                                        rake=None))
         return money_collected
 
     @staticmethod
@@ -117,12 +117,13 @@ class PokerExperimentRunner(ExperimentRunner):
             if not env.env.seats[i].folded_this_episode:
                 if env.env.seats[i].stack > 0 or env.env.seats[i].is_allin:
                     cards = env.env.cards2str(env.env.get_hole_cards_of_player(i))
-                    remaining_players.append(PlayerWithCards(name=f'Player_{(i + btn_idx) % self.num_players}',
-                                                             cards=self._parse_cards(cards)))
+                    remaining_players.append(
+                        PlayerWithCards(name=f'{self.player_names[(i + btn_idx) % self.num_players]}',
+                                        cards=self._parse_cards(cards)))
         return remaining_players
 
     def _has_folded(self, p: PlayerWithCards, last_action, btn_idx) -> bool:
-        return last_action[0] == 0 and f'Player_{(last_action[2] + btn_idx) % self.num_players}' == p.name
+        return last_action[0] == 0 and f'{self.player_names[(last_action[2] + btn_idx) % self.num_players]}' == p.name
 
     def _get_showdown_hands(self,
                             remaining_players: List[PlayerWithCards],
@@ -180,7 +181,7 @@ class PokerExperimentRunner(ExperimentRunner):
                 if stage == 'preflop':
                     raise_amount = 0
             episode_action = Action(stage=stage,
-                                    player_name=f'Player_{agent_idx}',
+                                    player_name=f'{self.player_names[agent_idx]}',
                                     action_type=ACTION_TYPES[a[0]],
                                     raise_amount=raise_amount,
                                     info={
@@ -233,7 +234,8 @@ class PokerExperimentRunner(ExperimentRunner):
         winners = self._get_winners(showdown_players=showdown_hands,
                                     payouts=info['payouts'],
                                     btn_idx=btn_idx)
-        money_collected = self._get_money_collected(env, initial_player_stacks, payouts=info['payouts'], btn_idx=btn_idx)
+        money_collected = self._get_money_collected(env, initial_player_stacks, payouts=info['payouts'],
+                                                    btn_idx=btn_idx)
 
         board = _make_board(env.env.cards2str(env.env.board))
         return PokerEpisode(date=DEFAULT_DATE,
@@ -296,5 +298,5 @@ class PokerExperimentRunner(ExperimentRunner):
             self.run_from_action_plan = False
             self.participants = experiment.participants
             self.iter_action_plan = iter([])
-
+            self.player_names = [p.name for p in self.participants]
         return self._run_episodes(experiment)
