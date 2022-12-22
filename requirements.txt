@@ -4,7 +4,7 @@ prefetch_generator
 seaborn
 click
 gdown
-sklearn
+scikit-learn
 numpy==1.22.0
 pandas
 pydantic
