@@ -264,15 +264,19 @@ class PokerExperimentRunner(ExperimentRunner):
         # ----- RUN EPISODES -----
         for ep_id in range(n_episodes):
             print(ep_id)
-            btn_idx = ep_id % num_players  # always move button to the right
-            new_starting_stacks = np.roll([p.stack for p in env.env.seats], btn_idx).astype(int).tolist()
-            env.env.set_stack_size(new_starting_stacks)
+            # always move button to the next player
+            btn_idx = ep_id % num_players
+            # along with all the stacks that are shifted 1 to the right
             # -------- Reset environment ------------
             episode = self._run_single_episode(env,
                                                env_reset_config,
                                                num_players,
                                                btn_idx,
                                                ep_id)
+            # rotate stacks, such that next player will be at 0
+            # [BTN UTG SB BB MP CO] will become [UTG SB BB MP CO BTN]
+            new_starting_stacks = np.roll([p.stack for p in env.env.seats], -1).astype(int).tolist()
+            env.env.set_stack_size(new_starting_stacks)
             poker_episodes.append(episode)
         print(self.total_actions_dict)
         return poker_episodes

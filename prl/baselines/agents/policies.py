@@ -105,6 +105,7 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
                  tightness: float = 0.9,
                  acceptance_level: float = 0.7):
         BaselinePolicy_Base.__init__(self, observation_space, action_space, config)
+        self._logits = None
         self._path_to_torch_model_state_dict = config['path_to_torch_model_state_dict']
         self._model = self.load_model()
         self.tightness = tightness
@@ -135,7 +136,7 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
                        agent_id: int,
                        obs: Union[List, np.ndarray]):
         hero_cards_1d, board_cards_1d = self.look_at_cards(obs)
-        # from cards get winning probability
+        # from cards get winning probabilityx
         mc_dict = self._card_evaluator.run_mc(hero_cards_1d, board_cards_1d, 2, n_iter=self._mc_iters)
         # {won: 0, lost: 0, tied: 0}[
         win_prob = float(mc_dict['won'] / self._mc_iters)
@@ -177,7 +178,8 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
         self._legal_moves = obs_batch['legal_moves']
         # extract legal move bits to obtain original observations
         observations = obs_batch['obs']
-        self._predictions = torch.argmax(self._model(torch.Tensor(observations)), axis=1)
+        self._logits = self._model(torch.Tensor(observations))
+        self._predictions = torch.argmax(self._logits, axis=1)
         return [self.compute_action(idx, obs) for idx, obs in enumerate(observations)], [], {}
 
     def load_model(self, model_type: BaselineModelType = BaselineModelType.MLP_2x512):
