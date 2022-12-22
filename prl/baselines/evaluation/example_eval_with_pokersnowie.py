@@ -51,7 +51,7 @@ if __name__ == '__main__':
     sb = 50
     bb = 100
     num_players = 2
-    max_episodes = 100
+    max_episodes = 500
     env = init_wrapped_env(env_wrapper_cls=AugmentObservationWrapper,
                            stack_sizes=[starting_stack_size, starting_stack_size],
                            blinds=[sb, bb],

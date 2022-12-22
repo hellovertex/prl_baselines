@@ -147,7 +147,7 @@ class PokerExperimentRunner(ExperimentRunner):
         info = None
         observation = initial_observation
         # determine who goes first
-        agent_idx = btn_idx if self.num_players <= 2 else (btn_idx + 2) % self.num_players
+        agent_idx = btn_idx if self.num_players < 4 else (btn_idx + 3) % self.num_players
         # --- SOURCE OF ACTIONS ---
         actions_total = {'preflop': [],
                          'flop': [],
