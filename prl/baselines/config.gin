@@ -1,2 +1,2 @@
-get_prl_baseline_model_ckpt_path.path = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt(1).pt"
-get_snowie_database_output_path.path = "/home/sascha/Documents/github.com/prl_baselines/prl/baselines/evaluation/Pokersnowie3.txt"
+get_prl_baseline_model_ckpt_path.path = "/home/sascha/Documents/github.com/prl_baselines/data/baseline_model_ckpt.pt"
+get_snowie_database_output_path.path = "/home/sascha/Documents/github.com/prl_baselines/data/pokersnowie_output.txt"
