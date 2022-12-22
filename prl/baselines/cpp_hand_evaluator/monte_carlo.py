@@ -1,5 +1,5 @@
 import random
-from hand_evaluator import rank
+from prl.baselines.cpp_hand_evaluator.hand_evaluator import rank
 
 LEN_DECK_WITHOUT_HERO_AND_BOARD_CARDS = 45  # 52 - 2 - 5
 
