@@ -40,7 +40,7 @@ class PokerExperimentRunner(ExperimentRunner):
         seats = list(np.roll(seats, btn_idx))
         for seat_id, seat in enumerate(seats):
             player_name = f'{self.player_names[seat_id]}'
-            seat_display_name = f'Seat {seat_id}'
+            seat_display_name = f'Seat {seat_id+1}'  # index starts at 1
             stack = "$" + str(seat.stack)
             player_stacks.append(PlayerStack(seat_display_name,
                                              player_name,

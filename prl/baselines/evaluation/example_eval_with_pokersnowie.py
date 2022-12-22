@@ -69,11 +69,19 @@ if __name__ == '__main__':
     ]
     # todo rake
     # todo 3+ players
+    # todo button is at 3 for >3 players, not >2, fix this
     # [x] todo player names
     # [x] todo pass heronames
     # todo use with pokersnowie
     # todo how does it perform vs callingstation in terms of bb/100
-
+    # todo initialize/bootstrap rl model with baseline NN
+    # todo run rl pipeline on aws
+    # todo: what do we need from the run, metrics etc?
+    # first deploy on small machine and see what we are missing, plots, logging, etc
+    # while the first small and cheap deployment runs, we can code up the rest:
+    # todo [optional] do we need to code up a purely MC based baseline?
+    # todo: compute Poker Stats from baesline
+    # todo: vpip 3bet etc
     participants = make_participants(agent_init_components,
                                      observation_space=env.observation_space,
                                      action_space=env.action_space)
