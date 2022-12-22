@@ -1,14 +1,13 @@
 from typing import List, Dict, Type, Tuple, Any
 
+import gin
 import gym
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
-from prl.environment.Wrappers.base import EnvWrapperBase
 from prl.environment.Wrappers.utils import init_wrapped_env
 
 from prl.baselines.agents.agents import CallingStation, StakePlayerImitator
-from prl.baselines.agents.core.base_agent import Agent, RllibAgent
-from prl.baselines.agents.policies import StakeLevelImitationPolicy, AlwaysCallingPolicy
-from prl.baselines.evaluation.core.experiment import AGENT, PokerExperiment, PokerExperimentParticipant
+from prl.baselines.agents.core.base_agent import RllibAgent
+from prl.baselines.evaluation.core.experiment import PokerExperiment, PokerExperimentParticipant
 from prl.baselines.evaluation.pokersnowie.export import PokerExperimentToPokerSnowie
 
 # def make_agents(env, path_to_torch_model_state_dict):
@@ -38,7 +37,7 @@ def make_participants(agent_init_components: List[AGENT_INIT_COMPONENTS],
                         'policy_config': policy_config}
         agent = agent_cls(agent_config)
         participants.append(PokerExperimentParticipant(id=i,
-                                                       name=f'{agent_cls.__name__}_Seat_{i}',
+                                                       name=f'{agent_cls.__name__}_Seat_{i + 1}',
                                                        alias=f'Agent_{i}',
                                                        starting_stack=stack,
                                                        agent=agent,
@@ -46,17 +45,34 @@ def make_participants(agent_init_components: List[AGENT_INIT_COMPONENTS],
     return tuple(participants)
 
 
+@gin.configurable
+def get_prl_baseline_model_ckpt_path(path=""):
+    """Passes path from config.gin file to the caller """
+    return path
+
+
+@gin.configurable
+def get_snowie_database_output_path(path=""):
+    """Passes path from config.gin file to the caller """
+    return path
+
+
 if __name__ == '__main__':
+    import gin
+
+    gin.parse_config_file('../config.gin')
+
     starting_stack_size = 20000
     sb = 50
     bb = 100
     num_players = 2
-    max_episodes = 500
+    max_episodes = 10
     env = init_wrapped_env(env_wrapper_cls=AugmentObservationWrapper,
                            stack_sizes=[starting_stack_size, starting_stack_size],
                            blinds=[sb, bb],
                            multiply_by=1)
-    model_path = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt(1).pt"
+    # model_path = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt(1).pt"
+    model_path = get_prl_baseline_model_ckpt_path()
     baseline_v1 = (StakePlayerImitator,  # agent_cls
                    {'path_to_torch_model_state_dict': model_path},  # policy_config
                    starting_stack_size)
@@ -67,18 +83,20 @@ if __name__ == '__main__':
         baseline_v1,  # agent_cls, policy_config, stack
         calling_station  # agent_cls, policy_config, stack
     ]
-    # todo rake
-    # todo 3+ players
-    # todo button is at 3 for >3 players, not >2, fix this
+    # todo 3+ players -- very important
+    # todo in the baseline, if win_prob>.8 just make a bet here and there, we check way too often
+    # [x] todo button is at 3 for >3 players, not >2, fix this
     # [x] todo player names
-    # [x] todo pass heronames
-    # todo use with pokersnowie
+
+    # todo aws rl
+    # todo very important fix the money in the experiment runnner
+
+    # todo rake -- not so important
+    # todo split pot -- we lose some games but only a very minot portion -- not important
+
     # todo how does it perform vs callingstation in terms of bb/100
     # todo initialize/bootstrap rl model with baseline NN
-    # todo run rl pipeline on aws
     # todo: what do we need from the run, metrics etc?
-    # first deploy on small machine and see what we are missing, plots, logging, etc
-    # while the first small and cheap deployment runs, we can code up the rest:
     # todo [optional] do we need to code up a purely MC based baseline?
     # todo: compute Poker Stats from baesline
     # todo: vpip 3bet etc
@@ -103,8 +121,8 @@ if __name__ == '__main__':
         from_action_plan=None  # compute action from fixed series of actions instead of calls to agent.act
     )
     db_gen = PokerExperimentToPokerSnowie().generate_database(
-        path_out='/home/sascha/Documents/github.com/prl_baselines/prl/baselines/evaluation/Pokersnowie3.txt',
+        path_out=get_snowie_database_output_path(),
         experiment=experiment,
         max_episodes_per_file=500,
-        hero_names=["StakePlayerImitator_Seat_0"]
+        hero_names=["StakePlayerImitator_Seat_1"]
     )

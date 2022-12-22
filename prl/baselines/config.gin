@@ -1,4 +1,2 @@
-
-evaluate_baseline.n_episodes = 1500
-evaluate_baseline.path_to_torch_model_state_dict="/home/sascha/Documents/github.com/prl_baselines/prl/baselines/agents/experiments/ckpt.pt"
-evaluate_baseline.test_gin_register = @Dummy
+get_prl_baseline_model_ckpt_path.path = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt(1).pt"
+get_snowie_database_output_path.path = "/home/sascha/Documents/github.com/prl_baselines/prl/baselines/evaluation/Pokersnowie3.txt"
