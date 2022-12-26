@@ -3,6 +3,7 @@ from random import random
 from typing import Union, List, Optional, Dict, Tuple
 
 import numpy as np
+import ray
 import torch
 from prl.environment.Wrappers.base import ActionSpace
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as FeatureEnum
@@ -32,7 +33,7 @@ RANK = 0
 SUITE = 1
 
 
-class RandomPolicy(BaselinePolicy_Base):
+class RandomPokerPolicy(BaselinePolicy_Base):
     """Policy that returns Random Actions"""
 
     def compute_actions(self, obs_batch: Union[List[TensorStructType], TensorStructType],
@@ -206,3 +207,11 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
             return net
         else:
             raise NotImplementedError
+
+
+ray.rllib.algorithms.registry.POLICIES[
+    'StakeLevelImitationPolicy'] = 'prl.baselines.agents.policies.StakeLevelImitationPolicy'
+ray.rllib.algorithms.registry.POLICIES[
+    'AlwaysCallingPolicy'] = 'prl.baselines.agents.policies.AlwaysCallingPolicy'
+ray.rllib.algorithms.registry.POLICIES[
+    'RandomPokerPolicy'] = 'prl.baselines.agents.policies.RandomPokerPolicy'

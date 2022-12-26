@@ -81,9 +81,10 @@ if __name__ == '__main__':
                        starting_stack_size)
     agent_init_components = [
         baseline_v1,  # agent_cls, policy_config, stack
-        calling_station  # agent_cls, policy_config, stack
+        baseline_v1  # agent_cls, policy_config, stack
     ]
-    # todo 3+ players -- very important
+    # todo: figure out how to ask ray.remote how many steps each actor can swing per seconds
+    # todo run with 3+ players and see if it looks reasonable -- very important
     # todo in the baseline, if win_prob>.8 just make a bet here and there, we check way too often
     # [x] todo button is at 3 for >3 players, not >2, fix this
     # [x] todo player names

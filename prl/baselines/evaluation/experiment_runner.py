@@ -1,14 +1,14 @@
+import time
 from typing import List, Dict
 
 import numpy as np
-from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as COLS
-from prl.environment.steinberger.PokerRL import Poker
-
 from prl.baselines.evaluation.core.experiment import PokerExperiment, DEFAULT_DATE, DEFAULT_VARIANT, DEFAULT_CURRENCY
 from prl.baselines.evaluation.core.runner import ExperimentRunner
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, PlayerStack, ActionType, \
     PlayerWithCards, PlayerWinningsCollected, Action, PokerEpisode
 from prl.baselines.utils.num_parsers import parse_num
+from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as COLS
+from prl.environment.steinberger.PokerRL import Poker
 
 POSITIONS_HEADS_UP = ['btn', 'bb']  # button is small blind in Heads Up situations
 POSITIONS = ['btn', 'sb', 'bb', 'utg', 'mp', 'co']
@@ -30,6 +30,8 @@ class PokerExperimentRunner(ExperimentRunner):
         self.run_from_action_plan = None
         self.total_actions_dict = None
         self.num_players = None
+        self._times_taken_to_compute_action = []
+        self._times_taken_to_step_env = []
 
     def _get_player_stacks(self, seats, num_players, btn_idx) -> List[PlayerStack]:
         """ Stacks at the beginning of every episode, not during or after."""
@@ -40,7 +42,7 @@ class PokerExperimentRunner(ExperimentRunner):
         seats = list(np.roll(seats, btn_idx))
         for seat_id, seat in enumerate(seats):
             player_name = f'{self.player_names[seat_id]}'
-            seat_display_name = f'Seat {seat_id+1}'  # index starts at 1
+            seat_display_name = f'Seat {seat_id + 1}'  # index starts at 1
             stack = "$" + str(seat.stack)
             player_stacks.append(PlayerStack(seat_display_name,
                                              player_name,
@@ -156,6 +158,7 @@ class PokerExperimentRunner(ExperimentRunner):
                          'as_sequence': []}
         while not done:
             # -------- ACT -----------
+            t0 = time.time()
             if self.run_from_action_plan:
                 a = next(self.iter_actions)
                 action = a.action_type, a.raise_amount
@@ -165,12 +168,14 @@ class PokerExperimentRunner(ExperimentRunner):
                 action_vec = self.participants[agent_idx].agent.act(observation)
                 action = int(action_vec[0][0].numpy())
                 action = env.int_action_to_tuple_action(action)
-
+            self._times_taken_to_compute_action.append(time.time() - t0)
             # -------- STEP ENVIRONMENT -----------
             remaining_players = self._get_remaining_players(env, btn_idx)
             stage = Poker.INT2STRING_ROUND[env.env.current_round]
             current_bet_before_action = env.current_player.current_bet
+            t0 = time.time()
             obs, _, done, info = env.step(action)
+            self._times_taken_to_step_env.append(time.time() - t0)
             # -------- RECORD LAST ACTION ---------
             a = env.env.last_action
             raise_amount = max(a[1], 0)  # if a[0] == ActionType.RAISE else -1
@@ -279,6 +284,10 @@ class PokerExperimentRunner(ExperimentRunner):
             env.env.set_stack_size(new_starting_stacks)
             poker_episodes.append(episode)
         print(self.total_actions_dict)
+        print(f'Average time taken computing actions: '
+              f'{np.mean(self._times_taken_to_compute_action) * 1000} ms')
+        print(f'Average time taken stepping environment: '
+              f'{np.mean(self._times_taken_to_step_env) * 1000} ms')
         return poker_episodes
 
     def run(self, experiment: PokerExperiment) -> List[PokerEpisode]:
