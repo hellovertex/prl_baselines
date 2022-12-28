@@ -23,9 +23,16 @@ Install Baseline agent package (also generates training data from poker game log
 2. `git submodule update --recursive --remote` (and `--init` if you did not clone using `--recurse-submodules`)
 2. `pip install -e .`  `# use -e optionally for development`
 
+### Building the hand evaluator c++ lib files
+1. `pip install "pybind11[global]"`
+2. `cmake prl/baselines/cpp_hand_evaluator/cpp`
+3. `make`
+4. `sudo apt install libpython3.10-dev` in case make fails
+
+
 ## Usage
 ### Supervised Learning of Poker Baseline Agent from Game Logs for our RL training
-- [ ] todo: update following description to be more complete
+- [ ] todo: update following description
 
 This will create `.csv` files in the `data/folder`, each containing 500k training examples.
 Note: Setting `--blind_sizes` parameter will determine the subfolder to which training data
