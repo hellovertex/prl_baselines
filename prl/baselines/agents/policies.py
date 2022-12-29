@@ -196,9 +196,9 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
             output_dim = len(classes)
             net = MLP(input_dim, output_dim, hidden_dim)
             # if running on GPU and we want to use cuda move model there
-            use_cuda = torch.cuda.is_available()
-            if use_cuda:
-                net = net.cuda()
+            # use_cuda = torch.cuda.is_available()
+            # if use_cuda:
+            #     net = net.cuda()
             self._model = net
             self._model.load_state_dict(torch.load(self._path_to_torch_model_state_dict,
                                                    # always on cpu because model used to collects rollouts
