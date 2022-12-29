@@ -26,8 +26,13 @@ Install Baseline agent package (also generates training data from poker game log
 ### Building the hand evaluator c++ lib files
 1. `pip install "pybind11[global]"`
 2. `cmake prl/baselines/cpp_hand_evaluator/cpp`
+
+in case cmake fails:
+`sudo apt-get update && sudo apt-get install build-essential`
 3. `make`
-4. `sudo apt install libpython3.10-dev` in case make fails
+
+in case make fails: `sudo apt install libpython3.10-dev` 
+
 
 
 ## Usage
