@@ -208,10 +208,12 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
         else:
             raise NotImplementedError
 
-
-ray.rllib.algorithms.registry.POLICIES[
-    'StakeLevelImitationPolicy'] = 'prl.baselines.agents.policies.StakeLevelImitationPolicy'
-ray.rllib.algorithms.registry.POLICIES[
-    'AlwaysCallingPolicy'] = 'prl.baselines.agents.policies.AlwaysCallingPolicy'
-ray.rllib.algorithms.registry.POLICIES[
-    'RandomPokerPolicy'] = 'prl.baselines.agents.policies.RandomPokerPolicy'
+try:
+    ray.rllib.algorithms.registry.POLICIES[
+        'StakeLevelImitationPolicy'] = 'prl.baselines.agents.policies.StakeLevelImitationPolicy'
+    ray.rllib.algorithms.registry.POLICIES[
+        'AlwaysCallingPolicy'] = 'prl.baselines.agents.policies.AlwaysCallingPolicy'
+    ray.rllib.algorithms.registry.POLICIES[
+        'RandomPokerPolicy'] = 'prl.baselines.agents.policies.RandomPokerPolicy'
+except AttributeError as e:
+    pass

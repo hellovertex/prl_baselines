@@ -80,6 +80,7 @@ class PokerEpisode(NamedTuple):
     info: Optional[Dict] = None
 
 
+
 class Parser:  # pylint: disable=too-few-public-methods
     """ Abstract Parser Interface. All parsers should be derived from this base class
     and implement the method "parse_file"."""

@@ -146,7 +146,8 @@ class PokerExperimentRunner(ExperimentRunner):
     def _run_game(self, env, initial_observation, btn_idx):
         done = False
         showdown_hands = None
-        info = None
+        info = {'player_hands': []}  # monkey patched
+        # todo: populate player_hands with default hands
         observation = initial_observation
         # determine who goes first
         agent_idx = btn_idx if self.num_players < 4 else (btn_idx + 3) % self.num_players
@@ -209,6 +210,7 @@ class PokerExperimentRunner(ExperimentRunner):
             # seat_id is relative to the button
             # so to translate seat_id to agent_idx, we must roll this by btn_idx
             agent_idx = (btn_idx + env.env.current_player.seat_id) % self.num_players
+
         return actions_total, showdown_hands, info
 
     def _run_single_episode(self,
@@ -256,7 +258,8 @@ class PokerExperimentRunner(ExperimentRunner):
                             actions_total=actions_total,
                             winners=winners,
                             showdown_hands=showdown_hands,
-                            money_collected=money_collected)
+                            money_collected=money_collected,
+                            info={'player_hands': []})
 
     def _run_episodes(self, experiment: PokerExperiment) -> List[PokerEpisode]:
 
@@ -273,11 +276,11 @@ class PokerExperimentRunner(ExperimentRunner):
             btn_idx = ep_id % num_players
             # along with all the stacks that are shifted 1 to the right
             # -------- Reset environment ------------
-            episode = self._run_single_episode(env,
-                                               env_reset_config,
-                                               num_players,
-                                               btn_idx,
-                                               ep_id)
+            episode = self._run_single_episode(env=env,
+                                               env_reset_config=env_reset_config,
+                                               num_players=num_players,
+                                               btn_idx=btn_idx,
+                                               ep_id=ep_id)
             # rotate stacks, such that next player will be at 0
             # [BTN UTG SB BB MP CO] will become [UTG SB BB MP CO BTN]
             new_starting_stacks = np.roll([p.stack for p in env.env.seats], -1).astype(int).tolist()

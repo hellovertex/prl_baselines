@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+    cmake_minimum_required(VERSION 3.16)
 project(HandEvaluator)
 set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(ext/pybind11/)

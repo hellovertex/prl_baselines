@@ -65,10 +65,10 @@ if __name__ == '__main__':
     starting_stack_size = 20000
     sb = 50
     bb = 100
-    num_players = 2
+    num_players = 6
     max_episodes = 10
     env = init_wrapped_env(env_wrapper_cls=AugmentObservationWrapper,
-                           stack_sizes=[starting_stack_size, starting_stack_size],
+                           stack_sizes=[starting_stack_size for _ in range(num_players)],
                            blinds=[sb, bb],
                            multiply_by=1)
     # model_path = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt(1).pt"
@@ -80,6 +80,10 @@ if __name__ == '__main__':
                        {},
                        starting_stack_size)
     agent_init_components = [
+        baseline_v1,  # agent_cls, policy_config, stack
+        baseline_v1,  # agent_cls, policy_config, stack
+        baseline_v1,  # agent_cls, policy_config, stack
+        baseline_v1,  # agent_cls, policy_config, stack
         baseline_v1,  # agent_cls, policy_config, stack
         baseline_v1  # agent_cls, policy_config, stack
     ]

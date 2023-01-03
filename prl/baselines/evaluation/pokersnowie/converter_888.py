@@ -108,6 +108,9 @@ class Converter888(PokerSnowieConverter):
         Dealt to Lutzmolch [ 4c, 3h ]
         """
         ret = "** Dealing down cards **\n"
+        # todo: Fix: its wrong to assume that we always convert episodes that ran until showdown
+        #  in case of evaluation of baseline we know the cards even when the hand was folded
+        #  PokerEpisode must have playerhnads
         for player in episode.showdown_hands:
             if player.name == hero_name:
                 # '[As Th]' to '[ As, Th ]'
@@ -243,28 +246,31 @@ class Converter888(PokerSnowieConverter):
         moves: dict = self._convert_moves(episode)
         summary = self._convert_summary(episode, hero_name)
         episode_888 = ""
-        try:
-            episode_888 = f"#Game No : {episode.hand_id}\n" \
-                          f"***** 888.de Snap Poker Hand History for Game {episode.hand_id} *****\n" \
-                          f"${sb}/${bb} Blinds No Limit Holdem - *** {t}\n" \
-                          f"Table Curico 6 Max (Real Money)\n" \
-                          f"{btn.seat_display_name} is the button\n" \
-                          f"Total number of players : {len(episode.player_stacks)}\n" + \
-                          seats + \
-                          blinds + \
-                          dealt_cards + \
-                          moves['preflop'] + \
-                          community_cards['flop'] + \
-                          moves['flop'] + \
-                          community_cards['turn'] + \
-                          moves['turn'] + \
-                          community_cards['river'] + \
-                          moves['river'] + \
-                          summary + \
-                          "\n\n\n"
-        except TypeError:
-            # skip None Values for turns of opponent
-            pass
+        # try:
+        # todo: dealt cards can be None
+        # todo:
+        episode_888 = f"#Game No : {episode.hand_id}\n" \
+                      f"***** 888.de Snap Poker Hand History for Game {episode.hand_id} *****\n" \
+                      f"${sb}/${bb} Blinds No Limit Holdem - *** {t}\n" \
+                      f"Table Curico 6 Max (Real Money)\n" \
+                      f"{btn.seat_display_name} is the button\n" \
+                      f"Total number of players : {len(episode.player_stacks)}\n" + \
+                      seats + \
+                      blinds + \
+                      dealt_cards + \
+                      moves['preflop'] + \
+                      community_cards['flop'] + \
+                      moves['flop'] + \
+                      community_cards['turn'] + \
+                      moves['turn'] + \
+                      community_cards['river'] + \
+                      moves['river'] + \
+                      summary + \
+                      "\n\n\n"
+        # except TypeError as e:
+        #     # skip None Values for turns of opponent
+        #     print(f'Failed to parse episode with id {episode.hand_id}. Original Error was {e}')
+        #     pass
         return episode_888
 
     def from_poker_episode(self, episode: PokerEpisode, hero_names: Optional[List[str]] = None) -> List[SnowieEpisode]:
