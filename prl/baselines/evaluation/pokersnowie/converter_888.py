@@ -107,11 +107,19 @@ class Converter888(PokerSnowieConverter):
         ** Dealing down cards **
         Dealt to Lutzmolch [ 4c, 3h ]
         """
+        # We can not assume that we always convert episodes that ran until showdown
+        # in case of evaluation of baseline we know the cards even when the hand was folded
+        # PokerEpisode must have playerhnads
         ret = "** Dealing down cards **\n"
-        # todo: Fix: its wrong to assume that we always convert episodes that ran until showdown
-        #  in case of evaluation of baseline we know the cards even when the hand was folded
-        #  PokerEpisode must have playerhnads
-        for player in episode.showdown_hands:
+        # todo: use episode.info['player_hands'] instead of episode.showdown_hands
+        """
+        class PlayerWithCardsAndPosition:
+            cards: str  # '[Ah Jd]' <-- encoded like this, due to compatibility with parsers
+            name: str
+            seat: Optional[str] = None
+            position: Optional[int | Positions6Max] = None
+        """
+        for player in episode.info['player_hands']:
             if player.name == hero_name:
                 # '[As Th]' to '[ As, Th ]'
                 cards = player.cards.replace(" ", ", ").replace("[", "[ ").replace("]", " ]")
@@ -247,8 +255,6 @@ class Converter888(PokerSnowieConverter):
         summary = self._convert_summary(episode, hero_name)
         episode_888 = ""
         # try:
-        # todo: dealt cards can be None
-        # todo:
         episode_888 = f"#Game No : {episode.hand_id}\n" \
                       f"***** 888.de Snap Poker Hand History for Game {episode.hand_id} *****\n" \
                       f"${sb}/${bb} Blinds No Limit Holdem - *** {t}\n" \

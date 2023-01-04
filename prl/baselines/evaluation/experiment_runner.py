@@ -1,14 +1,17 @@
 import time
-from typing import List, Dict
+from dataclasses import dataclass
+from typing import List, Dict, Optional
 
 import numpy as np
+from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as COLS
+from prl.environment.steinberger.PokerRL import Poker
+
 from prl.baselines.evaluation.core.experiment import PokerExperiment, DEFAULT_DATE, DEFAULT_VARIANT, DEFAULT_CURRENCY
 from prl.baselines.evaluation.core.runner import ExperimentRunner
+from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, PlayerStack, ActionType, \
     PlayerWithCards, PlayerWinningsCollected, Action, PokerEpisode
 from prl.baselines.utils.num_parsers import parse_num
-from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as COLS
-from prl.environment.steinberger.PokerRL import Poker
 
 POSITIONS_HEADS_UP = ['btn', 'bb']  # button is small blind in Heads Up situations
 POSITIONS = ['btn', 'sb', 'bb', 'utg', 'mp', 'co']
@@ -18,6 +21,14 @@ ACTION_TYPES = [ActionType.FOLD, ActionType.CHECK_CALL, ActionType.RAISE]
 
 def _make_board(board: str) -> str:
     return f"[{board.replace(',', '').rstrip()}]"
+
+
+@dataclass
+class PlayerWithCardsAndPosition:
+    cards: str  # '[Ah Jd]' <-- encoded like this, due to compatibility with parsers
+    name: str
+    seat: Optional[str] = None
+    position: Optional[str] = None  # c.f. Positions6Max
 
 
 class PokerExperimentRunner(ExperimentRunner):
@@ -38,16 +49,36 @@ class PokerExperimentRunner(ExperimentRunner):
         # seats are gotten from the environment and start with the button
         # our agent who has the button can be at a different index than 0 in our agent list
         # We must roll the seats, such that [BTN, ...] -> [...,BTN,...]
+        #
         player_stacks = []
         seats = list(np.roll(seats, btn_idx))
         for seat_id, seat in enumerate(seats):
             player_name = f'{self.player_names[seat_id]}'
             seat_display_name = f'Seat {seat_id + 1}'  # index starts at 1
-            stack = "$" + str(seat.stack)
+            stack = "$" + str(seat.starting_stack_this_episode)
             player_stacks.append(PlayerStack(seat_display_name,
                                              player_name,
                                              stack))
         return player_stacks
+
+    def _get_money_collected(self,
+                             env,
+                             initial_stacks: List[PlayerStack],
+                             payouts: Dict[int, str],
+                             btn_idx: int) -> List[PlayerWinningsCollected]:
+        money_collected = []
+        # env.env.seats always start with the button
+        # initial_stacks are our fixed agents, where anyone could have the button
+        # agent_idx relative to button
+        for pid, payout in payouts.items():
+            # Note: indices are relative to button
+            gain = env.env.seats[pid].stack - int(initial_stacks[(pid - btn_idx) % self.num_players].stack[1:])
+            # Note: indices are reversed relative to our agents
+            money_collected.append(
+                PlayerWinningsCollected(player_name=f'{self.player_names[(pid + btn_idx) % self.num_players]}',
+                                        collected="$" + str(int(gain)),
+                                        rake=None))
+        return money_collected
 
     def _get_blinds(self, num_players, btn_idx, bb, sb) -> List[Blind]:
         """
@@ -81,25 +112,6 @@ class PokerExperimentRunner(ExperimentRunner):
                     winners.append(PlayerWithCards(name=p.name,
                                                    cards=p.cards))
         return winners
-
-    def _get_money_collected(self,
-                             env,
-                             initial_stacks: List[PlayerStack],
-                             payouts: Dict[int, str],
-                             btn_idx: int) -> List[PlayerWinningsCollected]:
-        money_collected = []
-        # env.env.seats always start with the button
-        # initial_stacks are our fixed agents, where anyone could have the button
-        # agent_idx relative to button
-        for pid, payout in payouts.items():
-            # Note: indices are relative to button
-            gain = env.env.seats[pid].stack - int(initial_stacks[(pid - btn_idx) % self.num_players].stack[1:])
-            # Note: indices are reversed relative to our agents
-            money_collected.append(
-                PlayerWinningsCollected(player_name=f'{self.player_names[(pid + btn_idx) % self.num_players]}',
-                                        collected="$" + str(int(gain)),
-                                        rake=None))
-        return money_collected
 
     @staticmethod
     def _parse_cards(cards):
@@ -213,6 +225,22 @@ class PokerExperimentRunner(ExperimentRunner):
 
         return actions_total, showdown_hands, info
 
+    def get_player_hands(self, env, btn_idx):
+        player_cards = [env.cards2str(env.get_hole_cards_of_player(i)) for i in range(len(env.seats))]
+        hands = ['[' + h.rstrip()[:-1] + ']' for h in player_cards]
+        hands = [h.replace(',', '') for h in hands]
+        agent_hands = list(np.roll(hands, btn_idx))
+        positions = [Positions6Max(i) for i in list(np.roll([j for j in range(len(env.seats))], btn_idx))]
+        player_with_cards_and_positions = []
+        for seat_id, hand in enumerate(agent_hands):
+            cards = hands[seat_id]
+            name = f'{self.player_names[seat_id]}'
+            position = f'{positions[seat_id].name}'
+            player_with_cards_and_positions.append(PlayerWithCardsAndPosition(cards=cards,
+                                                                              name=name,
+                                                                              position=position))
+        return player_with_cards_and_positions
+
     def _run_single_episode(self,
                             env,
                             env_reset_config,
@@ -220,10 +248,10 @@ class PokerExperimentRunner(ExperimentRunner):
                             btn_idx,
                             ep_id) -> PokerEpisode:
         # --- SETUP AND RESET ENVIRONMENT ---
-        initial_player_stacks = self._get_player_stacks(env.env.seats,
+        obs, _, done, _ = env.reset(env_reset_config)
+        initial_player_stacks = self._get_player_stacks(env.env.seats,  # before reset
                                                         num_players,
                                                         btn_idx)
-        obs, _, done, _ = env.reset(env_reset_config)
         ante, blinds = self.post_blinds(obs, num_players, btn_idx, env)
 
         if self.run_from_action_plan:
@@ -245,6 +273,9 @@ class PokerExperimentRunner(ExperimentRunner):
                                                     btn_idx=btn_idx)
 
         board = _make_board(env.env.cards2str(env.env.board))
+
+        # player_hands: List[PlayerWithCardsAndPosition] = self.get_player_hands(env.env)
+        player_hands = self.get_player_hands(env.env, btn_idx)
         return PokerEpisode(date=DEFAULT_DATE,
                             hand_id=ep_id,
                             variant=DEFAULT_VARIANT,
@@ -259,7 +290,7 @@ class PokerExperimentRunner(ExperimentRunner):
                             winners=winners,
                             showdown_hands=showdown_hands,
                             money_collected=money_collected,
-                            info={'player_hands': []})
+                            info={'player_hands': player_hands})
 
     def _run_episodes(self, experiment: PokerExperiment) -> List[PokerEpisode]:
 
@@ -269,6 +300,8 @@ class PokerExperimentRunner(ExperimentRunner):
         n_episodes = experiment.max_episodes
 
         poker_episodes = []
+        new_starting_stacks = None
+
         # ----- RUN EPISODES -----
         for ep_id in range(n_episodes):
             print(ep_id)
@@ -283,7 +316,10 @@ class PokerExperimentRunner(ExperimentRunner):
                                                ep_id=ep_id)
             # rotate stacks, such that next player will be at 0
             # [BTN UTG SB BB MP CO] will become [UTG SB BB MP CO BTN]
-            new_starting_stacks = np.roll([p.stack for p in env.env.seats], -1).astype(int).tolist()
+            new_starting_stacks = np.roll(
+                [p.stack for p in env.env.seats],  # current stacks before advancing button
+                -1  # button has advanced by 1, roll back its index relative to seats
+            ).astype(int).tolist()
             env.env.set_stack_size(new_starting_stacks)
             poker_episodes.append(episode)
         print(self.total_actions_dict)
