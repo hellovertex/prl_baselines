@@ -165,7 +165,6 @@ class PokerExperimentRunner(ExperimentRunner):
         done = False
         showdown_hands = None
         info = {'player_hands': []}  # monkey patched
-        # todo: populate player_hands with default hands
         observation = initial_observation
         # determine who goes first
         agent_idx = btn_idx if self.num_players < 4 else (btn_idx + 3) % self.num_players
@@ -242,6 +241,8 @@ class PokerExperimentRunner(ExperimentRunner):
             cards = agent_hands[seat_id]
             name = f'{self.player_names[seat_id]}'
             position = f'{positions[seat_id].name}'
+            if position == 'SB' and len(agent_hands) == 2:
+                position = 'BB'  # for two players only, BTN becomes SB and SB becomes BB
             player_with_cards_and_positions.append(PlayerWithCardsAndPosition(cards=cards,
                                                                               name=name,
                                                                               position=position))
