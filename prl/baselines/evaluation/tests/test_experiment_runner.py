@@ -105,7 +105,7 @@ def test_episode_matches_environment_states_and_actions():
                                  env=test_env,
                                  env_reset_config=env_config,
                                  starting_stack_sizes=starting_stack_sizes,
-                                 participants={},  # no agents since we run from action list
+                                 participants=None,  # no agents since we run from action list
                                  max_episodes=1,
                                  current_episode=0,
                                  cbs_plots=[],

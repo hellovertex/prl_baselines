@@ -1,3 +1,4 @@
+import enum
 from dataclasses import dataclass
 from typing import TypeVar, List, Optional, Union, Dict, Callable, Tuple, Any, Type
 
@@ -33,6 +34,12 @@ class PokerExperimentParticipant:
     config: Optional[Dict]
 
 
+class PokerExperiment_EarlyStopping(enum.IntEnum):
+    PLAY_UNTIL_FIRST_ELIMINATED_PLAYER: 0
+    PLAY_UNTIL_HEADS_UP_WON: 1
+    ALWAYS_REBUY_AND_PLAY_UNTIL_NUM_EPISODES_REACHED: 99
+
+
 @dataclass
 class PokerExperiment:
     """Might change in the future"""
@@ -55,3 +62,4 @@ class PokerExperiment:
     # An action plan contains a single ordered list of actions to execute per episode
     # This means len(from_action_plan) == max_episodes
     from_action_plan: Optional[List[List[Action]]]
+    early_stopping_when: Optional[PokerExperiment_EarlyStopping] = None

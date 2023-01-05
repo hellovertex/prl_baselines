@@ -7,7 +7,8 @@ from prl.environment.Wrappers.utils import init_wrapped_env
 
 from prl.baselines.agents.agents import CallingStation, StakePlayerImitator
 from prl.baselines.agents.core.base_agent import RllibAgent
-from prl.baselines.evaluation.core.experiment import PokerExperiment, PokerExperimentParticipant
+from prl.baselines.evaluation.core.experiment import PokerExperiment, PokerExperimentParticipant, \
+    PokerExperiment_EarlyStopping
 from prl.baselines.evaluation.pokersnowie.export import PokerExperimentToPokerSnowie
 
 # def make_agents(env, path_to_torch_model_state_dict):
@@ -66,7 +67,7 @@ if __name__ == '__main__':
     sb = 50
     bb = 100
     num_players = 6
-    max_episodes = 10
+    max_episodes = 20
     env = init_wrapped_env(env_wrapper_cls=AugmentObservationWrapper,
                            stack_sizes=[starting_stack_size for _ in range(num_players)],
                            blinds=[sb, bb],
@@ -123,11 +124,13 @@ if __name__ == '__main__':
         cbs_metrics=[],
         # actors
         participants=participants,  # wrapper around agents that hold rllib policies that act given observation
-        from_action_plan=None  # compute action from fixed series of actions instead of calls to agent.act
+        from_action_plan=None,  # compute action from fixed series of actions instead of calls to agent.act
+        # early_stopping_when=PokerExperiment_EarlyStopping.ALWAYS_REBUY_AND_PLAY_UNTIL_NUM_EPISODES_REACHED
     )
     db_gen = PokerExperimentToPokerSnowie().generate_database(
         path_out=get_snowie_database_output_path(),
         experiment=experiment,
         max_episodes_per_file=500,
-        hero_names=["StakePlayerImitator_Seat_1"]
+        # hero_names=["StakePlayerImitator_Seat_1"]
+        hero_names=["BTN"]
     )

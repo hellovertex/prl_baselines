@@ -60,7 +60,9 @@ action_types = ['folds', 'checks', 'calls', 'bets', 'raises']
 
 class Converter888(PokerSnowieConverter):
     """Converts to PokerSnowie using 888-ExportFormat"""
-
+    class PlayerOutOfStackError(ValueError):
+        """Raise this, when the player has no chips left to bet.
+        In some edge cases, the player has chips <= BB. We skip these for convenience."""
     @staticmethod
     def parse_num(num):
         # parse string represenation of float, such that
@@ -111,7 +113,6 @@ class Converter888(PokerSnowieConverter):
         # in case of evaluation of baseline we know the cards even when the hand was folded
         # PokerEpisode must have playerhnads
         ret = "** Dealing down cards **\n"
-        # todo: use episode.info['player_hands'] instead of episode.showdown_hands
         """
         class PlayerWithCardsAndPosition:
             cards: str  # '[Ah Jd]' <-- encoded like this, due to compatibility with parsers
@@ -120,10 +121,10 @@ class Converter888(PokerSnowieConverter):
             position: Optional[int | Positions6Max] = None
         """
         for player in episode.info['player_hands']:
-            if player.name == hero_name:
+            if player.name == hero_name or player.position == hero_name:
                 # '[As Th]' to '[ As, Th ]'
                 cards = player.cards.replace(" ", ", ").replace("[", "[ ").replace("]", " ]")
-                ret += f"Dealt to {hero_name} {cards}\n"
+                ret += f"Dealt to {player.name} {cards}\n"
                 return ret
 
     @staticmethod
@@ -214,6 +215,9 @@ class Converter888(PokerSnowieConverter):
         ret = {}
         for player in episode.money_collected:
             won = self.parse_num(player.collected[1:])
+
+            # if int(won) <= 0:
+            #     raise self.PlayerOutOfStackError()
             ret[player.player_name] = won
         return ret
 
@@ -252,7 +256,10 @@ class Converter888(PokerSnowieConverter):
         dealt_cards = self._convert_dealt_cards(episode, hero_name)
         community_cards: dict = self._convert_community_cards(episode)
         moves: dict = self._convert_moves(episode)
-        summary = self._convert_summary(episode, hero_name)
+        try:
+            summary = self._convert_summary(episode, hero_name)
+        except self.PlayerOutOfStackError:
+            return ""
         episode_888 = ""
         # try:
         episode_888 = f"#Game No : {episode.hand_id}\n" \
