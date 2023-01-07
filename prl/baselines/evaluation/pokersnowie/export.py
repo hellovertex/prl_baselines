@@ -32,12 +32,12 @@ class PersistentStorage:
             if (i + 1) % max_episodes_per_file == 0:
                 # flush and write
                 self._write(write_buffer,
-                            path_out)
+                            path_out+f'_{n_files_written}')
                 n_files_written += 1
                 write_buffer = []
             write_buffer.append(e)
         self._write(write_buffer,
-                    path_out)
+                    path_out+f'_{n_files_written+1}')
 
 
 class HandHistorySmithyToPokerSnowie(PokerSnowieExporteur):

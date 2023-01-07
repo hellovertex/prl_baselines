@@ -58,6 +58,11 @@ def get_snowie_database_output_path(path=""):
     """Passes path from config.gin file to the caller """
     return path
 
+# def get_heros(num_players):
+#     if num_players == 2:
+#         return [ "SB", "BB"]
+#     if num_players:
+
 
 if __name__ == '__main__':
     import gin
@@ -67,7 +72,8 @@ if __name__ == '__main__':
     starting_stack_size = 20000
     sb = 50
     bb = 100
-    max_episodes = 20
+    max_episodes = 2000
+    num_players = 6
     # model_path = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt(1).pt"
     model_path = get_prl_baseline_model_ckpt_path()
     baseline_v1 = (StakePlayerImitator,  # agent_cls
@@ -85,44 +91,45 @@ if __name__ == '__main__':
         baseline_v1  # agent_cls, policy_config, stack
     ]
     #for num_players in [2, 3, 4, 5, 6]:
-    for num_players in [2]:
-        for position in ["BTN", "SB", "BB", "UTG", "MP", "CO"][:num_players]:
-            env = init_wrapped_env(env_wrapper_cls=AugmentObservationWrapper,
-                                   stack_sizes=[starting_stack_size for _ in range(num_players)],
-                                   blinds=[sb, bb],
-                                   multiply_by=1)
+    # for num_players in [2, 3, 4, 5, 6]:
+    positions = ["BTN", "SB", "BB", "UTG", "MP", "CO"]
+    # for position in positions:  # [:num_players]
+    env = init_wrapped_env(env_wrapper_cls=AugmentObservationWrapper,
+                           stack_sizes=[starting_stack_size for _ in range(num_players)],
+                           blinds=[sb, bb],
+                           multiply_by=1)
 
-            participants = make_participants(num_players,
-                                             agent_init_components,
-                                             observation_space=env.observation_space,
-                                             action_space=env.action_space)
-            experiment = PokerExperiment(
-                # env
-                env=env,  # single environment to run sequential games on
-                num_players=num_players,
-                starting_stack_sizes=[starting_stack_size, starting_stack_size],
-                env_reset_config=None,  # can pass {'deck_state_dict': Dict[str, Any]} to init the deck and player cards
-                # run
-                max_episodes=max_episodes,  # number of games to run
-                current_episode=0,
-                cbs_plots=[],
-                cbs_misc=[],
-                cbs_metrics=[],
-                # actors
-                participants=participants,  # wrapper around agents that hold rllib policies that act given observation
-                from_action_plan=None,  # compute action from fixed series of actions instead of calls to agent.act
-                # early_stopping_when=PokerExperiment_EarlyStopping.ALWAYS_REBUY_AND_PLAY_UNTIL_NUM_EPISODES_REACHED
-            )
-            pos = position
-            if num_players == 2:
-                pos = 'BTN' if position == 'BTN' else 'BB'
-            db_gen = PokerExperimentToPokerSnowie().generate_database(
-                path_out=str(get_snowie_database_output_path())+f'__n_players={num_players}__position={position}',
-                experiment=experiment,
-                max_episodes_per_file=500,
-                # hero_names=["StakePlayerImitator_Seat_1"]
-                hero_names=[pos]
-            )
+    participants = make_participants(num_players,
+                                     agent_init_components,
+                                     observation_space=env.observation_space,
+                                     action_space=env.action_space)
+    experiment = PokerExperiment(
+        # env
+        env=env,  # single environment to run sequential games on
+        num_players=num_players,
+        starting_stack_sizes=[starting_stack_size, starting_stack_size],
+        env_reset_config=None,  # can pass {'deck_state_dict': Dict[str, Any]} to init the deck and player cards
+        # run
+        max_episodes=max_episodes,  # number of games to run
+        current_episode=0,
+        cbs_plots=[],
+        cbs_misc=[],
+        cbs_metrics=[],
+        # actors
+        participants=participants,  # wrapper around agents that hold rllib policies that act given observation
+        from_action_plan=None,  # compute action from fixed series of actions instead of calls to agent.act
+        # early_stopping_when=PokerExperiment_EarlyStopping.ALWAYS_REBUY_AND_PLAY_UNTIL_NUM_EPISODES_REACHED
+    )
+    # pos = position
+    # if num_players == 2:
+    #     pos = 'BTN' if position == 'BTN' else 'BB'
+    db_gen = PokerExperimentToPokerSnowie().generate_database(
+        path_out=str(get_snowie_database_output_path())+f'__n_players={num_players}__position={"ALL"}',
+        experiment=experiment,
+        max_episodes_per_file=1000,
+        # hero_names=["StakePlayerImitator_Seat_1"]
+        hero_names=positions
+    )
 """
 # todo: figure out how to ask ray.remote how many steps each actor can swing per seconds
         # todo run with 3+ players and see if it looks reasonable -- very important
