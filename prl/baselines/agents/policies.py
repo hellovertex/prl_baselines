@@ -142,6 +142,7 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
         mc_dict = self._card_evaluator.run_mc(hero_cards_1d, board_cards_1d, 2, n_iter=self._mc_iters)
         # {won: 0, lost: 0, tied: 0}[
         win_prob = float(mc_dict['won'] / self._mc_iters)
+        # todo: replace win_prob < .5 with EV based fn -- win_prob 20% requires min_to_call <= 1/5 pot
         if win_prob < .5 and random() < self.tightness:
             return torch.tensor(ActionSpace.FOLD.value)
         else:
