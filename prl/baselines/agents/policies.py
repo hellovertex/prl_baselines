@@ -115,6 +115,7 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
         self._mc_iters = 5000
         self._predictions = []
         self._legal_moves = []
+        self.predictions_cumulative = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
 
     def card_bit_mask_to_int(self, c0: np.array, c1: np.array, board_mask: np.array) -> Tuple[List[int], List[int]]:
         c0_1d = dict_str_to_sk[CARD_BITS_TO_STR[c0][RANK] + CARD_BITS_TO_STR[c0][SUITE]]
@@ -181,6 +182,7 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
         observations = obs_batch['obs']
         self._logits = self._model(torch.Tensor(observations))
         self._predictions = torch.argmax(self._logits, axis=1)
+        self.predictions_cumulative[int(self._predictions[0])] += 1
         return [self.compute_action(idx, obs) for idx, obs in enumerate(observations)], [], {}
 
     def load_model(self, model_type: BaselineModelType = BaselineModelType.MLP_2x512):
@@ -207,6 +209,7 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
             return net
         else:
             raise NotImplementedError
+
 
 try:
     ray.rllib.algorithms.registry.POLICIES[

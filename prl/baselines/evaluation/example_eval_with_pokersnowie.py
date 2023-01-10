@@ -72,7 +72,7 @@ if __name__ == '__main__':
     starting_stack_size = 20000
     sb = 50
     bb = 100
-    max_episodes = 2000
+    max_episodes = 100
     num_players = 6
     # model_path = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt(1).pt"
     model_path = get_prl_baseline_model_ckpt_path()
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     # if num_players == 2:
     #     pos = 'BTN' if position == 'BTN' else 'BB'
     db_gen = PokerExperimentToPokerSnowie().generate_database(
-        path_out=str(get_snowie_database_output_path())+f'__n_players={num_players}__position={"ALL"}',
+        path_out=str(get_snowie_database_output_path())+f'__n_players={num_players}__position={"000000"}',
         experiment=experiment,
         max_episodes_per_file=1000,
         # hero_names=["StakePlayerImitator_Seat_1"]

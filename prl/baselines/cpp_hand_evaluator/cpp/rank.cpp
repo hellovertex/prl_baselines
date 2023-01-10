@@ -12,6 +12,8 @@ int rank(int c0, int c1,  // player cards
            int b0, int b1, int b2, int b3, int b4) {
     // Get the rank of the seven-card spade flush, ace high.
     // return SevenEval::GetRank(1, 41, 18, 19, 16, 20, 24);
+    // pybind11::gil_scoped_acquire acquire;
+    // pybind11::gil_scoped_release release;
     return SevenEval::GetRank(c0, c1, b0, b1, b2, b3, b4);
 }
 

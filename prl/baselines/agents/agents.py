@@ -36,6 +36,10 @@ class StakePlayerImitator(RllibAgent):
             config=config['policy_config']
         )
 
+    @property
+    def policy(self):
+        return self._rllib_policy
+
     def act(self, observation):
         """Wraps rllib policy."""
         assert isinstance(observation, dict)
