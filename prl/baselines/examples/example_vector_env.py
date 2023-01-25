@@ -1,7 +1,9 @@
 from enum import IntEnum
 from typing import Optional, Union
 
+import gym
 import numpy as np
+from gym.spaces import Box
 from pettingzoo import AECEnv
 from pettingzoo.utils.env import ObsType
 from tianshou.data import Collector
@@ -12,13 +14,15 @@ from pettingzoo.classic import tictactoe_v3
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
 # todo implement this https://pettingzoo.farama.org/tutorials/tianshou/intermediate/
-
+from tianshou.data import collector
 # [x] implement tianshou env wrapper
 # [x] implement seed() and render()
 # [ ]
 
 
 from pettingzoo.classic import texas_holdem_no_limit_v6
+
+
 class MultiAgentActionFlags(IntEnum):
     """
     In the Baseline Agents, the Monte Carlo simulation takes a lot of time,
@@ -47,6 +51,8 @@ class MCAgent:
 #  to create an agent that lives inside the environment
 from tianshou.policy import base, MultiAgentPolicyManager, RainbowPolicy
 from rlcard.envs import nolimitholdem
+
+
 # env = PettingZooEnv(TianshoEnvWrapper(make_env(cfg)))
 # venv = SubProcEnv(env)
 class TianshouEnvWrapper(AECEnv):
@@ -58,39 +64,121 @@ class TianshouEnvWrapper(AECEnv):
     so that tianshou can parse observation properly.
     """
 
+    def __init__(self, env):
+        super().__init__()
+        # todo get from conf
+        self.agents = []
+        self.env_wrapped = env
+        # moved this to prl.baselines because I understand we need access to the baseline agents
+        # which are not available from within prl_environment
+        self._mc_agent = None
+        obs_space = Box(low=0.0, high=6.0, shape=(564,), dtype=np.float64)
+        self.observation_space = obs_space
+        # if 'mask_legal_moves' in env_config:
+        #     if env_config['mask_legal_moves']:
+        self.observation_space = gym.spaces.Dict({
+            'obs': obs_space,  # do not change key-name 'obs' it is internally used by rllib (!)
+            'action_mask': Box(low=0, high=1, shape=(3,), dtype=int)
+            # one-hot encoded [FOLD, CHECK_CALL, RAISE]
+        })
+        self.observation_spaces = self._convert_to_dict(
+            [self.observation_space for _ in range(self.num_agents)]
+        )
+        self.action_spaces = self._convert_to_dict(
+            [self.env_wrapped.action_space for _ in range(self.num_agents)]
+        )
+        self.possible_agents = self.agents[:]
+
     def seed(self, seed: Optional[int] = None) -> None:
         np.random.seed(seed)
 
+    def observation_space(self, agent):
+        return self.observation_spaces[agent]
+
+    def action_space(self, agent):
+        return self.action_spaces[agent]
+
     def observe(self, agent: str) -> Optional[ObsType]:
+        # todo: add the following line but first check if it is needed by tianshou
+        # return {"observation": self._last_obs, "action_mask": self.next_legal_moves}
         raise NotImplementedError
 
     def render(self) -> Union[None, np.ndarray, str, list]:
-        return self.env.render()  # returns None
+        return self.env_wrapped.render()  # returns None
 
     def state(self) -> np.ndarray:
         raise NotImplementedError
 
-    def __init__(self, env):
-        super().__init__()
-        self.env = env
-        # moved this to prl.baselines because I understand we need access to the baseline agents
-        # which are not available from within prl_environment
-        self._mc_agent = None
+    def _convert_to_dict(self, list_of_list):
+        return dict(zip(self.possible_agents, list_of_list))
 
-    def reset(self, config=None):
-        observation, _, _, _ = super().reset(config)
-        return observation
+    def _scale_rewards(self, reward):
+        return reward
+
+    def _int_to_name(self, ind):
+        return self.possible_agents[ind]
+
+    def reset(self,
+              seed: Optional[int] = None,
+              return_info: bool = False,
+              options: Optional[dict] = None) -> None:
+        if seed is not None:
+            self.seed(seed=seed)
+        obs, rew, done, info = self.env_wrapped.reset()
+        player_id = self.env_wrapped.current_player.seat_id
+        player = self._int_to_name(player_id)
+        self.agents = self.possible_agents[:]
+        self.agent_selection = player
+        self.rewards = self._convert_to_dict([0 for _ in range(self.num_agents)])
+        self._cumulative_rewards = self._convert_to_dict(
+            [0 for _ in range(self.num_agents)]
+        )
+        self.terminations = self._convert_to_dict(
+            [False for _ in range(self.num_agents)]
+        )
+        self.truncations = self._convert_to_dict(
+            [False for _ in range(self.num_agents)]
+        )
+        self.infos = self._convert_to_dict(
+            [{"legal_moves": []} for _ in range(self.num_agents)]
+        )
+        # todo double check these:
+        legal_moves = np.array([0, 0, 0])
+        legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
+        self.next_legal_moves = legal_moves
+        self._last_obs = obs
 
     def step(self, action):
-        if action == MultiAgentActionFlags.TriggerMC:
-            # compute action here
-            pass
-
-    def observation_space(self):
-        pass
-
-    def action_space(self):
-        pass
+        # todo add the following code
+        # if action == MultiAgentActionFlags.TriggerMC:
+        #     # compute action here
+        #     pass
+        if (
+                self.terminations[self.agent_selection]
+                or self.truncations[self.agent_selection]
+        ):
+            return self._was_dead_step(action)
+        obs, rew, done, info = self.env_wrapped.step(action)
+        next_player_id = self.env_wrapped.current_player.seat_id
+        next_player = self._int_to_name(next_player_id)
+        if done:
+            self.rewards = self._convert_to_dict(
+                self._scale_rewards(info['payouts'])
+            )
+            self.terminations = self._convert_to_dict(
+                [True for _ in range(self.num_agents)]
+            )
+            self.truncations = self._convert_to_dict(
+                [False for _ in range(self.num_agents)]
+            )
+        else:
+            legal_moves = np.array([0, 0, 0])
+            legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
+            self.next_legal_moves = legal_moves
+        self._cumulative_rewards[self.agent_selection] = 0
+        self.agent_selection = next_player
+        self._accumulate_rewards()
+        self._deads_step_first()
 
 
 env_config = {"env_wrapper_cls": TianshouEnvWrapper,
