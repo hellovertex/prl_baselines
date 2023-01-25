@@ -1,4 +1,5 @@
 from enum import IntEnum
+from functools import partial
 from typing import Optional, Union, List
 
 import gym
@@ -42,7 +43,7 @@ class MCAgent:
         return MultiAgentActionFlags.TriggerMC
 
 
-class TianshouEnvWrapper(AECEnv, BaseWrapper):
+class TianshouEnvWrapper(AECEnv):
     """
     Multi Agent Environment that changes reset call such that
     observation, reward, done, info = reset()
@@ -53,27 +54,29 @@ class TianshouEnvWrapper(AECEnv, BaseWrapper):
 
     def __init__(self, env, agents: List[str]):
         super().__init__()
+        self.name = "env"
+        self.metadata = {'name': self.name}
         self.agents = agents
+        self.possible_agents = self.agents[:]
         self.env_wrapped = env
         # moved this to prl.baselines because I understand we need access to the baseline agents
         # which are not available from within prl_environment
         self._mc_agent = None
         obs_space = Box(low=0.0, high=6.0, shape=(564,), dtype=np.float64)
-        self.observation_space = obs_space
+
         # if 'mask_legal_moves' in env_config:
         #     if env_config['mask_legal_moves']:
-        self.observation_space = gym.spaces.Dict({
+        observation_space = gym.spaces.Dict({
             'obs': obs_space,  # do not change key-name 'obs' it is internally used by rllib (!)
             'action_mask': Box(low=0, high=1, shape=(3,), dtype=int)
             # one-hot encoded [FOLD, CHECK_CALL, RAISE]
         })
         self.observation_spaces = self._convert_to_dict(
-            [self.observation_space for _ in range(self.num_agents)]
+            [observation_space for _ in range(self.num_agents)]
         )
         self.action_spaces = self._convert_to_dict(
             [self.env_wrapped.action_space for _ in range(self.num_agents)]
         )
-        self.possible_agents = self.agents[:]
 
     def seed(self, seed: Optional[int] = None) -> None:
         np.random.seed(seed)
@@ -85,9 +88,8 @@ class TianshouEnvWrapper(AECEnv, BaseWrapper):
         return self.action_spaces[agent]
 
     def observe(self, agent: str) -> Optional[ObsType]:
-        # todo: add the following line but first check if it is needed by tianshou
-        # return {"observation": self._last_obs, "action_mask": self.next_legal_moves}
-        raise NotImplementedError
+        return {"observation": self._last_obs, "action_mask": self.next_legal_moves}
+        # raise NotImplementedError
 
     def render(self) -> Union[None, np.ndarray, str, list]:
         return self.env_wrapped.render()  # returns None
@@ -167,14 +169,18 @@ class TianshouEnvWrapper(AECEnv, BaseWrapper):
         self._deads_step_first()
 
 
-# class WrappedEnv(BaseWrapper):
-#     def __init__(self, env):
-#         super().__init__(env)
-#         self.env = env
+class WrappedEnv(BaseWrapper):
+    def seed(self, seed: Optional[int] = None) -> None:
+        np.random.seed(seed)
+
+    def __init__(self, env):
+        super().__init__(env)
+        self.env = env
 
 
 env_config = {"env_wrapper_cls": AugmentObservationWrapper,
-              "stack_sizes": [100, 125, 150, 175, 200, 250],
+              # "stack_sizes": [100, 125, 150, 175, 200, 250],
+              "stack_sizes": [100, 125],
               "blinds": [50, 100]}
 # env = init_wrapped_env(**env_config)
 # obs0 = env.reset(config=None)
@@ -186,8 +192,10 @@ def make_env(cfg):
 
 
 agents = ["p0", "p1"]
-env = PettingZooEnv(TianshouEnvWrapper(make_env(env_config), agents))
-venv = SubprocVectorEnv([env for _ in range(num_envs)])
+env = TianshouEnvWrapper(make_env(env_config), agents)
+wrapped_env_fn = partial(PettingZooEnv, WrappedEnv(env))
+wrapped_env = PettingZooEnv(WrappedEnv(env))
+venv = SubprocVectorEnv([wrapped_env_fn for _ in range(num_envs)])
 # env_fn = partial(make_env, env_config)
 # env_fns = [env_fn for _ in range(num_envs)]
 # # venv = SubprocVectorEnv(env_fns, wait_num=None, timeout=None)
@@ -199,7 +207,7 @@ venv = SubprocVectorEnv([env for _ in range(num_envs)])
 # print(obs)
 rainbow_config = {'model': None,
                   'optim': None,
-                  'num_atmos': 51,
+                  'num_atoms': 51,
                   'v_min': -6,
                   'v_max': 6,
                   'estimation_step': 3,
@@ -207,7 +215,8 @@ rainbow_config = {'model': None,
                   }
 policy = MultiAgentPolicyManager([
     RainbowPolicy(**rainbow_config),
-    RainbowPolicy(**rainbow_config)], env)  # policy is made from PettingZooEnv
+    RainbowPolicy(**rainbow_config)], wrapped_env)  # policy is made from PettingZooEnv
 
 collector = Collector(policy, venv)
-result = collector.collect(n_episode=1, render=.1)
+result = collector.collect(n_episode=1)
+print(result)
