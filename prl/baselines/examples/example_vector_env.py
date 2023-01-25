@@ -1,26 +1,25 @@
 from enum import IntEnum
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 import gym
 import numpy as np
 from gym.spaces import Box
 from pettingzoo import AECEnv
+from pettingzoo.utils import BaseWrapper
 from pettingzoo.utils.env import ObsType
-from tianshou.data import Collector
-from tianshou.env.venvs import SubprocVectorEnv, DummyVectorEnv
-from tianshou.env.pettingzoo_env import PettingZooEnv
-from functools import partial
-from pettingzoo.classic import tictactoe_v3
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
+from tianshou.data import Collector
+from tianshou.env.pettingzoo_env import PettingZooEnv
+from tianshou.policy import MultiAgentPolicyManager, RainbowPolicy
+from tianshou.env.venvs import SubprocVectorEnv
+
+
 # todo implement this https://pettingzoo.farama.org/tutorials/tianshou/intermediate/
-from tianshou.data import collector
-# [x] implement tianshou env wrapper
-# [x] implement seed() and render()
-# [ ]
-
-
-from pettingzoo.classic import texas_holdem_no_limit_v6
+# todo: create one policy (actually zero because c51 already exists and the _mc_agent
+#  does not have to be a policy after all
+# todo: copy from policies.StakeLevelImitationPolicy.compute_action(obs:np.ndarray,...)
+#  to create an agent that lives inside the environment
 
 
 class MultiAgentActionFlags(IntEnum):
@@ -43,19 +42,7 @@ class MCAgent:
         return MultiAgentActionFlags.TriggerMC
 
 
-# todo: create one policy (actually zero because c51 already exists and the _mc_agent
-#  does not have to be a policy after all
-
-
-# todo: copy from policies.StakeLevelImitationPolicy.compute_action(obs:np.ndarray,...)
-#  to create an agent that lives inside the environment
-from tianshou.policy import base, MultiAgentPolicyManager, RainbowPolicy
-from rlcard.envs import nolimitholdem
-
-
-# env = PettingZooEnv(TianshoEnvWrapper(make_env(cfg)))
-# venv = SubProcEnv(env)
-class TianshouEnvWrapper(AECEnv):
+class TianshouEnvWrapper(AECEnv, BaseWrapper):
     """
     Multi Agent Environment that changes reset call such that
     observation, reward, done, info = reset()
@@ -64,10 +51,9 @@ class TianshouEnvWrapper(AECEnv):
     so that tianshou can parse observation properly.
     """
 
-    def __init__(self, env):
+    def __init__(self, env, agents: List[str]):
         super().__init__()
-        # todo get from conf
-        self.agents = []
+        self.agents = agents
         self.env_wrapped = env
         # moved this to prl.baselines because I understand we need access to the baseline agents
         # which are not available from within prl_environment
@@ -181,7 +167,13 @@ class TianshouEnvWrapper(AECEnv):
         self._deads_step_first()
 
 
-env_config = {"env_wrapper_cls": TianshouEnvWrapper,
+# class WrappedEnv(BaseWrapper):
+#     def __init__(self, env):
+#         super().__init__(env)
+#         self.env = env
+
+
+env_config = {"env_wrapper_cls": AugmentObservationWrapper,
               "stack_sizes": [100, 125, 150, 175, 200, 250],
               "blinds": [50, 100]}
 # env = init_wrapped_env(**env_config)
@@ -193,15 +185,18 @@ def make_env(cfg):
     return init_wrapped_env(**cfg)
 
 
-env_fn = partial(make_env, env_config)
-env_fns = [env_fn for _ in range(num_envs)]
-# venv = SubprocVectorEnv(env_fns, wait_num=None, timeout=None)
-venv = DummyVectorEnv(env_fns, wait_num=None, timeout=None)
-obs = venv.reset()  # returns the initial observations of each environment
-# todo get ready_id`s and reset only with ids of envs that signalled `done`
-# returns "wait_num" steps or finished steps after "timeout" seconds,
-# whichever occurs first.
-print(obs)
+agents = ["p0", "p1"]
+env = PettingZooEnv(TianshouEnvWrapper(make_env(env_config), agents))
+venv = SubprocVectorEnv([env for _ in range(num_envs)])
+# env_fn = partial(make_env, env_config)
+# env_fns = [env_fn for _ in range(num_envs)]
+# # venv = SubprocVectorEnv(env_fns, wait_num=None, timeout=None)
+# venv = DummyVectorEnv(env_fns, wait_num=None, timeout=None)
+# obs = venv.reset()  # returns the initial observations of each environment
+# # todo get ready_id`s and reset only with ids of envs that signalled `done`
+# # returns "wait_num" steps or finished steps after "timeout" seconds,
+# # whichever occurs first.
+# print(obs)
 rainbow_config = {'model': None,
                   'optim': None,
                   'num_atmos': 51,
@@ -212,6 +207,7 @@ rainbow_config = {'model': None,
                   }
 policy = MultiAgentPolicyManager([
     RainbowPolicy(**rainbow_config),
-    RainbowPolicy(**rainbow_config)], venv)  # policy is made from PettingZooEnv
+    RainbowPolicy(**rainbow_config)], env)  # policy is made from PettingZooEnv
 
 collector = Collector(policy, venv)
+result = collector.collect(n_episode=1, render=.1)
