@@ -250,7 +250,7 @@ class TianshouEnvWrapper(AECEnv):
         next_player = self._int_to_name(next_player_id)
         if done:
             self.rewards = self._convert_to_dict(
-                self._scale_rewards(info['payouts'])
+                self._scale_rewards(rew)
             )
             self.terminations = self._convert_to_dict(
                 [True for _ in range(self.num_agents)]
@@ -285,7 +285,7 @@ env_config = {"env_wrapper_cls": AugmentObservationWrapper,
               "blinds": [50, 100]}
 # env = init_wrapped_env(**env_config)
 # obs0 = env.reset(config=None)
-num_envs = 31
+num_envs = 1
 
 
 def make_env(cfg):
@@ -353,22 +353,37 @@ class MCPolicy(BasePolicy):
         return Batch(logits=None, act=[MultiAgentActionFlags.TriggerMC] * nobs, state=None)
 
     def learn(self, batch: Batch, **kwargs: Any) -> Dict[str, Any]:
-        pass
+        return {}
+
+
+class TianshouCallingStation(BasePolicy):
+    CHECK_CALL = 1
+
+    def __init__(self, observation_space=None, action_space=None):
+        super().__init__(observation_space=observation_space,
+                         action_space=action_space)
+
+    def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:
+        nobs = len(batch.obs)
+        return Batch(logits=None, act=[self.CHECK_CALL] * nobs, state=None)
+
+    def learn(self, batch: Batch, **kwargs: Any) -> Dict[str, Any]:
+        return {}
 
 
 rainbow_config = get_rainbow_config()
 policy = MultiAgentPolicyManager([
     RainbowPolicy(**rainbow_config),
-    MCPolicy()], wrapped_env)  # policy is made from PettingZooEnv
+    TianshouCallingStation()], wrapped_env)  # policy is made from PettingZooEnv
 
-collector = Collector(policy, venv)
-t0 = time.time()
-result = collector.collect(n_episode=1000)
+# collector = Collector(policy, venv)
+# t0 = time.time()
+# result = collector.collect(n_episode=1000)
 
 train_collector = Collector(policy, venv)
 test_collector = Collector(policy, venv)
-epoch = 10
-step_per_epoch = 1000
+epoch = 10000
+step_per_epoch = 10000
 step_per_collect = 100
 episode_per_test = 50
 batch_size = 256
@@ -388,7 +403,7 @@ def test_fn(epoch, env_step):
         policy.policies[agents[aid]].set_eps(eps_test)
 
 
-logdir = [".", "v1", "rainbow"]
+logdir = [".", "v1", "rainbow_vs_calling_station"]
 
 
 def save_best_fn(policy):
@@ -407,9 +422,11 @@ win_rate = np.inf
 def stop_fn(mean_rewards):
     return mean_rewards >= win_rate
 
+
 def reward_metric(rews):
     # todo: consider computing the sum instead of single agent reward here
     return rews[:, learning_agent_ids[0]]
+
 
 # ======== tensorboard logging setup =========
 log_path = os.path.join(*logdir)
@@ -439,23 +456,6 @@ trainer = OffpolicyTrainer(policy=policy,
                            test_in_train=False  # whether to test in training phase
                            )
 result = trainer.run()
-result = offpolicy_trainer(
-    policy,
-    train_collector,
-    test_collector,
-    epoch,
-    step_per_epoch,
-    step_per_collect,
-    args.test_num,
-    args.batch_size,
-    train_fn=train_fn,
-    test_fn=test_fn,
-    stop_fn=stop_fn,
-    save_best_fn=save_best_fn,
-    update_per_step=args.update_per_step,
-    logger=logger,
-    test_in_train=False,
-    reward_metric=reward_metric
-)
+t0 = time.time()
 print(result)
 print(f'took {time.time() - t0} seconds')
