@@ -1,4 +1,5 @@
 import os
+import time
 from enum import IntEnum
 from functools import partial
 from random import random
@@ -280,7 +281,7 @@ env_config = {"env_wrapper_cls": AugmentObservationWrapper,
               "blinds": [50, 100]}
 # env = init_wrapped_env(**env_config)
 # obs0 = env.reset(config=None)
-num_envs = 3
+num_envs = 31
 
 
 def make_env(cfg):
@@ -305,7 +306,14 @@ def get_rainbow_config():
     hidden_dim = [512, 512]
     output_dim = len(classes)
     input_dim = 564  # hard coded for now -- very unlikely to be changed by me at any poiny in time
-    device = "cpu"
+    device = "cuda"
+    """
+    Note: tianshou.policy.modelfree.c51.C51Policy.__init__ must move support to cuda if training on cuda
+    self.support = torch.nn.Parameter(
+            torch.linspace(self._v_min, self._v_max, self._num_atoms),
+            requires_grad=False,
+        ).cuda()
+    """
     num_atoms = 51
     Q_dict = V_dict = {'input_dim': 564,
                        "output_dim": output_dim,
@@ -318,7 +326,7 @@ def get_rainbow_config():
               device=device,
               num_atoms=num_atoms,
               dueling_param=(Q_dict, V_dict)
-              )
+              ).to(device)
     optim = torch.optim.Adam(net.parameters(), lr=1e-6)
     # if running on GPU and we want to use cuda move model there
     return {'model': net,
@@ -350,5 +358,7 @@ policy = MultiAgentPolicyManager([
     MCPolicy()], wrapped_env)  # policy is made from PettingZooEnv
 
 collector = Collector(policy, venv)
-result = collector.collect(n_episode=1)
+t0 = time.time()
+result = collector.collect(n_episode=1000)
 print(result)
+print(f'took {time.time() - t0} seconds')
