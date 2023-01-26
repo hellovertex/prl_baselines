@@ -19,7 +19,10 @@ from tianshou.data import Collector, Batch
 from tianshou.env.pettingzoo_env import PettingZooEnv
 from tianshou.env.venvs import SubprocVectorEnv
 from tianshou.policy import MultiAgentPolicyManager, RainbowPolicy, BasePolicy
+from tianshou.trainer import offpolicy_trainer, OffpolicyTrainer
+from tianshou.utils import TensorboardLogger
 from tianshou.utils.net.common import Net
+from torch.utils.tensorboard import SummaryWriter
 
 from prl.baselines.cpp_hand_evaluator.monte_carlo import HandEvaluator_MonteCarlo
 from prl.baselines.cpp_hand_evaluator.rank import dict_str_to_sk
@@ -222,7 +225,8 @@ class TianshouEnvWrapper(AECEnv):
         # if use_cuda:
         #     net = net.cuda()
         self._model = net
-        os.environ['PRL_BASELINE_MODEL_PATH'] = "/home/hellovertex/Documents/github.com/prl_baselines/data/baseline_model_ckpt.pt"
+        os.environ[
+            'PRL_BASELINE_MODEL_PATH'] = "/home/hellovertex/Documents/github.com/prl_baselines/data/baseline_model_ckpt.pt"
         self._model.load_state_dict(torch.load(os.environ['PRL_BASELINE_MODEL_PATH'],
                                                # always on cpu because model used to collects rollouts
                                                map_location=torch.device('cpu'))['net'])
@@ -360,5 +364,98 @@ policy = MultiAgentPolicyManager([
 collector = Collector(policy, venv)
 t0 = time.time()
 result = collector.collect(n_episode=1000)
+
+train_collector = Collector(policy, venv)
+test_collector = Collector(policy, venv)
+epoch = 10
+step_per_epoch = 1000
+step_per_collect = 100
+episode_per_test = 50
+batch_size = 256
+update_per_step = 0.1
+learning_agent_ids = [0]
+eps_train = 0.2
+eps_test = 0.0
+
+
+def train_fn(epoch, env_step):
+    for aid in learning_agent_ids:
+        policy.policies[agents[aid]].set_eps(eps_train)
+
+
+def test_fn(epoch, env_step):
+    for aid in learning_agent_ids:
+        policy.policies[agents[aid]].set_eps(eps_test)
+
+
+logdir = [".", "v1", "rainbow"]
+
+
+def save_best_fn(policy):
+    model_save_path = os.path.join(
+        *logdir, 'policy.pth'
+    )
+    for aid in learning_agent_ids:
+        torch.save(
+            policy.policies[agents[aid]].state_dict(), model_save_path
+        )
+
+
+win_rate = np.inf
+
+
+def stop_fn(mean_rewards):
+    return mean_rewards >= win_rate
+
+def reward_metric(rews):
+    # todo: consider computing the sum instead of single agent reward here
+    return rews[:, learning_agent_ids[0]]
+
+# ======== tensorboard logging setup =========
+log_path = os.path.join(*logdir)
+writer = SummaryWriter(log_path)
+# writer.add_text("args", str(args))
+logger = TensorboardLogger(writer)
+
+trainer = OffpolicyTrainer(policy=policy,
+                           train_collector=train_collector,
+                           test_collector=test_collector,
+                           max_epoch=epoch,  # set stop_fn for early stopping
+                           step_per_epoch=step_per_epoch,  # num transitions per epoch
+                           step_per_collect=step_per_collect,  # step_per_collect -> update network -> repeat
+                           episode_per_test=episode_per_test,  # games to play for one policy evaluation
+                           batch_size=batch_size,
+                           update_per_step=update_per_step,  # fraction of steps_per_collect
+                           train_fn=train_fn,
+                           test_fn=test_fn,
+                           stop_fn=None,  # early stopping
+                           save_best_fn=save_best_fn,
+                           save_checkpoint_fn=None,
+                           resume_from_log=False,
+                           reward_metric=reward_metric,
+                           logger=logger,
+                           verbose=True,
+                           show_progress=True,
+                           test_in_train=False  # whether to test in training phase
+                           )
+result = trainer.run()
+result = offpolicy_trainer(
+    policy,
+    train_collector,
+    test_collector,
+    epoch,
+    step_per_epoch,
+    step_per_collect,
+    args.test_num,
+    args.batch_size,
+    train_fn=train_fn,
+    test_fn=test_fn,
+    stop_fn=stop_fn,
+    save_best_fn=save_best_fn,
+    update_per_step=args.update_per_step,
+    logger=logger,
+    test_in_train=False,
+    reward_metric=reward_metric
+)
 print(result)
 print(f'took {time.time() - t0} seconds')
