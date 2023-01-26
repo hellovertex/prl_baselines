@@ -4,16 +4,19 @@ from typing import Optional, Union, List
 
 import gym
 import numpy as np
+import torch
 from gym.spaces import Box
 from pettingzoo import AECEnv
 from pettingzoo.utils import BaseWrapper
 from pettingzoo.utils.env import ObsType
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
+from prl.environment.Wrappers.base import ActionSpace
 from prl.environment.Wrappers.utils import init_wrapped_env
 from tianshou.data import Collector
 from tianshou.env.pettingzoo_env import PettingZooEnv
-from tianshou.policy import MultiAgentPolicyManager, RainbowPolicy
 from tianshou.env.venvs import SubprocVectorEnv
+from tianshou.policy import MultiAgentPolicyManager, RainbowPolicy
+from tianshou.utils.net.common import Net
 
 
 # todo implement this https://pettingzoo.farama.org/tutorials/tianshou/intermediate/
@@ -196,6 +199,8 @@ env = TianshouEnvWrapper(make_env(env_config), agents)
 wrapped_env_fn = partial(PettingZooEnv, WrappedEnv(env))
 wrapped_env = PettingZooEnv(WrappedEnv(env))
 venv = SubprocVectorEnv([wrapped_env_fn for _ in range(num_envs)])
+
+
 # env_fn = partial(make_env, env_config)
 # env_fns = [env_fn for _ in range(num_envs)]
 # # venv = SubprocVectorEnv(env_fns, wait_num=None, timeout=None)
@@ -205,8 +210,38 @@ venv = SubprocVectorEnv([wrapped_env_fn for _ in range(num_envs)])
 # # returns "wait_num" steps or finished steps after "timeout" seconds,
 # # whichever occurs first.
 # print(obs)
-rainbow_config = {'model': None,
-                  'optim': None,
+def get_model():
+    # network
+    classes = [ActionSpace.FOLD,
+               ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED
+               ActionSpace.RAISE_MIN_OR_3BB,
+               ActionSpace.RAISE_HALF_POT,
+               ActionSpace.RAISE_POT,
+               ActionSpace.ALL_IN]
+    hidden_dim = [512, 512]
+    output_dim = len(classes)
+    input_dim = 564  # hard coded for now -- very unlikely to be changed by me at any poiny in time
+    device = "cpu"
+    Q_dict = V_dict = {'input_dim': 564,
+                       "output_dim": output_dim,
+                       "hidden_sizes": hidden_dim,
+                       "device": device,
+                       }
+    net = Net(state_shape=input_dim,
+              action_shape=output_dim,
+              hidden_sizes=hidden_dim,
+              device=device,
+              num_atoms=51,
+              dueling_param=(Q_dict, V_dict)
+              )
+    # if running on GPU and we want to use cuda move model there
+    return net
+
+
+model = get_model()
+optim = torch.optim.Adam(model.parameters(), lr=1e-6)
+rainbow_config = {'model': model,
+                  'optim': optim,
                   'num_atoms': 51,
                   'v_min': -6,
                   'v_max': 6,
