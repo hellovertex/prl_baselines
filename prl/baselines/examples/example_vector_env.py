@@ -231,7 +231,7 @@ class TianshouEnvWrapper(AECEnv):
     def step(self, action):
         # todo add the following code
         if action == MultiAgentActionFlags.TriggerMC:
-            self._logits = self._model(torch.Tensor([self._last_obs]))
+            self._logits = self._model(torch.Tensor(np.array([self._last_obs])))
             self._predictions = torch.argmax(self._logits, axis=1)
             action = self.compute_action(self._last_obs)
         if (
