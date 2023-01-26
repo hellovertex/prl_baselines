@@ -193,17 +193,17 @@ class TianshouEnvWrapper(AECEnv):
         win_prob = float(mc_dict['won'] / self._mc_iters)
         # todo: replace win_prob < .5 with EV based fn -- win_prob 20% requires min_to_call <= 1/5 pot
         if win_prob < .5 and random() < self.tightness:
-            return torch.tensor(ActionSpace.FOLD.value)
+            return ActionSpace.FOLD.value
         else:
             assert len(self._predictions == 1)
             prediction = self._predictions[0]
             # return raise of size at most the predicted size bucket
             if min(int(prediction), 2) in self.next_legal_moves:
-                return prediction
+                return int(prediction)
             elif ActionSpace.CHECK_CALL in self.next_legal_moves:
-                return torch.tensor(ActionSpace.CHECK_CALL.value)
+                return ActionSpace.CHECK_CALL.value
             else:
-                return torch.tensor(ActionSpace.FOLD.value)
+                return ActionSpace.FOLD.value
 
     def load_model(self):
         input_dim = 564
@@ -221,7 +221,7 @@ class TianshouEnvWrapper(AECEnv):
         # if use_cuda:
         #     net = net.cuda()
         self._model = net
-        os.environ['PRL_BASELINE_MODEL_PATH'] = "/home/sascha/Documents/github.com/prl_baselines/data/baseline_model_ckpt.pt"
+        os.environ['PRL_BASELINE_MODEL_PATH'] = "/home/hellovertex/Documents/github.com/prl_baselines/data/baseline_model_ckpt.pt"
         self._model.load_state_dict(torch.load(os.environ['PRL_BASELINE_MODEL_PATH'],
                                                # always on cpu because model used to collects rollouts
                                                map_location=torch.device('cpu'))['net'])
@@ -232,7 +232,7 @@ class TianshouEnvWrapper(AECEnv):
         # todo add the following code
         if action == MultiAgentActionFlags.TriggerMC:
             self._logits = self._model(torch.Tensor(np.array([self._last_obs])))
-            self._predictions = torch.argmax(self._logits, axis=1)
+            self._predictions = torch.argmax(self._logits, dim=1)
             action = self.compute_action(self._last_obs)
         if (
                 self.terminations[self.agent_selection]

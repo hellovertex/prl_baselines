@@ -11,3 +11,4 @@ pydantic
 tianshou
 ray[rllib]
 gin-config
+pettingzoo=1.22.3
