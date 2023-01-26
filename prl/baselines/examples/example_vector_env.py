@@ -89,6 +89,7 @@ class TianshouEnvWrapper(AECEnv):
         self.agents = agents
         self.possible_agents = self.agents[:]
         self.env_wrapped = env
+        self.BIG_BLIND = self.env_wrapped.env.BIG_BLIND
         self._card_evaluator = HandEvaluator_MonteCarlo()
         self._mc_iters = 5000
         self._model = self.load_model()
@@ -134,8 +135,8 @@ class TianshouEnvWrapper(AECEnv):
     def _convert_to_dict(self, list_of_list):
         return dict(zip(self.possible_agents, list_of_list))
 
-    def _scale_rewards(self, reward):
-        return reward
+    def _scale_rewards(self, rewards):
+        return [r/self.BIG_BLIND for r in rewards]
 
     def _int_to_name(self, ind):
         return self.possible_agents[ind]
@@ -281,7 +282,9 @@ class WrappedEnv(BaseWrapper):
 
 env_config = {"env_wrapper_cls": AugmentObservationWrapper,
               # "stack_sizes": [100, 125, 150, 175, 200, 250],
-              "stack_sizes": [100, 125],
+              "stack_sizes": [20000, 20000],
+              "multiply_by": 1,  # use 100 for floats to remove decimals but we have int stacks
+              "scale_rewards": False,  # we do this ourselves
               "blinds": [50, 100]}
 # env = init_wrapped_env(**env_config)
 # obs0 = env.reset(config=None)
