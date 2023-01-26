@@ -133,9 +133,10 @@ class TianshouEnvWrapper(AECEnv):
         self.infos = self._convert_to_dict(
             [{"legal_moves": []} for _ in range(self.num_agents)]
         )
-        # todo double check these:
-        legal_moves = np.array([0, 0, 0])
+        legal_moves = np.array([0, 0, 0, 0, 0, 0])
         legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
+        if legal_moves[2] == 1:
+            legal_moves[[3, 4, 5]] = 1
         self.next_legal_moves = legal_moves
         self._last_obs = obs
 
@@ -163,8 +164,10 @@ class TianshouEnvWrapper(AECEnv):
                 [False for _ in range(self.num_agents)]
             )
         else:
-            legal_moves = np.array([0, 0, 0])
+            legal_moves = np.array([0, 0, 0, 0, 0, 0])
             legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
+            if legal_moves[2] == 1:
+                legal_moves[[3,4,5]] = 1
             self.next_legal_moves = legal_moves
         self._cumulative_rewards[self.agent_selection] = 0
         self.agent_selection = next_player
@@ -201,16 +204,7 @@ wrapped_env = PettingZooEnv(WrappedEnv(env))
 venv = SubprocVectorEnv([wrapped_env_fn for _ in range(num_envs)])
 
 
-# env_fn = partial(make_env, env_config)
-# env_fns = [env_fn for _ in range(num_envs)]
-# # venv = SubprocVectorEnv(env_fns, wait_num=None, timeout=None)
-# venv = DummyVectorEnv(env_fns, wait_num=None, timeout=None)
-# obs = venv.reset()  # returns the initial observations of each environment
-# # todo get ready_id`s and reset only with ids of envs that signalled `done`
-# # returns "wait_num" steps or finished steps after "timeout" seconds,
-# # whichever occurs first.
-# print(obs)
-def get_model():
+def get_rainbow_config():
     # network
     classes = [ActionSpace.FOLD,
                ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED
@@ -222,6 +216,7 @@ def get_model():
     output_dim = len(classes)
     input_dim = 564  # hard coded for now -- very unlikely to be changed by me at any poiny in time
     device = "cpu"
+    num_atoms = 51
     Q_dict = V_dict = {'input_dim': 564,
                        "output_dim": output_dim,
                        "hidden_sizes": hidden_dim,
@@ -231,23 +226,22 @@ def get_model():
               action_shape=output_dim,
               hidden_sizes=hidden_dim,
               device=device,
-              num_atoms=51,
+              num_atoms=num_atoms,
               dueling_param=(Q_dict, V_dict)
               )
+    optim = torch.optim.Adam(net.parameters(), lr=1e-6)
     # if running on GPU and we want to use cuda move model there
-    return net
+    return {'model': net,
+            'optim': optim,
+            'num_atoms': num_atoms,
+            'v_min': -6,
+            'v_max': 6,
+            'estimation_step': 3,
+            'target_update_freq': 500  # training steps
+            }
 
 
-model = get_model()
-optim = torch.optim.Adam(model.parameters(), lr=1e-6)
-rainbow_config = {'model': model,
-                  'optim': optim,
-                  'num_atoms': 51,
-                  'v_min': -6,
-                  'v_max': 6,
-                  'estimation_step': 3,
-                  'target_update_freq': 500  # training steps
-                  }
+rainbow_config = get_rainbow_config()
 policy = MultiAgentPolicyManager([
     RainbowPolicy(**rainbow_config),
     RainbowPolicy(**rainbow_config)], wrapped_env)  # policy is made from PettingZooEnv
