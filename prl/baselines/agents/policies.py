@@ -60,7 +60,8 @@ class AlwaysCallingPolicy(BaselinePolicy_Base):
                         explore: Optional[bool] = None,
                         timestep: Optional[int] = None,
                         **kwargs, ):
-        return [torch.tensor(1) for _ in obs_batch], [], {}
+        observations = obs_batch['obs']
+        return [torch.tensor(1) for _, _ in enumerate(observations)], [], {}
 
 
 class AlwaysMinRaise(BaselinePolicy_Base):
