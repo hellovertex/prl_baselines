@@ -142,26 +142,30 @@ class TianshouEnvWrapper(AECEnv):
     def _int_to_name(self, ind):
         return self.possible_agents[ind]
 
-    def _reward_index_to_player_index(self, rew: dict):
-        """Reward index is relative to button because backend has button at index 0.
-        Our list of agents, say [Bob, Alice, Hans, Tina] can be such that anybody
-        can start.
-        In: rew
-
-        Example 01:
-            rew: {0: 10, 2: -10}
-            agents: [Bob, Alice, Hans, Tina], where Hans went first (index 2 here, index 3 in backend)
-            positions: [SB BB UTG BTN]
-            agents_backend: [Tina, Bob, Alice, Hans]
-            positions_backend: [BTN SB BB UTG]
-        out: {3: 10,  2: -10}
+    def roll_rewards(self, names: List[str], went_first: int, rewards: List[float], num_players: int):
         """
-        # if self.num_players > 3:
-        #    # offset 3 - start
-        #    pass
-        btn_offset = 0 if self.num_players < 4 else -3
-        return [(player_id + btn_offset + i) % self.num_players for i in range(self.num_players)]
-
+        Rolls indices from relative to button to relative to agent_list.
+        In Backend the button is always at index 0, in PettingZoo env however, any player could be
+        the button.
+        @param names: Player Names as in PettingZoo wrapped PokerRL env.
+        @param went_first: index of player in `agent_list` who started the round after env.reset()
+        @param rewards: Payouts gotten from PokerRL backend. Button is always at index 0
+        @param num_players: Total number of players at the table. Determines who goes first
+        according to the following rule: If number of players is less than four,
+        the button starts, otherwise the UTG in [Button, SmallBlind, BigBlind, UTG, MP, CO]
+        starts.
+        @return: The payouts dictionary with indices relative to the PettingZoo player name list,
+        instead of relative to the button. The backend has the button at index 0/
+        """
+        # player who goes first, either button at index 0 or UTG at index 3
+        offset = 0 if num_players < 4 else 3
+        # Example 1: "Alice" goes first
+        # - ["Bob", "Alice", "Tina"] --> ["Alice", "Tina", "Bob]
+        # Example 2:  "Hans" goes first (implies Tina is button)
+        # - ["Bob", "Alice", "Hans", "Tina"] --> ["Tina", "Bob", "Alice", "Hans"]
+        # Example 3:  "Tina" goes first (implies Bob is button)
+        # - ["Bob", "Alice", "Hans", "Tina"] --> ["Bob", "Alice", "Hans", "Tina"]
+        return list(np.roll(rewards, offset - went_first))
 
     def reset(self,
               seed: Optional[int] = None,
@@ -172,16 +176,7 @@ class TianshouEnvWrapper(AECEnv):
         obs, rew, done, info = self.env_wrapped.reset()
         player_id = (self._last_player_id + 1) % self.num_players
         player = self._int_to_name(player_id)
-        btn = 3 if self.num_players > 3 else 0
-        # The player who goes first is at position 0 or 3 in the underlying environment, depending
-        # on the number of players according to the game rules. For less than 4 players,
-        # the button goes first who is always at index 0.
-        # For more than 3 players, the UTG goes first which is at index 3 after BTN, SB, BB.
-        # The starting agent in our wrapped environment can be any number in [0,1,2,3,4,5]
-        # The resulting turns can be either offset by 0 or 3, so e.g. if player 2 starts then
-        # [2,3,4,5,0,1] or [5,0,1,2,3,4] are possible
-        self._turn_order = [(player_id + btn + i) % self.num_players for i in range(self.num_players)]
-
+        self.goes_first = player_id
         self.agents = self.possible_agents[:]
         self.agent_selection = player
         self.rewards = self._convert_to_dict([0 for _ in range(self.num_agents)])
@@ -283,7 +278,10 @@ class TianshouEnvWrapper(AECEnv):
         next_player = self._int_to_name(next_player_id)
         if done:
             self.rewards = self._convert_to_dict(
-                self._scale_rewards(rew)
+                self._scale_rewards(self.roll_rewards(names=self.possible_agents,
+                                                      went_first=self.goes_first,
+                                                      rewards=rew,
+                                                      num_players=self.num_players))
             )
             self.terminations = self._convert_to_dict(
                 [True for _ in range(self.num_agents)]
