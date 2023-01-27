@@ -88,14 +88,15 @@ class TianshouEnvWrapper(AECEnv):
         self.metadata = {'name': self.name}
         self.agents = agents
         self.possible_agents = self.agents[:]
+        self.num_players = len(self.possible_agents)
         self.env_wrapped = env
         self.BIG_BLIND = self.env_wrapped.env.BIG_BLIND
         self._card_evaluator = HandEvaluator_MonteCarlo()
         self._mc_iters = 5000
         self._model = self.load_model()
         self.tightness = .9  # todo make configurable
-        # moved this to prl.baselines because I understand we need access to the baseline agents
-        # which are not available from within prl_environment
+        self._last_player_id = -1
+        self._turn_order = None  # 3 if self.num_players >= 4 else 0
         self._mc_agent = None
         obs_space = Box(low=0.0, high=6.0, shape=(564,), dtype=np.float64)
 
@@ -141,6 +142,27 @@ class TianshouEnvWrapper(AECEnv):
     def _int_to_name(self, ind):
         return self.possible_agents[ind]
 
+    def _reward_index_to_player_index(self, rew: dict):
+        """Reward index is relative to button because backend has button at index 0.
+        Our list of agents, say [Bob, Alice, Hans, Tina] can be such that anybody
+        can start.
+        In: rew
+
+        Example 01:
+            rew: {0: 10, 2: -10}
+            agents: [Bob, Alice, Hans, Tina], where Hans went first (index 2 here, index 3 in backend)
+            positions: [SB BB UTG BTN]
+            agents_backend: [Tina, Bob, Alice, Hans]
+            positions_backend: [BTN SB BB UTG]
+        out: {3: 10,  2: -10}
+        """
+        # if self.num_players > 3:
+        #    # offset 3 - start
+        #    pass
+        btn_offset = 0 if self.num_players < 4 else -3
+        return [(player_id + btn_offset + i) % self.num_players for i in range(self.num_players)]
+
+
     def reset(self,
               seed: Optional[int] = None,
               return_info: bool = False,
@@ -148,8 +170,18 @@ class TianshouEnvWrapper(AECEnv):
         if seed is not None:
             self.seed(seed=seed)
         obs, rew, done, info = self.env_wrapped.reset()
-        player_id = self.env_wrapped.current_player.seat_id
+        player_id = (self._last_player_id + 1) % self.num_players
         player = self._int_to_name(player_id)
+        btn = 3 if self.num_players > 3 else 0
+        # The player who goes first is at position 0 or 3 in the underlying environment, depending
+        # on the number of players according to the game rules. For less than 4 players,
+        # the button goes first who is always at index 0.
+        # For more than 3 players, the UTG goes first which is at index 3 after BTN, SB, BB.
+        # The starting agent in our wrapped environment can be any number in [0,1,2,3,4,5]
+        # The resulting turns can be either offset by 0 or 3, so e.g. if player 2 starts then
+        # [2,3,4,5,0,1] or [5,0,1,2,3,4] are possible
+        self._turn_order = [(player_id + btn + i) % self.num_players for i in range(self.num_players)]
+
         self.agents = self.possible_agents[:]
         self.agent_selection = player
         self.rewards = self._convert_to_dict([0 for _ in range(self.num_agents)])
@@ -247,7 +279,7 @@ class TianshouEnvWrapper(AECEnv):
             return self._was_dead_step(action)
         obs, rew, done, info = self.env_wrapped.step(action)
         self._last_obs = obs
-        next_player_id = self.env_wrapped.current_player.seat_id
+        next_player_id = (self._last_player_id + 1) % self.num_players
         next_player = self._int_to_name(next_player_id)
         if done:
             self.rewards = self._convert_to_dict(
@@ -282,7 +314,7 @@ class WrappedEnv(BaseWrapper):
 
 env_config = {"env_wrapper_cls": AugmentObservationWrapper,
               # "stack_sizes": [100, 125, 150, 175, 200, 250],
-              "stack_sizes": [20000, 20000],
+              "stack_sizes": [10000, 10000],
               "multiply_by": 1,  # use 100 for floats to remove decimals but we have int stacks
               "scale_rewards": False,  # we do this ourselves
               "blinds": [50, 100]}
