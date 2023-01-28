@@ -26,6 +26,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from prl.baselines.cpp_hand_evaluator.monte_carlo import HandEvaluator_MonteCarlo
 from prl.baselines.cpp_hand_evaluator.rank import dict_str_to_sk
+from prl.baselines.examples.rainbow_net import Rainbow
 from prl.baselines.supervised_learning.models.nn_model import MLP
 
 IDX_C0_0 = 167  # feature_names.index('0th_player_card_0_rank_0')
@@ -163,8 +164,8 @@ class TianshouEnvWrapper(AECEnv):
         # - ["Bob", "Alice", "Tina"] --> ["Alice", "Tina", "Bob]
         # Example 2:  "Hans" goes first (implies Tina is button)
         # - ["Bob", "Alice", "Hans", "Tina"] --> ["Tina", "Bob", "Alice", "Hans"]
-        # Example 3:  "Tina" goes first (implies Bob is button)
-        # - ["Bob", "Alice", "Hans", "Tina"] --> ["Bob", "Alice", "Hans", "Tina"]
+        # Example 3:  "Tina" goes first (implies Alice is button)
+        # - ["Bob", "Alice", "Hans", "Stacy", "Tina"] --> ["Alice", "Hans", "Stacy", "Tina", "Bob"]
         return list(np.roll(rewards, offset - went_first))
 
     def reset(self,
@@ -340,10 +341,12 @@ def get_rainbow_config():
                ActionSpace.RAISE_HALF_POT,
                ActionSpace.RAISE_POT,
                ActionSpace.ALL_IN]
+    input_dim = 564
     hidden_dim = [512, 512]
     output_dim = len(classes)
     input_dim = 564  # hard coded for now -- very unlikely to be changed by me at any poiny in time
     device = "cuda"
+    # device = "cpu"
     """
     Note: tianshou.policy.modelfree.c51.C51Policy.__init__ must move support to cuda if training on cuda
     self.support = torch.nn.Parameter(
@@ -352,18 +355,28 @@ def get_rainbow_config():
         ).cuda()
     """
     num_atoms = 51
-    Q_dict = V_dict = {'input_dim': 564,
+    noisy_std = 0.1
+    Q_dict = V_dict = {'input_dim': input_dim,
                        "output_dim": output_dim,
                        "hidden_sizes": hidden_dim,
                        "device": device,
                        }
-    net = Net(state_shape=input_dim,
-              action_shape=output_dim,
-              hidden_sizes=hidden_dim,
-              device=device,
-              num_atoms=num_atoms,
-              dueling_param=(Q_dict, V_dict)
-              ).to(device)
+    # net = Net(state_shape=input_dim,
+    #           action_shape=output_dim,
+    #           hidden_sizes=hidden_dim,
+    #           device=device,
+    #           num_atoms=num_atoms,
+    #           dueling_param=(Q_dict, V_dict)
+    #           ).to(device)
+    net = Rainbow(
+        input_dim,
+        output_dim,
+        num_atoms,
+        noisy_std,
+        device,
+        is_dueling=True,
+        is_noisy=True
+    )
     optim = torch.optim.Adam(net.parameters(), lr=1e-6)
     # if running on GPU and we want to use cuda move model there
     return {'model': net,
