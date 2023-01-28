@@ -46,7 +46,6 @@ class DQN(nn.Module):
             activation: Optional[Union[ModuleType, Sequence[ModuleType]]] = nn.ReLU,
             device: Optional[Union[str, int, torch.device]] = None,
             linear_layer: Type[nn.Linear] = nn.Linear,
-            flatten_input: bool = True,
     ) -> None:
         super().__init__()
         # monkey-patched because dqn only computes features not q values for rainbow case
@@ -78,8 +77,7 @@ class DQN(nn.Module):
         if output_dim > 0:
             model += [linear_layer(hidden_sizes[-1], output_dim)]
         self.output_dim = 512
-        self.net = nn.Sequential(*model)
-        self.flatten_input = flatten_input
+        self.net = nn.Sequential(*model).to(device)
 
     def forward(
             self,
@@ -141,7 +139,6 @@ class Rainbow(DQN):
             activation: Optional[Union[ModuleType, Sequence[ModuleType]]] = nn.ReLU,
             device: Union[str, int, torch.device] = "cpu",
             linear_layer: Type[nn.Linear] = nn.Linear,
-            flatten_input: bool = True,
             num_atoms: int = 51,
             noisy_std: float = 0.5,
             is_dueling: bool = True,
@@ -153,8 +150,7 @@ class Rainbow(DQN):
                          norm_layer=norm_layer,
                          activation=activation,
                          device=device,
-                         linear_layer=linear_layer,
-                         flatten_input=flatten_input)
+                         linear_layer=linear_layer)
         self.action_num = output_dim
         self.num_atoms = num_atoms
 
@@ -167,13 +163,13 @@ class Rainbow(DQN):
         self.Q = nn.Sequential(
             linear(self.output_dim, 512), nn.ReLU(inplace=True),
             linear(512, self.action_num * self.num_atoms)
-        )
+        ).to(self.device)
         self._is_dueling = is_dueling
         if self._is_dueling:
             self.V = nn.Sequential(
                 linear(self.output_dim, 512), nn.ReLU(inplace=True),
                 linear(512, self.num_atoms)
-            )
+            ).to(self.device)
         self.output_dim = self.action_num * self.num_atoms
 
     def forward(

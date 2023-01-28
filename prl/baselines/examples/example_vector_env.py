@@ -1,4 +1,5 @@
 import os
+import pprint
 import time
 from enum import IntEnum
 from functools import partial
@@ -15,7 +16,7 @@ from pettingzoo.utils.env import ObsType
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.base import ActionSpace
 from prl.environment.Wrappers.utils import init_wrapped_env
-from tianshou.data import Collector, Batch
+from tianshou.data import Collector, Batch, PrioritizedVectorReplayBuffer
 from tianshou.env.pettingzoo_env import PettingZooEnv
 from tianshou.env.venvs import SubprocVectorEnv
 from tianshou.policy import MultiAgentPolicyManager, RainbowPolicy, BasePolicy
@@ -138,7 +139,7 @@ class TianshouEnvWrapper(AECEnv):
         return dict(zip(self.possible_agents, list_of_list))
 
     def _scale_rewards(self, rewards):
-        return [r/self.BIG_BLIND for r in rewards]
+        return [r / self.BIG_BLIND for r in rewards]
 
     def _int_to_name(self, ind):
         return self.possible_agents[ind]
@@ -319,7 +320,7 @@ env_config = {"env_wrapper_cls": AugmentObservationWrapper,
               "blinds": [50, 100]}
 # env = init_wrapped_env(**env_config)
 # obs0 = env.reset(config=None)
-num_envs = 1
+num_envs = 31
 
 
 def make_env(cfg):
@@ -346,6 +347,7 @@ def get_rainbow_config():
     output_dim = len(classes)
     input_dim = 564  # hard coded for now -- very unlikely to be changed by me at any poiny in time
     device = "cuda"
+    gamma = 0.99
     # device = "cpu"
     """
     Note: tianshou.policy.modelfree.c51.C51Policy.__init__ must move support to cuda if training on cuda
@@ -356,11 +358,11 @@ def get_rainbow_config():
     """
     num_atoms = 51
     noisy_std = 0.1
-    Q_dict = V_dict = {'input_dim': input_dim,
-                       "output_dim": output_dim,
-                       "hidden_sizes": hidden_dim,
-                       "device": device,
-                       }
+    # Q_dict = V_dict = {'input_dim': input_dim,
+    #                    "output_dim": output_dim,
+    #                    "hidden_sizes": hidden_dim,
+    #                    "device": device,
+    #                    }
     # net = Net(state_shape=input_dim,
     #           action_shape=output_dim,
     #           hidden_sizes=hidden_dim,
@@ -369,11 +371,12 @@ def get_rainbow_config():
     #           dueling_param=(Q_dict, V_dict)
     #           ).to(device)
     net = Rainbow(
-        input_dim,
-        output_dim,
-        num_atoms,
-        noisy_std,
-        device,
+        input_dim=input_dim,
+        output_dim=output_dim,
+        hidden_sizes=hidden_dim,
+        device=device,
+        num_atoms=num_atoms,
+        noisy_std=noisy_std,
         is_dueling=True,
         is_noisy=True
     )
@@ -422,12 +425,28 @@ policy = MultiAgentPolicyManager([
     RainbowPolicy(**rainbow_config),
     TianshouCallingStation()], wrapped_env)  # policy is made from PettingZooEnv
 
+buffer_size = 100000
+obs_stack = 1
+alpha = 0.5
+beta = 0.4
+beta_final = 1
+beta_anneal_step = 5000000
+weight_norm = True
 # collector = Collector(policy, venv)
 # t0 = time.time()
 # result = collector.collect(n_episode=1000)
-
-train_collector = Collector(policy, venv)
-test_collector = Collector(policy, venv)
+buffer = PrioritizedVectorReplayBuffer(
+    total_size=buffer_size,
+    buffer_num=len(venv),
+    ignore_obs_next=False,  # enable for framestacking
+    save_only_last_obs=False,  # enable for framestacking
+    stack_num=obs_stack,
+    alpha=alpha,
+    beta=beta,
+    weight_norm=weight_norm
+)
+train_collector = Collector(policy, venv, buffer, exploration_noise=True)
+test_collector = Collector(policy, venv, exploration_noise=True)
 epoch = 10000
 step_per_epoch = 10000
 step_per_collect = 100
@@ -436,12 +455,35 @@ batch_size = 256
 update_per_step = 0.1
 learning_agent_ids = [0]
 eps_train = 0.2
+eps_train_final = 0.05
 eps_test = 0.0
+no_priority = False
 
 
-def train_fn(epoch, env_step):
+# def train_fn(epoch, env_step):
+#     for aid in learning_agent_ids:
+#         policy.policies[agents[aid]].set_eps(eps_train)
+
+def train_fn(epoch, env_step, beta=beta):
+    # nature DQN setting, linear decay in the first 1M steps
+    if env_step <= 1e6:
+        eps = eps_train - env_step / 1e6 * \
+              (eps_train - eps_train_final)
+    else:
+        eps = eps_train_final
     for aid in learning_agent_ids:
-        policy.policies[agents[aid]].set_eps(eps_train)
+        policy.policies[agents[aid]].set_eps(eps)
+    if env_step % 1000 == 0:
+        logger.write("train/env_step", env_step, {"train/eps": eps})
+    if not no_priority:
+        if env_step <= beta_anneal_step:
+            beta = beta - env_step / beta_anneal_step * \
+                   (beta - beta_final)
+        else:
+            beta = beta_final
+        buffer.set_beta(beta)
+        if env_step % 1000 == 0:
+            logger.write("train/env_step", env_step, {"train/beta": beta})
 
 
 def test_fn(epoch, env_step):
@@ -474,12 +516,47 @@ def reward_metric(rews):
     return rews[:, learning_agent_ids[0]]
 
 
+# watch agent's performance
+# def watch():
+#     print("Setup test envs ...")
+#     policy.eval()
+#     policy.set_eps(args.eps_test)
+#     test_envs.seed(args.seed)
+#     if args.save_buffer_name:
+#         print(f"Generate buffer with size {args.buffer_size}")
+#         buffer = PrioritizedVectorReplayBuffer(
+#             args.buffer_size,
+#             buffer_num=len(test_envs),
+#             ignore_obs_next=True,
+#             save_only_last_obs=True,
+#             stack_num=args.frames_stack,
+#             alpha=args.alpha,
+#             beta=args.beta
+#         )
+#         collector = Collector(policy, test_envs, buffer, exploration_noise=True)
+#         result = collector.collect(n_step=args.buffer_size)
+#         print(f"Save buffer into {args.save_buffer_name}")
+#         # Unfortunately, pickle will cause oom with 1M buffer size
+#         buffer.save_hdf5(args.save_buffer_name)
+#     else:
+#         print("Testing agent ...")
+#         test_collector.reset()
+#         result = test_collector.collect(
+#             n_episode=args.test_num, render=args.render
+#         )
+#     rew = result["rews"].mean()
+#     print(f"Mean reward (over {result['n/ep']} episodes): {rew}")
+#
+# if args.watch:
+#     watch()
+#     exit(0)
 # ======== tensorboard logging setup =========
 log_path = os.path.join(*logdir)
 writer = SummaryWriter(log_path)
 # writer.add_text("args", str(args))
 logger = TensorboardLogger(writer)
-
+# test train_collector and start filling replay buffer
+train_collector.collect(n_step=batch_size * num_envs)
 trainer = OffpolicyTrainer(policy=policy,
                            train_collector=train_collector,
                            test_collector=test_collector,
@@ -503,5 +580,7 @@ trainer = OffpolicyTrainer(policy=policy,
                            )
 result = trainer.run()
 t0 = time.time()
-print(result)
+pprint.pprint(result)
 print(f'took {time.time() - t0} seconds')
+# pprint.pprint(result)
+# watch()
