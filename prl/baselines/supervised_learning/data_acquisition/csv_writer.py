@@ -30,8 +30,11 @@ class CSVWriter(Writer):
             os.makedirs(os.path.realpath(file_dir), exist_ok=True)
             columns = feature_names
             header = True
-        pd.DataFrame(data=data,
+        df = pd.DataFrame(data=data,
                      index=labels,  # The index (row labels) of the DataFrame.
-                     columns=columns).to_csv(
-            file_path, index=True, header=header, index_label='label', mode='a')
+                     columns=columns)
+        # float to int if applicable
+        df = df.apply(lambda x: x.apply(lambda y: int(y) if int(y) == y else y))
+        df.to_csv(
+            file_path, index=True, header=header, index_label='label', mode='a', float_format='%.5f')
         return file_dir, file_path

@@ -166,7 +166,7 @@ class RLStateEncoder(Encoder):
                             lut_holder=NoLimitHoldem.get_lut_holder())
         self._wrapped_env = self.env_wrapper_cls(env)
         # will be used for naming feature index in training data vector
-        self._feature_names = list(self._wrapped_env.obs_idx_dict.keys()) + ["button_index"]
+        self._feature_names = list(self._wrapped_env.obs_idx_dict.keys())
 
     def _make_ante(self, ante: str) -> float:
         """Converts ante string to float, e.g. '$0.00' -> float(0.00)"""
@@ -192,16 +192,6 @@ class RLStateEncoder(Encoder):
         observations = []
         actions = []
         showdown_players: List[str] = [player.name for player in episode.showdown_hands]
-        skip = False
-        # Maybe skip game, if selected_players is set and no selected player was in showdown
-        if selected_players:
-            skip = True
-            for s in selected_players:
-                if s in showdown_players:
-                    skip = False
-                    break
-        if skip:
-            return None, None  # observations, actions are empty, if selected players were not part of showdown
 
         it = 0
         debug_action_list = []
@@ -255,15 +245,18 @@ class RLStateEncoder(Encoder):
     def encode_episode(self, episode: PokerEpisode, selected_players=None) -> Tuple[Observations, Actions_Taken]:
         """Runs environment with steps from PokerEpisode.
         Returns observations and corresponding actions of players that made it to showdown."""
-        # skip episode if no selected_players has played in it
+
+        # Maybe skip game, if selected_players is set and no selected player was in showdown
         if selected_players:
+            # skip episode if no selected_players has played in it
+            showdown_players: List[str] = [player.name for player in episode.showdown_hands]
             skip = True
-            for p_info in episode.player_stacks:
-                if p_info.player_name in selected_players:
+            for s in selected_players:
+                if s in showdown_players:
                     skip = False
                     break
             if skip:
-                return None, None
+                return None, None  # observations, actions are empty, if selected players were not part of showdown
         # utils
         table = self.make_table(episode)
         self._currency_symbol = episode.currency_symbol
