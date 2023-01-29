@@ -6,11 +6,11 @@ from prl.baselines.supervised_learning.training.from_selected_players.train_eval
 EPOCHS = 8000000
 LR = 1e-6
 RESUME = True
-BATCH_SIZE = 1024  # dont make batch size larger than dataset
-TEST_BATCH_SIZE = 1024
+BATCH_SIZE = 512  # dont make batch size larger than dataset
+TEST_BATCH_SIZE = 512
 
 
-@click.command
+@click.command()
 @click.option("--blind_sizes",
               default="0.25-0.50",
               type=str,

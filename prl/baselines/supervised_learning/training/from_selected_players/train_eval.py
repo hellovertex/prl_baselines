@@ -23,9 +23,9 @@ def load_checkpoint(path_to_checkpoint):
 def get_datasets(input_dir, batch_size):
     dataset = InMemoryDataset(input_dir)
     total_len = len(dataset)
-    train_len = int(total_len * 0.8)
+    train_len = int(total_len * 0.85)
     test_len = int(total_len * 0.1)
-    val_len = int(total_len * 0.1)
+    val_len = int(total_len * 0.05)
     # add residuals to val_len to add up to total_len
     val_len += total_len - (int(train_len) + int(test_len) + int(val_len))
     # set seed
@@ -83,9 +83,9 @@ def run_train_eval(input_dir,
                    lr,
                    batch_size,
                    test_batch_size,
-                   log_interval=100,  # log training metrics every `log_interval` batches
-                   ckpt_interval=1000,  # save checkpoint each `ckpt_interval` batches
-                   eval_interval=1000,  # eval each `eval_interval` batches
+                   log_interval=1000,  # log training metrics every `log_interval` batches
+                   ckpt_interval=10000,  # save checkpoint each `ckpt_interval` batches
+                   eval_interval=10000,  # eval each `eval_interval` batches
                    ckpt_dir='./ckpt',
                    log_dir='./logdir',
                    resume=True,
@@ -123,6 +123,7 @@ def run_train_eval(input_dir,
     i_train = 0
     total_loss = 0
     correct = 0
+    best_accuracy = test_accuracy = -np.inf
 
     for epoch in range(start_epoch, epochs):
         pbar = tqdm(enumerate(BackgroundGenerator(train_dataloader)), total=round(len(train_dataloader)))
@@ -219,12 +220,13 @@ def run_train_eval(input_dir,
             if i % ckpt_interval == 0:
                 if not os.path.exists(ckpt_dir + '/ckpt'):
                     os.makedirs(ckpt_dir + '/ckpt')
-
-                torch.save({'epoch': epoch,
-                            'net': model.state_dict(),
-                            'n_iter': n_iter,
-                            'optim': optim.state_dict(),
-                            'loss': loss}, ckpt_dir + '/ckpt.pt')  # net
-                # save model for inference 
-                torch.save(model, ckpt_dir + '/model.pt')
+                if best_accuracy < test_accuracy:
+                    best_accuracy = test_accuracy
+                    torch.save({'epoch': epoch,
+                                'net': model.state_dict(),
+                                'n_iter': n_iter,
+                                'optim': optim.state_dict(),
+                                'loss': loss}, ckpt_dir + '/ckpt.pt')  # net
+                    # save model for inference
+                    torch.save(model, ckpt_dir + '/model.pt')
             n_iter += 1
