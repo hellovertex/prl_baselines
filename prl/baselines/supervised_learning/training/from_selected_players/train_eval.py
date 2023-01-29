@@ -83,9 +83,9 @@ def run_train_eval(input_dir,
                    lr,
                    batch_size,
                    test_batch_size,
-                   log_interval=1000,  # log training metrics every `log_interval` batches
-                   ckpt_interval=10000,  # save checkpoint each `ckpt_interval` batches
-                   eval_interval=10000,  # eval each `eval_interval` batches
+                   log_interval=300,  # log training metrics every `log_interval` train steps
+                   ckpt_interval=300,  # save checkpoint each `ckpt_interval` batches
+                   eval_interval=300,  # eval each `eval_interval` batches
                    ckpt_dir='./ckpt',
                    log_dir='./logdir',
                    resume=True,
@@ -133,8 +133,9 @@ def run_train_eval(input_dir,
         i_train = 0
         correct = 0
         total_loss = 0
-
+        j = 0
         for i, (x, y) in pbar:
+            j += 1
             if use_cuda:  # keep
                 x = x.cuda()
                 y = y.cuda()
@@ -151,15 +152,13 @@ def run_train_eval(input_dir,
             # udpate tensorboardX
             correct += pred.eq(y.data).cpu().sum().item()
             i_train += 1
-            if i % log_interval == 0:
+            if i_train % log_interval == 0:
                 n_batch = i_train * batch_size  # how many samples across all batches seen so far
                 writer.add_scalar(tag='Training Loss', scalar_value=total_loss / i_train, global_step=n_iter)
                 writer.add_scalar(tag='Training Accuracy', scalar_value=100.0 * correct / n_batch, global_step=n_iter)
                 print(f"\nTrain set: "
                       f"Average loss: {round(total_loss / i_train, 4)}, "
                       f"Accuracy: {correct}/{n_batch} ({round(100.0 * correct / n_batch, 2)}%)\n")
-                if correct > 100000:
-                    print('wtf')
                 i_train = 0
                 correct = 0
                 total_loss = 0
@@ -176,7 +175,7 @@ def run_train_eval(input_dir,
             start_time = time.time()
 
             # evaluate
-            if i % eval_interval == 0:
+            if j % eval_interval == 0:
                 # bring models to evaluation mode
                 model.eval()
                 # pbar_test = tqdm(enumerate(BackgroundGenerator(dataset)), total=len(testset) / test_batch_size)
@@ -217,7 +216,7 @@ def run_train_eval(input_dir,
                         k += 1
 
             # save checkpoint if needed
-            if i % ckpt_interval == 0:
+            if j % ckpt_interval == 0:
                 if not os.path.exists(ckpt_dir + '/ckpt'):
                     os.makedirs(ckpt_dir + '/ckpt')
                 if best_accuracy < test_accuracy:
