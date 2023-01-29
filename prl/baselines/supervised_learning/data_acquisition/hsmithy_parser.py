@@ -339,7 +339,7 @@ class HSmithyParser(Parser):
                             winners=winners,
                             showdown_hands=showdown_hands,
                             money_collected=money_collected,
-                            info={'as_string': episode})
+                            info={'episode_str': episode})
 
     def _parse_hands(self, hands_played) -> Generator[PokerEpisode, None, None]:
         for current in hands_played:  # c for current_hand
