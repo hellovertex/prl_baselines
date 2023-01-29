@@ -14,7 +14,7 @@ from prl.baselines.supervised_learning.data_acquisition import hsmithy_extractor
 
 target_player = "Clamfish0"
 fpath = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped/Aaltje III-0.25-0.50-USD-NoLimitHoldem-PokerStars-2-8-2020.txt"
-folder_out = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
+folder_out = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50"
 extr = hsmithy_extractor.HSmithyExtractor()
 filenames = glob.glob("/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped/**/*.txt", recursive=True)
 # todo: loop extract file for all 60gb of unzipped files
