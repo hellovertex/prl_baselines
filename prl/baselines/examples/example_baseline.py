@@ -13,12 +13,11 @@ import glob
 from prl.baselines.supervised_learning.data_acquisition import hsmithy_extractor
 
 target_player = "Clamfish0"
-fpath = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped/Aaltje III-0.25-0.50-USD-NoLimitHoldem-PokerStars-2-8-2020.txt"
-folder_out = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50"
+# fpath = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped/Aaltje III-0.25-0.50-USD-NoLimitHoldem-PokerStars-2-8-2020.txt"
+folder_out = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
 extr = hsmithy_extractor.HSmithyExtractor()
-filenames = glob.glob("/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped/**/*.txt", recursive=True)
-# todo: loop extract file for all 60gb of unzipped files
-#  loop target players for all of
+filenames = glob.glob("/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped/**/*.txt", recursive=True)
+
 best_players = ['ishuha',
                 'Sakhacop',
                 'nastja336',
@@ -36,12 +35,6 @@ best_players = ['ishuha',
                 'ilaviiitech',
                 'm0bba',
                 'KDV707']
-for f in filenames:
-    for pname in best_players:
-        extr.extract_file(file_path_in=f,
-                          file_path_out=folder_out,
-                          target_player=pname)
-
 gains = {"ishuha": {"n_hands_played": 59961, "n_showdowns": 18050, "n_won": 10598, "total_earnings": 37425.32000000013},
          "Sakhacop": {"n_hands_played": 54873, "n_showdowns": 14718, "n_won": 9235,
                       "total_earnings": 43113.86000000007},
@@ -69,3 +62,16 @@ gains = {"ishuha": {"n_hands_played": 59961, "n_showdowns": 18050, "n_won": 1059
                          "total_earnings": 22407.82999999994},
          "m0bba": {"n_hands_played": 24384, "n_showdowns": 6349, "n_won": 4325, "total_earnings": 25772.450000000015},
          "KDV707": {"n_hands_played": 25570, "n_showdowns": 6241, "n_won": 3492, "total_earnings": 23929.970000000063}}
+n_files = len(filenames)
+n_files_skipped = 0
+for i, f in enumerate(filenames):
+    print(f'Extractin file {i} / {n_files}')
+    for pname in best_players:
+        try:
+            extr.extract_file(file_path_in=f,
+                              file_path_out=folder_out,
+                              target_player=pname)
+        except UnicodeDecodeError:
+            n_files_skipped += 1
+print(f"Done. Extracted {n_files - n_files_skipped}. {n_files_skipped} files were skipped.")
+
