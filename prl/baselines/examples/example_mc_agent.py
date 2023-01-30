@@ -11,13 +11,13 @@ df = pd.read_csv(fpath,
                  encoding='cp1252')
 legal_moves = [1, 1, 1, 1, 1, 1]  # 1 for each action
 agent = MCAgent()
-cummax = {0:0,
-          1:0,
-          2:0,
-          3:0,
-          4:0,
-          5:0,
-          6:0}
+cummax = {0: 0,
+          1: 0,
+          2: 0,
+          3: 0,
+          4: 0,
+          5: 0,
+          6: 0}
 n_obs = len(df)
 for i in range(n_obs):
     print(f'Iterating row {i} of {n_obs}')
@@ -27,7 +27,7 @@ for i in range(n_obs):
     pred = agent.compute_action(obs, legal_moves)
     cummax[pred] += torch.max(softmax(agent._logits, dim=1)).detach().numpy().item()
 avg_acceptance = {}
-for k,v in cummax:
+for k, v in cummax.items():
     avg_acceptance[k] = v / n_obs
 print(f'Average acceptance level over {n_obs} observations is per actions: '
       f'CHECK_CALL: {avg_acceptance[1]}\n'

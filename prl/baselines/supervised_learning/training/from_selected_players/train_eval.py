@@ -16,9 +16,6 @@ from prl.baselines.supervised_learning.models.nn_model import MLP
 from prl.baselines.supervised_learning.training.dataset import InMemoryDataset
 
 
-def load_checkpoint(path_to_checkpoint):
-    return torch.load(path_to_checkpoint)
-
 
 def get_datasets(input_dir, batch_size):
     dataset = InMemoryDataset(input_dir)
@@ -58,6 +55,9 @@ def get_model(traindata):
     return net
 
 
+def load_checkpoint(path_to_checkpoint):
+    return torch.load(path_to_checkpoint)
+
 def init_state(ckpt_dir, resume: bool, model, optim):
     # # load checkpoint if needed/ wanted
 
@@ -69,13 +69,14 @@ def init_state(ckpt_dir, resume: bool, model, optim):
             model.load_state_dict(ckpt['net'])
             start_epoch = ckpt['epoch']
             start_n_iter = ckpt['n_iter']
+            best_accuracy = ckpt['best_accuracy']
             optim.load_state_dict(ckpt['optim'])
             print("last checkpoint restored")
         except Exception as e:
             # fail silently and start from scratch
             logging.info(f"Loading checkpoints failed with exception: {e}")
             logging.info(f"Continue Training from scratch")
-    return start_n_iter, start_epoch
+    return start_n_iter, start_epoch, best_accuracy
 
 
 def run_train_eval(input_dir,
@@ -111,10 +112,10 @@ def run_train_eval(input_dir,
     test_dataloader = DataLoader(testdataset, batch_size=batch_size, shuffle=True)
     traindata, testdata = iter(train_dataloader), iter(test_dataloader)
     model = get_model(traindata)
-
+    best_accuracy = test_accuracy = -np.inf
     # create optimizer
     optim = torch.optim.Adam(model.parameters(), lr=lr)
-    start_n_iter, start_epoch = init_state(ckpt_dir, resume, model, optim)
+    start_n_iter, start_epoch, best_accuracy = init_state(ckpt_dir, resume, model, optim)
 
     # use tensorboardX to keep track of experiments
     writer = SummaryWriter(log_dir=log_dir,
@@ -123,7 +124,7 @@ def run_train_eval(input_dir,
     i_train = 0
     total_loss = 0
     correct = 0
-    best_accuracy = test_accuracy = -np.inf
+
 
     for epoch in range(start_epoch, epochs):
         pbar = tqdm(enumerate(BackgroundGenerator(train_dataloader)), total=round(len(train_dataloader)))
@@ -225,7 +226,8 @@ def run_train_eval(input_dir,
                                 'net': model.state_dict(),
                                 'n_iter': n_iter,
                                 'optim': optim.state_dict(),
-                                'loss': loss}, ckpt_dir + '/ckpt.pt')  # net
+                                'loss': loss,
+                                'best_accuracy': best_accuracy}, ckpt_dir + '/ckpt.pt')  # net
                     # save model for inference
                     torch.save(model, ckpt_dir + '/model.pt')
             n_iter += 1

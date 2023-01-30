@@ -46,17 +46,17 @@ class MCAgent:
                    ActionSpace.ALL_IN]
         hidden_dim = [512, 512]
         output_dim = len(classes)
-        net = MLP_old(input_dim, output_dim, hidden_dim)
+        net = MLP(input_dim, output_dim, hidden_dim)
         # if running on GPU and we want to use cuda move model there
         # use_cuda = torch.cuda.is_available()
         # if use_cuda:
         #     net = net.cuda()
         self._model = net
         os.environ[
-            'PRL_BASELINE_MODEL_PATH'] = "/home/sascha/Documents/github.com/prl_baselines/data/baseline_model_ckpt.pt"
-        self._model.load_state_dict(torch.load(os.environ['PRL_BASELINE_MODEL_PATH'],
-                                               # always on cpu because model used to collects rollouts
-                                               map_location=torch.device('cpu'))['net'])
+            'PRL_BASELINE_MODEL_PATH'] = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
+        ckpt = torch.load(os.environ['PRL_BASELINE_MODEL_PATH'],
+                          map_location=torch.device('cpu'))
+        self._model.load_state_dict(ckpt['net'])
         self._model.eval()
         return net
 
