@@ -23,11 +23,13 @@ class PlayerStats:
         self.threebet = 0
         self.cbet = 0
         self.af = 0
+        self.num_immediate_folds = 0
         self.num_checkcall_or_folds = 0
         self.num_bets_or_raises = 0
         self.hands_to_showdown = 0
         self.hands_played = 0
         self.hands_total = 0
+        self.is_new_hand = NotImplementedError
 
     def big_blind_checked_preflop(self, obs, action):
         if action != ActionSpace.CHECK_CALL:
@@ -39,7 +41,7 @@ class PlayerStats:
 
     def _update_vpip(self, obs, action):
         """Percentage of time player makes calls or raises before the flop."""
-        if fts.Round_preflop:
+        if obs[fts.Round_preflop]:
             # if action is not fold and player is not big blind who checks, update vpip
             if not action == ActionSpace.FOLD:
                 # as big blind, only increment vpip if we call a bet or raise
@@ -48,6 +50,7 @@ class PlayerStats:
                     self.vpip = (self.vpip + 1) / self.hands_total
 
     def _update_af(self, obs, action):
+        """Agression factor: #(Bet + Raise) / #(Call, checking or folding)"""
         if action < ActionSpace.RAISE_MIN_OR_3BB:
             self.num_checkcall_or_folds += 1
         else:
@@ -55,7 +58,22 @@ class PlayerStats:
         self.af = self.num_bets_or_raises / self.num_checkcall_or_folds
 
     def _update_pfr(self, obs, action):
-        pass
+        """Preflop Bets/Raises"""
+        if obs[fts.Round_preflop]:
+            if action >= ActionSpace.RAISE_MIN_OR_3BB:
+                self.pfr = (self.pfr + 1) / self.hands_total
+
+    def _update_tightness(self, obs, action):
+        """1 - Percentage of hands played. tightness = 0.9 means player plays 10% of hands
+        A hand is played if it is not folded immediately preflop. """
+        if self.is_new_hand:
+            # players first action
+            if obs[fts.Small_blind] + obs[fts.Big_blind] == obs[fts.Pot_amt]:
+                if obs[fts.Round_preflop] and action == ActionSpace.FOLD:
+                    self.num_immediate_folds += 1
+                else:
+                    pass # todo
+
 
     def _update_cbet(self, obs, action):
         pass
@@ -63,8 +81,18 @@ class PlayerStats:
     def _update_3bet(self, obs, action):
         pass
 
-    def update_stats(self, obs: np.ndarray, action: int):
-        self.hands_total += 1
+    def new_hands_dealt(self, obs, action):
+        """Consider using this instead of is_new_hand parameter."""
+        # a new hand is dealt when three conditions are met in obs
+        # i) round == preflop
+        # ii) pot == sb + bb
+        # iii) none of the players have folded yet
+        pass
+
+    def update_stats(self, obs: np.ndarray, action: int, is_new_hand: bool):
+        self.is_new_hand = is_new_hand
+        if is_new_hand:
+            self.hands_total += 1
         self._update_vpip(obs, action)
         self._update_af(obs, action)
         self._update_pfr(obs, action)
@@ -72,8 +100,7 @@ class PlayerStats:
         self._update_3bet(obs, action)
 
     def reset(self):
-        """If necessary, we can reset all stats to 0 here, but I dont see where this could
-        be useful"""
+        """If necessary, we can reset all stats to 0 here, but I dont think well need it"""
         pass
 
     def to_dict(self):
