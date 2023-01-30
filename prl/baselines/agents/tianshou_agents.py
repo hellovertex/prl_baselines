@@ -53,7 +53,7 @@ class MCAgent:
         #     net = net.cuda()
         self._model = net
         os.environ[
-            'PRL_BASELINE_MODEL_PATH'] = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
+            'PRL_BASELINE_MODEL_PATH'] = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/ckpt/ckpt.pt"
         ckpt = torch.load(os.environ['PRL_BASELINE_MODEL_PATH'],
                           map_location=torch.device('cpu'))
         self._model.load_state_dict(ckpt['net'])

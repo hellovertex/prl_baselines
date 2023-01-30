@@ -125,7 +125,7 @@ def run_train_eval(input_dir,
     i_train = 0
     total_loss = 0
     correct = 0
-
+    j = 0
 
     for epoch in range(start_epoch, epochs):
         pbar = tqdm(enumerate(BackgroundGenerator(train_dataloader)), total=round(len(train_dataloader)))
@@ -135,7 +135,7 @@ def run_train_eval(input_dir,
         i_train = 0
         correct = 0
         total_loss = 0
-        j = 0
+
         for i, (x, y) in pbar:
             j += 1
             if use_cuda:  # keep
@@ -154,7 +154,7 @@ def run_train_eval(input_dir,
             # udpate tensorboardX
             correct += pred.eq(y.data).cpu().sum().item()
             i_train += 1
-            if i_train % log_interval == 0:
+            if j % log_interval == 0:
                 n_batch = i_train * batch_size  # how many samples across all batches seen so far
                 writer.add_scalar(tag='Training Loss', scalar_value=total_loss / i_train, global_step=n_iter)
                 writer.add_scalar(tag='Training Accuracy', scalar_value=100.0 * correct / n_batch, global_step=n_iter)
@@ -185,7 +185,7 @@ def run_train_eval(input_dir,
                 test_loss = 0
                 test_correct = 0
                 with torch.no_grad():
-                    for j, (x, y) in enumerate(BackgroundGenerator(test_dataloader)):
+                    for x, y in BackgroundGenerator(test_dataloader):
                         if use_cuda:
                             x = x.cuda()
                             y = y.cuda()
@@ -202,6 +202,18 @@ def run_train_eval(input_dir,
                         test_loss, round(test_correct), len(testdataset), test_accuracy
                     )
                 )
+                if not os.path.exists(ckpt_dir + '/ckpt'):
+                    os.makedirs(ckpt_dir + '/ckpt')
+                if best_accuracy < test_accuracy:
+                    best_accuracy = test_accuracy
+                    torch.save({'epoch': epoch,
+                                'net': model.state_dict(),
+                                'n_iter': n_iter,
+                                'optim': optim.state_dict(),
+                                'loss': loss,
+                                'best_accuracy': best_accuracy}, ckpt_dir + '/ckpt.pt')  # net
+                    # save model for inference
+                    torch.save(model, ckpt_dir + '/model.pt')
                 # return model to training mode
                 model.train()
 
@@ -216,19 +228,4 @@ def run_train_eval(input_dir,
                         writer.add_histogram(f"layer{k}.weights", layer.state_dict()['weight'], global_step=n_iter)
                         writer.add_histogram(f"layer{k}.bias", layer.state_dict()['bias'], global_step=n_iter)
                         k += 1
-
-            # save checkpoint if needed
-            if j % ckpt_interval == 0:
-                if not os.path.exists(ckpt_dir + '/ckpt'):
-                    os.makedirs(ckpt_dir + '/ckpt')
-                if best_accuracy < test_accuracy:
-                    best_accuracy = test_accuracy
-                    torch.save({'epoch': epoch,
-                                'net': model.state_dict(),
-                                'n_iter': n_iter,
-                                'optim': optim.state_dict(),
-                                'loss': loss,
-                                'best_accuracy': best_accuracy}, ckpt_dir + '/ckpt.pt')  # net
-                    # save model for inference
-                    torch.save(model, ckpt_dir + '/model.pt')
             n_iter += 1
