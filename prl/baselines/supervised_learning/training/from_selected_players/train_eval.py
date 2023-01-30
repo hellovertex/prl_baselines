@@ -63,6 +63,7 @@ def init_state(ckpt_dir, resume: bool, model, optim):
 
     start_n_iter = 0
     start_epoch = 0
+    best_accuracy = -np.inf
     if resume:
         try:
             ckpt = load_checkpoint(ckpt_dir + '/ckpt.pt')
