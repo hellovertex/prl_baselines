@@ -24,6 +24,7 @@ def _write(blind_sizes, parsed_hands, n_pickle_file, len_filenames, max_files_pe
     print(f"Parsed {min(max_files_per_pickle * (n_pickle_file + 1), len_filenames)}/{len_filenames} "
           f"files and wrote result to {outfile}...")
 
+
 class Runner:
     def __init__(self,
                  parser: Parser,

@@ -88,9 +88,9 @@ class MCAgent:
         # {won: 0, lost: 0, tied: 0}[
         win_prob = float(mc_dict['won'] / self._mc_iters)
         # todo: replace win_prob < .5
-
+        total_to_call = obs[cols.Total_to_call]
         # if we have negative EV on calling/raising, we fold with high probability
-        if win_prob < obs[cols.Total_to_call] / obs[cols.Pot_amt]:
+        if win_prob < total_to_call / (obs[cols.Pot_amt] + total_to_call):
             if random() > self.tightness:  # tightness is equal to % of hands played, e.g. 0.15
                 return ActionSpace.FOLD.value
         certainty = torch.max(softmax(self._logits, dim=1)).detach().numpy().item()
