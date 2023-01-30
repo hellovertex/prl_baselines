@@ -29,7 +29,6 @@ class PlayerStats:
         self.hands_to_showdown = 0
         self.hands_played = 0
         self.hands_total = 0
-        self.is_new_hand = NotImplementedError
 
     def big_blind_checked_preflop(self, obs, action):
         if action != ActionSpace.CHECK_CALL:
@@ -66,14 +65,10 @@ class PlayerStats:
     def _update_tightness(self, obs, action):
         """1 - Percentage of hands played. tightness = 0.9 means player plays 10% of hands
         A hand is played if it is not folded immediately preflop. """
-        if self.is_new_hand:
-            # players first action
-            if obs[fts.Small_blind] + obs[fts.Big_blind] == obs[fts.Pot_amt]:
-                if obs[fts.Round_preflop] and action == ActionSpace.FOLD:
-                    self.num_immediate_folds += 1
-                else:
-                    pass # todo
-
+        if obs[fts.Round_preflop] and self.is_first_action:
+            if action == ActionSpace.FOLD:
+                self.num_immediate_folds += 1
+        self.tightness = 1 - (self.num_immediate_folds / self.hands_total)
 
     def _update_cbet(self, obs, action):
         pass
@@ -91,13 +86,15 @@ class PlayerStats:
 
     def update_stats(self, obs: np.ndarray, action: int, is_new_hand: bool):
         self.is_new_hand = is_new_hand
-        if is_new_hand:
+        if is_new_hand:  # todo consider replacing with if self.new_hands_dealt():
+            self.is_first_action = True
             self.hands_total += 1
         self._update_vpip(obs, action)
         self._update_af(obs, action)
         self._update_pfr(obs, action)
         self._update_cbet(obs, action)
         self._update_3bet(obs, action)
+        self.is_first_action = False
 
     def reset(self):
         """If necessary, we can reset all stats to 0 here, but I dont think well need it"""
