@@ -85,6 +85,13 @@ class MCAgent:
         # {won: 0, lost: 0, tied: 0}[
         win_prob = float(mc_dict['won'] / self._mc_iters)
         # todo: replace win_prob < .5
+        # 1. legal actions
+        # 2. if win_prob < total_to_call/pot: fold with 1-tightness
+        # 3. pick argmax only if p(argmax) > 1-acceptance
+        # 4. start with acceptance 1 and decrease until
+        # 5. tighntess(mc_agent) == tightness(players) = n_hands_played/n_total_hands
+        # 6. n_hands_played should be hands that are not immediately folded preflop
+        # 7. gotta compute them from the players datasets
         # write script to determine
         # do pseudo harmonic mapping here
         if win_prob < .5 and random() < self.tightness:

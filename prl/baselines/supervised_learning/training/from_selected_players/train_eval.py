@@ -126,7 +126,6 @@ def run_train_eval(input_dir,
     total_loss = 0
     correct = 0
 
-
     for epoch in range(start_epoch, epochs):
         pbar = tqdm(enumerate(BackgroundGenerator(train_dataloader)), total=round(len(train_dataloader)))
         pbar.set_description(
