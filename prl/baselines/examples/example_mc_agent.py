@@ -21,9 +21,16 @@ class PlayerStats:
         self.pfr = 0
         self.tightness = 0
         self.threebet = 0
-        self.cbet = 0
+        self.cbet = {'flop': 0.0,
+                     'turn': 0.0,
+                     'river': 0.0}
         self.af = 0
         self.num_immediate_folds = 0
+        self.raises_preflop = 0
+        self.raises_flop = 0
+        self.raises_turn = 0
+        self.raises_river = 0
+        self.cbets_flop = 0
         self.num_checkcall_or_folds = 0
         self.num_bets_or_raises = 0
         self.hands_to_showdown = 0
@@ -71,7 +78,13 @@ class PlayerStats:
         self.tightness = 1 - (self.num_immediate_folds / self.hands_total)
 
     def _update_cbet(self, obs, action):
-        pass
+        player_raised_preflop = obs[fts.Preflop_player_0_action_0_what_2] or obs[fts.Preflop_player_0_action_1_what_2]
+        if player_raised_preflop:
+            self.raises_preflop += 1
+            if obs[fts.Round_flop] and action >= ActionSpace.RAISE_MIN_OR_3BB:
+                self.cbets_flop += 1
+                self.cbet['flop'] = self.cbets_flop / self.raises_preflop
+
 
     def _update_3bet(self, obs, action):
         pass
