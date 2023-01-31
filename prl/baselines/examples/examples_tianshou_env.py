@@ -144,6 +144,10 @@ class MCAgent:
         action = self._compute_action(obs)
         return action
 
+    def act(self, obs, legal_moves):
+        """Wrapper for compute action"""
+        return self.compute_action(obs, legal_moves)
+
 
 class TianshouEnvWrapper(AECEnv):
     """
@@ -157,7 +161,8 @@ class TianshouEnvWrapper(AECEnv):
     def __init__(self,
                  env,
                  agents: List[str],
-                 reward_type: RewardType):
+                 reward_type: RewardType,
+                 mc_ckpt_path: str):
         super().__init__()
         self.name = "env"
         self.reward_type = reward_type
@@ -168,7 +173,7 @@ class TianshouEnvWrapper(AECEnv):
         self.env_wrapped = env
         self.BIG_BLIND = self.env_wrapped.env.BIG_BLIND
         self._mc_agent = MCAgent(
-            ckpt_path="/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/ckpt/ckpt.pt")
+            ckpt_path=mc_ckpt_path)
         self._last_player_id = -1
 
         obs_space = Box(low=0.0, high=6.0, shape=(564,), dtype=np.float64)
@@ -331,11 +336,14 @@ def make_env(cfg):
 def make_vector_env(num_envs: int,
                     single_env_config: dict,
                     agent_names: List[str],
-                    reward_type: RewardType = RewardType.MBB) -> Tuple[SubprocVectorEnv, PettingZooEnv]:
+                    mc_model_ckpt_path: str,
+                    reward_type: RewardType = RewardType.MBB,
+                    ) -> Tuple[SubprocVectorEnv, PettingZooEnv]:
     assert len(agent_names) == len(single_env_config['stack_sizes'])
     env = TianshouEnvWrapper(env=make_env(single_env_config),
                              agents=agent_names,
-                             reward_type=reward_type)
+                             reward_type=reward_type,
+                             mc_ckpt_path=mc_model_ckpt_path)
     wrapped_env_fn = partial(PettingZooEnv, WrappedEnv(env))
     wrapped_env = PettingZooEnv(WrappedEnv(env))
     venv = SubprocVectorEnv([wrapped_env_fn for _ in range(num_envs)])

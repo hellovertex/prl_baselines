@@ -5,15 +5,14 @@ import time
 import numpy as np
 import torch
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
-from prl.environment.Wrappers.base import ActionSpace
 from tianshou.data import Collector, PrioritizedVectorReplayBuffer
 from tianshou.policy import MultiAgentPolicyManager, RainbowPolicy
 from tianshou.trainer import OffpolicyTrainer
 from tianshou.utils import TensorboardLogger
 from torch.utils.tensorboard import SummaryWriter
 
+from prl.baselines.agents.tianshou_policies import get_rainbow_config
 from prl.baselines.examples.examples_tianshou_env import make_vector_env
-from prl.baselines.examples.rainbow_net import Rainbow
 
 # train config
 buffer_size = 100000
@@ -51,42 +50,8 @@ env_config = {"env_wrapper_cls": AugmentObservationWrapper,
 # env = init_wrapped_env(**env_config)
 # obs0 = env.reset(config=None)
 num_envs = 31
-
-venv, wrapped_env = make_vector_env(num_envs, env_config, agents)
-
-
-def get_rainbow_config(params):
-    # network
-    classes = [ActionSpace.FOLD,
-               ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED
-               ActionSpace.RAISE_MIN_OR_3BB,
-               ActionSpace.RAISE_HALF_POT,
-               ActionSpace.RAISE_POT,
-               ActionSpace.ALL_IN]
-    hidden_dim = [512, 512]
-    output_dim = len(classes)
-    input_dim = 564  # hard coded for now -- very unlikely to be changed by me at any poiny in time
-    net = Rainbow(
-        input_dim=input_dim,
-        output_dim=output_dim,
-        hidden_sizes=hidden_dim,
-        device=params['device'],
-        num_atoms=params['num_atoms'],
-        noisy_std=params['noisy_std'],
-        is_dueling=True,
-        is_noisy=True
-    )
-    # load from config if possible
-    optim = torch.optim.Adam(net.parameters(), lr=params['lr'])
-    # if running on GPU and we want to use cuda move model there
-    return {'model': net,
-            'optim': optim,
-            'num_atoms': params['num_atoms'],
-            'v_min': params['v_min'],
-            'v_max': params['v_max'],
-            'estimation_step': params['estimation_step'],
-            'target_update_freq': params['target_update_freq']  # training steps
-            }
+mc_model_ckpt_path = os.environ["MC_MODEL_CKPT_PATH"]
+venv, wrapped_env = make_vector_env(num_envs, env_config, agents, mc_model_ckpt_path)
 
 
 params = {'device': "cuda",

@@ -2,8 +2,12 @@ from enum import IntEnum
 from typing import Union, Optional, Any, Dict
 
 import numpy as np
+import torch
+from prl.environment.Wrappers.base import ActionSpace
 from tianshou.data import Batch
 from tianshou.policy import BasePolicy
+
+from prl.baselines.examples.rainbow_net import Rainbow
 
 
 class MultiAgentActionFlags(IntEnum):
@@ -33,3 +37,47 @@ class MCPolicy(BasePolicy):
     def learn(self, batch: Batch, **kwargs: Any) -> Dict[str, Any]:
         return {}
 
+
+default_rainbow_params = {'device': "cuda",
+                          'lr': 1e-6,
+                          'num_atoms': 51,
+                          'noisy_std': 0.1,
+                          'v_min': -6,
+                          'v_max': 6,
+                          'estimation_step': 3,
+                          'target_update_freq': 500  # training steps
+                          }
+
+
+def get_rainbow_config(params):
+    # network
+    classes = [ActionSpace.FOLD,
+               ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED
+               ActionSpace.RAISE_MIN_OR_3BB,
+               ActionSpace.RAISE_HALF_POT,
+               ActionSpace.RAISE_POT,
+               ActionSpace.ALL_IN]
+    hidden_dim = [512, 512]
+    output_dim = len(classes)
+    input_dim = 564  # hard coded for now -- very unlikely to be changed by me at any poiny in time
+    net = Rainbow(
+        input_dim=input_dim,
+        output_dim=output_dim,
+        hidden_sizes=hidden_dim,
+        device=params['device'],
+        num_atoms=params['num_atoms'],
+        noisy_std=params['noisy_std'],
+        is_dueling=True,
+        is_noisy=True
+    )
+    # load from config if possible
+    optim = torch.optim.Adam(net.parameters(), lr=params['lr'])
+    # if running on GPU and we want to use cuda move model there
+    return {'model': net,
+            'optim': optim,
+            'num_atoms': params['num_atoms'],
+            'v_min': params['v_min'],
+            'v_max': params['v_max'],
+            'estimation_step': params['estimation_step'],
+            'target_update_freq': params['target_update_freq']  # training steps
+            }
