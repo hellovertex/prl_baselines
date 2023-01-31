@@ -6,6 +6,7 @@ from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns 
 from prl.environment.Wrappers.base import ActionSpace
 from prl.environment.steinberger.PokerRL import NoLimitHoldem, Poker
 
+from prl.baselines.evaluation.analyzer import PlayerAnalyzer
 from prl.baselines.examples.examples_tianshou_env import MCAgent
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import make_board_cards, card_tokens, card
 
@@ -66,15 +67,21 @@ initial_board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
 state_dict = {'deck': {'deck_remaining': deck},  # np.ndarray(shape=(52-n_cards*num_players, 2))
               'board': initial_board,  # np.ndarray(shape=(n_cards, 2))
               'hand': hands}
+unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_test"
+
+ckpt_path = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
+baseline = MCAgent(ckpt_path)
+
 obs, rew, done, info = wrapped_env.reset({'deck_state_dict': state_dict})
 assert len(agents) == num_players == len(stack_sizes)
-legal_moves = wrapped_env.get_legal_moves_extended()
 i = 0
 while True:
+    legal_moves = wrapped_env.get_legal_moves_extended()
     action = agents[i].compute_action(obs, legal_moves)
     # action = parse_action(wrapped_env, action)
-
+    pred = baseline.compute_action(obs, legal_moves)
     obs, rew, done, info = wrapped_env.step(action)
+
     if not done:
         i = (i + 1) % num_players
     # make sure the card feature columns mathc the cards of the resp players
