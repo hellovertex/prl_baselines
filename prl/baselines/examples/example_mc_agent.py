@@ -31,6 +31,8 @@ class PlayerStats:
         self.raises_turn = 0
         self.raises_river = 0
         self.cbets_flop = 0
+        self.cbets_turn = 0
+        self.cbets_river = 0
         self.num_checkcall_or_folds = 0
         self.num_bets_or_raises = 0
         self.hands_to_showdown = 0
@@ -77,17 +79,73 @@ class PlayerStats:
                 self.num_immediate_folds += 1
         self.tightness = 1 - (self.num_immediate_folds / self.hands_total)
 
-    def _update_cbet(self, obs, action):
-        player_raised_preflop = obs[fts.Preflop_player_0_action_0_what_2] or obs[fts.Preflop_player_0_action_1_what_2]
-        if player_raised_preflop:
-            self.raises_preflop += 1
-            if obs[fts.Round_flop] and action >= ActionSpace.RAISE_MIN_OR_3BB:
-                self.cbets_flop += 1
-                self.cbet['flop'] = self.cbets_flop / self.raises_preflop
+    @staticmethod
+    def _player_has_not_acted_in_flop(obs):
+        return not (obs[fts.Flop_player_0_action_0_what_0] or
+                    obs[fts.Flop_player_0_action_0_what_1] or
+                    obs[fts.Flop_player_0_action_0_what_2])
 
+    def _update_cbet_flop(self, obs, action):
+        player_raised_preflop = obs[fts.Preflop_player_0_action_0_what_2] or obs[fts.Preflop_player_0_action_1_what_2]
+        if obs[fts.Round_flop]:
+            # only update cbet stats on first move in flop
+            if self._player_has_not_acted_in_flop(obs):
+                if player_raised_preflop:
+                    self.raises_preflop += 1
+                    if action >= ActionSpace.RAISE_MIN_OR_3BB:
+                        self.cbets_flop += 1
+                    self.cbet['flop'] = self.cbets_flop / self.raises_preflop
+
+    @staticmethod
+    def _player_has_not_acted_in_turn(obs):
+        return not (obs[fts.Turn_player_0_action_0_what_0] or
+                    obs[fts.Turn_player_0_action_0_what_1] or
+                    obs[fts.Turn_player_0_action_0_what_2])
+
+    def _update_cbet_turn(self, obs, action):
+        player_raised_flop = obs[fts.Flop_player_0_action_0_what_2] or obs[fts.Flop_player_0_action_1_what_2]
+        if obs[fts.Round_turn]:
+            # only update cbet stats on first move in flop
+            if self._player_has_not_acted_in_turn(obs):
+                if player_raised_flop:
+                    self.raises_flop += 1
+                    if action >= ActionSpace.RAISE_MIN_OR_3BB:
+                        self.cbets_turn += 1
+                    self.cbet['turn'] = self.cbets_turn / self.raises_flop
+
+    @staticmethod
+    def _player_has_not_acted_in_river(obs):
+        return not (obs[fts.River_player_0_action_0_what_0] or
+                    obs[fts.River_player_0_action_0_what_1] or
+                    obs[fts.River_player_0_action_0_what_2])
+
+    def _update_cbet_river(self, obs, action):
+        player_raised_turn = obs[fts.Turn_player_0_action_0_what_2] or obs[fts.Turn_player_0_action_1_what_2]
+        if obs[fts.Round_river]:
+            if self._player_has_not_acted_in_river(obs):
+                if player_raised_turn:
+                    self.raises_turn += 1
+                    if action >= ActionSpace.RAISE_MIN_OR_3BB:
+                        self.cbets_river += 1
+                    self.cbet['river'] = self.cbets_turn / self.raises_flop
+
+    def _update_cbet(self, obs, action):
+        """Continuation Bet (Cbet): If player raised in previous round, percentage of times
+        the player opens with a bet in the next round."""
+        self._update_cbet_flop(obs, action)
+        self._update_cbet_turn(obs, action)
+        self._update_cbet_river(obs, action)
 
     def _update_3bet(self, obs, action):
-        pass
+        """3bet: First re-raise Pre-flop"""
+        # A 3bet is present when the following conditions are met
+        # i) Exactly one opponent raised as their _first_ action and
+        # ii) None of the opponents raised as their _second_ action
+        # iii) This is our first preflop action
+
+        if action >= ActionSpace.RAISE_MIN_OR_3BB:
+            pass
+
 
     def new_hands_dealt(self, obs, action):
         """Consider using this instead of is_new_hand parameter."""
