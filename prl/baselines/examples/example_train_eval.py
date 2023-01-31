@@ -15,6 +15,7 @@ from prl.baselines.agents.tianshou_policies import get_rainbow_config
 from prl.baselines.examples.examples_tianshou_env import make_vector_env
 
 # train config
+device = "cuda"
 buffer_size = 100000
 obs_stack = 1
 alpha = 0.5
@@ -34,6 +35,7 @@ eps_train_final = 0.05
 eps_test = 0.0
 no_priority = False
 logdir = [".", "v3", "rainbow_vs_rainbow_heads_up"]
+load_ckpt = False
 win_rate_early_stopping = np.inf
 
 # environment config
@@ -53,8 +55,7 @@ num_envs = 31
 mc_model_ckpt_path = os.environ["MC_MODEL_CKPT_PATH"]
 venv, wrapped_env = make_vector_env(num_envs, env_config, agents, mc_model_ckpt_path)
 
-
-params = {'device': "cuda",
+params = {'device': device,
           'lr': 1e-6,
           'num_atoms': 51,
           'noisy_std': 0.1,
@@ -64,6 +65,11 @@ params = {'device': "cuda",
           'target_update_freq': 500  # training steps
           }
 rainbow_config = get_rainbow_config(params)
+rainbow_policy = RainbowPolicy(**rainbow_config)
+if load_ckpt:
+    rainbow_policy.load_state_dict(torch.load(os.path.join(
+        *logdir, 'policy.pth'
+    ), map_location=device))
 # 'load_from_ckpt_dir': None
 policy = MultiAgentPolicyManager([
     RainbowPolicy(**rainbow_config),
@@ -170,6 +176,28 @@ log_path = os.path.join(*logdir)
 writer = SummaryWriter(log_path)
 # writer.add_text("args", str(args))
 logger = TensorboardLogger(writer)
+
+ckpt_dir = './ckpt_train_eval'
+
+
+def save_checkpoint_fn(epoch: int,
+                       env_step: int,
+                       gradient_step: int):
+    pass
+    # if not os.path.exists(ckpt_dir + '/ckpt'):
+    #     os.makedirs(ckpt_dir + '/ckpt')
+    # if best_accuracy < test_accuracy:
+    #     best_accuracy = test_accuracy
+    #     torch.save({'epoch': epoch,
+    #                 'net': model.state_dict(),
+    #                 'n_iter': n_iter,
+    #                 'optim': optim.state_dict(),
+    #                 'loss': loss,
+    #                 'best_accuracy': best_accuracy}, ckpt_dir + '/ckpt.pt')  # net
+    #     # save model for inference
+    #     torch.save(model, ckpt_dir + '/model.pt')
+
+
 # test train_collector and start filling replay buffer
 train_collector.collect(n_step=batch_size * num_envs)
 trainer = OffpolicyTrainer(policy=policy,
@@ -185,7 +213,7 @@ trainer = OffpolicyTrainer(policy=policy,
                            test_fn=test_fn,
                            stop_fn=None,  # early stopping
                            save_best_fn=save_best_fn,
-                           save_checkpoint_fn=None,
+                           save_checkpoint_fn=save_checkpoint_fn,
                            resume_from_log=False,
                            reward_metric=reward_metric,
                            logger=logger,
