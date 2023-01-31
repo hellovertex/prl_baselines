@@ -45,7 +45,7 @@ if __name__ == '__main__':
     # env = init_wrapped_env(**env_config)
     # obs0 = env.reset(config=None)
     num_envs = 31
-    ckpt = "/home/hellovertex/Documents/github.com/hellovertex/prl_baselines/data/ckpt/ckpt.pt"
+    ckpt = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
     env = init_wrapped_env(**env_config)
 
     agents = [
