@@ -55,7 +55,7 @@ num_envs = 31
 venv, wrapped_env = make_vector_env(num_envs, env_config, agents)
 
 
-def get_rainbow_config():
+def get_rainbow_config(params):
     # network
     classes = [ActionSpace.FOLD,
                ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED
@@ -63,63 +63,48 @@ def get_rainbow_config():
                ActionSpace.RAISE_HALF_POT,
                ActionSpace.RAISE_POT,
                ActionSpace.ALL_IN]
-    input_dim = 564
     hidden_dim = [512, 512]
     output_dim = len(classes)
     input_dim = 564  # hard coded for now -- very unlikely to be changed by me at any poiny in time
-    device = "cuda"
-    gamma = 0.99
-    # device = "cpu"
-    """
-    Note: tianshou.policy.modelfree.c51.C51Policy.__init__ must move support to cuda if training on cuda
-    self.support = torch.nn.Parameter(
-            torch.linspace(self._v_min, self._v_max, self._num_atoms),
-            requires_grad=False,
-        ).cuda()
-    """
-    num_atoms = 51
-    noisy_std = 0.1
-    # Q_dict = V_dict = {'input_dim': input_dim,
-    #                    "output_dim": output_dim,
-    #                    "hidden_sizes": hidden_dim,
-    #                    "device": device,
-    #                    }
-    # net = Net(state_shape=input_dim,
-    #           action_shape=output_dim,
-    #           hidden_sizes=hidden_dim,
-    #           device=device,
-    #           num_atoms=num_atoms,
-    #           dueling_param=(Q_dict, V_dict)
-    #           ).to(device)
     net = Rainbow(
         input_dim=input_dim,
         output_dim=output_dim,
         hidden_sizes=hidden_dim,
-        device=device,
-        num_atoms=num_atoms,
-        noisy_std=noisy_std,
+        device=params['device'],
+        num_atoms=params['num_atoms'],
+        noisy_std=params['noisy_std'],
         is_dueling=True,
         is_noisy=True
     )
-    optim = torch.optim.Adam(net.parameters(), lr=1e-6)
+    # load from config if possible
+    optim = torch.optim.Adam(net.parameters(), lr=params['lr'])
     # if running on GPU and we want to use cuda move model there
     return {'model': net,
             'optim': optim,
-            'num_atoms': num_atoms,
-            'v_min': -6,
-            'v_max': 6,
-            'estimation_step': 3,
-            'target_update_freq': 500  # training steps
+            'num_atoms': params['num_atoms'],
+            'v_min': params['v_min'],
+            'v_max': params['v_max'],
+            'estimation_step': params['estimation_step'],
+            'target_update_freq': params['target_update_freq']  # training steps
             }
 
 
-rainbow_config = get_rainbow_config()
+params = {'device': "cuda",
+          'lr': 1e-6,
+          'num_atoms': 51,
+          'noisy_std': 0.1,
+          'v_min': -6,
+          'v_max': 6,
+          'estimation_step': 3,
+          'target_update_freq': 500  # training steps
+          }
+rainbow_config = get_rainbow_config(params)
+# 'load_from_ckpt_dir': None
 policy = MultiAgentPolicyManager([
     RainbowPolicy(**rainbow_config),
     RainbowPolicy(**rainbow_config),
     #    MCPolicy()
 ], wrapped_env)  # policy is made from PettingZooEnv
-
 
 buffer = PrioritizedVectorReplayBuffer(
     total_size=buffer_size,

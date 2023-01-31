@@ -2,9 +2,11 @@ import enum
 from dataclasses import dataclass
 from typing import TypeVar, List, Optional, Union, Dict, Callable, Tuple, Any, Type
 
+import tianshou.policy
 from prl.environment.Wrappers.base import EnvWrapperBase
 from prl.environment.steinberger.PokerRL import NoLimitHoldem
 from ray.rllib import Policy
+from tianshou.env import SubprocVectorEnv
 
 from prl.baselines.agents.core.base_agent import Agent, RllibAgent
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Action
@@ -22,7 +24,6 @@ DEFAULT_CURRENCY = "$"
 class PokerExperimentEvaluation:
     pass
 
-
 @dataclass
 class PokerExperimentParticipant:
     """Might change in the future"""
@@ -30,7 +31,7 @@ class PokerExperimentParticipant:
     name: str
     alias: Optional[str]
     starting_stack: Union[int, float]
-    agent: RllibAgent
+    agent: tianshou.policy.BasePolicy
     config: Optional[Dict]
 
 
@@ -45,7 +46,7 @@ class PokerExperiment:
     """Might change in the future"""
     num_players: int  # 2 <= num_players <= 6
     env_cls = NoLimitHoldem
-    env: ENV_WRAPPER
+    env: SubprocVectorEnv
     env_reset_config: Optional[Dict[str, Any]]
     starting_stack_sizes: Optional[List[int]]
     # candidates to add
