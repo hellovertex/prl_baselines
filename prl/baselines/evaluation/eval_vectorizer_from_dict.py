@@ -1,11 +1,13 @@
 from typing import Tuple
 
+import numpy as np
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as fts
 from prl.environment.Wrappers.base import ActionSpace
-from prl.environment.steinberger.PokerRL import NoLimitHoldem
+from prl.environment.steinberger.PokerRL import NoLimitHoldem, Poker
 
 from prl.baselines.examples.examples_tianshou_env import MCAgent
+from prl.baselines.supervised_learning.data_acquisition.environment_utils import make_board_cards, card_tokens, card
 
 
 def parse_action(env, int_action) -> Tuple:
@@ -45,7 +47,26 @@ agents = [
     MCAgent(ckpt),
     MCAgent(ckpt),
 ]
-obs, rew, done, info = wrapped_env.reset()
+# # '[6h Ts]' to ['6h', 'Ts']
+# showdown_cards = card_tokens(final_player.cards)
+# # ['6h', 'Ts'] to [[5,3], [5,0]]
+# hand = [card(token) for token in showdown_cards]
+board = '[6h Ts Td 9c Jc]'
+board_cards = make_board_cards(board)
+
+deck = np.empty(shape=(13 * 4, 2), dtype=np.int8)
+deck[:len(board_cards)] = board_cards
+player_hands = ['[6s 6d]', '[9s 9d]', '[Jd Js]']
+player_hands = [card_tokens(cards) for cards in player_hands]
+hands = []
+for cards in player_hands:
+    hand = [card(token) for token in cards]
+    hands.append(hand)
+initial_board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
+state_dict = {'deck': {'deck_remaining': deck},  # np.ndarray(shape=(52-n_cards*num_players, 2))
+              'board': initial_board,  # np.ndarray(shape=(n_cards, 2))
+              'hand': hands}
+obs, rew, done, info = wrapped_env.reset({'deck_state_dict': state_dict})
 assert len(agents) == num_players == len(stack_sizes)
 legal_moves = wrapped_env.get_legal_moves_extended()
 i = 0
@@ -93,4 +114,3 @@ while True:
         break
 
     a = 0
-
