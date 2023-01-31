@@ -137,7 +137,7 @@ class MCAgent:
         # 6. n_hands_played should be hands that are not immediately folded preflop
         # 7. gotta compute them from the players datasets
 
-    def compute_action(self, obs: np.ndarray, legal_moves):
+    def compute_action(self, obs: np.ndarray, legal_moves) -> int:
         self.next_legal_moves = legal_moves
         self._logits = self._model(torch.Tensor(np.array([obs])))
         self._predictions = torch.argmax(self._logits, dim=1)

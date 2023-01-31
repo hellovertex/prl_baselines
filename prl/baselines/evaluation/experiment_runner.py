@@ -166,6 +166,11 @@ class PokerExperimentRunner(ExperimentRunner):
         showdown_hands = None
         info = {'player_hands': []}  # monkey patched
         observation = initial_observation
+        # upd
+        legal_moves = np.array([0, 0, 0, 0, 0, 0])
+        legal_moves[env.env.get_legal_actions()] += 1
+        if legal_moves[2] == 1:
+            legal_moves[[3, 4, 5]] = 1
         # determine who goes first
         agent_idx = btn_idx if self.num_players < 4 else (btn_idx + 3) % self.num_players
         # --- SOURCE OF ACTIONS ---
@@ -183,9 +188,10 @@ class PokerExperimentRunner(ExperimentRunner):
                 # if isinstance(action, tuple):
                 #     action =
             else:
-                action_vec = self.participants[agent_idx].agent.act(observation)
-                action = int(action_vec[0][0].numpy())
-                action = env.int_action_to_tuple_action(action)
+                action = self.participants[agent_idx].agent.act(observation, legal_moves)
+                # action_vec = self.participants[agent_idx].agent.act(observation, legal_moves)
+                # action = int(action_vec[0][0].numpy())
+                # action = env.int_action_to_tuple_action(action)
             self._times_taken_to_compute_action.append(time.time() - t0)
             # -------- STEP ENVIRONMENT -----------
             remaining_players = self._get_remaining_players(env, btn_idx)

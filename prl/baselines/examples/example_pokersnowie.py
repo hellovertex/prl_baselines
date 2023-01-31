@@ -1,16 +1,13 @@
-from typing import List, Dict, Type, Tuple, Any
+from typing import Dict, Type, Tuple, Any
 
-import gin
-import gym
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
 
 from prl.baselines.agents.core.base_agent import RllibAgent
-from prl.baselines.agents.tianshou_policies import default_rainbow_params, get_rainbow_config, MCPolicy
-from prl.baselines.evaluation.core.experiment import PokerExperiment, PokerExperimentParticipant, \
-    PokerExperiment_EarlyStopping
+from prl.baselines.agents.tianshou_policies import default_rainbow_params, get_rainbow_config
+from prl.baselines.evaluation.core.experiment import PokerExperiment, PokerExperimentParticipant
 from prl.baselines.evaluation.pokersnowie.export import PokerExperimentToPokerSnowie
-from prl.baselines.examples.examples_tianshou_env import make_vector_env, MCAgent
+from prl.baselines.examples.examples_tianshou_env import MCAgent
 
 AGENT_CLS = Type[RllibAgent]
 POLICY_CONFIG = Dict[str, Any]
