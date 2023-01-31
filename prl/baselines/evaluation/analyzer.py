@@ -163,7 +163,9 @@ class PlayerAnalyzer:
         Assumes Btn is at index 0."""
         # make args for env
         args = NoLimitHoldem.ARGS_CLS(n_seats=len(stack_sizes),
-                                      starting_stack_sizes_list=stack_sizes)
+                                      starting_stack_sizes_list=stack_sizes,
+                                      use_simplified_headsup_obs=False,
+                                      )
         # return wrapped env instance
         env = NoLimitHoldem(is_evaluating=True,
                             env_args=args,
@@ -219,6 +221,7 @@ class PlayerAnalyzer:
                 # can use showdown players actions and observations or use only top_players actions and observations
                 filtered_players = showdown_players if not selected_players else [p for p in showdown_players if
                                                                                   p in selected_players]
+                # filtered_players = [pname]
                 # only store obs and action of acting player
                 if player.position_index == next_to_act and player.player_name in filtered_players:
                     observations.append(obs)
@@ -238,15 +241,22 @@ class PlayerAnalyzer:
                         action_label = self._wrapped_env.discretize(action_formatted)
 
                     actions.append(action_label)
+                    # analysis
+                    if player.player_name == pname:
+                        legal_moves = np.array([0, 0, 0, 0, 0, 0])
+                        legal_moves[self._wrapped_env.get_legal_actions()] += 1
+                        if legal_moves[2] == 1:
+                            legal_moves[[3, 4, 5]] = 1
+                        action_prediction = self.baseline.compute_action(obs, legal_moves)
+                        self.baseline_stats.update_stats(obs, action_prediction, is_new_hand=is_new_hand)
+                        for s in self.player_stats:
+                            if s.pname == pname:
+                                s.update_stats(obs, action_label, is_new_hand=is_new_hand)
+                                break
+                        is_new_hand = False
             debug_action_list.append(action_formatted)
 
-            action_prediction = self.baseline(obs)
-            self.baseline_stats.update_stats(obs, action_prediction, is_new_hand=is_new_hand)
-            for s in self.player_stats:
-                if s.pname == pname:
-                    s.update_stats(obs, action_label, is_new_hand=is_new_hand)
-                    break
-            is_new_hand = False
+            # step env
             obs, _, done, _ = env.step(action_formatted)
             it += 1
 

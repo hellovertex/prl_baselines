@@ -5,11 +5,15 @@ Agression Factor (AF): #raises / #calls
 Tightness: % hands played (not folded immediately preflop)
 """
 import glob
+import time
+
+import prl.environment.Wrappers.augment
 
 from prl.baselines.agents.tianshou_agents import MCAgent
 from prl.baselines.evaluation.analyzer import PlayerAnalyzer
 from prl.baselines.evaluation.stats import PlayerStats
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
+from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from pathlib import Path
 # [ ] 1. go into encoder and start building stats table while encoding from_dir = player_data with network loaded
 # [x] 2. fix win_prob < ? condition - fix pot odds && fix whatif total_to_call=0
@@ -27,22 +31,26 @@ from pathlib import Path
 acceptance_levels = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1]
 # ppl and ppool filenames -- single file and globbed files
 # implement parser, encoder, analyzer pipeline
-unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
+unzipped_dir = "/home/hellovertex/Documents/github.com/hellovertex/prl_baselines/data/player_data"
 filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
 parser = HSmithyParser()
-ckpt_path = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/ckpt/ckpt.pt"
+ckpt_path = "/home/hellovertex/Documents/github.com/hellovertex/prl_baselines/data/ckpt/ckpt.pt"
 baseline = MCAgent(ckpt_path)
 player_stats = []
 for ifile, filename in enumerate(filenames):
     pname = Path(filename).stem
     player_stats.append(PlayerStats(pname=pname))
 
-analyzer = PlayerAnalyzer(baseline=baseline, player_stats=player_stats)
+analyzer = PlayerAnalyzer(baseline=baseline, player_stats=player_stats, env_wrapper_cls=AugmentObservationWrapper)
 
 for ifile, filename in enumerate(filenames):
     pname = Path(filename).stem
+    t0 = time.time()
     parsed_hands = parser.parse_file(filename)
+    print(f'Parsing file no. {ifile} took {time.time() - t0} seconds.')
+    num_parsed_hands = sum(1 for x in parsed_hands)
     for ihand, hand in enumerate(parsed_hands):
+        print(f'Analysing hand {ihand} / {num_parsed_hands}')
         analyzer.analyze_episode(hand, pname=pname)
 
 stats_baseline = analyzer.baseline_stats.to_dict()
