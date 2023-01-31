@@ -46,9 +46,10 @@ analyzer = PlayerAnalyzer(baseline=baseline, player_stats=player_stats, env_wrap
 for ifile, filename in enumerate(filenames):
     pname = Path(filename).stem
     t0 = time.time()
-    parsed_hands = parser.parse_file(filename)
+    parsed_hands = list(parser.parse_file(filename))
     print(f'Parsing file no. {ifile} took {time.time() - t0} seconds.')
-    num_parsed_hands = sum(1 for x in parsed_hands)
+    num_parsed_hands = len(parsed_hands)
+    print(f'num_parsed_hands = {num_parsed_hands}')
     for ihand, hand in enumerate(parsed_hands):
         print(f'Analysing hand {ihand} / {num_parsed_hands}')
         analyzer.analyze_episode(hand, pname=pname)
