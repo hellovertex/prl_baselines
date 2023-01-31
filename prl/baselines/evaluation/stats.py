@@ -75,7 +75,13 @@ class PlayerStats:
             self.num_checkcall_or_folds += 1
         else:
             self.num_bets_or_raises += 1
-        self.af = self.num_bets_or_raises / self.num_checkcall_or_folds
+        try:
+            self.af = self.num_bets_or_raises / self.num_checkcall_or_folds
+        except ZeroDivisionError:
+            if self.num_bets_or_raises > 0:
+                self.af = self.num_bets_or_raises
+            else:
+                self.af = 0
 
     def _update_pfr(self, obs, action):
         """Preflop Bets/Raises. The pfr is updated once per hand."""
@@ -157,7 +163,8 @@ class PlayerStats:
                     self.raises_turn += 1
                     if action >= ActionSpace.RAISE_MIN_OR_3BB:
                         self.cbets_river += 1
-                    self.cbet['river'] = self.cbets_turn / self.raises_flop
+
+                    self.cbet['river'] = self.cbets_river / self.raises_turn
             self.cbet_river_updated_this_hand = True
 
     def _update_cbet(self, obs, action):
