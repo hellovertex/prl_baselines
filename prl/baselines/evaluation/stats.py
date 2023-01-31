@@ -99,7 +99,7 @@ class PlayerStats:
             self.pfr_updated_this_preflop = True
 
     def _update_tightness(self, obs, action):
-        """1 - Percentage of hands played. tightness = 0.9 means player plays 10% of hands
+        """Percentage of hands played. tightness = 0.9 means player plays 90% of hands
         A hand is played if it is not folded immediately preflop.
         The tightness is updated once per hand. """
         if self.tightness_updated_this_hand:
@@ -258,4 +258,7 @@ class PlayerStats:
                 # 'hands_to_showdown': self.hands_to_showdown,  # compute wtsd
                 'hands_played': self.hands_played,
                 'hands_total': self.hands_total,
+                'registered_folds': self.registered_folds,
+                'registered_calls': self.registered_calls,
+                'registered_raises': self.registered_raises,
                 }

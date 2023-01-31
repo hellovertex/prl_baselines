@@ -35,8 +35,8 @@ class MCAgent:
     def __init__(self, ckpt_path):
         """ckpt path may be something like ./ckpt/ckpt.pt"""
         self._mc_iters = 5000
-        self.tightness = .2  # percentage of hands played, "played" meaning not folded immediately
-        self.acceptance_threshold = 0.3  # minimum certainty of probability of network to perform action
+        self.tightness = .1  # percentage of hands played, "played" meaning not folded immediately
+        self.acceptance_threshold = 0.0  # minimum certainty of probability of network to perform action
         self._card_evaluator = HandEvaluator_MonteCarlo()
         self.load_model(ckpt_path)
 
@@ -96,7 +96,8 @@ class MCAgent:
             obs[cols.Curr_bet_p4],
             obs[cols.Curr_bet_p5],
                        ]) + obs[cols.Pot_amt]
-        if win_prob < total_to_call / (potsize + total_to_call):
+        pot_odds = total_to_call / (potsize + total_to_call)
+        if win_prob < pot_odds:
             if random() > self.tightness:  # tightness is equal to % of hands played, e.g. 0.15
                 return ActionSpace.FOLD.value
         certainty = torch.max(softmax(self._logits, dim=1)).detach().numpy().item()
@@ -106,7 +107,7 @@ class MCAgent:
             prediction = self._predictions[0]
             # if we are allowed, we raise otherwise we check
             # todo: should we add pseudo harmonic mapping here with train/eval modes?
-            if min(int(prediction), 2) in self.next_legal_moves:
+            if self.next_legal_moves[min(int(prediction), 2)]:
                 return int(prediction)
             elif ActionSpace.CHECK_CALL in self.next_legal_moves:
                 return ActionSpace.CHECK_CALL.value
