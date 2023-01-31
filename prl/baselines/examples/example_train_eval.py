@@ -86,9 +86,9 @@ test_collector = Collector(policy, venv, exploration_noise=True)
 
 
 def train_fn(epoch, env_step, beta=beta):
-    # nature DQN setting, linear decay in the first 1M steps
-    if env_step <= 1e6:
-        eps = eps_train - env_step / 1e6 * \
+    # linear decay in the first 100M steps
+    if env_step <= 1e8:
+        eps = eps_train - env_step / 1e8 * \
               (eps_train - eps_train_final)
     else:
         eps = eps_train_final
