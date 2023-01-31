@@ -14,7 +14,7 @@ from prl.environment.Wrappers.base import ActionSpace
 # none of the stats can be computed from single observatoins they all require avg
 # however updating them can
 class PlayerStats:
-
+    # updates only if we have not already for this hand
     def __init__(self, pname, *args, **kwargs):
         self.pname = pname
         self.vpip = 0
@@ -69,6 +69,8 @@ class PlayerStats:
         """Preflop Bets/Raises"""
         if obs[fts.Round_preflop]:
             if action >= ActionSpace.RAISE_MIN_OR_3BB:
+                # todo: only update pfr if we have not already for this hand
+                has_raised_preflop = obs[fts.Preflop_player_0_action_0_what_2] or obs[fts.Preflop_player_0_action_1_what_2]
                 self.pfr = (self.pfr + 1) / self.hands_total
 
     def _update_tightness(self, obs, action):
@@ -141,11 +143,10 @@ class PlayerStats:
         # A 3bet is present when the following conditions are met
         # i) Exactly one opponent raised as their _first_ action and
         # ii) None of the opponents raised as their _second_ action
-        # iii) This is our first preflop action
+        # iii) This is our first preflop action, and it is a raise
 
         if action >= ActionSpace.RAISE_MIN_OR_3BB:
             pass
-
 
     def new_hands_dealt(self, obs, action):
         """Consider using this instead of is_new_hand parameter."""
@@ -175,7 +176,7 @@ class PlayerStats:
         return {'vpip': self.vpip,
                 'pfr': self.pfr,
                 'tightness': self.tightness,
-                'threebet': self.threebet,
+                '3bet': self.threebet,
                 'cbet': self.cbet,
                 'af': self.af,
                 'hands_to_showdown': self.hands_to_showdown,  # compute wtsd
