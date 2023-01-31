@@ -32,14 +32,15 @@ SUITE = 1
 
 class MCAgent:
 
-    def __init__(self):
+    def __init__(self, ckpt_path):
+        """ckpt path may be something like ./ckpt/ckpt.pt"""
         self._mc_iters = 5000
         self.tightness = .2  # percentage of hands played, "played" meaning not folded immediately
         self.acceptance_threshold = 0  # minimum certainty of probability of network to perform action
         self._card_evaluator = HandEvaluator_MonteCarlo()
-        self.load_model()
+        self.load_model(ckpt_path)
 
-    def load_model(self):
+    def load_model(self, ckpt_path):
         input_dim = 564
         classes = [ActionSpace.FOLD,
                    ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED in CHECK_CALL
@@ -55,9 +56,7 @@ class MCAgent:
         # if use_cuda:
         #     net = net.cuda()
         self._model = net
-        os.environ[
-            'PRL_BASELINE_MODEL_PATH'] = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/ckpt/ckpt.pt"
-        ckpt = torch.load(os.environ['PRL_BASELINE_MODEL_PATH'],
+        ckpt = torch.load(ckpt_path,
                           map_location=torch.device('cpu'))
         self._model.load_state_dict(ckpt['net'])
         self._model.eval()
