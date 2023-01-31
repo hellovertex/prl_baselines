@@ -46,6 +46,7 @@ class PlayerStats:
         self.cbet_flop_updated_this_hand = False
         self.cbet_turn_updated_this_hand = False
         self.cbet_river_updated_this_hand = False
+        self.three_bet_updated_this_hand = False
         self.n_vpip = 0
         self.n_pfr = 0
 
@@ -201,6 +202,7 @@ class PlayerStats:
                 if action >= ActionSpace.RAISE_MIN_OR_3BB:
                     self.times_three_betted += 1
                 self.threebet = self.times_three_betted / self.total_can_three_bet
+                self.three_bet_updated_this_hand = True
 
     def new_hands_dealt(self, obs, action):
         """Consider using this instead of is_new_hand parameter."""
@@ -221,6 +223,7 @@ class PlayerStats:
             self.cbet_flop_updated_this_hand = False
             self.cbet_turn_updated_this_hand = False
             self.cbet_river_updated_this_hand = False
+            self.three_bet_updated_this_hand = False
         self._update_vpip(obs, action)
         self._update_af(obs, action)
         self._update_pfr(obs, action)
