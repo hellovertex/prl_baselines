@@ -213,10 +213,9 @@ class PlayerAnalyzer:
         else:
             # make sure other palyer cards are seen. enough for next player as this will
             # trigger at some point. this function is called millions of times
-            if hands[(i+1)%num_players][0][0] != Poker.CARD_NOT_DEALT_TOKEN_1D:
+            if hands[(i + 1) % num_players][0][0] != Poker.CARD_NOT_DEALT_TOKEN_1D:
                 assert sum(p1_first_card) == 2
                 assert sum(p1_second_card) == 2
-
 
     def _simulate_environment(self, pname, env, episode, cards_state_dict, table, starting_stack_sizes_list,
                               selected_players=None):
@@ -280,9 +279,27 @@ class PlayerAnalyzer:
                     #         # actions.append((ActionType.FOLD.value, -1))  # replace action with FOLD for now
                     # # use top players actions as labels, take actions as labels directly 0 for fold 1 for checkcall etc
                     # else:
+                    # todo: need switch that prevents baseline.compute_action
+                    #  to be called when cards are unknown (e.g. when running from
+                    #  handhistory smithy files and player folded early
+                    #  on the other hand if we analyze games were all cards are known
+                    #  i.e. self play, then we can query baseline.compute_action anytime
                     action_label = self._wrapped_env.discretize(action_formatted)
                     actions.append(action_label)
-                    break
+                    if player.player_name == pname:
+                        legal_moves = np.array([0, 0, 0, 0, 0, 0])
+                        legal_moves[self._wrapped_env.get_legal_actions()] += 1
+                        if legal_moves[2] == 1:
+                            legal_moves[[3, 4, 5]] = 1
+                        action_prediction = self.baseline.compute_action(obs, legal_moves)
+                        self.baseline_stats.update_stats(obs, action_prediction, is_new_hand=is_new_hand)
+                        for s in self.player_stats:
+                            if s.pname == pname:
+                                s.update_stats(obs,
+                                               self._wrapped_env.discretize(action_formatted),
+                                               is_new_hand=is_new_hand)
+                                break
+                        is_new_hand = False
                     # if action_label == 0 and player.player_name == pname:
                     #     print('debug')
                     # analysis
@@ -300,22 +317,9 @@ class PlayerAnalyzer:
                     #     is_new_hand = False
             debug_action_list.append(action_formatted)
 
-            # if player.player_name == pname:
-            #     legal_moves = np.array([0, 0, 0, 0, 0, 0])
-            #     legal_moves[self._wrapped_env.get_legal_actions()] += 1
-            #     if legal_moves[2] == 1:
-            #         legal_moves[[3, 4, 5]] = 1
-            #     action_prediction = self.baseline.compute_action(obs, legal_moves)
-            #     self.baseline_stats.update_stats(obs, action_prediction, is_new_hand=is_new_hand)
-            #     for s in self.player_stats:
-            #         if s.pname == pname:
-            #             s.update_stats(obs,
-            #                            self._wrapped_env.discretize(action_formatted),
-            #                            is_new_hand=is_new_hand)
-            #             break
-            #     is_new_hand = False
-            if action_formatted == (1,107):
-                print("debug")
+
+            # if action_formatted == (1, 107):
+            #     print("debug")
             # step env
             obs, _, done, _ = env.step(action_formatted)
             it += 1
