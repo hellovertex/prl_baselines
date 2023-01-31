@@ -1,16 +1,17 @@
-import os
 from random import random
-from typing import Tuple, List, Union
+from typing import Tuple, List, Union, Optional, Any, Dict
 
 import numpy as np
 import torch
+from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols
 from prl.environment.Wrappers.base import ActionSpace
+from tianshou.data import Batch
+from tianshou.policy import BasePolicy
 from torch import softmax
 
 from prl.baselines.cpp_hand_evaluator.monte_carlo import HandEvaluator_MonteCarlo
 from prl.baselines.cpp_hand_evaluator.rank import dict_str_to_sk
-from prl.baselines.supervised_learning.models.nn_model import MLP, MLP_old
-from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols
+from prl.baselines.supervised_learning.models.nn_model import MLP
 
 IDX_C0_0 = 167  # feature_names.index('0th_player_card_0_rank_0')
 IDX_C0_1 = 184  # feature_names.index('0th_player_card_1_rank_0')
@@ -28,6 +29,21 @@ BOARD_BITS_TO_STR = np.array(['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 
                               'Q', 'K', 'A', 'h', 'd', 's', 'c'])
 RANK = 0
 SUITE = 1
+
+
+class TianshouCallingStation(BasePolicy):
+    CHECK_CALL = 1
+
+    def __init__(self, observation_space=None, action_space=None):
+        super().__init__(observation_space=observation_space,
+                         action_space=action_space)
+
+    def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:
+        nobs = len(batch.obs)
+        return Batch(logits=None, act=[self.CHECK_CALL] * nobs, state=None)
+
+    def learn(self, batch: Batch, **kwargs: Any) -> Dict[str, Any]:
+        return {}
 
 
 class MCAgent:
@@ -95,7 +111,7 @@ class MCAgent:
             obs[cols.Curr_bet_p3],
             obs[cols.Curr_bet_p4],
             obs[cols.Curr_bet_p5],
-                       ]) + obs[cols.Pot_amt]
+        ]) + obs[cols.Pot_amt]
         pot_odds = total_to_call / (potsize + total_to_call)
         if win_prob < pot_odds:
             if random() > self.tightness:  # tightness is equal to % of hands played, e.g. 0.15
