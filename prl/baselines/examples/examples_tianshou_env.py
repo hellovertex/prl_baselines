@@ -145,7 +145,15 @@ class MCAgent:
         return action
 
     def act(self, obs, legal_moves):
-        """Wrapper for compute action"""
+        """Wrapper for compute action only when evaluating in poke--> single env"""
+        if type(obs) == dict:
+            legal_moves = np.array([0, 0, 0, 0, 0, 0])
+            legal_moves[obs['legal_moves'][0]] += 1
+            if legal_moves[2] == 1:
+                legal_moves[[3, 4, 5]] = 1
+            obs = obs['obs']
+            if type(obs) == list:
+                obs = np.array(obs)[0]
         return self.compute_action(obs, legal_moves)
 
 

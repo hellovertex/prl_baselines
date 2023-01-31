@@ -34,8 +34,8 @@ if __name__ == '__main__':
     starting_stack = 20000
     stack_sizes = [starting_stack for _ in range(num_players)]
     agent_names = [f'p{i}' for i in range(num_players)]
-    rainbow_config = get_rainbow_config(default_rainbow_params)
-
+    # rainbow_config = get_rainbow_config(default_rainbow_params)
+    # RainbowPolicy(**rainbow_config).load_state_dict...
     env_config = {"env_wrapper_cls": AugmentObservationWrapper,
                   # "stack_sizes": [100, 125, 150, 175, 200, 250],
                   "stack_sizes": stack_sizes,
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     # env = init_wrapped_env(**env_config)
     # obs0 = env.reset(config=None)
     num_envs = 31
-    ckpt = ""
+    ckpt = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
     env = init_wrapped_env(**env_config)
 
     agents = [
