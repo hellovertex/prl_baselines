@@ -183,6 +183,7 @@ class PlayerAnalyzer:
         hands = []
         for s in self._wrapped_env.env.seats:
             hands.append(s.hand)
+        num_players = len(self._wrapped_env.env.seats)
         p0_first_card = obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_rank_0]
         p0_second_card = obs[fts.First_player_card_1_rank_0:fts.Second_player_card_0_rank_0]
         p1_first_card = obs[fts.Second_player_card_0_rank_0:fts.Second_player_card_1_rank_0]
@@ -200,16 +201,22 @@ class PlayerAnalyzer:
         the transition for a2 survives
         """
         # note after done we dont increment i, so the last remaining player gets obs
-        assert p0_first_card[r00] == 1
-        assert p0_first_card[13 + s00] == 1
-        assert p0_second_card[r01] == 1
-        assert p0_second_card[13 + s01] == 1
+        if not sum(p0_first_card) == 0:
+            # in case of specific initialization some agent cards might be unknown even to the env
+            assert p0_first_card[r00] == 1
+            assert p0_first_card[13 + s00] == 1
+            assert p0_second_card[r01] == 1
+            assert p0_second_card[13 + s01] == 1
         if not done:
             assert sum(p1_first_card) == 0
             assert sum(p1_second_card) == 0
         else:
-            assert sum(p1_first_card) == 2
-            assert sum(p1_second_card) == 2
+            # make sure other palyer cards are seen. enough for next player as this will
+            # trigger at some point. this function is called millions of times
+            if hands[(i+1)%num_players][0][0] != Poker.CARD_NOT_DEALT_TOKEN_1D:
+                assert sum(p1_first_card) == 2
+                assert sum(p1_second_card) == 2
+
 
     def _simulate_environment(self, pname, env, episode, cards_state_dict, table, starting_stack_sizes_list,
                               selected_players=None):
@@ -234,6 +241,7 @@ class PlayerAnalyzer:
         showdown_players: List[str] = [player.name for player in episode.showdown_hands]
 
         it = 0
+        i = 0 if len(starting_stack_sizes_list) < 4 else 3
         debug_action_list = []
         while not done:
             try:
@@ -306,11 +314,15 @@ class PlayerAnalyzer:
             #                            is_new_hand=is_new_hand)
             #             break
             #     is_new_hand = False
-
+            if action_formatted == (1,107):
+                print("debug")
             # step env
             obs, _, done, _ = env.step(action_formatted)
             it += 1
-            self.run_assertions(obs, it, done)
+            # i = (i+1) % len(starting_stack_sizes_list)
+            if not done:
+                i = self._wrapped_env.env.current_player.seat_id
+            self.run_assertions(obs, i, done)
 
         if not observations:
             print(actions)
