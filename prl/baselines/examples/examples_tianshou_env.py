@@ -1,3 +1,4 @@
+from enum import IntEnum
 from functools import partial
 from functools import partial
 from typing import Optional, Union, List, Tuple
@@ -16,6 +17,11 @@ from prl.baselines.agents.tianshou_agents import MCAgent
 from prl.baselines.agents.tianshou_policies import MultiAgentActionFlags
 
 
+class RewardType(IntEnum):
+    MBB = 0
+    ABSOLUTE = 1
+
+
 class TianshouEnvWrapper(AECEnv):
     """
     Multi Agent Environment that changes reset call such that
@@ -25,9 +31,13 @@ class TianshouEnvWrapper(AECEnv):
     so that tianshou can parse observation properly.
     """
 
-    def __init__(self, env, agents: List[str]):
+    def __init__(self,
+                 env,
+                 agents: List[str],
+                 reward_type: RewardType):
         super().__init__()
         self.name = "env"
+        self.reward_type = reward_type
         self.metadata = {'name': self.name}
         self.agents = agents
         self.possible_agents = self.agents[:]
@@ -77,7 +87,13 @@ class TianshouEnvWrapper(AECEnv):
         return dict(zip(self.possible_agents, list_of_list))
 
     def _scale_rewards(self, rewards):
-        return [r / self.BIG_BLIND for r in rewards]
+        if self.reward_type == RewardType.MBB:
+            return [r / self.BIG_BLIND for r in rewards]
+        if self.reward_type == RewardType.ABSOLUTE:
+            return rewards
+        else:
+            raise NotImplementedError(f"Reward Type {self.reward_type} "
+                                      f"not implemented.")
 
     def _int_to_name(self, ind):
         return self.possible_agents[ind]
@@ -191,9 +207,12 @@ def make_env(cfg):
 
 def make_vector_env(num_envs: int,
                     single_env_config: dict,
-                    agent_names: List[str]) -> Tuple[SubprocVectorEnv, PettingZooEnv]:
+                    agent_names: List[str],
+                    reward_type: RewardType = RewardType.MBB) -> Tuple[SubprocVectorEnv, PettingZooEnv]:
     assert len(agent_names) == len(single_env_config['stack_sizes'])
-    env = TianshouEnvWrapper(env=make_env(single_env_config), agents=agent_names)
+    env = TianshouEnvWrapper(env=make_env(single_env_config),
+                             agents=agent_names,
+                             reward_type=reward_type)
     wrapped_env_fn = partial(PettingZooEnv, WrappedEnv(env))
     wrapped_env = PettingZooEnv(WrappedEnv(env))
     venv = SubprocVectorEnv([wrapped_env_fn for _ in range(num_envs)])

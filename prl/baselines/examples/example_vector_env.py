@@ -15,13 +15,36 @@ from torch.utils.tensorboard import SummaryWriter
 from prl.baselines.examples.examples_tianshou_env import make_vector_env
 from prl.baselines.examples.rainbow_net import Rainbow
 
+# train config
+buffer_size = 100000
+obs_stack = 1
+alpha = 0.5
+beta = 0.4
+beta_final = 1
+beta_anneal_step = 5000000
+weight_norm = True
+epoch = 10000
+step_per_epoch = 10000
+step_per_collect = 100
+episode_per_test = 50
+batch_size = 256
+update_per_step = 0.1
+learning_agent_ids = [0, 1]
+eps_train = 0.2
+eps_train_final = 0.05
+eps_test = 0.0
+no_priority = False
+logdir = [".", "v3", "rainbow_vs_rainbow_heads_up"]
+win_rate_early_stopping = np.inf
+
+# environment config
 num_players = 2
 starting_stack = 20000
 stack_sizes = [starting_stack for _ in range(num_players)]
 agents = [f'p{i}' for i in range(num_players)]
 env_config = {"env_wrapper_cls": AugmentObservationWrapper,
               # "stack_sizes": [100, 125, 150, 175, 200, 250],
-              "stack_sizes": [10000, 10000],
+              "stack_sizes": stack_sizes,
               "multiply_by": 1,  # use 100 for floats to remove decimals but we have int stacks
               "scale_rewards": False,  # we do this ourselves
               "blinds": [50, 100]}
@@ -97,26 +120,6 @@ policy = MultiAgentPolicyManager([
     #    MCPolicy()
 ], wrapped_env)  # policy is made from PettingZooEnv
 
-buffer_size = 100000
-obs_stack = 1
-alpha = 0.5
-beta = 0.4
-beta_final = 1
-beta_anneal_step = 5000000
-weight_norm = True
-epoch = 10000
-step_per_epoch = 10000
-step_per_collect = 100
-episode_per_test = 50
-batch_size = 256
-update_per_step = 0.1
-learning_agent_ids = [0, 1]
-eps_train = 0.2
-eps_train_final = 0.05
-eps_test = 0.0
-no_priority = False
-logdir = [".", "v3", "rainbow_vs_rainbow_heads_up"]
-win_rate_early_stopping = np.inf
 
 buffer = PrioritizedVectorReplayBuffer(
     total_size=buffer_size,
