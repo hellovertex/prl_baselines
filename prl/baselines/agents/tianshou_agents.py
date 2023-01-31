@@ -36,7 +36,7 @@ class MCAgent:
         """ckpt path may be something like ./ckpt/ckpt.pt"""
         self._mc_iters = 5000
         self.tightness = .2  # percentage of hands played, "played" meaning not folded immediately
-        self.acceptance_threshold = 0  # minimum certainty of probability of network to perform action
+        self.acceptance_threshold = 0.3  # minimum certainty of probability of network to perform action
         self._card_evaluator = HandEvaluator_MonteCarlo()
         self.load_model(ckpt_path)
 

@@ -31,10 +31,10 @@ from pathlib import Path
 acceptance_levels = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1]
 # ppl and ppool filenames -- single file and globbed files
 # implement parser, encoder, analyzer pipeline
-unzipped_dir = "/home/hellovertex/Documents/github.com/hellovertex/prl_baselines/data/player_data_test"
+unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_test"
 filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
 parser = HSmithyParser()
-ckpt_path = "/home/hellovertex/Documents/github.com/hellovertex/prl_baselines/data/ckpt/ckpt.pt"
+ckpt_path = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/ckpt/ckpt.pt"
 baseline = MCAgent(ckpt_path)
 player_stats = []
 for ifile, filename in enumerate(filenames):

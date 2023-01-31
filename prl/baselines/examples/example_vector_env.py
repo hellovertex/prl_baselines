@@ -77,7 +77,7 @@ class TianshouEnvWrapper(AECEnv):
         self.num_players = len(self.possible_agents)
         self.env_wrapped = env
         self.BIG_BLIND = self.env_wrapped.env.BIG_BLIND
-        self._mc_agent = MCAgent()
+        self._mc_agent = MCAgent(ckpt_path="/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/ckpt/ckpt.pt")
         self._last_player_id = -1
 
         obs_space = Box(low=0.0, high=6.0, shape=(564,), dtype=np.float64)
@@ -338,7 +338,9 @@ class TianshouCallingStation(BasePolicy):
 rainbow_config = get_rainbow_config()
 policy = MultiAgentPolicyManager([
     RainbowPolicy(**rainbow_config),
-    TianshouCallingStation()], wrapped_env)  # policy is made from PettingZooEnv
+    RainbowPolicy(**rainbow_config),
+#    MCPolicy()
+], wrapped_env)  # policy is made from PettingZooEnv
 
 buffer_size = 100000
 obs_stack = 1
@@ -368,7 +370,7 @@ step_per_collect = 100
 episode_per_test = 50
 batch_size = 256
 update_per_step = 0.1
-learning_agent_ids = [0]
+learning_agent_ids = [0, 1]
 eps_train = 0.2
 eps_train_final = 0.05
 eps_test = 0.0
@@ -406,7 +408,7 @@ def test_fn(epoch, env_step):
         policy.policies[agents[aid]].set_eps(eps_test)
 
 
-logdir = [".", "v1", "rainbow_vs_calling_station"]
+logdir = [".", "v3", "rainbow_vs_rainbow_heads_up"]
 
 
 def save_best_fn(policy):
