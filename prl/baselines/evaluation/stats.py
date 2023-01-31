@@ -39,6 +39,9 @@ class PlayerStats:
         self.three_bet_updated_this_hand = False
         self.n_vpip = 0
         self.n_pfr = 0
+        self.registered_folds = 0
+        self.registered_calls = 0
+        self.registered_raises = 0
 
     def big_blind_checked_preflop(self, obs, action):
         assert obs[fts.Round_preflop]
@@ -230,7 +233,16 @@ class PlayerStats:
         self._update_pfr(obs, action)
         self._update_cbet(obs, action)
         self._update_3bet(obs, action)
+        self._update_tightness(obs, action)
         self.is_first_action = False
+        if action == ActionSpace.FOLD:
+            self.registered_folds += 1
+        elif action == ActionSpace.CHECK_CALL:
+            self.registered_calls += 1
+        elif action >= ActionSpace.RAISE_MIN_OR_3BB:
+            self.registered_raises += 1
+        else:
+            raise ValueError(f"Action must be in [0,1,2,3,4,5] but was {action}")
 
     def reset(self):
         """If necessary, we can reset all stats to 0 here, but I dont think well need it"""
@@ -243,7 +255,7 @@ class PlayerStats:
                 '3bet': self.threebet,
                 'cbet': self.cbet,
                 'af': self.af,
-                'hands_to_showdown': self.hands_to_showdown,  # compute wtsd
+                # 'hands_to_showdown': self.hands_to_showdown,  # compute wtsd
                 'hands_played': self.hands_played,
                 'hands_total': self.hands_total,
                 }
