@@ -5,6 +5,7 @@ Agression Factor (AF): #raises / #calls
 Tightness: % hands played (not folded immediately preflop)
 """
 import glob
+import json
 import time
 
 import prl.environment.Wrappers.augment
@@ -58,3 +59,6 @@ stats_baseline = analyzer.baseline_stats.to_dict()
 print(stats_baseline)
 print(analyzer.player_stats[0].to_dict())
 print(analyzer.player_stats[1].to_dict())
+with open('stats.txt', 'a+') as f:
+    for stat in analyzer.player_stats:
+        f.write(json.dumps(stat.to_dict()))

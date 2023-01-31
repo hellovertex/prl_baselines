@@ -6,7 +6,8 @@ from prl.environment.steinberger.PokerRL.game.games import NoLimitHoldem
 
 from prl.baselines.evaluation.stats import PlayerStats
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Encoder, PlayerInfo, Positions6Max
-from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Action, ActionType, Blind, PlayerWithCards
+from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Action, ActionType, Blind, \
+    PlayerWithCards
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import DICT_RANK, DICT_SUITE, \
     make_board_cards, card_tokens, card
 
@@ -225,22 +226,24 @@ class PlayerAnalyzer:
                 # only store obs and action of acting player
                 if player.position_index == next_to_act and player.player_name in filtered_players:
                     observations.append(obs)
-                    # use showdown player actions as labels, 0 for loser and action for winner
-                    if not selected_players:
-                        # player that won showdown -- can be multiple (split pot)
-                        if player.player_name in [winner.name for winner in episode.winners]:
-                            action_label = self._wrapped_env.discretize(action_formatted)
-                            # actions.append(action_formatted)  # use his action as supervised label
-                        # player that lost showdown
-                        else:
-                            # replace action call/raise with fold
-                            action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
-                            # actions.append((ActionType.FOLD.value, -1))  # replace action with FOLD for now
-                    # use top players actions as labels, take actions as labels directly 0 for fold 1 for checkcall etc
-                    else:
-                        action_label = self._wrapped_env.discretize(action_formatted)
+                    # # use showdown player actions as labels, 0 for loser and action for winner
+                    # if not selected_players:
+                    #     # player that won showdown -- can be multiple (split pot)
+                    #     if player.player_name in [winner.name for winner in episode.winners]:
+                    #         action_label = self._wrapped_env.discretize(action_formatted)
+                    #         # actions.append(action_formatted)  # use his action as supervised label
+                    #     # player that lost showdown
+                    #     else:
+                    #         # replace action call/raise with fold
+                    #         action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
+                    #         # actions.append((ActionType.FOLD.value, -1))  # replace action with FOLD for now
+                    # # use top players actions as labels, take actions as labels directly 0 for fold 1 for checkcall etc
+                    # else:
+                    action_label = self._wrapped_env.discretize(action_formatted)
 
                     actions.append(action_label)
+                    # if action_label == 0 and player.player_name == pname:
+                    #     print('debug')
                     # analysis
                     if player.player_name == pname:
                         legal_moves = np.array([0, 0, 0, 0, 0, 0])
@@ -265,7 +268,8 @@ class PlayerAnalyzer:
             raise RuntimeError("Seems we need more debugging")
         return observations, actions
 
-    def analyze_episode(self, episode: PokerEpisode, pname: str, selected_players=None) -> Tuple[Observations, Actions_Taken]:
+    def analyze_episode(self, episode: PokerEpisode, pname: str, selected_players=None) -> Tuple[
+        Observations, Actions_Taken]:
         """Runs environment with steps from PokerEpisode.
         Returns observations and corresponding actions of players that made it to showdown."""
 

@@ -65,8 +65,8 @@ class PlayerStats:
                 if not self.big_blind_checked_preflop(obs, action):
                     # any other call or raise increments vpip
                     self.n_vpip += 1
-                    self.vpip_updated_this_round = True
             self.vpip = self.n_vpip / self.hands_total
+        self.vpip_updated_this_round = True
 
 
 
@@ -226,9 +226,10 @@ class PlayerStats:
             self.cbet_turn_updated_this_hand = False
             self.cbet_river_updated_this_hand = False
             self.three_bet_updated_this_hand = False
-            hand_played = 1 if action > ActionSpace.FOLD and not self.big_blind_checked_preflop(obs,action) else 0
+            hand_played = 1 if action > ActionSpace.FOLD and not self.big_blind_checked_preflop(obs, action) else 0
             self.hands_played += hand_played
-        self._update_vpip(obs, action)
+        # self._update_vpip(obs, action)
+        self.vpip = 1  # vpip is always one since we only look at games where player went to showdown
         self._update_af(obs, action)
         self._update_pfr(obs, action)
         self._update_cbet(obs, action)
@@ -249,7 +250,8 @@ class PlayerStats:
         pass
 
     def to_dict(self):
-        return {'vpip': self.vpip,
+        return {'name':self.pname,
+                'vpip': self.vpip,
                 'pfr': self.pfr,
                 'tightness': self.tightness,
                 '3bet': self.threebet,
