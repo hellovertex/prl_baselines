@@ -30,7 +30,7 @@ def make_participants(agents, starting_stack) -> Tuple[PokerExperimentParticipan
 if __name__ == '__main__':
     max_episodes = 100
     # environment config
-    num_players = 2
+    num_players = 3
     starting_stack = 20000
     stack_sizes = [starting_stack for _ in range(num_players)]
     agent_names = [f'p{i}' for i in range(num_players)]
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     # env = init_wrapped_env(**env_config)
     # obs0 = env.reset(config=None)
     num_envs = 31
-    ckpt = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
+    ckpt = "/home/hellovertex/Documents/github.com/hellovertex/prl_baselines/data/ckpt/ckpt.pt"
     env = init_wrapped_env(**env_config)
 
     agents = [
@@ -53,7 +53,7 @@ if __name__ == '__main__':
         MCAgent(ckpt),
         MCAgent(ckpt),
     ]
-
+    assert len(agents) == num_players == len(stack_sizes)
     participants = make_participants(agents, starting_stack)
     experiment = PokerExperiment(
         # env

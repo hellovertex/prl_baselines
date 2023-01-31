@@ -346,11 +346,11 @@ class PokerExperimentRunner(ExperimentRunner):
               f'{np.mean(self._times_taken_to_compute_action) * 1000} ms')
         print(f'Average time taken stepping environment: '
               f'{np.mean(self._times_taken_to_step_env) * 1000} ms')
-        neural_net_predictions = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
-        for p in self.participants:
-            for k, v in p.agent.policy.predictions_cumulative.items():
-                neural_net_predictions[k] += v
-        print(f'Total neural net predictions: {neural_net_predictions}')
+        # neural_net_predictions = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+        # for p in self.participants:
+        #     for k, v in p.agent.policy.predictions_cumulative.items():
+        #         neural_net_predictions[k] += v
+        # print(f'Total neural net predictions: {neural_net_predictions}')
         return poker_episodes
 
     def run(self, experiment: PokerExperiment) -> List[PokerEpisode]:

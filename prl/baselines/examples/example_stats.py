@@ -8,11 +8,10 @@ import glob
 import json
 import time
 
-import prl.environment.Wrappers.augment
 
-from prl.baselines.agents.tianshou_agents import MCAgent
 from prl.baselines.evaluation.analyzer import PlayerAnalyzer
 from prl.baselines.evaluation.stats import PlayerStats
+from prl.baselines.examples.examples_tianshou_env import MCAgent
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from pathlib import Path
