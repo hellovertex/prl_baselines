@@ -38,8 +38,13 @@ class PlayerStats:
         self.hands_to_showdown = 0
         self.hands_played = 0
         self.hands_total = 0
+        self.total_can_three_bet = 0
+        self.times_three_betted = 0
+        self.vpip_updated_this_round = False
+        self.n_vpip = 0
 
     def big_blind_checked_preflop(self, obs, action):
+        assert obs[fts.Round_preflop]
         if action != ActionSpace.CHECK_CALL:
             return False
         if obs[fts.Total_to_call] <= obs[fts.Curr_bet_p0]:
@@ -49,13 +54,19 @@ class PlayerStats:
 
     def _update_vpip(self, obs, action):
         """Percentage of time player makes calls or raises before the flop."""
+        if self.vpip_updated_this_round:
+            return
+
         if obs[fts.Round_preflop]:
             # if action is not fold and player is not big blind who checks, update vpip
             if not action == ActionSpace.FOLD:
                 # as big blind, only increment vpip if we call a bet or raise
                 if not self.big_blind_checked_preflop(obs, action):
                     # any other call or raise increments vpip
-                    self.vpip = (self.vpip + 1) / self.hands_total
+                    self.n_vpip += 1
+            self.vpip = self.n_vpip / self.hands_total
+
+        self.vpip_updated_this_round = True
 
     def _update_af(self, obs, action):
         """Agression factor: #(Bet + Raise) / #(Call, checking or folding)"""
@@ -70,7 +81,8 @@ class PlayerStats:
         if obs[fts.Round_preflop]:
             if action >= ActionSpace.RAISE_MIN_OR_3BB:
                 # todo: only update pfr if we have not already for this hand
-                has_raised_preflop = obs[fts.Preflop_player_0_action_0_what_2] or obs[fts.Preflop_player_0_action_1_what_2]
+                has_raised_preflop = obs[fts.Preflop_player_0_action_0_what_2] or obs[
+                    fts.Preflop_player_0_action_1_what_2]
                 self.pfr = (self.pfr + 1) / self.hands_total
 
     def _update_tightness(self, obs, action):
@@ -144,9 +156,26 @@ class PlayerStats:
         # i) Exactly one opponent raised as their _first_ action and
         # ii) None of the opponents raised as their _second_ action
         # iii) This is our first preflop action, and it is a raise
-
-        if action >= ActionSpace.RAISE_MIN_OR_3BB:
-            pass
+        exactly_one_opponent_raised_as_their_first_action = sum([
+            obs[fts.Preflop_player_1_action_0_what_2],
+            obs[fts.Preflop_player_2_action_0_what_2],
+            obs[fts.Preflop_player_3_action_0_what_2],
+            obs[fts.Preflop_player_4_action_0_what_2],
+            obs[fts.Preflop_player_5_action_0_what_2],
+        ]) == 1
+        none_of_the_opponents_raised_as_their_second_action = sum([
+            obs[fts.Preflop_player_1_action_1_what_2],
+            obs[fts.Preflop_player_2_action_1_what_2],
+            obs[fts.Preflop_player_3_action_1_what_2],
+            obs[fts.Preflop_player_4_action_1_what_2],
+            obs[fts.Preflop_player_5_action_1_what_2],
+        ]) == 0
+        if exactly_one_opponent_raised_as_their_first_action and none_of_the_opponents_raised_as_their_second_action:
+            if self.is_first_action:
+                self.total_can_three_bet += 1
+                if action >= ActionSpace.RAISE_MIN_OR_3BB:
+                    self.times_three_betted += 1
+                self.threebet = self.times_three_betted / self.total_can_three_bet
 
     def new_hands_dealt(self, obs, action):
         """Consider using this instead of is_new_hand parameter."""
