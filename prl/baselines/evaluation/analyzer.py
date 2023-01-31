@@ -1,5 +1,5 @@
 from typing import List, Tuple, Dict, Optional
-
+from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as fts
 import numpy as np
 from prl.environment.steinberger.PokerRL.game.Poker import Poker
 from prl.environment.steinberger.PokerRL.game.games import NoLimitHoldem
@@ -179,6 +179,38 @@ class PlayerAnalyzer:
         """Converts ante string to float, e.g. '$0.00' -> float(0.00)"""
         return float(ante.split(self._currency_symbol)[1]) * MULTIPLY_BY
 
+    def run_assertions(self, obs, i, done):
+        hands = []
+        for s in self._wrapped_env.env.seats:
+            hands.append(s.hand)
+        p0_first_card = obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_rank_0]
+        p0_second_card = obs[fts.First_player_card_1_rank_0:fts.Second_player_card_0_rank_0]
+        p1_first_card = obs[fts.Second_player_card_0_rank_0:fts.Second_player_card_1_rank_0]
+        p1_second_card = obs[fts.Second_player_card_1_rank_0:fts.Third_player_card_0_rank_0]
+        r00 = hands[i][0][0]  # rank first player first card
+        s00 = hands[i][0][1]
+        r01 = hands[i][1][0]
+        s01 = hands[i][1][1]  # suite first player second card
+        """
+        a0 calls after reset
+        a1 observes obs1 folds
+        a2 observes obs2 folds --> Game ended
+        who gets obs3? a2 gets ob3 but a0 and a1 are also candidates. however they wont.
+        for simplicity in these cases the transitions are cut out and only 
+        the transition for a2 survives
+        """
+        # note after done we dont increment i, so the last remaining player gets obs
+        assert p0_first_card[r00] == 1
+        assert p0_first_card[13 + s00] == 1
+        assert p0_second_card[r01] == 1
+        assert p0_second_card[13 + s01] == 1
+        if not done:
+            assert sum(p1_first_card) == 0
+            assert sum(p1_second_card) == 0
+        else:
+            assert sum(p1_first_card) == 2
+            assert sum(p1_second_card) == 2
+
     def _simulate_environment(self, pname, env, episode, cards_state_dict, table, starting_stack_sizes_list,
                               selected_players=None):
         """Under Construction."""
@@ -259,23 +291,26 @@ class PlayerAnalyzer:
                     #             break
                     #     is_new_hand = False
             debug_action_list.append(action_formatted)
-            if player.player_name == pname:
-                legal_moves = np.array([0, 0, 0, 0, 0, 0])
-                legal_moves[self._wrapped_env.get_legal_actions()] += 1
-                if legal_moves[2] == 1:
-                    legal_moves[[3, 4, 5]] = 1
-                action_prediction = self.baseline.compute_action(obs, legal_moves)
-                self.baseline_stats.update_stats(obs, action_prediction, is_new_hand=is_new_hand)
-                for s in self.player_stats:
-                    if s.pname == pname:
-                        s.update_stats(obs,
-                                       self._wrapped_env.discretize(action_formatted),
-                                       is_new_hand=is_new_hand)
-                        break
-                is_new_hand = False
+
+            # if player.player_name == pname:
+            #     legal_moves = np.array([0, 0, 0, 0, 0, 0])
+            #     legal_moves[self._wrapped_env.get_legal_actions()] += 1
+            #     if legal_moves[2] == 1:
+            #         legal_moves[[3, 4, 5]] = 1
+            #     action_prediction = self.baseline.compute_action(obs, legal_moves)
+            #     self.baseline_stats.update_stats(obs, action_prediction, is_new_hand=is_new_hand)
+            #     for s in self.player_stats:
+            #         if s.pname == pname:
+            #             s.update_stats(obs,
+            #                            self._wrapped_env.discretize(action_formatted),
+            #                            is_new_hand=is_new_hand)
+            #             break
+            #     is_new_hand = False
+
             # step env
             obs, _, done, _ = env.step(action_formatted)
             it += 1
+            self.run_assertions(obs, it, done)
 
         if not observations:
             print(actions)
