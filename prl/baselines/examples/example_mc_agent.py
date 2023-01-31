@@ -40,7 +40,7 @@ for ifile, filename in enumerate(filenames):
 analyzer = PlayerAnalyzer(baseline=baseline, player_stats=player_stats)
 
 for ifile, filename in enumerate(filenames):
-    pname = ""
+    pname = Path(filename).stem
     parsed_hands = parser.parse_file(filename)
     for ihand, hand in enumerate(parsed_hands):
         analyzer.analyze_episode(hand, pname=pname)
