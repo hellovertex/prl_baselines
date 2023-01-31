@@ -29,15 +29,18 @@ step_per_collect = 100
 episode_per_test = 50
 batch_size = 256
 update_per_step = 0.1
-learning_agent_ids = [0, 1]
+learning_agent_ids = [0]
 eps_train = 0.2
 eps_train_final = 0.05
 eps_test = 0.0
 no_priority = False
 logdir = [".", "v3", "rainbow_vs_rainbow_heads_up"]
-load_ckpt = False
+load_ckpt = True
+ckpt_save_path = os.path.join(
+        *logdir, f'ckpt.pt'
+    )
 win_rate_early_stopping = np.inf
-
+best_rew = -np.inf
 # environment config
 num_players = 2
 starting_stack = 20000
@@ -56,6 +59,7 @@ mc_model_ckpt_path = os.environ["MC_MODEL_CKPT_PATH"]
 venv, wrapped_env = make_vector_env(num_envs, env_config, agents, mc_model_ckpt_path)
 
 params = {'device': device,
+          'load_from_ckpt': ckpt_save_path,
           'lr': 1e-6,
           'num_atoms': 51,
           'noisy_std': 0.1,
@@ -67,9 +71,7 @@ params = {'device': device,
 rainbow_config = get_rainbow_config(params)
 rainbow_policy = RainbowPolicy(**rainbow_config)
 if load_ckpt:
-    rainbow_policy.load_state_dict(torch.load(os.path.join(
-        *logdir, 'policy.pth'
-    ), map_location=device))
+    rainbow_policy.load_state_dict(torch.load(ckpt_save_path, map_location=device))
 # 'load_from_ckpt_dir': None
 policy = MultiAgentPolicyManager([
     RainbowPolicy(**rainbow_config),
@@ -119,10 +121,10 @@ def test_fn(epoch, env_step):
 
 
 def save_best_fn(policy):
-    model_save_path = os.path.join(
-        *logdir, 'policy.pth'
-    )
     for aid in learning_agent_ids:
+        model_save_path = os.path.join(
+            *logdir, f'policy_{aid}.pth'
+        )
         torch.save(
             policy.policies[agents[aid]].state_dict(), model_save_path
         )
@@ -130,6 +132,7 @@ def save_best_fn(policy):
 
 def stop_fn(mean_rewards):
     return mean_rewards >= win_rate_early_stopping
+
 
 
 def reward_metric(rews):
@@ -177,25 +180,20 @@ writer = SummaryWriter(log_path)
 # writer.add_text("args", str(args))
 logger = TensorboardLogger(writer)
 
-ckpt_dir = './ckpt_train_eval'
-
 
 def save_checkpoint_fn(epoch: int,
                        env_step: int,
-                       gradient_step: int):
-    pass
-    # if not os.path.exists(ckpt_dir + '/ckpt'):
-    #     os.makedirs(ckpt_dir + '/ckpt')
-    # if best_accuracy < test_accuracy:
-    #     best_accuracy = test_accuracy
-    #     torch.save({'epoch': epoch,
-    #                 'net': model.state_dict(),
-    #                 'n_iter': n_iter,
-    #                 'optim': optim.state_dict(),
-    #                 'loss': loss,
-    #                 'best_accuracy': best_accuracy}, ckpt_dir + '/ckpt.pt')  # net
-    #     # save model for inference
-    #     torch.save(model, ckpt_dir + '/model.pt')
+                       gradient_step: int) -> str:
+    # for aid in learning_agent_ids:
+    # assume learning agent is at index 0
+    torch.save({
+        'epoch': epoch,
+        'net': policy.policies[agents[0]].state_dict(),
+        'model': rainbow_config['model'].state_dict(),
+        'env_step': env_step,
+        'optim': rainbow_config['optim'].state_dict(),
+    }, ckpt_save_path)
+    return ckpt_save_path
 
 
 # test train_collector and start filling replay buffer
@@ -214,7 +212,7 @@ trainer = OffpolicyTrainer(policy=policy,
                            stop_fn=None,  # early stopping
                            save_best_fn=save_best_fn,
                            save_checkpoint_fn=save_checkpoint_fn,
-                           resume_from_log=False,
+                           resume_from_log=load_ckpt,
                            reward_metric=reward_metric,
                            logger=logger,
                            verbose=True,

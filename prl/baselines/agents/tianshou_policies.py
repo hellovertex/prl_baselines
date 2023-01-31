@@ -60,11 +60,12 @@ def get_rainbow_config(params):
     hidden_dim = [512, 512]
     output_dim = len(classes)
     input_dim = 564  # hard coded for now -- very unlikely to be changed by me at any poiny in time
+    device = params['device']
     net = Rainbow(
         input_dim=input_dim,
         output_dim=output_dim,
         hidden_sizes=hidden_dim,
-        device=params['device'],
+        device=device,
         num_atoms=params['num_atoms'],
         noisy_std=params['noisy_std'],
         is_dueling=True,
@@ -72,6 +73,9 @@ def get_rainbow_config(params):
     )
     # load from config if possible
     optim = torch.optim.Adam(net.parameters(), lr=params['lr'])
+    if 'load_from_ckpt' in params:
+        net.load_state_dict(torch.load(params['load_from_ckpt'], map_location=device)['model'])
+        optim.load_state_dict(torch.load(params['load_from_ckpt'], map_location=device)['optim'])
     # if running on GPU and we want to use cuda move model there
     return {'model': net,
             'optim': optim,
