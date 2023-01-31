@@ -40,8 +40,14 @@ class PlayerStats:
         self.hands_total = 0
         self.total_can_three_bet = 0
         self.times_three_betted = 0
-        self.vpip_updated_this_round = False
+        self.vpip_updated_this_hand = False
+        self.tightness_updated_this_hand = False
+        self.pfr_updated_this_preflop = False
+        self.cbet_flop_updated_this_hand = False
+        self.cbet_turn_updated_this_hand = False
+        self.cbet_river_updated_this_hand = False
         self.n_vpip = 0
+        self.n_pfr = 0
 
     def big_blind_checked_preflop(self, obs, action):
         assert obs[fts.Round_preflop]
@@ -53,8 +59,9 @@ class PlayerStats:
         return False
 
     def _update_vpip(self, obs, action):
-        """Percentage of time player makes calls or raises before the flop."""
-        if self.vpip_updated_this_round:
+        """Percentage of time player makes calls or raises before the flop.
+        The vpip is updated once per hand."""
+        if self.vpip_updated_this_hand:
             return
 
         if obs[fts.Round_preflop]:
@@ -69,7 +76,8 @@ class PlayerStats:
         self.vpip_updated_this_round = True
 
     def _update_af(self, obs, action):
-        """Agression factor: #(Bet + Raise) / #(Call, checking or folding)"""
+        """Agression factor: #(Bet + Raise) / #(Call, checking or folding).
+        The af is updated with every action."""
         if action < ActionSpace.RAISE_MIN_OR_3BB:
             self.num_checkcall_or_folds += 1
         else:
@@ -77,21 +85,28 @@ class PlayerStats:
         self.af = self.num_bets_or_raises / self.num_checkcall_or_folds
 
     def _update_pfr(self, obs, action):
-        """Preflop Bets/Raises"""
+        """Preflop Bets/Raises. The pfr is updated once per hand."""
+        # only update pfr if we have not already for this hand
+        if self.pfr_updated_this_preflop:
+            return
+
         if obs[fts.Round_preflop]:
             if action >= ActionSpace.RAISE_MIN_OR_3BB:
-                # todo: only update pfr if we have not already for this hand
-                has_raised_preflop = obs[fts.Preflop_player_0_action_0_what_2] or obs[
-                    fts.Preflop_player_0_action_1_what_2]
-                self.pfr = (self.pfr + 1) / self.hands_total
+                self.n_pfr += 1
+            self.pfr = self.n_pfr / self.hands_total
+            self.pfr_updated_this_preflop = True
 
     def _update_tightness(self, obs, action):
         """1 - Percentage of hands played. tightness = 0.9 means player plays 10% of hands
-        A hand is played if it is not folded immediately preflop. """
+        A hand is played if it is not folded immediately preflop.
+        The tightness is updated once per hand. """
+        if self.tightness_updated_this_hand:
+            return
         if obs[fts.Round_preflop] and self.is_first_action:
             if action == ActionSpace.FOLD:
                 self.num_immediate_folds += 1
         self.tightness = 1 - (self.num_immediate_folds / self.hands_total)
+        self.tightness_updated_this_hand = True
 
     @staticmethod
     def _player_has_not_acted_in_flop(obs):
@@ -100,6 +115,8 @@ class PlayerStats:
                     obs[fts.Flop_player_0_action_0_what_2])
 
     def _update_cbet_flop(self, obs, action):
+        if self.cbet_flop_updated_this_hand:
+            return
         player_raised_preflop = obs[fts.Preflop_player_0_action_0_what_2] or obs[fts.Preflop_player_0_action_1_what_2]
         if obs[fts.Round_flop]:
             # only update cbet stats on first move in flop
@@ -109,6 +126,7 @@ class PlayerStats:
                     if action >= ActionSpace.RAISE_MIN_OR_3BB:
                         self.cbets_flop += 1
                     self.cbet['flop'] = self.cbets_flop / self.raises_preflop
+            self.cbet_flop_updated_this_hand = True
 
     @staticmethod
     def _player_has_not_acted_in_turn(obs):
@@ -117,6 +135,8 @@ class PlayerStats:
                     obs[fts.Turn_player_0_action_0_what_2])
 
     def _update_cbet_turn(self, obs, action):
+        if self.cbet_turn_updated_this_hand:
+            return
         player_raised_flop = obs[fts.Flop_player_0_action_0_what_2] or obs[fts.Flop_player_0_action_1_what_2]
         if obs[fts.Round_turn]:
             # only update cbet stats on first move in flop
@@ -126,6 +146,7 @@ class PlayerStats:
                     if action >= ActionSpace.RAISE_MIN_OR_3BB:
                         self.cbets_turn += 1
                     self.cbet['turn'] = self.cbets_turn / self.raises_flop
+            self.cbet_turn_updated_this_hand = True
 
     @staticmethod
     def _player_has_not_acted_in_river(obs):
@@ -134,6 +155,8 @@ class PlayerStats:
                     obs[fts.River_player_0_action_0_what_2])
 
     def _update_cbet_river(self, obs, action):
+        if self.cbet_river_updated_this_hand:
+            return
         player_raised_turn = obs[fts.Turn_player_0_action_0_what_2] or obs[fts.Turn_player_0_action_1_what_2]
         if obs[fts.Round_river]:
             if self._player_has_not_acted_in_river(obs):
@@ -142,10 +165,12 @@ class PlayerStats:
                     if action >= ActionSpace.RAISE_MIN_OR_3BB:
                         self.cbets_river += 1
                     self.cbet['river'] = self.cbets_turn / self.raises_flop
+            self.cbet_river_updated_this_hand = True
 
     def _update_cbet(self, obs, action):
         """Continuation Bet (Cbet): If player raised in previous round, percentage of times
-        the player opens with a bet in the next round."""
+        the player opens with a bet in the next round.
+        Cbets are updated once per hand. """
         self._update_cbet_flop(obs, action)
         self._update_cbet_turn(obs, action)
         self._update_cbet_river(obs, action)
@@ -190,6 +215,12 @@ class PlayerStats:
         if is_new_hand:  # todo consider replacing with if self.new_hands_dealt():
             self.is_first_action = True
             self.hands_total += 1
+            self.vpip_updated_this_hand = False
+            self.pfr_updated_this_preflop = False
+            self.tightness_updated_this_hand = False
+            self.cbet_flop_updated_this_hand = False
+            self.cbet_turn_updated_this_hand = False
+            self.cbet_river_updated_this_hand = False
         self._update_vpip(obs, action)
         self._update_af(obs, action)
         self._update_pfr(obs, action)
