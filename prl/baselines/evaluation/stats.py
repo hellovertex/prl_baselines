@@ -216,6 +216,8 @@ class PlayerStats:
             self.cbet_turn_updated_this_hand = False
             self.cbet_river_updated_this_hand = False
             self.three_bet_updated_this_hand = False
+            hand_played = 1 if action > ActionSpace.FOLD and not self.big_blind_checked_preflop(obs,action) else 0
+            self.hands_played += hand_played
         self._update_vpip(obs, action)
         self._update_af(obs, action)
         self._update_pfr(obs, action)

@@ -31,7 +31,7 @@ from pathlib import Path
 acceptance_levels = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1]
 # ppl and ppool filenames -- single file and globbed files
 # implement parser, encoder, analyzer pipeline
-unzipped_dir = "/home/hellovertex/Documents/github.com/hellovertex/prl_baselines/data/player_data"
+unzipped_dir = "/home/hellovertex/Documents/github.com/hellovertex/prl_baselines/data/player_data_test"
 filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
 parser = HSmithyParser()
 ckpt_path = "/home/hellovertex/Documents/github.com/hellovertex/prl_baselines/data/ckpt/ckpt.pt"

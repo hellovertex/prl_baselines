@@ -23,7 +23,7 @@ class PlayerAnalyzer:
         self._currency_symbol = None
         self._feature_names = None
         self.baseline = baseline  # analysis is computed against baseline
-        self.player_stats = []
+        self.player_stats = player_stats
         self.baseline_stats = PlayerStats(pname='baseline')
 
     class _EnvironmentEdgeCaseEncounteredError(ValueError):
