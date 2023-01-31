@@ -260,7 +260,7 @@ class PlayerStats:
 # fold probability is marginalized by tightness and by acceptance but we can fix the tightness to the players
 # so the only remaining parameter is acceptance level. Again, todo move this to .tex
 
-# Notes
-
-# jeez i dont need the action it can be 99 in the replay buffer nobody cares
-# the network is only trained with observations. the action it did itself it knows
+acceptance_levels = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1]
+# ppl and ppool filenames -- single file and globbed files
+filenames = []
+# implement parser, encoder, analyzer pipeline
