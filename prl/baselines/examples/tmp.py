@@ -95,8 +95,7 @@ while True:
     pretty_print(i, obs, action)
     obs, rew, done, info = wrapped_env.step(action)
     # print_player_cards(obs)
-    if not done:
-        i = (i + 1) % num_players
+    i = env.current_player.seat_id
     # make sure the card feature columns mathc the cards of the resp players
     # make sure the current bet feature columns mathc the current bet of the resp players
     # stack etc make sure they all match
@@ -120,21 +119,19 @@ while True:
     the transition for a2 survives
     """
     # note after done we dont increment i, so the last remaining player gets obs
-    if obs[fts.Round_preflop]:
-        assert p0_first_card[r00] == 1
-        assert p0_first_card[13 + s00] == 1
-        assert p0_second_card[r01] == 1
-        assert p0_second_card[13 + s01] == 1
-        if not done:
-            assert sum(p1_first_card) == 0
-            assert sum(p1_second_card) == 0
-        else:
-            assert sum(p1_first_card) == 2
-            assert sum(p1_second_card) == 2
-        if done:
-            break
+    # if not obs[fts.Round_preflop]:
+    #     # postflop the turn order changes and BTN is always last
+    #     i = env.current_player.seat_id
+    assert p0_first_card[r00] == 1
+    assert p0_first_card[13 + s00] == 1
+    assert p0_second_card[r01] == 1
+    assert p0_second_card[13 + s01] == 1
+    if not done:
+        assert sum(p1_first_card) == 0
+        assert sum(p1_second_card) == 0
     else:
-        # postflop the turn order changes and BTN is always last
-        # todo what do we have to assert here in order to ensure turn order postflop
-        pass
+        assert sum(p1_first_card) == 2
+        assert sum(p1_second_card) == 2
+    if done:
+        break
     a = 0
