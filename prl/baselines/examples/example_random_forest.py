@@ -1,12 +1,11 @@
+import joblib
 import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import random_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV, cross_val_score
-import joblib
+from torch.utils.data import random_split
 
 from prl.baselines.supervised_learning.training.dataset import InMemoryDataset
+
 input_dir = "/home/sascha/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50"
 dataset = InMemoryDataset(input_dir)
 total_len = len(dataset)
@@ -22,6 +21,9 @@ gen = torch.Generator().manual_seed(1)
 train, test, val = random_split(dataset, [train_len, test_len, val_len], generator=gen)
 
 # Defining the Random Forest model
+# # Loading the saved model
+# filename = 'random_forest.sav'
+best_model = joblib.load(filename)
 model = RandomForestClassifier()
 
 # Defining the hyperparameters to tune
