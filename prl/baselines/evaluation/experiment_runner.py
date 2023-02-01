@@ -6,15 +6,15 @@ import numpy as np
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as COLS
 from prl.environment.steinberger.PokerRL import Poker
 
-from prl.baselines.evaluation.core.experiment import PokerExperiment, DEFAULT_DATE, DEFAULT_VARIANT, DEFAULT_CURRENCY, \
-    PokerExperiment_EarlyStopping
+from prl.baselines.evaluation.core.experiment import DEFAULT_DATE, DEFAULT_VARIANT, DEFAULT_CURRENCY
+from prl.baselines.evaluation.core.experiment import PokerExperiment
 from prl.baselines.evaluation.core.runner import ExperimentRunner
 from prl.baselines.evaluation.stats import PlayerStats
 from prl.baselines.evaluation.utils import pretty_print, cards2str
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
+from prl.baselines.supervised_learning.data_acquisition.core.parser import Action
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, PlayerStack, ActionType, \
-    PlayerWithCards, PlayerWinningsCollected, Action, PokerEpisode
-from prl.baselines.supervised_learning.data_acquisition.select_players import PlayerStat
+    PlayerWithCards, PlayerWinningsCollected, PokerEpisode
 from prl.baselines.utils.num_parsers import parse_num
 
 POSITIONS_HEADS_UP = ['btn', 'bb']  # button is small blind in Heads Up situations
@@ -380,27 +380,6 @@ class RLLibPokerExperimentRunner(ExperimentRunner):
             self.player_names = [p.name for p in self.participants]
         return self._run_episodes(experiment)
 
-import time
-from dataclasses import dataclass
-from typing import List, Dict, Optional
-
-import numpy as np
-from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as COLS
-from prl.environment.steinberger.PokerRL import Poker
-
-from prl.baselines.evaluation.core.experiment import PokerExperiment, DEFAULT_DATE, DEFAULT_VARIANT, DEFAULT_CURRENCY, \
-    PokerExperiment_EarlyStopping
-from prl.baselines.evaluation.core.runner import ExperimentRunner
-from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
-from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, PlayerStack, ActionType, \
-    PlayerWithCards, PlayerWinningsCollected, Action, PokerEpisode
-from prl.baselines.utils.num_parsers import parse_num
-
-POSITIONS_HEADS_UP = ['btn', 'bb']  # button is small blind in Heads Up situations
-POSITIONS = ['btn', 'sb', 'bb', 'utg', 'mp', 'co']
-STAGES = [Poker.PREFLOP, Poker.FLOP, Poker.TURN, Poker.RIVER]
-ACTION_TYPES = [ActionType.FOLD, ActionType.CHECK_CALL, ActionType.RAISE]
-
 
 @dataclass
 class PlayerWithCardsAndPosition:
@@ -671,6 +650,7 @@ class PokerExperimentRunner(ExperimentRunner):
                    f"collected ${amt} and " \
                    f"showed {cards2str(cards)}"
         print(res)
+
     def _run_single_episode(self,
                             ep_id) -> PokerEpisode:
         # --- SETUP AND RESET ENVIRONMENT ---
