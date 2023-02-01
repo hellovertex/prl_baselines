@@ -626,10 +626,6 @@ class PokerExperimentRunner(ExperimentRunner):
 
             if done:
                 showdown_hands = self._get_showdown_hands(remaining_players)
-                if self.verbose:
-                    # print summary
-                    a = 1
-                    pass
 
             legal_moves = self.backend.get_legal_actions()
             observation = {'obs': [obs], 'legal_moves': [legal_moves]}
@@ -688,6 +684,12 @@ class PokerExperimentRunner(ExperimentRunner):
 
         # player_hands: List[PlayerWithCardsAndPosition] = self.get_player_hands(env.env)
         player_hands = self.get_player_hands()
+        if self.verbose:
+            # print summary
+            # Player xy collected $200 and showed
+            # Player yz collected $200 and showed
+            # todo def print_summary(...)
+            a = 1
         return PokerEpisode(date=DEFAULT_DATE,
                             hand_id=ep_id,
                             variant=DEFAULT_VARIANT,
