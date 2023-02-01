@@ -50,10 +50,10 @@ class MCAgent:
 
     def __init__(self, ckpt_path, num_players):
         """ckpt path may be something like ./ckpt/ckpt.pt"""
-        self._mc_iters = 50000
+        self._mc_iters = 10000
         self.num_players = num_players
         self.tightness = .1  # percentage of hands played, "played" meaning not folded immediately
-        self.acceptance_threshold = 0.0  # minimum certainty of probability of network to perform action
+        self.acceptance_threshold = 0.5  # minimum certainty of probability of network to perform action
         self._card_evaluator = HandEvaluator_MonteCarlo()
         self.load_model(ckpt_path)
 
@@ -117,9 +117,12 @@ class MCAgent:
             obs[cols.Curr_bet_p5],
         ]) + obs[cols.Pot_amt]
         pot_odds = total_to_call / (potsize + total_to_call)
-        if win_prob < pot_odds:
-            if random() > self.tightness:  # tightness is equal to % of hands played, e.g. 0.15
-                return ActionSpace.FOLD.value
+        # ignore pot odds preflop, we marginalize fold probability via acceptance threshold
+        if not obs[cols.Round_preflop]:
+            # fold when bad pot odds are not good enough according to MC simulation
+            if win_prob < pot_odds:
+                if random() > self.tightness:  # tightness is equal to % of hands played, e.g. 0.15
+                    return ActionSpace.FOLD.value
         certainty = torch.max(softmax(self._logits, dim=1)).detach().numpy().item()
         # if the probability is high enough, we take the action suggested by the neural network
         if certainty > self.acceptance_threshold:

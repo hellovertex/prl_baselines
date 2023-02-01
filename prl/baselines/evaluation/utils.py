@@ -119,9 +119,11 @@ def get_round(obs):
 def pretty_print(player_id, obs, action):
     cards = get_player_cards(obs)
     round = get_round(obs)
+    acted = ActionSpace(action).name
     result = f'Player {player_id} performed ' \
-           f'action {ActionSpace(action).name} with cards {cards[0]} ' \
-           f'in {round}'
+             f'action {"CHECK_FOLD" if acted == "FOLD" else acted} ' \
+             f'with cards {cards[0]} ' \
+             f'in {round}'
     print(result)
     return result
 

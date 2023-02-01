@@ -69,7 +69,7 @@ board_cards = make_board_cards(board)
 
 deck = np.empty(shape=(13 * 4, 2), dtype=np.int8)
 deck[:len(board_cards)] = board_cards
-player_hands = ['[Ks 7d]', '[2c 2h]', '[Jd Js]', '[7c 5h]', '[3s 3h]', '[4s 4h]']
+player_hands = ['[Ks 7d]', '[2c 2h]', '[Jd Js]', '[7c 5h]', '[7s 7h]', '[4s 4h]']
 player_hands = [card_tokens(cards) for cards in player_hands]
 hands = []
 for cards in player_hands:
@@ -120,17 +120,21 @@ while True:
     the transition for a2 survives
     """
     # note after done we dont increment i, so the last remaining player gets obs
-    assert p0_first_card[r00] == 1
-    assert p0_first_card[13 + s00] == 1
-    assert p0_second_card[r01] == 1
-    assert p0_second_card[13 + s01] == 1
-    if not done:
-        assert sum(p1_first_card) == 0
-        assert sum(p1_second_card) == 0
+    if obs[fts.Round_preflop]:
+        assert p0_first_card[r00] == 1
+        assert p0_first_card[13 + s00] == 1
+        assert p0_second_card[r01] == 1
+        assert p0_second_card[13 + s01] == 1
+        if not done:
+            assert sum(p1_first_card) == 0
+            assert sum(p1_second_card) == 0
+        else:
+            assert sum(p1_first_card) == 2
+            assert sum(p1_second_card) == 2
+        if done:
+            break
     else:
-        assert sum(p1_first_card) == 2
-        assert sum(p1_second_card) == 2
-    if done:
-        break
-
+        # postflop the turn order changes and BTN is always last
+        # todo what do we have to assert here in order to ensure turn order postflop
+        pass
     a = 0
