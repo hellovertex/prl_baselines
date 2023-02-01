@@ -20,8 +20,6 @@ STAGES = [Poker.PREFLOP, Poker.FLOP, Poker.TURN, Poker.RIVER]
 ACTION_TYPES = [ActionType.FOLD, ActionType.CHECK_CALL, ActionType.RAISE]
 
 
-
-
 @dataclass
 class PlayerWithCardsAndPosition:
     cards: str  # '[Ah Jd]' <-- encoded like this, due to compatibility with parsers
@@ -192,12 +190,12 @@ class PokerExperimentRunner(ExperimentRunner):
                 raise_amount = 0
         self.total_actions_dict[what] += 1
         return Action(stage=stage,
-                                player_name=f'{self.player_names[agent_idx]}',
-                                action_type=ACTION_TYPES[a[0]],
-                                raise_amount=raise_amount,
-                                info={
-                                    'total_call_or_bet_amt_minus_current_bet': raise_amount - current_bet_before_action
-                                })
+                      player_name=f'{self.player_names[agent_idx]}',
+                      action_type=ACTION_TYPES[a[0]],
+                      raise_amount=raise_amount,
+                      info={
+                          'total_call_or_bet_amt_minus_current_bet': raise_amount - current_bet_before_action
+                      })
 
     def _run_game(self, env, initial_observation, btn_idx):
         done = False
@@ -254,25 +252,26 @@ class PokerExperimentRunner(ExperimentRunner):
 
     def get_player_hands(self):
         env = self.backend
+        # parse cards from 2d int to str
         player_cards = [env.cards2str(
             env.get_hole_cards_of_player(i)
         ) for i in range(len(env.seats))]
         hands = ['[' + h.rstrip()[:-1] + ']' for h in player_cards]
         hands = [h.replace(',', '') for h in hands]
-        offset = self.agent_map[]
-        agent_hands = list(np.roll(hands, btn_idx))
-        positions = [Positions6Max(i) for i in list(np.roll([j for j in range(len(env.seats))], btn_idx))]
-        player_with_cards_and_positions = []
-        for seat_id, hand in enumerate(agent_hands):
-            cards = agent_hands[seat_id]
-            name = f'{self.player_names[seat_id]}'
+        # str repr of table positions btn, sb, bb
+        positions = [Positions6Max(i) for i in range(self.num_players)]
+        player_hands = []
+        # map hand to agent_name using index from self.agent_map
+        for seat_id, hand in enumerate(hands):
+            agent_id = self.agent_map[seat_id]
+            name = f'{self.player_names[agent_id]}'
             position = f'{positions[seat_id].name}'
-            if position == 'SB' and len(agent_hands) == 2:
+            if position == Positions6Max.SB.name and len(hands) == 2:
                 position = 'BB'  # for two players only, BTN becomes SB and SB becomes BB
-            player_with_cards_and_positions.append(PlayerWithCardsAndPosition(cards=cards,
-                                                                              name=name,
-                                                                              position=position))
-        return player_with_cards_and_positions
+            player_hands.append(PlayerWithCardsAndPosition(cards=hand,
+                                                           name=name,
+                                                           position=position))
+        return player_hands
 
     def _run_single_episode(self,
                             ep_id) -> PokerEpisode:
@@ -299,16 +298,16 @@ class PokerExperimentRunner(ExperimentRunner):
         board = self._make_board()
 
         # player_hands: List[PlayerWithCardsAndPosition] = self.get_player_hands(env.env)
-        player_hands = self.get_player_hands(env.env, btn_idx)
+        player_hands = self.get_player_hands()
         return PokerEpisode(date=DEFAULT_DATE,
                             hand_id=ep_id,
                             variant=DEFAULT_VARIANT,
                             currency_symbol=DEFAULT_CURRENCY,
-                            num_players=num_players,
+                            num_players=self.num_players,
                             blinds=blinds,
                             ante=ante,
                             player_stacks=initial_player_stacks,
-                            btn_idx=btn_idx,
+                            btn_idx=self.agent_map[Positions6Max.BTN],
                             board_cards=board,
                             actions_total=actions_total,
                             winners=winners,
