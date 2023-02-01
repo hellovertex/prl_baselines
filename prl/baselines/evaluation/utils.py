@@ -1,3 +1,5 @@
+from typing import List, Dict
+
 import numpy as np
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols, AugmentObservationWrapper
 from prl.environment.Wrappers.base import ActionSpace
@@ -128,6 +130,20 @@ def pretty_print(player_id, obs, action):
     return result
 
 
+def get_reset_config(player_hands: List[str],
+                     board=None) -> Dict:
+    """
+    In: ['[6s 6d]', '[9s 9d]', '[Jd Js]']
+    Out: state_dict used to initialize PokerRL environment with the specified player
+    and board cards via env.reset(config)
+    """
+    board = board if board else '[6h Ts Td 9c Jc]'
+
+    reset_config = {}
+
+    return reset_config
+
+
 def get_default_env(num_players, starting_stack_size=None):
     starting_stack_size = 20000 if not starting_stack_size else starting_stack_size
     stack_sizes = [starting_stack_size for _ in range(num_players)]
@@ -148,17 +164,18 @@ def print_player_actions(obs):
 
 
 def get_player_stacks(obs, normalization_sum=1):
-    stacks = {0:  obs[cols.Stack_p0] * normalization_sum,
-              1:  obs[cols.Stack_p1] * normalization_sum,
-              2:  obs[cols.Stack_p2] * normalization_sum,
-              3:  obs[cols.Stack_p3] * normalization_sum,
-              4:  obs[cols.Stack_p4] * normalization_sum,
-              5:  obs[cols.Stack_p5] * normalization_sum}
+    stacks = {0: obs[cols.Stack_p0] * normalization_sum,
+              1: obs[cols.Stack_p1] * normalization_sum,
+              2: obs[cols.Stack_p2] * normalization_sum,
+              3: obs[cols.Stack_p3] * normalization_sum,
+              4: obs[cols.Stack_p4] * normalization_sum,
+              5: obs[cols.Stack_p5] * normalization_sum}
     return stacks
+
 
 def print_player_stacks(obs, normalization_sum=1):
     stacks = get_player_stacks(obs, normalization_sum)
     res = ""
-    for k,v in stacks.items():
+    for k, v in stacks.items():
         res += f"Player {k} stack is: {v} chips.\n"
     print(res)
