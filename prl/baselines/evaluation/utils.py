@@ -6,6 +6,8 @@ from prl.environment.Wrappers.base import ActionSpace
 from prl.environment.steinberger.PokerRL import Poker, NoLimitHoldem
 from prl.environment.steinberger.PokerRL.game._.rl_env.game_rules import HoldemRules
 
+from prl.baselines.supervised_learning.data_acquisition.environment_utils import make_board_cards, card_tokens, card
+
 N_RANKS = 13
 N_SUITS = 4
 CI = N_RANKS + N_SUITS
@@ -138,10 +140,18 @@ def get_reset_config(player_hands: List[str],
     and board cards via env.reset(config)
     """
     board = board if board else '[6h Ts Td 9c Jc]'
-
-    reset_config = {}
-
-    return reset_config
+    board_cards = make_board_cards(board)
+    deck = np.empty(shape=(13 * 4, 2), dtype=np.int8)
+    deck[:len(board_cards)] = board_cards
+    player_hands = [card_tokens(cards) for cards in player_hands]
+    hands = []
+    for cards in player_hands:
+        hand = [card(token) for token in cards]
+        hands.append(hand)
+    initial_board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
+    return {'deck_state_dict': {'deck': {'deck_remaining': deck},  # np.ndarray(shape=(52-n_cards*num_players, 2))
+            'board': initial_board,  # np.ndarray(shape=(n_cards, 2))
+            'hand': hands}}
 
 
 def get_default_env(num_players, starting_stack_size=None):

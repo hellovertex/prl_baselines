@@ -7,6 +7,7 @@ from prl.environment.Wrappers.base import ActionSpace
 from prl.environment.steinberger.PokerRL import NoLimitHoldem, Poker
 
 from prl.baselines.evaluation.analyzer import PlayerAnalyzer
+from prl.baselines.evaluation.utils import get_reset_config
 from prl.baselines.examples.examples_tianshou_env import MCAgent
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import make_board_cards, card_tokens, card
 
@@ -53,20 +54,8 @@ agents = [
 # # ['6h', 'Ts'] to [[5,3], [5,0]]
 # hand = [card(token) for token in showdown_cards]
 board = '[6h Ts Td 9c Jc]'
-board_cards = make_board_cards(board)
-
-deck = np.empty(shape=(13 * 4, 2), dtype=np.int8)
-deck[:len(board_cards)] = board_cards
 player_hands = ['[6s 6d]', '[9s 9d]', '[Jd Js]']
-player_hands = [card_tokens(cards) for cards in player_hands]
-hands = []
-for cards in player_hands:
-    hand = [card(token) for token in cards]
-    hands.append(hand)
-initial_board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
-state_dict = {'deck': {'deck_remaining': deck},  # np.ndarray(shape=(52-n_cards*num_players, 2))
-              'board': initial_board,  # np.ndarray(shape=(n_cards, 2))
-              'hand': hands}
+state_dict = get_reset_config(player_hands, board)
 unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_test"
 
 ckpt_path = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
