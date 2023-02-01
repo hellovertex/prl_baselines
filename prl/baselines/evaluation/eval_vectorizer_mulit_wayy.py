@@ -1,3 +1,10 @@
+# make agents
+# make environment
+# run games in self play
+# create episodes from games
+# convert episodes to 888 format (done)
+# write episodes to text file
+
 from typing import Tuple
 
 import numpy as np
@@ -9,6 +16,8 @@ from prl.environment.steinberger.PokerRL import NoLimitHoldem, Poker
 from prl.baselines.evaluation.analyzer import PlayerAnalyzer
 from prl.baselines.examples.examples_tianshou_env import MCAgent
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import make_board_cards, card_tokens, card
+
+from prl.baselines.evaluation.utils import print_player_cards, pretty_print
 
 
 def parse_action(env, int_action) -> Tuple:
@@ -28,7 +37,7 @@ def parse_action(env, int_action) -> Tuple:
         raise ValueError
 
 
-num_players = 5
+num_players = 6
 starting_stack_size = 20000
 stack_sizes = [starting_stack_size for _ in range(num_players)]
 args = NoLimitHoldem.ARGS_CLS(n_seats=len(stack_sizes),
@@ -44,11 +53,12 @@ feature_names = list(wrapped_env.obs_idx_dict.keys())
 ckpt = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
 
 agents = [
-    MCAgent(ckpt),
-    MCAgent(ckpt),
-    MCAgent(ckpt),
-    MCAgent(ckpt),
-    MCAgent(ckpt),
+    MCAgent(ckpt, num_players),
+    MCAgent(ckpt, num_players),
+    MCAgent(ckpt, num_players),
+    MCAgent(ckpt, num_players),
+    MCAgent(ckpt, num_players),
+    MCAgent(ckpt, num_players),
 ]
 # # '[6h Ts]' to ['6h', 'Ts']
 # showdown_cards = card_tokens(final_player.cards)
@@ -59,7 +69,7 @@ board_cards = make_board_cards(board)
 
 deck = np.empty(shape=(13 * 4, 2), dtype=np.int8)
 deck[:len(board_cards)] = board_cards
-player_hands = ['[6s 6d]', '[9s 9d]', '[Jd Js]', '[Qd Qs]', '[Kd Ks]']
+player_hands = ['[Ks 7d]', '[2c 2h]', '[Jd Js]', '[7c 5h]', '[7s 7h]', '[4s 4h]']
 player_hands = [card_tokens(cards) for cards in player_hands]
 hands = []
 for cards in player_hands:
@@ -72,20 +82,20 @@ state_dict = {'deck': {'deck_remaining': deck},  # np.ndarray(shape=(52-n_cards*
 unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_test"
 
 ckpt_path = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
-baseline = MCAgent(ckpt_path)
+baseline = MCAgent(ckpt_path, num_players=num_players)
 
 obs, rew, done, info = wrapped_env.reset({'deck_state_dict': state_dict})
 assert len(agents) == num_players == len(stack_sizes)
-i = 3
+i = 0 if num_players < 4 else 3
 while True:
     legal_moves = wrapped_env.get_legal_moves_extended()
     action = agents[i].compute_action(obs, legal_moves)
     # action = parse_action(wrapped_env, action)
     pred = baseline.compute_action(obs, legal_moves)
+    pretty_print(i, obs, action)
     obs, rew, done, info = wrapped_env.step(action)
-
-    if not done:
-        i = env.current_player.seat_id
+    # print_player_cards(obs)
+    i = env.current_player.seat_id
     # make sure the card feature columns mathc the cards of the resp players
     # make sure the current bet feature columns mathc the current bet of the resp players
     # stack etc make sure they all match
@@ -109,6 +119,9 @@ while True:
     the transition for a2 survives
     """
     # note after done we dont increment i, so the last remaining player gets obs
+    # if not obs[fts.Round_preflop]:
+    #     # postflop the turn order changes and BTN is always last
+    #     i = env.current_player.seat_id
     assert p0_first_card[r00] == 1
     assert p0_first_card[13 + s00] == 1
     assert p0_second_card[r01] == 1
@@ -121,5 +134,4 @@ while True:
         assert sum(p1_second_card) == 2
     if done:
         break
-
     a = 0

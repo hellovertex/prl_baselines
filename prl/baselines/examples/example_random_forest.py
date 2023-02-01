@@ -2,6 +2,7 @@ import joblib
 import torch
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV, cross_val_score
+from tensorboardX import SummaryWriter
 from torch.utils.data import random_split
 
 from prl.baselines.supervised_learning.training.dataset import InMemoryDataset
@@ -23,7 +24,7 @@ train, test, val = random_split(dataset, [train_len, test_len, val_len], generat
 # Defining the Random Forest model
 # # Loading the saved model
 # filename = 'random_forest.sav'
-best_model = joblib.load(filename)
+# best_model = joblib.load(filename)
 model = RandomForestClassifier()
 
 # Defining the hyperparameters to tune
@@ -33,10 +34,36 @@ param_grid = {
     'min_samples_split': [2, 5, 10, 20],
 }
 
+# Initializing the SummaryWriter
+writer = SummaryWriter()
+
 # Performing cross-validation and hyperparameter tuning using GridSearchCV
 grid_search = GridSearchCV(model, param_grid, cv=5)
 grid_search.fit(train.x, train.y)
+# # Evaluating the updated model's generalization performance
+# train_predictions = best_model.predict(train)
+# test_predictions = best_model.predict(test)
+#
+# train_accuracy = accuracy_score(train_labels, train_predictions)
+# test_accuracy = accuracy_score(test_labels, test_predictions)
+# train_precision = precision_score(train_labels, train_predictions)
+# test_precision = precision_score(test_labels, test_predictions)
+# train_recall = recall_score(train_labels, train_predictions)
+# test_recall = recall_score(test_labels, test_predictions)
+# train_f1 = f1_score(train_labels, train_predictions)
+# test_f1 = f1_score(test_labels, test_predictions)
+#
+# # Writing the metrics to TensorBoard
+# writer.add_scalar('Train/Accuracy', train_accuracy, 0)
+# writer.add_scalar('Test/Accuracy', test_accuracy, 0)
+# writer.add_scalar('Train/Precision', train_precision, 0)
+# writer.add_scalar('Test/Precision', test_precision, 0)
+# writer.add_scalar('Train/Recall', train_recall, 0)
+# writer.add_scalar('Test/Recall', test_recall, 0)
+# writer.add_scalar('Train/F1', train_f1, 0)
+# writer.add_scalar('Test/F1', test_f1, 0)
 
+writer.close()
 # Selecting the best model
 best_model = grid_search.best_estimator_
 
