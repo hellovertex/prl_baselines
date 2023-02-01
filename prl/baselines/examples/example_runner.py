@@ -20,8 +20,6 @@ STAGES = [Poker.PREFLOP, Poker.FLOP, Poker.TURN, Poker.RIVER]
 ACTION_TYPES = [ActionType.FOLD, ActionType.CHECK_CALL, ActionType.RAISE]
 
 
-def _make_board(board: str) -> str:
-    return f"[{board.replace(',', '').rstrip()}]"
 
 
 @dataclass
@@ -50,6 +48,10 @@ class PokerExperimentRunner(ExperimentRunner):
         self._times_taken_to_compute_action = []
         self._times_taken_to_step_env = []
 
+    def _make_board(self) -> str:
+        board = self.backend.cards2str(self.backend.board)
+        return f"[{board.replace(',', '').rstrip()}]"
+
     def _get_starting_stacks_relative_to_agents(self) -> List[PlayerStack]:
         """ Stacks at the beginning of every episode, not during or after."""
         # seats are gotten from the environment and start with the button
@@ -69,22 +71,25 @@ class PokerExperimentRunner(ExperimentRunner):
         return player_stacks
 
     def _get_money_collected(self,
-                             env,
                              initial_stacks: List[PlayerStack],
-                             payouts: Dict[int, str],
-                             btn_idx: int) -> List[PlayerWinningsCollected]:
+                             payouts: Dict[int, str]
+                             ) -> List[PlayerWinningsCollected]:
         money_collected = []
         # env.env.seats always start with the button
         # initial_stacks are our fixed agents, where anyone could have the button
         # agent_idx relative to button
         for pid, payout in payouts.items():
+            agent_id = self.agent_map[pid]
             # Note: indices are relative to button
-            gain = env.env.seats[pid].stack - int(initial_stacks[(pid + btn_idx) % self.num_players].stack[1:])
-            # Note: indices are reversed relative to our agents
-            if (int(gain) <= 0):
-                print("debug")
+            stack_t0 = self.backend.seats[pid].starting_stack_this_episode
+            stack_t1 = self.backend.seats[pid].stack
+            # e.g. bb will have gain=20050 - 20000=50 if sb folded to bb
+            # in this case sb will have gain=19950 - 20000 = - 50
+            # but since sb is not in payouts, the gain must be non-negative
+            gain = stack_t1 - stack_t0
+            assert not gain < 0
             money_collected.append(
-                PlayerWinningsCollected(player_name=f'{self.player_names[(pid + btn_idx) % self.num_players]}',
+                PlayerWinningsCollected(player_name=f'{self.player_names[agent_id]}',
                                         collected="$" + str(int(gain)),
                                         rake=None))
         return money_collected
@@ -170,6 +175,30 @@ class PokerExperimentRunner(ExperimentRunner):
         assert obs[COLS.Ante] == 0  # games with ante not supported
         return ante, blinds
 
+    def record_last_action(self, agent_idx, stage, current_bet_before_action):
+        a = self.backend.last_action
+        what, how_much, who = a
+        # -1 is default for fold and check --> clip -1 to 0
+        raise_amount = max(how_much, 0)
+        bb_acted = who == self.backend.BB_POS
+        quantity_equals_bb = how_much == self.backend.BIG_BLIND
+        is_check_call = what == ActionType.CHECK_CALL
+        # if it is preflop, the acting player is the big blind
+        # and the action is call with amount equal to big blind
+        # then we actually have to make it a check
+        # instead of call by setting raise amount to zero
+        if bb_acted and quantity_equals_bb and is_check_call:
+            if stage == 'preflop':
+                raise_amount = 0
+        self.total_actions_dict[what] += 1
+        return Action(stage=stage,
+                                player_name=f'{self.player_names[agent_idx]}',
+                                action_type=ACTION_TYPES[a[0]],
+                                raise_amount=raise_amount,
+                                info={
+                                    'total_call_or_bet_amt_minus_current_bet': raise_amount - current_bet_before_action
+                                })
+
     def _run_game(self, env, initial_observation, btn_idx):
         done = False
         showdown_hands = None
@@ -184,7 +213,9 @@ class PokerExperimentRunner(ExperimentRunner):
                          'river': [],
                          'as_sequence': []}
         while not done:
-            # -------- ACT -----------
+            # -------------------------------------
+            # --------------- ACT -----------------
+            # -------------------------------------
             t0 = time.time()
             if self.run_from_action_plan:
                 a = next(self.iter_actions)
@@ -192,54 +223,43 @@ class PokerExperimentRunner(ExperimentRunner):
             else:
                 action = self.participants[agent_idx].agent.act(observation, None)
             self._times_taken_to_compute_action.append(time.time() - t0)
-
+            # -------------------------------------
             # -------- STEP ENVIRONMENT -----------
+            # -------------------------------------
             remaining_players = self._get_remaining_players()
-            stage = Poker.INT2STRING_ROUND[env.env.current_round]
-            current_bet_before_action = env.current_player.current_bet
+            stage = Poker.INT2STRING_ROUND[self.backend.current_round]
+            current_bet_before_action = self.env.current_player.current_bet
             t0 = time.time()
             obs, _, done, info = env.step(action)
             self._times_taken_to_step_env.append(time.time() - t0)
+            # -------------------------------------
             # -------- RECORD LAST ACTION ---------
-            a = env.env.last_action
-            raise_amount = max(a[1], 0)  # if a[0] == ActionType.RAISE else -1
-            # set raise amount to zero if it is preflop, the acting player is the big blind
-            # and the action is call with amount equal to big blind
-            # then we actually have to make it a check
-            if a[2] == env.env.BB_POS and a[1] == env.env.BIG_BLIND and a[0] == 1:
-                if stage == 'preflop':
-                    raise_amount = 0
-            episode_action = Action(stage=stage,
-                                    player_name=f'{self.player_names[agent_idx]}',
-                                    action_type=ACTION_TYPES[a[0]],
-                                    raise_amount=raise_amount,
-                                    info={
-                                        'total_call_or_bet_amt_minus_current_bet': raise_amount - current_bet_before_action
-                                    })
-
+            # -------------------------------------
+            episode_action = self.record_last_action(agent_idx=agent_idx,
+                                                     stage=stage,
+                                                     current_bet_before_action=current_bet_before_action)
             actions_total[stage].append(episode_action)
             actions_total['as_sequence'].append(episode_action)
-            self.total_actions_dict[a[0]] += 1
-            # if not done, prepare next turn
+
             if done:
                 showdown_hands = self._get_showdown_hands(remaining_players, a, btn_idx)
 
-                break
-            legal_moves = env.env.get_legal_actions()
+            legal_moves = self.backend.get_legal_actions()
             observation = {'obs': [obs], 'legal_moves': [legal_moves]}
 
             # -------- SET NEXT AGENT -----------
-            # btn_idx is the index of the button relative to our agent list
-            # seat_id is relative to the button
-            # so to translate seat_id to agent_idx, we must roll this by btn_idx
-            agent_idx = (btn_idx + env.env.current_player.seat_id) % self.num_players
+            agent_idx = self.agent_map[self.backend.current_player.seat_id]
 
         return actions_total, showdown_hands, info
 
-    def get_player_hands(self, env, btn_idx):
-        player_cards = [env.cards2str(env.get_hole_cards_of_player(i)) for i in range(len(env.seats))]
+    def get_player_hands(self):
+        env = self.backend
+        player_cards = [env.cards2str(
+            env.get_hole_cards_of_player(i)
+        ) for i in range(len(env.seats))]
         hands = ['[' + h.rstrip()[:-1] + ']' for h in player_cards]
         hands = [h.replace(',', '') for h in hands]
+        offset = self.agent_map[]
         agent_hands = list(np.roll(hands, btn_idx))
         positions = [Positions6Max(i) for i in list(np.roll([j for j in range(len(env.seats))], btn_idx))]
         player_with_cards_and_positions = []
@@ -273,10 +293,10 @@ class PokerExperimentRunner(ExperimentRunner):
 
         winners = self._get_winners(showdown_hands=showdown_hands,
                                     payouts=info['payouts'])
-        money_collected = self._get_money_collected(env, initial_player_stacks, payouts=info['payouts'],
-                                                    btn_idx=btn_idx)
+        money_collected = self._get_money_collected(initial_player_stacks,
+                                                    payouts=info['payouts'])
 
-        board = _make_board(env.env.cards2str(env.env.board))
+        board = self._make_board()
 
         # player_hands: List[PlayerWithCardsAndPosition] = self.get_player_hands(env.env)
         player_hands = self.get_player_hands(env.env, btn_idx)
@@ -314,7 +334,7 @@ class PokerExperimentRunner(ExperimentRunner):
             for rel_btn, agent_idx in self.agent_map.items():
                 shifted_indices[rel_btn] = (agent_idx + 1) % exp.num_players
             self.agent_map = shifted_indices
-            
+
         print(self.total_actions_dict)
         print(f'Average time taken computing actions: '
               f'{np.mean(self._times_taken_to_compute_action) * 1000} ms')
@@ -335,7 +355,7 @@ class PokerExperimentRunner(ExperimentRunner):
         self.env = experiment.wrapped_env
         self.env_reset_config = experiment.env_reset_config
         self.backend = experiment.wrapped_env.env
-        
+
         # maps backend indices to agents/players 
         # need this because we move the button but backend has 
         # button always at position 0
