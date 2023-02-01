@@ -46,7 +46,7 @@ class PokerExperiment:
     """Might change in the future"""
     num_players: int  # 2 <= num_players <= 6
     env_cls = NoLimitHoldem
-    env: ENV_WRAPPER
+    wrapped_env: ENV_WRAPPER
     env_reset_config: Optional[Dict[str, Any]]
     starting_stack_sizes: Optional[List[int]]
     # candidates to add

@@ -35,6 +35,11 @@ class PlayerWithCardsAndPosition:
 class PokerExperimentRunner(ExperimentRunner):
     # run experiments using
     def __init__(self):
+        self.agent_winnings = None
+        self.backend = None
+        self.agent_map = None
+        self.env_reset_config = None
+        self.env = None
         self.player_names = None
         self.money_from_last_round = None
         self.iter_action_plan = None
@@ -45,7 +50,7 @@ class PokerExperimentRunner(ExperimentRunner):
         self._times_taken_to_compute_action = []
         self._times_taken_to_step_env = []
 
-    def _get_starting_stacks_relative_to_agents(self, env, num_players, btn_idx) -> List[PlayerStack]:
+    def _get_starting_stacks_relative_to_agents(self) -> List[PlayerStack]:
         """ Stacks at the beginning of every episode, not during or after."""
         # seats are gotten from the environment and start with the button
         # our agent who has the button can be at a different index than 0 in our agent list
@@ -53,10 +58,10 @@ class PokerExperimentRunner(ExperimentRunner):
         #
         player_stacks = []
         # relative to agents --> roll env->agent_list
-        seats = list(np.roll(env.env.seats, btn_idx))
-        for seat_id, seat in enumerate(seats):
-            player_name = f'{self.player_names[seat_id]}'
-            seat_display_name = f'Seat {seat_id + 1}'  # index starts at 1
+        for seat_id, seat in enumerate(self.env.seats):
+            agent_id = self.agent_map[seat_id]
+            player_name = f'{self.player_names[agent_id]}'
+            seat_display_name = f'Seat {agent_id + 1}'  # index starts at 1
             stack = "$" + str(seat.starting_stack_this_episode)
             player_stacks.append(PlayerStack(seat_display_name,
                                              player_name,
@@ -255,13 +260,11 @@ class PokerExperimentRunner(ExperimentRunner):
         return player_with_cards_and_positions
 
     def _run_single_episode(self,
-                            env,
-                            env_reset_config,
                             num_players,
                             btn_idx,
                             ep_id) -> PokerEpisode:
         # --- SETUP AND RESET ENVIRONMENT ---
-        obs, _, done, _ = env.reset(env_reset_config)
+        obs, _, done, _ = self.env.reset(self.env_reset_config)
         initial_player_stacks = self._get_starting_stacks_relative_to_agents(env,  # before reset
                                                                              num_players,
                                                                              btn_idx)
@@ -306,51 +309,30 @@ class PokerExperimentRunner(ExperimentRunner):
                             info={'player_hands': player_hands})
 
     def _run_episodes(self, experiment: PokerExperiment) -> List[PokerEpisode]:
-
-        env = experiment.env
-        env_reset_config = experiment.env_reset_config
-        num_players = experiment.num_players
-        n_episodes = experiment.max_episodes
-
+        exp = experiment
         poker_episodes = []
-        new_starting_stacks = None
-        # 1. set button index
-        # 2. run single episode
-        # 3. get final player stacks to initialize next round
         # ----- RUN EPISODES -----
-        for ep_id in range(n_episodes):
+        for ep_id in range(exp.max_episodes):
             print(ep_id)
-            # always move button to the next player
-            btn_idx = ep_id % num_players
+
             # along with all the stacks that are shifted 1 to the right
             # -------- Reset environment ------------
-            episode = self._run_single_episode(env=env,
-                                               env_reset_config=env_reset_config,
-                                               num_players=num_players,
-                                               btn_idx=btn_idx,
+            episode = self._run_single_episode(num_players=exp.num_players,
                                                ep_id=ep_id)
-            # rotate stacks, such that next player will be at 0
-            # [BTN UTG SB BB MP CO] will become [UTG SB BB MP CO BTN]
-            # todo check how env reacts when stacks contain 0, e.g. [250, 0, 150, ...]
-            new_starting_stacks = np.roll(
-                [p.stack for p in env.env.seats],  # current stacks before advancing button
-                -1  # button has advanced by 1, roll back its index relative to seats
-            ).astype(int).tolist()
-            # # top up players who are out of money
-            new_starting_stacks = [stack if stack > 0 else experiment.starting_stack_sizes[0] for stack in
-                                   new_starting_stacks]
-            env.env.set_stack_size(new_starting_stacks)
             poker_episodes.append(episode)
+
+            # always move button to the next player
+            # [BTN UTG SB BB MP CO] will become [UTG SB BB MP CO BTN]
+            shifted_indices = {}
+            for rel_btn, agent_idx in self.agent_map.items():
+                shifted_indices[rel_btn] = (agent_idx + 1) % exp.num_players
+            self.agent_map = shifted_indices
+            
         print(self.total_actions_dict)
         print(f'Average time taken computing actions: '
               f'{np.mean(self._times_taken_to_compute_action) * 1000} ms')
         print(f'Average time taken stepping environment: '
               f'{np.mean(self._times_taken_to_step_env) * 1000} ms')
-        # neural_net_predictions = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
-        # for p in self.participants:
-        #     for k, v in p.agent.policy.predictions_cumulative.items():
-        #         neural_net_predictions[k] += v
-        # print(f'Total neural net predictions: {neural_net_predictions}')
         return poker_episodes
 
     def run(self, experiment: PokerExperiment) -> List[PokerEpisode]:
@@ -363,6 +345,18 @@ class PokerExperimentRunner(ExperimentRunner):
         self.total_actions_dict = {ActionType.FOLD.value: 0,
                                    ActionType.CHECK_CALL.value: 0,
                                    ActionType.RAISE.value: 0}
+        self.env = experiment.wrapped_env
+        self.env_reset_config = experiment.env_reset_config
+        self.backend = experiment.wrapped_env.env
+        
+        # maps backend indices to agents/players 
+        # need this because we move the button but backend has 
+        # button always at position 0
+        self.agent_map = {}
+        self.agent_winnings = {}
+        for i in range(experiment.num_players):
+            self.agent_map[i] = i
+            self.agent_winnings[i] = 0
         # Actions can be generated via
         # 1) Using agents <--> participant.agent.act
         # 2) Using a predefined action list <--> next() on an iterator over actions
