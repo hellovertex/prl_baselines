@@ -24,6 +24,7 @@ DEFAULT_CURRENCY = "$"
 class PokerExperimentEvaluation:
     pass
 
+
 @dataclass
 class PokerExperimentParticipant:
     """Might change in the future"""
@@ -33,6 +34,19 @@ class PokerExperimentParticipant:
     starting_stack: Union[int, float]
     agent: tianshou.policy.BasePolicy
     config: Optional[Dict]
+
+
+def make_participants(agents, starting_stack, **kwargs) -> Tuple[PokerExperimentParticipant]:
+    """Returns list of agents using default participant represenation"""
+    participants = []
+    for i, agent in enumerate(agents):
+        participants.append(PokerExperimentParticipant(id=i,
+                                                       name=f'{type(agent).__name__}_Seat_{i + 1}',
+                                                       alias=f'Agent_{i}',
+                                                       starting_stack=starting_stack,
+                                                       agent=agent,
+                                                       config={}))
+    return tuple(participants)
 
 
 class PokerExperiment_EarlyStopping(enum.IntEnum):
@@ -64,3 +78,24 @@ class PokerExperiment:
     # This means len(from_action_plan) == max_episodes
     from_action_plan: Optional[List[List[Action]]]
     early_stopping_when: Optional[PokerExperiment_EarlyStopping] = None
+
+
+def make_default_experiment(env, participants, max_episodes=10, env_reset_config=None):
+    return PokerExperiment(
+        # env
+        num_players=len(participants),
+        wrapped_env=env,  # single environment to run sequential games on
+        env_reset_config=env_reset_config,
+        starting_stack_sizes=None,
+        # can pass {'deck_state_dict': Dict[str, Any]} to init the deck and player cards
+        # run
+        max_episodes=max_episodes,  # number of games to run
+        current_episode=0,
+        cbs_plots=[],
+        cbs_misc=[],
+        cbs_metrics=[],
+        # actors
+        participants=participants,  # wrapper around agents that hold rllib policies that act given observation
+        from_action_plan=None,  # compute action from fixed series of actions instead of calls to agent.act
+        # early_stopping_when=PokerExperiment_EarlyStopping.ALWAYS_REBUY_AND_PLAY_UNTIL_NUM_EPISODES_REACHED
+    )

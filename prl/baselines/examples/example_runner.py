@@ -154,16 +154,19 @@ class PokerExperimentRunner(ExperimentRunner):
                                         cards=self._parse_cards(cards)))
         return remaining_players
 
-    def _has_folded_last_turn(self, p: PlayerWithCards, last_action, btn_idx) -> bool:
-        return last_action[0] == 0 and f'{self.player_names[(last_action[2] + btn_idx) % self.num_players]}' == p.name
+    def _has_folded_last_turn(self, p: PlayerWithCards) -> bool:
+        last_who = self.backend.last_action[2]
+        last_what = self.backend.last_action[0]
+        target_player = f'{self.player_names[self.agent_map[last_who]]}' == p.name
+        folded = last_what == ActionType.FOLD
+        return target_player and folded
 
     def _get_showdown_hands(self,
-                            remaining_players: List[PlayerWithCards],
-                            last_action,
-                            btn_idx) -> List[PlayerWithCards]:
+                            remaining_players: List[PlayerWithCards]
+                            ) -> List[PlayerWithCards]:
         showdown_hands = []
         for p in remaining_players:
-            if not self._has_folded_last_turn(p, last_action, btn_idx):
+            if not self._has_folded_last_turn(p):
                 showdown_hands.append(p)
         return showdown_hands
 
@@ -197,7 +200,7 @@ class PokerExperimentRunner(ExperimentRunner):
                           'total_call_or_bet_amt_minus_current_bet': raise_amount - current_bet_before_action
                       })
 
-    def _run_game(self, env, initial_observation, btn_idx):
+    def _run_game(self, initial_observation):
         done = False
         showdown_hands = None
         info = {'player_hands': []}  # monkey patched
@@ -224,11 +227,11 @@ class PokerExperimentRunner(ExperimentRunner):
             # -------------------------------------
             # -------- STEP ENVIRONMENT -----------
             # -------------------------------------
-            remaining_players = self._get_remaining_players()
+            remaining_players: List[PlayerWithCards] = self._get_remaining_players()
             stage = Poker.INT2STRING_ROUND[self.backend.current_round]
             current_bet_before_action = self.env.current_player.current_bet
             t0 = time.time()
-            obs, _, done, info = env.step(action)
+            obs, _, done, info = self.env.step(action)
             self._times_taken_to_step_env.append(time.time() - t0)
             # -------------------------------------
             # -------- RECORD LAST ACTION ---------
@@ -240,7 +243,7 @@ class PokerExperimentRunner(ExperimentRunner):
             actions_total['as_sequence'].append(episode_action)
 
             if done:
-                showdown_hands = self._get_showdown_hands(remaining_players, a, btn_idx)
+                showdown_hands = self._get_showdown_hands(remaining_players)
 
             legal_moves = self.backend.get_legal_actions()
             observation = {'obs': [obs], 'legal_moves': [legal_moves]}

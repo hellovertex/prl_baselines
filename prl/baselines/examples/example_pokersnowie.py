@@ -5,7 +5,7 @@ from prl.environment.Wrappers.utils import init_wrapped_env
 
 from prl.baselines.agents.core.base_agent import RllibAgent
 from prl.baselines.agents.tianshou_policies import default_rainbow_params, get_rainbow_config
-from prl.baselines.evaluation.core.experiment import PokerExperiment, PokerExperimentParticipant
+from prl.baselines.evaluation.core.experiment import PokerExperiment, PokerExperimentParticipant, make_participants
 from prl.baselines.evaluation.pokersnowie.export import PokerExperimentToPokerSnowie
 from prl.baselines.examples.examples_tianshou_env import MCAgent
 
@@ -13,19 +13,6 @@ AGENT_CLS = Type[RllibAgent]
 POLICY_CONFIG = Dict[str, Any]
 STARTING_STACK = int
 AGENT_INIT_COMPONENTS = Tuple[AGENT_CLS, POLICY_CONFIG, STARTING_STACK]
-
-
-def make_participants(agents, starting_stack) -> Tuple[PokerExperimentParticipant]:
-    participants = []
-    for i, agent in enumerate(agents):
-        participants.append(PokerExperimentParticipant(id=i,
-                                                       name=f'{type(agent).__name__}_Seat_{i + 1}',
-                                                       alias=f'Agent_{i}',
-                                                       starting_stack=starting_stack,
-                                                       agent=agent,
-                                                       config={}))
-    return tuple(participants)
-
 
 if __name__ == '__main__':
     max_episodes = 100
@@ -49,9 +36,9 @@ if __name__ == '__main__':
     env = init_wrapped_env(**env_config)
 
     agents = [
-        MCAgent(ckpt),
-        MCAgent(ckpt),
-        MCAgent(ckpt),
+        MCAgent(ckpt,num_players),
+        MCAgent(ckpt,num_players),
+        MCAgent(ckpt,num_players),
     ]
     assert len(agents) == num_players == len(stack_sizes)
     participants = make_participants(agents, starting_stack)

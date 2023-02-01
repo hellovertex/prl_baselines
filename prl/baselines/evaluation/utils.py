@@ -128,8 +128,8 @@ def pretty_print(player_id, obs, action):
     return result
 
 
-def get_default_env(num_players):
-    starting_stack_size = 20000
+def get_default_env(num_players, starting_stack_size=None):
+    starting_stack_size = 20000 if not starting_stack_size else starting_stack_size
     stack_sizes = [starting_stack_size for _ in range(num_players)]
     args = NoLimitHoldem.ARGS_CLS(n_seats=len(stack_sizes),
                                   starting_stack_sizes_list=stack_sizes,
