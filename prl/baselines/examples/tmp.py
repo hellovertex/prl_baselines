@@ -53,12 +53,12 @@ feature_names = list(wrapped_env.obs_idx_dict.keys())
 ckpt = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
 
 agents = [
-    MCAgent(ckpt),
-    MCAgent(ckpt),
-    MCAgent(ckpt),
-    MCAgent(ckpt),
-    MCAgent(ckpt),
-    MCAgent(ckpt),
+    MCAgent(ckpt, num_players),
+    MCAgent(ckpt, num_players),
+    MCAgent(ckpt, num_players),
+    MCAgent(ckpt, num_players),
+    MCAgent(ckpt, num_players),
+    MCAgent(ckpt, num_players),
 ]
 # # '[6h Ts]' to ['6h', 'Ts']
 # showdown_cards = card_tokens(final_player.cards)
@@ -82,7 +82,7 @@ state_dict = {'deck': {'deck_remaining': deck},  # np.ndarray(shape=(52-n_cards*
 unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_test"
 
 ckpt_path = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
-baseline = MCAgent(ckpt_path)
+baseline = MCAgent(ckpt_path, num_players=num_players)
 
 obs, rew, done, info = wrapped_env.reset({'deck_state_dict': state_dict})
 assert len(agents) == num_players == len(stack_sizes)

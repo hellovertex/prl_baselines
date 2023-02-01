@@ -48,9 +48,10 @@ SUITE = 1
 
 class MCAgent:
 
-    def __init__(self, ckpt_path):
+    def __init__(self, ckpt_path, num_players):
         """ckpt path may be something like ./ckpt/ckpt.pt"""
-        self._mc_iters = 5000
+        self._mc_iters = 50000
+        self.num_players = num_players
         self.tightness = .1  # percentage of hands played, "played" meaning not folded immediately
         self.acceptance_threshold = 0.0  # minimum certainty of probability of network to perform action
         self._card_evaluator = HandEvaluator_MonteCarlo()
@@ -99,7 +100,10 @@ class MCAgent:
                         obs: Union[List, np.ndarray]):
         hero_cards_1d, board_cards_1d = self.look_at_cards(obs)
         # from cards get winning probabilityx
-        mc_dict = self._card_evaluator.run_mc(hero_cards_1d, board_cards_1d, 2, n_iter=self._mc_iters)
+        mc_dict = self._card_evaluator.run_mc(hero_cards_1d,
+                                              board_cards_1d,
+                                              self.num_players,
+                                              n_iter=self._mc_iters)
         # {won: 0, lost: 0, tied: 0}[
         win_prob = float(mc_dict['won'] / self._mc_iters)
         # todo: replace win_prob < .5
