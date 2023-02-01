@@ -17,7 +17,8 @@ from prl.baselines.evaluation.analyzer import PlayerAnalyzer
 from prl.baselines.examples.examples_tianshou_env import MCAgent
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import make_board_cards, card_tokens, card
 
-from prl.baselines.evaluation.utils import print_player_cards
+from prl.baselines.evaluation.utils import print_player_cards, pretty_print
+
 
 def parse_action(env, int_action) -> Tuple:
     """for testing only, we do not care about raise amounts,
@@ -68,7 +69,7 @@ board_cards = make_board_cards(board)
 
 deck = np.empty(shape=(13 * 4, 2), dtype=np.int8)
 deck[:len(board_cards)] = board_cards
-player_hands = ['[Ks 7d]', '[Ac Ah]', '[Jd Js]', '[2s 2h]', '[3s 3h]', '[4s 4h]']
+player_hands = ['[Ks 7d]', '[2c 2h]', '[Jd Js]', '[7c 5h]', '[3s 3h]', '[4s 4h]']
 player_hands = [card_tokens(cards) for cards in player_hands]
 hands = []
 for cards in player_hands:
@@ -85,14 +86,15 @@ baseline = MCAgent(ckpt_path)
 
 obs, rew, done, info = wrapped_env.reset({'deck_state_dict': state_dict})
 assert len(agents) == num_players == len(stack_sizes)
-i = 0
+i = 0 if num_players < 4 else 3
 while True:
     legal_moves = wrapped_env.get_legal_moves_extended()
     action = agents[i].compute_action(obs, legal_moves)
     # action = parse_action(wrapped_env, action)
     pred = baseline.compute_action(obs, legal_moves)
+    pretty_print(i, obs, action)
     obs, rew, done, info = wrapped_env.step(action)
-    print_player_cards(obs)
+    # print_player_cards(obs)
     if not done:
         i = (i + 1) % num_players
     # make sure the card feature columns mathc the cards of the resp players
