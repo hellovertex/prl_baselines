@@ -1,7 +1,7 @@
 import numpy as np
-from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols
+from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols, AugmentObservationWrapper
 from prl.environment.Wrappers.base import ActionSpace
-from prl.environment.steinberger.PokerRL import Poker
+from prl.environment.steinberger.PokerRL import Poker, NoLimitHoldem
 from prl.environment.steinberger.PokerRL.game._.rl_env.game_rules import HoldemRules
 
 N_RANKS = 13
@@ -128,11 +128,37 @@ def pretty_print(player_id, obs, action):
     return result
 
 
+def get_default_env(num_players):
+    starting_stack_size = 20000
+    stack_sizes = [starting_stack_size for _ in range(num_players)]
+    args = NoLimitHoldem.ARGS_CLS(n_seats=len(stack_sizes),
+                                  starting_stack_sizes_list=stack_sizes,
+                                  use_simplified_headsup_obs=False)
+    # return wrapped env instance
+    env = NoLimitHoldem(is_evaluating=True,
+                        env_args=args,
+                        lut_holder=NoLimitHoldem.get_lut_holder())
+    return AugmentObservationWrapper(env)
+
+
 def print_player_actions(obs):
     # todo consider adding card info* to past actions to make it easier to connect
     #  only for player 0 as the other cards are invisible
     pass
 
 
-def print_player_stacks(obs):
-    pass
+def get_player_stacks(obs, normalization_sum=1):
+    stacks = {0:  obs[cols.Stack_p0] * normalization_sum,
+              1:  obs[cols.Stack_p1] * normalization_sum,
+              2:  obs[cols.Stack_p2] * normalization_sum,
+              3:  obs[cols.Stack_p3] * normalization_sum,
+              4:  obs[cols.Stack_p4] * normalization_sum,
+              5:  obs[cols.Stack_p5] * normalization_sum}
+    return stacks
+
+def print_player_stacks(obs, normalization_sum=1):
+    stacks = get_player_stacks(obs, normalization_sum)
+    res = ""
+    for k,v in stacks.items():
+        res += f"Player {k} stack is: {v} chips.\n"
+    print(res)
