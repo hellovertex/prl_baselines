@@ -9,10 +9,12 @@ from prl.environment.steinberger.PokerRL import Poker
 from prl.baselines.evaluation.core.experiment import PokerExperiment, DEFAULT_DATE, DEFAULT_VARIANT, DEFAULT_CURRENCY, \
     PokerExperiment_EarlyStopping
 from prl.baselines.evaluation.core.runner import ExperimentRunner
-from prl.baselines.evaluation.utils import pretty_print
+from prl.baselines.evaluation.stats import PlayerStats
+from prl.baselines.evaluation.utils import pretty_print, cards2str
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, PlayerStack, ActionType, \
     PlayerWithCards, PlayerWinningsCollected, Action, PokerEpisode
+from prl.baselines.supervised_learning.data_acquisition.select_players import PlayerStat
 from prl.baselines.utils.num_parsers import parse_num
 
 POSITIONS_HEADS_UP = ['btn', 'bb']  # button is small blind in Heads Up situations
@@ -658,6 +660,17 @@ class PokerExperimentRunner(ExperimentRunner):
                                                            position=position))
         return player_hands
 
+    def print_summary(self, info):
+        # Player xy collected $200 and showed
+        # Player yz collected $200 and showed
+        res = ""
+        for pid, amt in info['payouts'].items():
+            cards = self.backend.get_hole_cards_of_player(pid)
+            agent_id = self.agent_map[pid]
+            res += f"Player {self.player_names[agent_id]} " \
+                   f"collected ${amt} and " \
+                   f"showed {cards2str(cards)}"
+        print(res)
     def _run_single_episode(self,
                             ep_id) -> PokerEpisode:
         # --- SETUP AND RESET ENVIRONMENT ---
@@ -685,11 +698,7 @@ class PokerExperimentRunner(ExperimentRunner):
         # player_hands: List[PlayerWithCardsAndPosition] = self.get_player_hands(env.env)
         player_hands = self.get_player_hands()
         if self.verbose:
-            # print summary
-            # Player xy collected $200 and showed
-            # Player yz collected $200 and showed
-            # todo def print_summary(...)
-            a = 1
+            self.print_summary(info)
         return PokerEpisode(date=DEFAULT_DATE,
                             hand_id=ep_id,
                             variant=DEFAULT_VARIANT,
@@ -751,10 +760,8 @@ class PokerExperimentRunner(ExperimentRunner):
         # need this because we move the button but backend has
         # button always at position 0
         self.agent_map = {}
-        self.agent_winnings = {}
         for i in range(experiment.num_players):
             self.agent_map[i] = i
-            self.agent_winnings[i] = 0
         # Actions can be generated via
         # 1) Using agents <--> participant.agent.act
         # 2) Using a predefined action list <--> next() on an iterator over actions
@@ -767,4 +774,7 @@ class PokerExperimentRunner(ExperimentRunner):
             self.participants = experiment.participants
             self.iter_action_plan = iter([])
             self.player_names = [p.name for p in self.participants]
+            self.agent_summary = {}
+            for i in range(experiment.num_players):
+                self.agent_summary[i] = {i: PlayerStats(self.player_names[i])}
         return self._run_episodes(experiment)
