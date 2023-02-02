@@ -28,8 +28,8 @@ def train_eval(abs_input_dir, params, log_interval, eval_interval):
     device = "cuda" if use_cuda else "cpu"
     epochs = params['max_epoch']
     for hdims in params['hdims']:
-        model = get_model(traindata, hidden_dims=hdims, device=device)
         for lr in params['lrs']:
+            model = get_model(traindata, hidden_dims=hdims, device=device)
             logdir = base_logdir + f'_{hdims}_{lr}'
             ckptdir = base_ckptdir + f'_{hdims}_{lr}'
             optim = torch.optim.Adam(model.parameters(), lr=lr)
@@ -164,7 +164,7 @@ if __name__ == "__main__":
     # filenames = glob.glob(os.environ["TRAIN_EVAL_SOURCE_DIR"]+"/**/*.txt",recursive=True)
     log_interval = eval_interval = 5  # epochs (i.e BATCH_SIZE * train_steps) environment steps
     params = {'hdims': [[256], [512], [256, 256], [512, 512]],
-              'lrs': [1e-6, 1e-5, 1e-7],
+              'lrs': [1e-6],  # we ruled out 1e-5 and 1e-7 by hand, 1e-6 is the best we found after multiple trainings
               # 'max_epoch': 5_000_000,
               'max_epoch': 10_000,
               'batch_size': 256,
