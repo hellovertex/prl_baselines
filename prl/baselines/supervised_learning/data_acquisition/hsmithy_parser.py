@@ -62,9 +62,11 @@ class HSmithyParser(Parser):
         Seat 1: edmundtrebus (big blind) folded on the Flop
         Seat 2: XOZAIH folded before Flop (didn't bet)
         """
+
     class PlayerCashedOutBeforeAwarded(ValueError):
         """When the message (pot not awarded as player cashed out) appears,
         the player cashed out before collecting the pot and we skip this game (happens very rarely)"""
+
     def __init__(self):
         # todo consider making HSmithyParser another abstract class and make derived PokerStars-Parser
         self._variant = None
@@ -296,7 +298,8 @@ class HSmithyParser(Parser):
         rake = re.compile(rf"Rake ([$€Â£￡]\d+.?\d*)").findall(episode)[0]
         collected = []
         for found in pattern.findall(episode):
-            collected.append(PlayerWinningsCollected(player_name=found[0].split("\n")[-1], collected=found[1], rake=rake))
+            collected.append(
+                PlayerWinningsCollected(player_name=found[0].split("\n")[-1], collected=found[1], rake=rake))
         if not collected or "cashed out" in episode:
             raise self.PlayerCashedOutBeforeAwarded()
         return collected
@@ -341,9 +344,11 @@ class HSmithyParser(Parser):
                             money_collected=money_collected,
                             info={'episode_str': episode})
 
-    def _parse_hands(self, hands_played) -> Generator[PokerEpisode, None, None]:
+    def _parse_hands(self, hands_played) -> List[PokerEpisode]:
+        parsed_hands = []
         for current in hands_played:  # c for current_hand
             # Only parse hands that went to Showdown stage, i.e. were shown
+            a = 1
             if not '*** SHOW DOWN ***' in current:
                 continue
 
@@ -355,41 +360,51 @@ class HSmithyParser(Parser):
                 continue
 
             try:
-                yield self._parse_episode(current, showdown)
+                hand = self._parse_episode(current, showdown)
+                parsed_hands.append(hand)
             except self._InvalidPlayerNameError as e:
                 # if an _InvalidPlayerNameError is thrown, we have encountered some weird player name like
                 #  é=mc².Fin  é=mc³.Start
                 # we can parse unicode characters and very exotic player names including those
                 # with multiple whitespaces but this name finally broke our nameparser
                 # Hence we skip these _very_ rare cases where the name is unparsable without further efforts
+                a = 1
                 continue
             except self._InvalidGameTypeError as e:
                 # We can encounter games where not only small blind,
                 # big blind, and ante are posted, but that contain lines like
                 # <'player one posts small & big blinds'>. We skip these games
                 # because our env does not support them.
+                a = 1
                 continue
             except self._PlayerLeavesDuringPotContributionError:
                 # Edge case that player leaves before rundown
+                a = 1
                 continue
             except self._CurrencyNotSupportedError:
                 # Only parse EUR, USD, GBP games
+                a = 1
                 continue
             except self._Utf8NotSupportedError:
                 # A _very_ small fraction of txt files encodes the €-sign as <â‚¬>.
                 # Since it would be extra effort to adjust the parser accordingly, we skip these games.
+                a = 1
                 continue
             except self._NoSmallAndBigBlindGameTypeError:
                 # Only games with a single small blind a single big blind are accepted.
                 # Text files included games with multiple small blinds. Maybe a bug in their crawler.
                 # We skip these games.
+                a = 1
                 continue
             except self._ShowDownHappenedButNoSummaryDataExists:
+                a = 1
                 continue
             except self.PlayerCashedOutBeforeAwarded:
+                a = 1
                 continue
+        return parsed_hands
 
-    def parse_file(self, file_path) -> Generator[PokerEpisode, None, None]:
+    def parse_file(self, file_path) -> List[PokerEpisode]:
         self._variant = 'NoLimitHoldem'  # todo parse variant from filename
         with open(file_path, 'r', encoding='utf-8') as f:  # pylint: disable=invalid-name,unspecified-encoding
             hand_database = f.read()

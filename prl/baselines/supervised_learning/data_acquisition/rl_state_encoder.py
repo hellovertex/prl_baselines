@@ -1,11 +1,14 @@
 from typing import List, Tuple, Dict, Optional
 
 import numpy as np
+from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL.game.Poker import Poker
 from prl.environment.steinberger.PokerRL.game.games import NoLimitHoldem
 
+from prl.baselines.evaluation.utils import pretty_print
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Encoder, PlayerInfo, Positions6Max
-from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Action, ActionType, Blind, PlayerWithCards
+from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Action, ActionType, Blind, \
+    PlayerWithCards
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import DICT_RANK, DICT_SUITE, \
     make_board_cards, card_tokens, card
 
@@ -16,7 +19,8 @@ class RLStateEncoder(Encoder):
     Observations = Optional[List[List]]
     Actions_Taken = Optional[List[Tuple[int, int]]]
 
-    def __init__(self, env_wrapper_cls=None):
+    def __init__(self, env_wrapper_cls=None, verbose=False):
+        self.verbose = verbose
         self.env_wrapper_cls = env_wrapper_cls
         self._wrapped_env = None
         self._currency_symbol = None
@@ -154,37 +158,20 @@ class RLStateEncoder(Encoder):
                 'board': initial_board,  # np.ndarray(shape=(n_cards, 2))
                 'hand': player_hands}
 
-    def _init_wrapped_env(self, stack_sizes: List[float]):
-        """Initializes environment used to generate observations.
-        Assumes Btn is at index 0."""
-        # make args for env
-        args = NoLimitHoldem.ARGS_CLS(n_seats=len(stack_sizes),
-                                      starting_stack_sizes_list=stack_sizes)
-        # return wrapped env instance
-        env = NoLimitHoldem(is_evaluating=True,
-                            env_args=args,
-                            lut_holder=NoLimitHoldem.get_lut_holder())
-        self._wrapped_env = self.env_wrapper_cls(env)
-        # will be used for naming feature index in training data vector
-        self._feature_names = list(self._wrapped_env.obs_idx_dict.keys())
-
     def _make_ante(self, ante: str) -> float:
         """Converts ante string to float, e.g. '$0.00' -> float(0.00)"""
         return float(ante.split(self._currency_symbol)[1]) * MULTIPLY_BY
 
     def _simulate_environment(self, env, episode, cards_state_dict, table, starting_stack_sizes_list,
                               selected_players=None):
-        """Under Construction."""
+        """Runs poker environment from episode and returns observations and actions emitted for selected players.
+        If no players selectd, then all showdown players actions and observations will be returned."""
         # if episode.hand_id == 216163387520 or episode.hand_id == 214211025466:
         for s in starting_stack_sizes_list:
             if s == env.env.SMALL_BLIND or s == env.env.BIG_BLIND:
                 # skip edge case of player all in by calling big blind
                 raise self._EnvironmentEdgeCaseEncounteredError("Edge case 1 encountered. See docstring for details.")
-        #
-        # if episode.hand_id == 213304492236:
-        #    debug = 1
-        # todo: remove key 'table' from config - not needed anymore
-        state_dict = {'deck_state_dict': cards_state_dict, 'table': table}
+        state_dict = {'deck_state_dict': cards_state_dict}
         obs, _, done, _ = env.reset(config=state_dict)
         assert obs[-1] in [0, 1, 2, 3, 4, 5], f"obs[-1] = {obs[-1]}. " \
                                               f"get_current_obs should have caught this already. check the wrapper impl"
@@ -198,42 +185,28 @@ class RLStateEncoder(Encoder):
         while not done:
             try:
                 action = episode.actions_total['as_sequence'][it]
-                # # use only observations, for which next_action.player_name == top_player
-                # if it+1 < len(episode.actions_total['as_sequence']):
-                #     next_action = episode.actions_total['as_sequence'][it+1]
-
             except IndexError:
                 raise self._EnvironmentDidNotTerminateInTimeError
 
             action_formatted = self.build_action(action)
-            # store up to two actions per player per stage
-            # self._actions_per_stage[action.player_name][action.stage].append(action_formatted)
+            action_label = self._wrapped_env.discretize(action_formatted)
             next_to_act = env.current_player.seat_id
+            if self.verbose:
+                pretty_print(next_to_act, obs, action_label)
             for player in table:
-                # if player reached showdown (we can see his cards)
-                # can use showdown players actions and observations or use only top_players actions and observations
+                # if player reached showdown we can see his cards
                 filtered_players = showdown_players if not selected_players else [p for p in showdown_players if
                                                                                   p in selected_players]
-                # only store obs and action of acting player
+                # only store obs and action of showdown player
                 if player.position_index == next_to_act and player.player_name in filtered_players:
                     observations.append(obs)
-                    # use showdown player actions as labels, 0 for loser and action for winner
                     if not selected_players:
-                        # player that won showdown -- can be multiple (split pot)
-                        if player.player_name in [winner.name for winner in episode.winners]:
-                            action_label = self._wrapped_env.discretize(action_formatted)
-                            # actions.append(action_formatted)  # use his action as supervised label
-                        # player that lost showdown
-                        else:
+                        if not player.player_name in [winner.name for winner in episode.winners]:
                             # replace action call/raise with fold
                             action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
-                            # actions.append((ActionType.FOLD.value, -1))  # replace action with FOLD for now
-                    # use top players actions as labels, take actions as labels directly 0 for fold 1 for checkcall etc
-                    else:
-                        action_label = self._wrapped_env.discretize(action_formatted)
-
                     actions.append(action_label)
             debug_action_list.append(action_formatted)
+
             obs, _, done, _ = env.step(action_formatted)
             it += 1
 
@@ -242,7 +215,8 @@ class RLStateEncoder(Encoder):
             raise RuntimeError("Seems we need more debugging")
         return observations, actions
 
-    def encode_episode(self, episode: PokerEpisode, selected_players=None) -> Tuple[Observations, Actions_Taken]:
+    def encode_episode(self, episode: PokerEpisode, selected_players=None) -> Tuple[
+        Observations, Actions_Taken]:
         """Runs environment with steps from PokerEpisode.
         Returns observations and corresponding actions of players that made it to showdown."""
 
@@ -265,7 +239,11 @@ class RLStateEncoder(Encoder):
         # todo: pass env_cls as argument (N_BOARD_CARDS etc. gets accessible)
         # get starting stacks, starting with button at index 0
         stacks = [player.stack_size for player in table]
-        self._init_wrapped_env(stacks)
+
+        self._wrapped_env = init_wrapped_env(self.env_wrapper_cls,
+                                             stacks)
+        # will be used for naming feature index in training data vector
+        self._feature_names = list(self._wrapped_env.obs_idx_dict.keys())
 
         self._wrapped_env.env.SMALL_BLIND, self._wrapped_env.env.BIG_BLIND = self.make_blinds(episode.blinds)
         self._wrapped_env.env.ANTE = self._make_ante(episode.ante)

@@ -117,7 +117,8 @@ class Runner:
 
         n_samples = 0
         for i, hand in enumerate(from_parsed_hands):
-            observations, actions = self.encoder.encode_episode(hand, selected_players=self._selected_players)
+            observations, actions = self.encoder.encode_episode(hand,
+                                                                selected_players=self._selected_players)
             if not observations:
                 continue
             if training_data is None:
@@ -147,7 +148,7 @@ class Runner:
             self._n_skipped += 1
         return parsed_hands
 
-    def parse_encode_write(self, abs_filepath, blind_sizes):
+    def parse_encode_write(self, abs_filepath):
         """Docstring"""
         # ** Parse **
         parsed_hands = self.parse(abs_filepath)
@@ -202,5 +203,4 @@ class Runner:
         # Parse, encode, vectorize and write the training data from .txt to disk
         for i, filename in enumerate(filenames):
             if not self.file_has_been_encoded_already(logfile=self.logfile, filename=filename):
-                self.parse_encode_write(os.path.abspath(filename).__str__(),
-                                        blind_sizes=blind_sizes)
+                self.parse_encode_write(os.path.abspath(filename).__str__())
