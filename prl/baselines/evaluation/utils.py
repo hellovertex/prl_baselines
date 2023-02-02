@@ -189,3 +189,15 @@ def print_player_stacks(obs, normalization_sum=1):
     for k, v in stacks.items():
         res += f"Player {k} stack is: {v} chips.\n"
     print(res)
+
+
+def print_summary(mapping_agent_id_to_name, base_env, info):
+    res = ""
+    for pid, amt in info['payouts'].items():
+        cards = base_env.get_hole_cards_of_player(pid)
+        agent_name = mapping_agent_id_to_name[pid]
+        res += f"Player {pid}: {agent_name} " \
+               f"collected ${amt} and " \
+               f"showed {cards2str(cards)}"
+    print(res)
+    pass

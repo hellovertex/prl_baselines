@@ -17,7 +17,7 @@ from prl.baselines.evaluation.analyzer import PlayerAnalyzer
 from prl.baselines.examples.examples_tianshou_env import MCAgent
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import make_board_cards, card_tokens, card
 
-from prl.baselines.evaluation.utils import print_player_cards, pretty_print
+from prl.baselines.evaluation.utils import print_player_cards, pretty_print, print_summary
 
 
 def parse_action(env, int_action) -> Tuple:
@@ -60,6 +60,9 @@ agents = [
     MCAgent(ckpt, num_players),
     MCAgent(ckpt, num_players),
 ]
+mapping_agent_id_to_name = {}
+for i, agent in enumerate(agents):
+    mapping_agent_id_to_name[i] = type(agent).__name__
 # # '[6h Ts]' to ['6h', 'Ts']
 # showdown_cards = card_tokens(final_player.cards)
 # # ['6h', 'Ts'] to [[5,3], [5,0]]
@@ -133,5 +136,6 @@ while True:
         assert sum(p1_first_card) == 2
         assert sum(p1_second_card) == 2
     if done:
+        print_summary(mapping_agent_id_to_name, env, info)
         break
     a = 0
