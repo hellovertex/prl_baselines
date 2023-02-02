@@ -163,7 +163,7 @@ if __name__ == "__main__":
     # export TRAIN_EVAL_SOURCE_DIR=/home/.../Documents/github.com/prl_baselines/data/02_vectorized/0.25-0.50/...
     # filenames = glob.glob(os.environ["TRAIN_EVAL_SOURCE_DIR"]+"/**/*.txt",recursive=True)
     log_interval = eval_interval = 5  # epochs (i.e BATCH_SIZE * train_steps) environment steps
-    params = {'hdims': [[256], [512], [256, 256], [512, 512]],
+    params = {'hdims': [[256], [512]],  # [256, 256], [512, 512]], -- not better
               'lrs': [1e-6],  # we ruled out 1e-5 and 1e-7 by hand, 1e-6 is the best we found after multiple trainings
               # 'max_epoch': 5_000_000,
               'max_epoch': 10_000,
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     # print(f'Finished job after {time.time() - start} seconds.')
 
     # train x NNs at once
-    x = 5
+    x = 3
     chunks = []
     current_chunk = []
     i = 0
