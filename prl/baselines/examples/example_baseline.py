@@ -16,6 +16,8 @@ class BaselineAgent:
     # 4. select the best player P1 using fitness function -- i) mutate ii) save weights to current best
     # 5. repeat 2,3,4
     It is enough to have a 569 x
+
+    todo: figure out how we can use the trained .ckpt MLP quickly(vectorized/mp) with this numpy based approach
     """
     def __init__(self, base_model):
         self.base_model = base_model
