@@ -34,11 +34,17 @@ class Runner:
                  encoder: Encoder,
                  writer: Writer,
                  write_azure: bool,
-                 logfile="log.txt"):
+                 logfile="log.txt",
+                 use_outdir_per_player=False,
+                 blind_sizes="0.25-0.50",
+                 only_from_selected_players=False,
+                 selected_players: List[str]=None
+                 ):
+        self.use_outdir_per_player = use_outdir_per_player
         self._n_files_written_this_run = 0
         self._n_files_already_encoded = 0
         self._n_showdowns = 0
-        self._only_from_selected_players: bool = False
+        self._only_from_selected_players = only_from_selected_players
         self._selected_players: Optional[List[str]] = []
         self.parser = parser
         self.encoder = encoder
@@ -51,7 +57,8 @@ class Runner:
         self._n_invalid_files = 0
         self._n_skipped = 0
         self._experiment = None
-        self.blind_sizes = None
+        self.blind_sizes = blind_sizes
+        self._selected_players = selected_players
 
         with open(logfile, "a+") as f:
             self._n_files_already_encoded = len(f.readlines())
@@ -223,8 +230,9 @@ class Runner:
             p = multiprocessing.Pool()
             t0 = time.time()
             for x in p.imap(self.parse_encode_write, filenames):
-                print(x + f'. Took {time.time() - t0} seconds')
+                return x
         else:
             for i, filename in enumerate(filenames):
                 self.parse_encode_write(filename)
         print(f'Finished job after {time.time() - start} seconds.')
+        return ""

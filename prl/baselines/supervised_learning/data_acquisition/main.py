@@ -1,3 +1,8 @@
+import ast
+import glob
+import multiprocessing
+import time
+
 import click
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 
@@ -65,5 +70,41 @@ def main(blind_sizes, from_gdrive_id, unzipped_dir, version_two, use_player_name
                    use_outdir_per_player=use_player_names_as_outdir)
 
 
+def parse_encode_write(filename):
+    blind_sizes = "0.25-0.50"
+    parser = HSmithyParser()
+
+    # Steps Steinberger Poker Environment, augments observations and vectorizes them
+    encoder = RLStateEncoder(env_wrapper_cls=AugmentObservationWrapper)
+
+    # writes training data from encoder to disk
+    writer = CSVWriter(out_filename_base=f'6MAX_{blind_sizes}')
+    with open("/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/eda_result_filtered.txt",
+              "r") as data:
+        player_dict = ast.literal_eval(data.read())
+    # Uses the results of parser and encoder to write training data to disk or cloud
+    runner = Runner(parser=parser,
+                    encoder=encoder,
+                    writer=writer,
+                    write_azure=False,
+                    logfile=LOGFILE,
+                    use_outdir_per_player=True,
+                    only_from_selected_players=True,
+                    selected_players=list(player_dict.keys()))
+    # parse PokerEpisodes, encode, vectorize, write training data and labels to disk
+    # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
+    return runner.parse_encode_write(filename)
+
+
 if __name__ == '__main__':
-    main()
+    # main()
+    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_test"
+    filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
+    print(f'Starting job. This may take a while.')
+    start = time.time()
+    p = multiprocessing.Pool()
+    t0 = time.time()
+    for x in p.imap_unordered(parse_encode_write, filenames):
+        print(x + f'. Took {time.time() - t0} seconds')
+    print(f'Finished job after {time.time() - start} seconds.')
+    p.close()
