@@ -13,6 +13,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from prl.baselines.agents.tianshou_policies import get_rainbow_config
 from prl.baselines.examples.examples_tianshou_env import make_vector_env
+# todo move this script from prl.baselines to prl.reinforce
 
 # train config
 device = "cuda"
