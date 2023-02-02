@@ -52,7 +52,6 @@ def train_eval(abs_input_dir, params, log_interval, eval_interval):
                 total_loss = 0
 
                 for i, (x, y) in pbar:
-                    j += 1
                     if use_cuda:  # keep
                         x = x.cuda()
                         y = y.cuda()
@@ -69,7 +68,8 @@ def train_eval(abs_input_dir, params, log_interval, eval_interval):
                     # udpate tensorboardX
                     correct += pred.eq(y.data).cpu().sum().item()
                     i_train += 1
-                    if j % log_interval == 0:
+                    # log once (i==0) every epoch (j % log_interval)
+                    if j % log_interval == 0 and i == 0:
                         n_batch = i_train * BATCH_SIZE  # how many samples across all batches seen so far
                         writer.add_scalar(tag='Training Loss', scalar_value=total_loss / i_train, global_step=n_iter)
                         writer.add_scalar(tag='Training Accuracy', scalar_value=100.0 * correct / n_batch,
@@ -92,8 +92,8 @@ def train_eval(abs_input_dir, params, log_interval, eval_interval):
                         fraction, epoch, epochs))
                     start_time = time.time()
 
-                    # evaluate
-                    if j % eval_interval == 0:
+                    # evaluate once (i==0) every epoch (j % eval_interval)
+                    if j % eval_interval == 0 and i == 0:
                         model.eval()
                         test_loss = 0
                         test_correct = 0
@@ -143,7 +143,9 @@ def train_eval(abs_input_dir, params, log_interval, eval_interval):
                                 writer.add_histogram(f"layer{k}.bias", layer.state_dict()['bias'], global_step=n_iter)
                                 k += 1
                     n_iter += 1
-
+                j += 1
+    return f"Finished training from {abs_input_dir}. " \
+           f"Logs and checkpoints can be found under {base_logdir} and {base_ckptdir} resp."
 
 if __name__ == "__main__":
     """On Nvidia GPUs you can add the following line at the beginning of our code.
@@ -160,22 +162,44 @@ if __name__ == "__main__":
 
     # export TRAIN_EVAL_SOURCE_DIR=/home/.../Documents/github.com/prl_baselines/data/02_vectorized/0.25-0.50/...
     # filenames = glob.glob(os.environ["TRAIN_EVAL_SOURCE_DIR"]+"/**/*.txt",recursive=True)
-    log_interval = eval_interval = 100  # trainsteps (a BATCH_SIZE observations)
+    log_interval = eval_interval = 5  # epochs (i.e BATCH_SIZE * train_steps) environment steps
     params = {'hdims': [[256], [512], [256, 256], [512, 512]],
               'lrs': [1e-6, 1e-5, 1e-7],
-              'max_epoch': 5_000_000,
-              'batch_size': 512,
+              # 'max_epoch': 5_000_000,
+              'max_epoch': 10_000,
+              'batch_size': 256,
               }
-    player_dirs = [x[0] for x in os.walk(os.environ["TRAIN_EVAL_SOURCE_DIR"])]
+    player_dirs = [x[0] for x in
+                   os.walk("/home/hellovertex/Documents/github.com/prl_baselines/data/02_vectorized/0.25-0.50")][1:]
     train_eval_fn = partial(train_eval, params=params, log_interval=log_interval, eval_interval=eval_interval)
     print(f'Starting job. This may take a while.')
+
     start = time.time()
     p = multiprocessing.Pool()
     t0 = time.time()
-    for x in p.imap_unordered(train_eval_fn, player_dirs):
-        print(x + f'. Took {time.time() - t0} seconds')
-    print(f'Finished job after {time.time() - start} seconds.')
+
+    # # train all 17 NNs at once (is this gonna blow up my machine??)
+    # for x in p.imap_unordered(train_eval_fn, player_dirs):
+    #     print(x + f'. Took {time.time() - t0} seconds')
+    # print(f'Finished job after {time.time() - start} seconds.')
+
+    # train x NNs at once
+    x = 5
+    chunks = []
+    current_chunk = []
+    i = 0
+    for subdir in player_dirs:
+        current_chunk.append(subdir)
+        if (i+1) % x == 0:
+            chunks.append(current_chunk)
+            current_chunk = []
+        i += 1
+    for dirs in chunks:
+        for x in p.imap_unordered(train_eval_fn, dirs):
+            print(x + f'. Took {time.time() - t0} seconds')
+        print(f'Finished job after {time.time() - start} seconds.')
+
     p.close()
-    #
+
     # for player_subdir in player_dirs:
     #     train_eval_fn(abs_input_dir=player_subdir)
