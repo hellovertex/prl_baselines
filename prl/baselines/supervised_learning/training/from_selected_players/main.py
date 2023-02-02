@@ -19,11 +19,25 @@ TEST_BATCH_SIZE = 512
               type=str,
               help="Optional if you do not want to use training data from data/03_preprocessed/{blind_sizes}, "
                    "e.g. if you want to train using data that is (not) down-sampled.")
-def main(blind_sizes, path_to_csv_files):
+@click.option("--ckpt_dir",
+              type=str,
+              default="ckpt",
+              help="where to store ckpt.pt")
+@click.option("--log_dir",
+              type=str,
+              default="logdir",
+              help="tensorboard logdir/")
+@click.option("--dir_prefix",
+              type=str,
+              default="./",
+              help="This will be prepended to ckpt_dir and log_dir params. Use e.g. for versioning.")
+def main(blind_sizes, path_to_csv_files, ckpt_dir, log_dir, dir_prefix):
     if not path_to_csv_files:
         path_to_csv_files = str(DATA_DIR) + '/03_preprocessed' + f'/{blind_sizes}'
-
+    dir_prefix = "./ishuha/"
     run_train_eval(input_dir=path_to_csv_files,
+                   ckpt_dir=dir_prefix + ckpt_dir,
+                   log_dir=log_dir,
                    epochs=EPOCHS,
                    batch_size=BATCH_SIZE,
                    test_batch_size=TEST_BATCH_SIZE,

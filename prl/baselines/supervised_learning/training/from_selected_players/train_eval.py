@@ -16,13 +16,12 @@ from prl.baselines.supervised_learning.models.nn_model import MLP
 from prl.baselines.supervised_learning.training.dataset import InMemoryDataset
 
 
-
 def get_datasets(input_dir, batch_size):
     dataset = InMemoryDataset(input_dir)
     total_len = len(dataset)
-    train_len = int(total_len * 0.85)
+    train_len = int(total_len * 0.89)
     test_len = int(total_len * 0.1)
-    val_len = int(total_len * 0.05)
+    val_len = int(total_len * 0.01)
     # add residuals to val_len to add up to total_len
     val_len += total_len - (int(train_len) + int(test_len) + int(val_len))
     # set seed
@@ -32,7 +31,7 @@ def get_datasets(input_dir, batch_size):
     return train, test
 
 
-def get_model(traindata):
+def get_model(traindata, hidden_dims):
     # network
     classes = [ActionSpace.FOLD,
                ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED
@@ -40,14 +39,14 @@ def get_model(traindata):
                ActionSpace.RAISE_HALF_POT,
                ActionSpace.RAISE_POT,
                ActionSpace.ALL_IN]
-    hidden_dim = [512, 512]
+
     output_dim = len(classes)
     input_dim = None
     # waste the first batch to dynamically get the input dimension
     for x, y in traindata:
         input_dim = x.shape[1]
         break
-    net = MLP(input_dim, output_dim, hidden_dim)
+    net = MLP(input_dim, output_dim, hidden_dims)
     # if running on GPU and we want to use cuda move model there
     use_cuda = torch.cuda.is_available()
     if use_cuda:
@@ -57,6 +56,7 @@ def get_model(traindata):
 
 def load_checkpoint(path_to_checkpoint):
     return torch.load(path_to_checkpoint)
+
 
 def init_state(ckpt_dir, resume: bool, model, optim):
     # # load checkpoint if needed/ wanted
@@ -112,7 +112,8 @@ def run_train_eval(input_dir,
     train_dataloader = DataLoader(traindataset, batch_size=batch_size, shuffle=True)
     test_dataloader = DataLoader(testdataset, batch_size=batch_size, shuffle=True)
     traindata, testdata = iter(train_dataloader), iter(test_dataloader)
-    model = get_model(traindata)
+    hidden_dim = [512, 512]
+    model = get_model(traindata, hidden_dims=hidden_dim)
     best_accuracy = test_accuracy = -np.inf
     # create optimizer
     optim = torch.optim.Adam(model.parameters(), lr=lr)
@@ -126,6 +127,11 @@ def run_train_eval(input_dir,
     total_loss = 0
     correct = 0
     j = 0
+    for lr in [1e-6, 1e-5, 1e-7]:
+        for hdims in [[256], [512], [512, 512]]:
+            # todo loop everything and make early stopping and call this function with unzipped dir
+            #  and loop over the individual players as well
+            pass
 
     for epoch in range(start_epoch, epochs):
         pbar = tqdm(enumerate(BackgroundGenerator(train_dataloader)), total=round(len(train_dataloader)))
