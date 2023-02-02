@@ -1,8 +1,11 @@
 import ast
 import glob
 import itertools
+import multiprocessing
 import os
 import pickle
+import time
+from pathlib import Path
 from typing import List, Optional
 
 import gdown
@@ -148,7 +151,7 @@ class Runner:
             self._n_skipped += 1
         return parsed_hands
 
-    def parse_encode_write(self, abs_filepath):
+    def _parse_encode_write(self, abs_filepath, outdir):
         """Docstring"""
         # ** Parse **
         parsed_hands = self.parse(abs_filepath)
@@ -160,7 +163,8 @@ class Runner:
                 file_dir, file_path = self.writer.write_train_data(training_data,
                                                                    labels,
                                                                    self.encoder.feature_names,
-                                                                   n_samples, self.blind_sizes)
+                                                                   n_samples,
+                                                                   outdir)
 
                 self._n_files_written_this_run += 1
                 print(f"\nExtracted {len(training_data)} training samples from {self._hand_counter + 1} poker hands"
@@ -169,7 +173,19 @@ class Runner:
             # pass
         # return parsed_hands
 
-    def run(self, blind_sizes, unzipped_dir=None, from_gdrive_id=None, version_two=False):
+    def parse_encode_write(self, filename):
+        if not self.file_has_been_encoded_already(logfile=self.logfile, filename=filename):
+            outdir = self.blind_sizes + '/' + Path(filename).stem if self.use_outdir_per_player else self.blind_sizes
+            self._parse_encode_write(abs_filepath=os.path.abspath(filename).__str__(),
+                                     outdir=outdir)
+            return f'Wrote training data for {filename} to {outdir}'
+
+    def run(self, blind_sizes,
+            unzipped_dir=None,
+            from_gdrive_id=None,
+            version_two=False,
+            use_outdir_per_player=False,
+            use_parallelization=True):
         """
         :param blind_sizes: determines data folder paths that are looked up and created, e.g. "data/01_raw/0.25-0.50"
         :param unzipped_dir: if a zip file has been unpacked previously, pass folder containing its unzipped content
@@ -184,6 +200,7 @@ class Runner:
         """
         self.blind_sizes = blind_sizes
         self._hand_counter = 0
+        self.use_outdir_per_player = use_outdir_per_player
 
         # extract zipfile with Poker-hands (.zip is stored locally or downloaded via from_gdrive)
         if not unzipped_dir:
@@ -199,8 +216,15 @@ class Runner:
                 self._selected_players = list(player_dict.keys())
         else:
             self._selected_players = None
-
         # Parse, encode, vectorize and write the training data from .txt to disk
-        for i, filename in enumerate(filenames):
-            if not self.file_has_been_encoded_already(logfile=self.logfile, filename=filename):
-                self.parse_encode_write(os.path.abspath(filename).__str__())
+        print(f'Starting job. This may take a while.')
+        start = time.time()
+        if use_parallelization:
+            p = multiprocessing.Pool()
+            t0 = time.time()
+            for x in p.imap(self.parse_encode_write, filenames):
+                print(x + f'. Took {time.time() - t0} seconds')
+        else:
+            for i, filename in enumerate(filenames):
+                self.parse_encode_write(filename)
+        print(f'Finished job after {time.time() - start} seconds.')
