@@ -8,11 +8,36 @@ class BaselineAgent:
     - MARL: acts together with other agents in a MARL fashion:
     - VectorEnv?
     - PBT?
-
+    # algo:
+    # 0. define fitness function
+    # 1. init 6 players with random weights
+    # 2. play M games -- collect rewards per player
+    # 3. evaluate players using rewards collected
+    # 4. select the best player P1 using fitness function -- i) mutate ii) save weights to current best
+    # 5. repeat 2,3,4
     It is enough to have a 569 x
     """
     def __init__(self, base_model):
         self.base_model = base_model
+
+
+def mutate(weights, mutation_rate=0.1, mutation_std=0.1):
+    # Normalize the weights to have a unit norm
+    norm = np.linalg.norm(weights)
+    weights = weights / norm
+
+    # Generate random noise with a standard deviation of mutation_std
+    noise = np.random.normal(0, mutation_std, size=weights.shape)
+
+    # Apply the mutation by adding the noise to the weights with a probability of mutation_rate
+    mutation = np.random.binomial(1, mutation_rate, size=weights.shape)
+    weights = weights + mutation * noise
+
+    # Renormalize the weights to have the same norm as before
+    weights = weights * norm
+
+    return weights
+
 def xavier(input_size, output_size):
     var = 2. / (input_size + output_size)
     bound = np.sqrt(3.0 * var)
