@@ -98,7 +98,7 @@ def parse_encode_write(filename):
 
 if __name__ == '__main__':
     # main()
-    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_test"
+    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
     filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
     print(f'Starting job. This may take a while.')
     start = time.time()

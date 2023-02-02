@@ -142,7 +142,7 @@ class Runner:
                 except Exception as e:
                     print(e)
             n_samples += len(observations)
-            print("Simulating environment", end='') if i == 0 else print('.', end='')
+            # print("Simulating environment", end='') if i == 0 else print('.', end='')
 
         return training_data, labels, n_samples
 
