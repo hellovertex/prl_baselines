@@ -1,5 +1,7 @@
+import multiprocessing
 import os
 import time
+from functools import partial
 
 import numpy as np
 import torch
@@ -165,5 +167,15 @@ if __name__ == "__main__":
               'batch_size': 512,
               }
     player_dirs = [x[0] for x in os.walk(os.environ["TRAIN_EVAL_SOURCE_DIR"])]
-    for player_subdir in player_dirs:
-        train_eval(player_subdir, params, log_interval, eval_interval)
+    train_eval_fn = partial(train_eval, params=params, log_interval=log_interval, eval_interval=eval_interval)
+    print(f'Starting job. This may take a while.')
+    start = time.time()
+    p = multiprocessing.Pool()
+    t0 = time.time()
+    for x in p.imap_unordered(train_eval_fn, player_dirs):
+        print(x + f'. Took {time.time() - t0} seconds')
+    print(f'Finished job after {time.time() - start} seconds.')
+    p.close()
+    #
+    # for player_subdir in player_dirs:
+    #     train_eval_fn(abs_input_dir=player_subdir)
