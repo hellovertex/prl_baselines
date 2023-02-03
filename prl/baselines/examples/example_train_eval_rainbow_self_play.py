@@ -15,8 +15,12 @@ from torch.utils.tensorboard import SummaryWriter
 from prl.baselines.agents.tianshou_policies import get_rainbow_config
 from prl.baselines.examples.examples_tianshou_env import make_vectorized_prl_env
 
+
 # todo move this script from prl.baselines to prl.reinforce
-global max_reward_sum
+
+class Reward:
+    def __init__(self):
+        self.reward = 0
 
 
 # train config
@@ -54,12 +58,14 @@ def train_eval(
     starting_stack = 20000
     stack_sizes = [starting_stack for _ in range(num_players)]
     agents = [f'p{i}' for i in range(num_players)]
+    sb = 50
+    bb = 100
     env_config = {"env_wrapper_cls": AugmentObservationWrapper,
                   # "stack_sizes": [100, 125, 150, 175, 200, 250],
                   "stack_sizes": stack_sizes,
                   "multiply_by": 1,  # use 100 for floats to remove decimals but we have int stacks
                   "scale_rewards": False,  # we do this ourselves
-                  "blinds": [50, 100]}
+                  "blinds": [sb, bb]}
     # env = init_wrapped_env(**env_config)
     # obs0 = env.reset(config=None)
     num_envs = 1
@@ -140,47 +146,17 @@ def train_eval(
     def stop_fn(mean_rewards):
         return mean_rewards >= win_rate_early_stopping
 
+    max_reward = Reward()
+
     def reward_metric(rews):
         # The reward at index 0 is the reward relative to observer
         # i.e. the reward gotten from the last action,
         # so we drop the rewards rews[1:] of the other players
-        return rews[0]
+        rew = np.mean(rews)
+        if rew > max_reward.reward:
+            max_reward.reward = rew
+        return rew / bb
 
-    # watch agent's performance
-    # def watch():
-    #     print("Setup test envs ...")
-    #     policy.eval()
-    #     policy.set_eps(args.eps_test)
-    #     test_envs.seed(args.seed)
-    #     if args.save_buffer_name:
-    #         print(f"Generate buffer with size {args.buffer_size}")
-    #         buffer = PrioritizedVectorReplayBuffer(
-    #             args.buffer_size,
-    #             buffer_num=len(test_envs),
-    #             ignore_obs_next=True,
-    #             save_only_last_obs=True,
-    #             stack_num=args.frames_stack,
-    #             alpha=args.alpha,
-    #             beta=args.beta
-    #         )
-    #         collector = Collector(policy, test_envs, buffer, exploration_noise=True)
-    #         result = collector.collect(n_step=args.buffer_size)
-    #         print(f"Save buffer into {args.save_buffer_name}")
-    #         # Unfortunately, pickle will cause oom with 1M buffer size
-    #         buffer.save_hdf5(args.save_buffer_name)
-    #     else:
-    #         print("Testing agent ...")
-    #         test_collector.reset()
-    #         result = test_collector.collect(
-    #             n_episode=args.test_num, render=args.render
-    #         )
-    #     rew = result["rews"].mean()
-    #     print(f"Mean reward (over {result['n/ep']} episodes): {rew}")
-    #
-    # if args.watch:
-    #     watch()
-    #     exit(0)
-    # ======== tensorboard logging setup =========
     log_path = os.path.join(*logdir)
     writer = SummaryWriter(log_path)
     # writer.add_text("args", str(args))
@@ -193,7 +169,7 @@ def train_eval(
         # assume learning agent is at index 0
         torch.save({
             'epoch': epoch,
-            'net': policy.policies[agents[0]].state_dict(),
+            'net': policy.state_dict(),
             'model': rainbow_config['model'].state_dict(),
             'env_step': env_step,
             'optim': rainbow_config['optim'].state_dict(),
@@ -223,17 +199,13 @@ def train_eval(
                                show_progress=True,
                                test_in_train=False  # whether to test in training phase
                                )
-    for epoch, epoch_stat, info in trainer:
-        print("Epoch:", epoch)
-        print(epoch_stat)
-        print(info)
     result = trainer.run()
     t0 = time.time()
     pprint.pprint(result)
     print(f'took {time.time() - t0} seconds')
     # pprint.pprint(result)
     # watch()
-    return
+    return max_reward.reward
 
 
 if __name__ == "__main__":
@@ -248,12 +220,11 @@ if __name__ == "__main__":
         max_alpha = None
         max_beta = None
         max_buffer_size = None
-        global max_reward_sum
 
         for freq in target_update_frequencies:
-            train_eval(f"num_players={num_players},targ_upd_freq={freq}",
-                       num_players=num_players,
-                       target_update_freq=freq)
+            max_reward_sum = train_eval(f"num_players={num_players},targ_upd_freq={freq}",
+                                        num_players=num_players,
+                                        target_update_freq=freq)
             if max_reward_sum > curr_max_rew:
                 curr_max_rew = max_reward_sum
                 max_freq = freq
@@ -262,10 +233,10 @@ if __name__ == "__main__":
         max_reward_sum = 0
 
         for buffer_size in buffer_sizes:
-            train_eval(f"num_players={num_players},buffer_size={buffer_size}",
-                       num_players=num_players,
-                       buffer_size=buffer_size,
-                       target_update_freq=max_freq)
+            max_reward_sum = train_eval(f"num_players={num_players},buffer_size={buffer_size}",
+                                        num_players=num_players,
+                                        buffer_size=buffer_size,
+                                        target_update_freq=max_freq)
             if max_reward_sum > curr_max_rew:
                 curr_max_rew = max_reward_sum
                 max_buffer_size = buffer_size
@@ -274,11 +245,11 @@ if __name__ == "__main__":
         max_reward_sum = 0
 
         for alpha in alphas:
-            train_eval(f"num_players={num_players},alpha={alpha}",
-                       num_players=num_players,
-                       alpha=alpha,
-                       target_update_freq=max_freq,
-                       buffer_size=max_buffer_size)
+            max_reward_sum = train_eval(f"num_players={num_players},alpha={alpha}",
+                                        num_players=num_players,
+                                        alpha=alpha,
+                                        target_update_freq=max_freq,
+                                        buffer_size=max_buffer_size)
             if max_reward_sum > curr_max_rew:
                 curr_max_rew = max_reward_sum
                 max_alpha = alpha
@@ -287,12 +258,12 @@ if __name__ == "__main__":
         max_reward_sum = 0
 
         for beta in betas:
-            train_eval(f"num_players={num_players},beta={beta}",
-                       num_players=num_players,
-                       alpha=max_alpha,
-                       target_update_freq=max_freq,
-                       buffer_size=max_buffer_size,
-                       beta=beta)
+            max_reward_sum = train_eval(f"num_players={num_players},beta={beta}",
+                                        num_players=num_players,
+                                        alpha=max_alpha,
+                                        target_update_freq=max_freq,
+                                        buffer_size=max_buffer_size,
+                                        beta=beta)
             if max_reward_sum > curr_max_rew:
                 curr_max_rew = max_reward_sum
                 max_beta = beta
