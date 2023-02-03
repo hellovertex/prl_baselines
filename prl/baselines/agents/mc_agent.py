@@ -160,6 +160,6 @@ class MCAgent:
                 obs = np.array(obs)[0]
         if report_probas:
             action = self.compute_action(obs, legal_moves)
-            return action, torch.softmax(self._logits, dim=1)
+            return action, torch.softmax(self._logits, dim=1).detach().numpy()
         return self.compute_action(obs, legal_moves)
 

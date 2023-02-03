@@ -15,8 +15,14 @@ def xavier(input_size, output_size):
     return np.random.uniform(-bound, bound, size=(input_size, output_size))
 
 
-sigmoid = lambda x: 1 / (1 + np.exp(-x))
-relu = lambda x: np.maximum(x, 0)
+@njit
+def relu(x):
+    return np.maximum(x, 0)
+
+
+@njit
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
 
 
 class Player:
@@ -25,7 +31,7 @@ class Player:
                  ckpt_to_mc_agent,
                  num_players=6):
         self.name = name
-        self.w0 = xavier(564, 512)
+        self.w0 = xavier(570, 512)
         self.b0 = np.zeros(512)
         self.w1 = xavier(512, 512)
         self.b1 = np.zeros(512)
@@ -39,6 +45,17 @@ class Player:
                  w0=self.w0, w1=self.w1, w2=self.w2,
                  b0=self.b0, b1=self.b1)
 
+    @staticmethod
+    @njit
+    def compute_fold_probability(obs, w0, b0, w1, b1, w2):
+        x = obs
+        x = np.dot(x, w0) + b0
+        x = relu(x)
+        x = np.dot(x, w1) + b1
+        x * relu(x)
+        x = np.dot(x, w2)
+        return sigmoid(x)
+
     def load(self, filename):
         data = np.load(filename)
         self.w0 = data['w0']
@@ -48,8 +65,9 @@ class Player:
         self.b1 = data['b1']
         return self
 
+    @staticmethod
     @njit
-    def _mutate(self, weights, mutation_rate, mutation_std):
+    def _mutate(weights, mutation_rate, mutation_std):
         # Normalize weights to apply noise
         norm = np.linalg.norm(weights)
         weights = weights / norm
@@ -70,16 +88,6 @@ class Player:
         for params in self.wnb:
             self._mutate(params, mutation_rate, mutation_std)
 
-    @njit
-    def compute_fold_probability(self, obs):
-        x = obs
-        x = np.dot(x, self.w0) + self.b0
-        x = relu(x)
-        x = np.dot(x, self.w1) + self.b1
-        x * relu(x)
-        x = np.dot(x, self.w2)
-        return sigmoid(x)
-
     def act(self, obs, legal_moves):
         action, probas = self.mc_agent.act(obs,
                                            legal_moves,
@@ -88,10 +96,10 @@ class Player:
         if type(obs) == list:
             obs = obs + probas
         elif type(obs) == np.ndarray:
-            obs = np.concatenate([obs, probas])
+            obs = np.concatenate([obs, probas[0]])
 
         # use concatenated new obs to compute fold_prob
-        fold_prob = self.compute_fold_probability(obs, probas)
+        fold_prob = self.compute_fold_probability(obs, *self.wnb)
 
         if fold_prob < random():
             return ActionSpace.FOLD
