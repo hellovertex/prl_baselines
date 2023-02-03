@@ -8,10 +8,10 @@ from gym.spaces import Box
 from pettingzoo import AECEnv
 from pettingzoo.utils import BaseWrapper
 from pettingzoo.utils.env import ObsType
+from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
 from tianshou.env.pettingzoo_env import PettingZooEnv
 from tianshou.env.venvs import SubprocVectorEnv
-
 from prl.baselines.agents.mc_agent import MCAgent
 from prl.baselines.agents.tianshou_policies import MultiAgentActionFlags
 from prl.baselines.evaluation.core.experiment import ENV_WRAPPER
@@ -223,11 +223,29 @@ def make_vectorized_pettingzoo_env(num_envs: int,
     return venv, wrapped_env
 
 
+# class TianshouWrappedSingleEnv(AugmentObservationWrapper):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#
+#     @override
+#     def observation_space(self):
+#         obs_space = Box(low=0.0, high=6.0, shape=(564,), dtype=np.float64)
+#
+#         # if 'mask_legal_moves' in env_config:
+#         #     if env_config['mask_legal_moves']:
+#         return gym.spaces.Dict({
+#             'obs': obs_space,  # do not change key-name 'obs' it is internally used by rllib (!)
+#             'action_mask': Box(low=0, high=1, shape=(3,), dtype=int)
+#             # one-hot encoded [FOLD, CHECK_CALL, RAISE]
+#         })
+
+
 def make_vectorized_prl_env(num_envs: int,
                             single_env_config: dict,
                             agent_names: List[str],
                             ) -> Tuple[SubprocVectorEnv, ENV_WRAPPER]:
     assert len(agent_names) == len(single_env_config['stack_sizes'])
+    single_env_config['disable_info'] = True  # drop info we do not need it with tianshou
     wrapped_env_fn = partial(make_env, single_env_config)
     wrapped_env = wrapped_env_fn()
     venv = SubprocVectorEnv([wrapped_env_fn for _ in range(num_envs)])
