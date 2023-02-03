@@ -11,15 +11,6 @@ from prl.baselines.agents.mc_agent import MCAgent
 from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
 
 
-@njit
-def relu(x):
-    return np.maximum(x, 0)
-
-
-@njit
-def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
-
 
 def xavier(m, n):
     return torch.nn.init.xavier_uniform_(torch.empty(m, n))
@@ -29,16 +20,16 @@ class Player(torch.nn.Module):
     def __init__(self,
                  name,
                  ckpt_to_mc_agent,
+                 device,
                  num_players=6):
         super(Player, self).__init__()
-        device = "cuda" if torch.cuda.is_available() else "cpu"
         self.device = device
         self.name = name
-        self.w0 = torch.nn.Parameter(xavier(570, 512)).to(device)
-        self.b0 = torch.nn.Parameter(torch.zeros(512)).to(device)
-        self.w1 = torch.nn.Parameter(xavier(512, 512)).to(device)
-        self.b1 = torch.nn.Parameter(torch.zeros(512)).to(device)
-        self.w2 = torch.nn.Parameter(xavier(512, 1)).to(device)
+        self.w0 = torch.nn.Parameter(xavier(570, 512).to(device))
+        self.b0 = torch.nn.Parameter(torch.zeros(512).to(device))
+        self.w1 = torch.nn.Parameter(xavier(512, 512).to(device))
+        self.b1 = torch.nn.Parameter(torch.zeros(512).to(device))
+        self.w2 = torch.nn.Parameter(xavier(512, 1).to(device))
         # self.w0 = torch.nn.Linear(570, 512)
         # self.w1 = torch.nn.Linear(512, 512)
         # self.w2 = torch.nn.Linear(512, 1)
@@ -60,7 +51,7 @@ class Player(torch.nn.Module):
         return torch.sigmoid(obs)
 
     @staticmethod
-    def _mutate(weights, mutation_rate, mutation_std):
+    def _mutate(weights, mutation_rate, mutation_std, device):
         weights = torch.tensor(weights)
         # Normalize weights to apply noise
         norm = torch.norm(weights)
@@ -70,7 +61,7 @@ class Player(torch.nn.Module):
         noise = torch.normal(mean=0., std=mutation_std, size=weights.shape)
 
         # Apply mutation by adding noise to weights with a prob mutation_rate
-        mutation = torch.bernoulli(torch.full_like(weights, mutation_rate))
+        mutation = torch.bernoulli(torch.full_like(weights, mutation_rate)).to(device)
         weights = weights + mutation * noise
 
         # Renormalize the weights to have the same norm as before
@@ -79,9 +70,9 @@ class Player(torch.nn.Module):
         return weights
 
     def mutate(self, mutation_rate=0.1, mutation_std=0.1):
-        self.w0 = self._mutate(self.w0, mutation_rate, mutation_std)
-        self.w1 = self._mutate(self.w1, mutation_rate, mutation_std)
-        self.w2 = self._mutate(self.w2, mutation_rate, mutation_std)
+        self.w0 = self._mutate(self.w0, mutation_rate, mutation_std, self.device)
+        self.w1 = self._mutate(self.w1, mutation_rate, mutation_std, self.device)
+        self.w2 = self._mutate(self.w2, mutation_rate, mutation_std, self.device)
 
     def act(self, obs, legal_moves):
         obs = torch.Tensor(np.array([obs])).to(self.device)
@@ -141,10 +132,10 @@ if __name__ == "__main__":
     # n_games = 10000
     evolution_steps = 100
     # evolution_steps = 100_000_000
-    ckpt_to_mc_agent = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
+    ckpt_to_mc_agent = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/ckpt_dir/Lucastitos_[256]_1e-06/ckpt.pt"
 
     # 1. init 6 players with random params
-    players = [Player(name=f"Player_{i}",
+    players = [Player(name=f"Player_{i}", device="cuda",
                       ckpt_to_mc_agent=ckpt_to_mc_agent) for i in range(6)]
     player_names = [p.name for p in players]
 
@@ -164,7 +155,7 @@ if __name__ == "__main__":
         # 5. terminate when `evolution_steps` threshold reached
         epoch += 1
         if epoch > evolution_steps:
-            best_player.save('./best_player.npz')
+            best_player.save('./best_player.pt')
             break
 
         # 4. mutate weights to generate new generation

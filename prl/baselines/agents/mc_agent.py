@@ -20,7 +20,7 @@ from torch import softmax
 from prl.baselines.agents.tianshou_policies import MultiAgentActionFlags
 from prl.baselines.cpp_hand_evaluator.monte_carlo import HandEvaluator_MonteCarlo
 from prl.baselines.cpp_hand_evaluator.rank import dict_str_to_sk
-from prl.baselines.supervised_learning.models.nn_model import MLP
+from tianshou.utils.net.common import MLP
 
 
 
@@ -45,9 +45,10 @@ SUITE = 1
 
 class MCAgent:
 
-    def __init__(self, ckpt_path, num_players):
+    def __init__(self, ckpt_path, num_players, device="cuda"):
         """ckpt path may be something like ./ckpt/ckpt.pt"""
-        self._mc_iters = 10000
+        self._mc_iters = 5000
+        self.device = device
         self.num_players = num_players
         self.tightness = .1  # percentage of hands played, "played" meaning not folded immediately
         self.acceptance_threshold = 0.5  # minimum certainty of probability of network to perform action
@@ -62,21 +63,19 @@ class MCAgent:
                    ActionSpace.RAISE_HALF_POT,
                    ActionSpace.RAISE_POT,
                    ActionSpace.ALL_IN]
-        hidden_dim = [512, 512]
+        hidden_dim = [256]
         output_dim = len(classes)
-        net = MLP(input_dim, output_dim, hidden_dim)
-        # if running on GPU and we want to use cuda move model there
-        # use_cuda = torch.cuda.is_available()
-        # if use_cuda:
-        #     net = net.cuda()
-        self._model = net
+        self._model = MLP(input_dim, output_dim, hidden_dim).to(self.device)
         ckpt = torch.load(ckpt_path,
-                          map_location=torch.device('cpu'))
+                          map_location=self.device)
         self._model.load_state_dict(ckpt['net'])
         self._model.eval()
-        return net
+
 
     def card_bit_mask_to_int(self, c0: np.array, c1: np.array, board_mask: np.array) -> Tuple[List[int], List[int]]:
+        c0 = c0.cpu()
+        c1 = c1.cpu()
+        board_mask = board_mask.cpu()
         c0_1d = dict_str_to_sk[CARD_BITS_TO_STR[c0][RANK] + CARD_BITS_TO_STR[c0][SUITE]]
         c1_1d = dict_str_to_sk[CARD_BITS_TO_STR[c1][RANK] + CARD_BITS_TO_STR[c1][SUITE]]
         board = BOARD_BITS_TO_STR[board_mask.bool()]
@@ -120,7 +119,7 @@ class MCAgent:
             if win_prob < pot_odds:
                 if random() > self.tightness:  # tightness is equal to % of hands played, e.g. 0.15
                     return ActionSpace.FOLD.value
-        certainty = torch.max(softmax(self._logits, dim=1)).detach().numpy().item()
+        certainty = torch.max(softmax(self._logits, dim=1)).detach().item()
         # if the probability is high enough, we take the action suggested by the neural network
         if certainty > self.acceptance_threshold:
             assert len(self._predictions == 1)
