@@ -14,6 +14,7 @@ from tianshou.env.venvs import SubprocVectorEnv
 
 from prl.baselines.agents.mc_agent import MCAgent
 from prl.baselines.agents.tianshou_policies import MultiAgentActionFlags
+from prl.baselines.evaluation.core.experiment import ENV_WRAPPER
 
 
 class RewardType(IntEnum):
@@ -205,12 +206,12 @@ def make_env(cfg):
     return init_wrapped_env(**cfg)
 
 
-def make_vector_env(num_envs: int,
-                    single_env_config: dict,
-                    agent_names: List[str],
-                    mc_model_ckpt_path: str,
-                    reward_type: RewardType = RewardType.MBB,
-                    ) -> Tuple[SubprocVectorEnv, PettingZooEnv]:
+def make_vectorized_pettingzoo_env(num_envs: int,
+                                   single_env_config: dict,
+                                   agent_names: List[str],
+                                   mc_model_ckpt_path: str,
+                                   reward_type: RewardType = RewardType.MBB,
+                                   ) -> Tuple[SubprocVectorEnv, PettingZooEnv]:
     assert len(agent_names) == len(single_env_config['stack_sizes'])
     env = TianshouEnvWrapper(env=make_env(single_env_config),
                              agents=agent_names,
@@ -218,5 +219,16 @@ def make_vector_env(num_envs: int,
                              mc_ckpt_path=mc_model_ckpt_path)
     wrapped_env_fn = partial(PettingZooEnv, WrappedEnv(env))
     wrapped_env = PettingZooEnv(WrappedEnv(env))
+    venv = SubprocVectorEnv([wrapped_env_fn for _ in range(num_envs)])
+    return venv, wrapped_env
+
+
+def make_vectorized_prl_env(num_envs: int,
+                            single_env_config: dict,
+                            agent_names: List[str],
+                            ) -> Tuple[SubprocVectorEnv, ENV_WRAPPER]:
+    assert len(agent_names) == len(single_env_config['stack_sizes'])
+    wrapped_env_fn = partial(make_env, single_env_config)
+    wrapped_env = wrapped_env_fn()
     venv = SubprocVectorEnv([wrapped_env_fn for _ in range(num_envs)])
     return venv, wrapped_env

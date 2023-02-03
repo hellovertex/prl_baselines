@@ -1,20 +1,19 @@
-import multiprocessing
+import os
 import os
 import pprint
 import time
-from functools import partial
 
 import numpy as np
 import torch
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from tianshou.data import Collector, PrioritizedVectorReplayBuffer
-from tianshou.policy import MultiAgentPolicyManager, RainbowPolicy
+from tianshou.policy import RainbowPolicy
 from tianshou.trainer import OffpolicyTrainer
 from tianshou.utils import TensorboardLogger
 from torch.utils.tensorboard import SummaryWriter
 
 from prl.baselines.agents.tianshou_policies import get_rainbow_config
-from prl.baselines.examples.examples_tianshou_env import make_vector_env
+from prl.baselines.examples.examples_tianshou_env import make_vectorized_prl_env
 
 # todo move this script from prl.baselines to prl.reinforce
 global max_reward_sum
@@ -64,9 +63,9 @@ def train_eval(
     # env = init_wrapped_env(**env_config)
     # obs0 = env.reset(config=None)
     num_envs = 1
-    # mc_model_ckpt_path = os.environ["MC_MODEL_CKPT_PATH"]
-    mc_model_ckpt_path = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/ckpt/ckpt.pt"
-    venv, wrapped_env = make_vector_env(num_envs, env_config, agents, mc_model_ckpt_path)
+    venv, wrapped_env = make_vectorized_prl_env(num_envs=num_envs,
+                                                single_env_config=env_config,
+                                                agent_names=agents)
 
     params = {'device': device,
               'load_from_ckpt': ckpt_save_path,
@@ -142,8 +141,10 @@ def train_eval(
         return mean_rewards >= win_rate_early_stopping
 
     def reward_metric(rews):
-        # todo: consider computing the sum instead of single agent reward here
-        return rews
+        # The reward at index 0 is the reward relative to observer
+        # i.e. the reward gotten from the last action,
+        # so we drop the rewards rews[1:] of the other players
+        return rews[0]
 
     # watch agent's performance
     # def watch():
@@ -236,6 +237,8 @@ def train_eval(
 
 
 if __name__ == "__main__":
+    # 1. todo fix reward rolling in AugmentObsWarpper
+    # Single Env
     for num_players in [2, 6]:
         target_update_frequencies = [500, 5000, 25000, 50000, 100000, 1_000_000]
         alphas = betas = [.4, .6, .8]
@@ -249,7 +252,7 @@ if __name__ == "__main__":
 
         for freq in target_update_frequencies:
             train_eval(f"num_players={num_players},targ_upd_freq={freq}",
-            num_players=num_players,
+                       num_players=num_players,
                        target_update_freq=freq)
             if max_reward_sum > curr_max_rew:
                 curr_max_rew = max_reward_sum
