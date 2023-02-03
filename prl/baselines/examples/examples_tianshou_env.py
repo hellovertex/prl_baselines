@@ -70,7 +70,7 @@ class TianshouEnvWrapper(AECEnv):
             self.agent_map[i] = i
 
     def seed(self, seed: Optional[int] = None) -> None:
-        np.random.seed(seed)
+        self.seed = np.random.seed(seed)
 
     def observation_space(self, agent):
         return self.observation_spaces[agent]
@@ -109,7 +109,11 @@ class TianshouEnvWrapper(AECEnv):
               options: Optional[dict] = None) -> None:
         if seed is not None:
             self.seed(seed=seed)
-        obs, rew, done, info = self.env_wrapped.reset()
+        reset_config=None
+        if options:
+            if 'reset_config' in options:
+                reset_config = options['reset_config']
+        obs, rew, done, info = self.env_wrapped.reset(reset_config)
         shifted_indices = {}
         for rel_btn, agent_idx in self.agent_map.items():
             shifted_indices[rel_btn] = (agent_idx + 1) % self.num_players
@@ -185,10 +189,11 @@ class WrappedEnv(BaseWrapper):
         self.env = env
 
 
-def make_default_tianshou_env(mc_model_ckpt_path, num_players=2):
+def make_default_tianshou_env(mc_model_ckpt_path, num_players=2,agents=None):
     starting_stack = 20000
     stack_sizes = [starting_stack for _ in range(num_players)]
-    agents = [f'p{i}' for i in range(num_players)]
+    if not agents:
+        agents = [f'p{i}' for i in range(num_players)]
     env_config = {"env_wrapper_cls": AugmentObservationWrapper,
                   # "stack_sizes": [100, 125, 150, 175, 200, 250],
                   "stack_sizes": stack_sizes,
@@ -202,7 +207,8 @@ def make_default_tianshou_env(mc_model_ckpt_path, num_players=2):
                              agents=agents,
                              mc_ckpt_path=mc_model_ckpt_path,
                              reward_type=RewardType.MBB)
-    return env
+    wrapped_env = PettingZooEnv(WrappedEnv(env))
+    return wrapped_env
 
 def make_env(cfg):
     return init_wrapped_env(**cfg)
