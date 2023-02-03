@@ -79,18 +79,18 @@ class MCAgent:
     def card_bit_mask_to_int(self, c0: np.array, c1: np.array, board_mask: np.array) -> Tuple[List[int], List[int]]:
         c0_1d = dict_str_to_sk[CARD_BITS_TO_STR[c0][RANK] + CARD_BITS_TO_STR[c0][SUITE]]
         c1_1d = dict_str_to_sk[CARD_BITS_TO_STR[c1][RANK] + CARD_BITS_TO_STR[c1][SUITE]]
-        board = BOARD_BITS_TO_STR[board_mask.astype(bool)]
+        board = BOARD_BITS_TO_STR[board_mask.bool()]
         # board = array(['A', 'c', '2', 'h', '8', 'd'], dtype='<U1')
         board_cards = []
-        for i in range(0, sum(board_mask) - 1, 2):  # sum is 6,8,10 for flop turn river resp.
+        for i in range(0, int(torch.sum(board_mask)) - 1, 2):  # sum is 6,8,10 for flop turn river resp.
             board_cards.append(dict_str_to_sk[board[i] + board[i + 1]])
 
         return [c0_1d, c1_1d], board_cards
 
     def look_at_cards(self, obs: np.array) -> Tuple[List[int], List[int]]:
-        c0_bits = obs[IDX_C0_0:IDX_C0_1].astype(bool)
-        c1_bits = obs[IDX_C1_0:IDX_C1_1].astype(bool)
-        board_bits = obs[IDX_BOARD_START:IDX_BOARD_END].astype(int)  # bit representation
+        c0_bits = obs[0][IDX_C0_0:IDX_C0_1].bool()
+        c1_bits = obs[0][IDX_C1_0:IDX_C1_1].bool()
+        board_bits = obs[0][IDX_BOARD_START:IDX_BOARD_END] # bit representation
         return self.card_bit_mask_to_int(c0_bits, c1_bits, board_bits)
 
     def _compute_action(self,
@@ -104,18 +104,18 @@ class MCAgent:
         # {won: 0, lost: 0, tied: 0}[
         win_prob = float(mc_dict['won'] / self._mc_iters)
         # todo: replace win_prob < .5
-        total_to_call = obs[cols.Total_to_call]
+        total_to_call = obs[0][cols.Total_to_call]
         # if we have negative EV on calling/raising, we fold with high probability
         potsize = sum([
-            obs[cols.Curr_bet_p1],
-            obs[cols.Curr_bet_p2],
-            obs[cols.Curr_bet_p3],
-            obs[cols.Curr_bet_p4],
-            obs[cols.Curr_bet_p5],
-        ]) + obs[cols.Pot_amt]
+            obs[0][cols.Curr_bet_p1],
+            obs[0][cols.Curr_bet_p2],
+            obs[0][cols.Curr_bet_p3],
+            obs[0][cols.Curr_bet_p4],
+            obs[0][cols.Curr_bet_p5],
+        ]) + obs[0][cols.Pot_amt]
         pot_odds = total_to_call / (potsize + total_to_call)
         # ignore pot odds preflop, we marginalize fold probability via acceptance threshold
-        if not obs[cols.Round_preflop]:
+        if not obs[0][cols.Round_preflop]:
             # fold when bad pot odds are not good enough according to MC simulation
             if win_prob < pot_odds:
                 if random() > self.tightness:  # tightness is equal to % of hands played, e.g. 0.15
@@ -143,7 +143,9 @@ class MCAgent:
 
     def compute_action(self, obs: np.ndarray, legal_moves) -> int:
         self.next_legal_moves = legal_moves
-        self._logits = self._model(torch.Tensor(np.array([obs])))
+        if not type(obs) == torch.Tensor:
+            obs = torch.Tensor(np.array([obs]))
+        self._logits = self._model(obs)
         self._predictions = torch.argmax(self._logits, dim=1)
         action = self._compute_action(obs)
         return action
@@ -160,6 +162,6 @@ class MCAgent:
                 obs = np.array(obs)[0]
         if report_probas:
             action = self.compute_action(obs, legal_moves)
-            return action, torch.softmax(self._logits, dim=1).detach().numpy()
+            return action, torch.softmax(self._logits, dim=1).detach()
         return self.compute_action(obs, legal_moves)
 

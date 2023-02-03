@@ -3,17 +3,12 @@ from random import random
 from typing import List
 
 import numpy as np
+import torch
 from numba import njit
 from prl.environment.Wrappers.base import ActionSpace
 
 from prl.baselines.agents.mc_agent import MCAgent
 from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
-
-
-def xavier(input_size, output_size):
-    var = 2. / (input_size + output_size)
-    bound = np.sqrt(3.0 * var)
-    return np.random.uniform(-bound, bound, size=(input_size, output_size))
 
 
 @njit
@@ -26,58 +21,56 @@ def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
 
-class Player:
+def xavier(m, n):
+    return torch.nn.init.xavier_uniform_(torch.empty(m, n))
+
+
+class Player(torch.nn.Module):
     def __init__(self,
                  name,
                  ckpt_to_mc_agent,
                  num_players=6):
+        super(Player, self).__init__()
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = device
         self.name = name
-        self.w0 = xavier(570, 512)
-        self.b0 = np.zeros(512)
-        self.w1 = xavier(512, 512)
-        self.b1 = np.zeros(512)
-        self.w2 = xavier(512, 1)
+        self.w0 = torch.nn.Parameter(xavier(570, 512)).to(device)
+        self.b0 = torch.nn.Parameter(torch.zeros(512)).to(device)
+        self.w1 = torch.nn.Parameter(xavier(512, 512)).to(device)
+        self.b1 = torch.nn.Parameter(torch.zeros(512)).to(device)
+        self.w2 = torch.nn.Parameter(xavier(512, 1)).to(device)
+        # self.w0 = torch.nn.Linear(570, 512)
+        # self.w1 = torch.nn.Linear(512, 512)
+        # self.w2 = torch.nn.Linear(512, 1)
         self.mc_agent = MCAgent(ckpt_to_mc_agent, num_players)
-        self.wnb = [self.w0, self.b0, self.w1, self.b1, self.w2]
         self.collected_rewards = 0
 
-    def save(self, filename):
-        np.savez(filename,
-                 w0=self.w0, w1=self.w1, w2=self.w2,
-                 b0=self.b0, b1=self.b1)
+    def save_weights(self, path):
+        torch.save(self.state_dict(), path)
+
+    def load_weights(self, path):
+        self.load_state_dict(torch.load(path))
+
+    def compute_fold_probability(self, obs):
+        obs = obs @ self.w0 + self.b0
+        obs = torch.relu(obs)
+        obs = obs @ self.w1 + self.b1
+        obs = torch.relu(obs)
+        obs = obs @ self.w2
+        return torch.sigmoid(obs)
 
     @staticmethod
-    @njit
-    def compute_fold_probability(obs, w0, b0, w1, b1, w2):
-        x = obs
-        x = np.dot(x, w0) + b0
-        x = relu(x)
-        x = np.dot(x, w1) + b1
-        x * relu(x)
-        x = np.dot(x, w2)
-        return sigmoid(x)
-
-    def load(self, filename):
-        data = np.load(filename)
-        self.w0 = data['w0']
-        self.w1 = data['w1']
-        self.w2 = data['w2']
-        self.b0 = data['b0']
-        self.b1 = data['b1']
-        return self
-
-    @staticmethod
-    @njit
     def _mutate(weights, mutation_rate, mutation_std):
+        weights = torch.tensor(weights)
         # Normalize weights to apply noise
-        norm = np.linalg.norm(weights)
+        norm = torch.norm(weights)
         weights = weights / norm
 
         # Apply noise with a standard deviation of mutation_std
-        noise = np.random.normal(0, mutation_std, size=weights.shape)
+        noise = torch.normal(mean=0., std=mutation_std, size=weights.shape)
 
         # Apply mutation by adding noise to weights with a prob mutation_rate
-        mutation = np.random.binomial(1, mutation_rate, size=weights.shape)
+        mutation = torch.bernoulli(torch.tensor(mutation_rate), size=weights.shape)
         weights = weights + mutation * noise
 
         # Renormalize the weights to have the same norm as before
@@ -86,21 +79,20 @@ class Player:
         return weights
 
     def mutate(self, mutation_rate=0.1, mutation_std=0.1):
-        for params in self.wnb:
-            self._mutate(params, mutation_rate, mutation_std)
+        self.w0 = self._mutate(self.w0, mutation_rate, mutation_std)
+        self.w1 = self._mutate(self.w1, mutation_rate, mutation_std)
+        self.w2 = self._mutate(self.w2, mutation_rate, mutation_std)
 
     def act(self, obs, legal_moves):
+        obs = torch.Tensor(np.array([obs])).to(self.device)
         action, probas = self.mc_agent.act(obs,
                                            legal_moves,
                                            report_probas=True)
         # concatenate action probabilities with obs
-        if type(obs) == list:
-            obs = obs + probas
-        elif type(obs) == np.ndarray:
-            obs = np.concatenate([obs, probas[0]])
+        obs = torch.concat([obs, probas], dim=1)
 
         # use concatenated new obs to compute fold_prob
-        fold_prob = self.compute_fold_probability(obs, *self.wnb)
+        fold_prob = self.compute_fold_probability(obs)
 
         if fold_prob < random():
             return ActionSpace.FOLD
@@ -178,5 +170,3 @@ if __name__ == "__main__":
         # 4. mutate weights to generate new generation
         players = [best_player for _ in range(6)]
         [p.mutate(mutation_rate=.2) for p in players]
-
-
