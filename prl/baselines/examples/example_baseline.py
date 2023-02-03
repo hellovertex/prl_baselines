@@ -99,27 +99,6 @@ class Player:
             return action
 
 
-"""
-    Has a .ckpt model from game log supervised learning
-    self.base_model = base_model
-    FrameWork requirements:
-
-    - MARL: acts together with other agents in a MARL fashion:
-    - VectorEnv?
-    - PBT?
-    # algo:
-    # [x] 0. define fitness function -- rewards
-    # [x] 1. init 6 players with random weights
-    # [x] 2. play M games -- collect rewards per player
-    # [x] 3. evaluate players using rewards collected
-    # 4. select the best player P1 using fitness function -- i) mutate ii) save weights to current best
-    # 5. repeat 2,3,4
-    It is enough to have a 569 x
-
-    todo: figure out how we can use the trained .ckpt MLP quickly(vectorized/mp) with this numpy based approach
-    """
-
-
 def play_game(players, env):
     # the environment takes care of moving the button, see eval_tianshou_env.py
     # we can assume player positions are fixed while in the backend they are not
@@ -129,7 +108,7 @@ def play_game(players, env):
     obs = obs['obs']
     while True:
         i = player_names.index(agent_id)
-        action = player_names[i].act(obs, legal_moves)
+        action = players[i].act(obs, legal_moves)
         obs_dict, cum_rewards, terminated, truncated, info = env.step(action)
         agent_id = obs_dict['agent_id']
         players[i].collected_rewards += cum_rewards
@@ -155,7 +134,7 @@ def select_best_player(players: List[Player]):
 
 if __name__ == "__main__":
     n_games = 10
-    #n_games = 10000
+    # n_games = 10000
     evolution_steps = 100
     # evolution_steps = 100_000_000
     ckpt_to_mc_agent = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
@@ -185,6 +164,3 @@ if __name__ == "__main__":
         epoch += 1
         if epoch > evolution_steps:
             break
-
-
-
