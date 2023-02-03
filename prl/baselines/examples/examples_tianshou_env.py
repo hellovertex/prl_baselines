@@ -8,6 +8,7 @@ from gym.spaces import Box
 from pettingzoo import AECEnv
 from pettingzoo.utils import BaseWrapper
 from pettingzoo.utils.env import ObsType
+from prl.environment.Wrappers.aoh import Positions6Max
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
 from tianshou.env.pettingzoo_env import PettingZooEnv
@@ -64,6 +65,9 @@ class TianshouEnvWrapper(AECEnv):
         self.action_spaces = self._convert_to_dict(
             [self.env_wrapped.action_space for _ in range(self.num_agents)]
         )
+        self.agent_map = {}
+        for i in range(self.num_players):
+            self.agent_map[i] = i
 
     def seed(self, seed: Optional[int] = None) -> None:
         np.random.seed(seed)
@@ -131,9 +135,13 @@ class TianshouEnvWrapper(AECEnv):
         if seed is not None:
             self.seed(seed=seed)
         obs, rew, done, info = self.env_wrapped.reset()
-        player_id = (self._last_player_id + 1) % self.num_players
+        shifted_indices = {}
+        for rel_btn, agent_idx in self.agent_map.items():
+            shifted_indices[rel_btn] = (agent_idx + 1) % self.num_players
+        self.agent_map = shifted_indices
+        player_id = self.agent_map[self.env_wrapped.env.current_player.seat_id]
         player = self._int_to_name(player_id)
-        self.goes_first = player_id
+
         self.agents = self.possible_agents[:]
         self.agent_selection = player
         self.rewards = self._convert_to_dict([0 for _ in range(self.num_agents)])
@@ -166,14 +174,14 @@ class TianshouEnvWrapper(AECEnv):
             return self._was_dead_step(action)
         obs, rew, done, info = self.env_wrapped.step(action)
         self._last_obs = obs
-        next_player_id = (self._last_player_id + 1) % self.num_players
+        next_player_id = self.env_wrapped.env.current_player.seat_id
+        next_player_id = self.agent_map[next_player_id]
         next_player = self._int_to_name(next_player_id)
+        # roll button to correct position [BTN,...,] to [,...,BTN,...]
+        rewards = np.roll(rew, self.agent_map[Positions6Max.BTN])
         if done:
             self.rewards = self._convert_to_dict(
-                self._scale_rewards(self.roll_rewards(names=self.possible_agents,
-                                                      went_first=self.goes_first,
-                                                      rewards=rew,
-                                                      num_players=self.num_players))
+                self._scale_rewards(rewards)
             )
             self.terminations = self._convert_to_dict(
                 [True for _ in range(self.num_agents)]

@@ -7,13 +7,13 @@ import numpy as np
 import torch
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from tianshou.data import Collector, PrioritizedVectorReplayBuffer
-from tianshou.policy import RainbowPolicy
+from tianshou.policy import RainbowPolicy, MultiAgentPolicyManager
 from tianshou.trainer import OffpolicyTrainer
 from tianshou.utils import TensorboardLogger
 from torch.utils.tensorboard import SummaryWriter
 
 from prl.baselines.agents.tianshou_policies import get_rainbow_config
-from prl.baselines.examples.examples_tianshou_env import make_vectorized_prl_env
+from prl.baselines.examples.examples_tianshou_env import make_vectorized_prl_env, make_vectorized_pettingzoo_env
 
 
 # todo move this script from prl.baselines to prl.reinforce
@@ -36,7 +36,7 @@ def train_eval(
         beta_final=1,
         beta_anneal_step=5000000,
         weight_norm=True,
-        epoch=10_000,
+        epoch=5_000,
         step_per_epoch=10_000,
         step_per_collect=100,
         episode_per_test=50,
@@ -49,8 +49,8 @@ def train_eval(
         load_ckpt=True):
     win_rate_early_stopping = np.inf,
     best_rew = -np.inf
-
-    logdir = [".", "v3", "rainbow_vs_rainbow_heads_up", dir_suffix]
+    learning_agent_ids = [0]
+    logdir = [".", "v3", "rainbow_self_play", dir_suffix]
     ckpt_save_path = os.path.join(
         *logdir, f'ckpt.pt'
     )
@@ -68,10 +68,12 @@ def train_eval(
                   "blinds": [sb, bb]}
     # env = init_wrapped_env(**env_config)
     # obs0 = env.reset(config=None)
-    num_envs = 1
-    venv, wrapped_env = make_vectorized_prl_env(num_envs=num_envs,
-                                                single_env_config=env_config,
-                                                agent_names=agents)
+    num_envs = 31
+    mc_model_ckpt_path = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/ckpt/ckpt.pt"
+    venv, wrapped_env = make_vectorized_pettingzoo_env(num_envs=num_envs,
+                                                       single_env_config=env_config,
+                                                       agent_names=agents,
+                                                       mc_model_ckpt_path=mc_model_ckpt_path)
 
     params = {'device': device,
               'load_from_ckpt': ckpt_save_path,
@@ -92,12 +94,14 @@ def train_eval(
             # initial training, no ckpt created yet, ignore silently
             pass
     # # 'load_from_ckpt_dir': None
-    # policy = MultiAgentPolicyManager([
-    #     RainbowPolicy(**rainbow_config),
-    #     RainbowPolicy(**rainbow_config),
-    #     #    MCPolicy()
-    # ], wrapped_env)  # policy is made from PettingZooEnv
-    policy = RainbowPolicy(**rainbow_config)
+    rainbow = RainbowPolicy(**rainbow_config)
+    policy = MultiAgentPolicyManager([
+        rainbow,
+        rainbow,  # share weights
+        #    MCPolicy()
+    ], wrapped_env)  # policy is made from PettingZooEnv
+    # policy = RainbowPolicy(**rainbow_config)
+
     buffer = PrioritizedVectorReplayBuffer(
         total_size=buffer_size,
         buffer_num=len(venv),
@@ -112,14 +116,14 @@ def train_eval(
     test_collector = Collector(policy, venv, exploration_noise=True)
 
     def train_fn(epoch, env_step, beta=beta):
-        # linear decay in the first 100M steps
-        if env_step <= 1e8:
-            eps = eps_train - env_step / 1e8 * \
+        # linear decay in the first 10M steps
+        if env_step <= 1e7:
+            eps = eps_train - env_step / 1e7 * \
                   (eps_train - eps_train_final)
         else:
             eps = eps_train_final
-
-        policy.set_eps(eps)
+        for aid in learning_agent_ids:
+            policy.policies[agents[aid]].set_eps(eps)
         if env_step % 1000 == 0:
             logger.write("train/env_step", env_step, {"train/eps": eps})
         if not no_priority:
@@ -133,15 +137,17 @@ def train_eval(
                 logger.write("train/env_step", env_step, {"train/beta": beta})
 
     def test_fn(epoch, env_step):
-        policy.set_eps(eps_test)
+        for aid in learning_agent_ids:
+            policy.policies[agents[aid]].set_eps(eps_test)
 
     def save_best_fn(policy):
-        model_save_path = os.path.join(
-            *logdir, f'policy_{dir_suffix}.pth'
-        )
-        torch.save(
-            policy.state_dict(), model_save_path
-        )
+        for aid in learning_agent_ids:
+            model_save_path = os.path.join(
+                *logdir, f'policy_{aid}.pth'
+            )
+            torch.save(
+                policy.policies[agents[aid]].state_dict(), model_save_path
+            )
 
     def stop_fn(mean_rewards):
         return mean_rewards >= win_rate_early_stopping
@@ -150,13 +156,10 @@ def train_eval(
 
     def reward_metric(rews):
         # The reward at index 0 is the reward relative to observer
-        # i.e. the reward gotten from the last action,
-        # so we drop the rewards rews[1:] of the other players
-        rew = np.mean(rews)
+        rew = np.mean(rews[:, learning_agent_ids[0]])
         if rew > max_reward.reward:
             max_reward.reward = rew
-        return rew / bb
-
+        return rew
     log_path = os.path.join(*logdir)
     writer = SummaryWriter(log_path)
     # writer.add_text("args", str(args))
@@ -212,7 +215,7 @@ if __name__ == "__main__":
     # 1. todo fix reward rolling in AugmentObsWarpper
     # Single Env
     for num_players in [2, 6]:
-        target_update_frequencies = [500, 5000, 25000, 50000, 100000, 1_000_000]
+        target_update_frequencies = [5000, 50000, 100000, 1_000_000]
         alphas = betas = [.4, .6, .8]
         buffer_sizes = [10_000, 50_000, 100_000, 1_000_000]
         curr_max_rew = 0
