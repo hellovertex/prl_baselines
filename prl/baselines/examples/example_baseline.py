@@ -1,3 +1,4 @@
+import time
 from random import random
 from typing import List
 
@@ -117,17 +118,20 @@ def play_game(players, env):
     while True:
         i = player_names.index(agent_id)
         action = players[i].act(obs, legal_moves)
-        obs_dict, cum_rewards, terminated, truncated, info = env.step(action)
+        obs_dict, rewards, terminated, truncated, info = env.step(action)
         agent_id = obs_dict['agent_id']
-        players[i].collected_rewards += cum_rewards
+        players[i].collected_rewards += rewards[player_names.index(agent_id)]
         obs = obs_dict['obs']
         if terminated:
             break
 
 
 def play_games(n_games, players, env):
+    t0 = time.time()
     for i in range(n_games):
         play_game(players, env)
+    print(f'Playing {n_games} games took {time.time() - t0} seconds.')
+    return players
 
 
 def select_best_player(players: List[Player]):
@@ -141,7 +145,7 @@ def select_best_player(players: List[Player]):
 
 
 if __name__ == "__main__":
-    n_games = 10
+    n_games = 100
     # n_games = 10000
     evolution_steps = 100
     # evolution_steps = 100_000_000
@@ -155,20 +159,24 @@ if __name__ == "__main__":
     # 1.1 Create poker environment that automatically moves btn after reset, see `eval_tianshou_env.py`
     env = make_default_tianshou_env(ckpt_to_mc_agent,
                                     agents=player_names,
-                                    num_players=2)
+                                    num_players=6)
     epoch = 0
     while True:
         # 2. Play many games to let each player accumulate rewards over all games
-        play_games(n_games=10000, players=players, env=env)
+        print(f'Playing {n_games} games at epoch {epoch}/{evolution_steps}')
+        players = play_games(n_games=n_games, players=players, env=env)
 
         # 3. evaluate players using collected rewards
-        best_player, collected_reward = select_best_player
+        best_player, collected_reward = select_best_player(players)
 
-        # 4. mutate weights to generate new generation
-        new_gen = [best_player for _ in range(6)]
-        [p.mutate(mutation_rate=.2) for p in new_gen]
-
-        # 5. terminate after
+        # 5. terminate when `evolution_steps` threshold reached
         epoch += 1
         if epoch > evolution_steps:
+            best_player.save('./best_player.npz')
             break
+
+        # 4. mutate weights to generate new generation
+        players = [best_player for _ in range(6)]
+        [p.mutate(mutation_rate=.2) for p in players]
+
+
