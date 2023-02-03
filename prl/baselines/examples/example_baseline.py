@@ -64,11 +64,22 @@ class Player:
         return sigmoid(x)
 
     def act(self, obs, legal_moves):
-        fold_prob = self.compute_fold_probability(obs)
+        action, probas = self.mc_agent.act(obs,
+                                           legal_moves,
+                                           report_probas=True)
+        # concatenate action probabilities with obs
+        if type(obs) == list:
+            obs = obs + probas
+        elif type(obs) == np.ndarray:
+            obs = np.concatenate([obs, probas])
+
+        # use concatenated new obs to compute fold_prob
+        fold_prob = self.compute_fold_probability(obs, probas)
+
         if fold_prob < random():
             return ActionSpace.FOLD
         else:
-            return self.mc_agent.act(obs, legal_moves)
+            return action
 
 
 class BaselineAgent:

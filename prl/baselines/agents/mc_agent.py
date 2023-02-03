@@ -148,7 +148,7 @@ class MCAgent:
         action = self._compute_action(obs)
         return action
 
-    def act(self, obs, legal_moves):
+    def act(self, obs, legal_moves, report_probas=False):
         """Wrapper for compute action only when evaluating in poke--> single env"""
         if type(obs) == dict:
             legal_moves = np.array([0, 0, 0, 0, 0, 0])
@@ -158,5 +158,8 @@ class MCAgent:
             obs = obs['obs']
             if type(obs) == list:
                 obs = np.array(obs)[0]
+        if report_probas:
+            action = self.compute_action(obs, legal_moves)
+            return action, torch.softmax(self._logits, dim=1)
         return self.compute_action(obs, legal_moves)
 

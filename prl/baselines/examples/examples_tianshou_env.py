@@ -114,10 +114,6 @@ class TianshouEnvWrapper(AECEnv):
             if 'reset_config' in options:
                 reset_config = options['reset_config']
         obs, rew, done, info = self.env_wrapped.reset(reset_config)
-        shifted_indices = {}
-        for rel_btn, agent_idx in self.agent_map.items():
-            shifted_indices[rel_btn] = (agent_idx + 1) % self.num_players
-        self.agent_map = shifted_indices
         player_id = self.agent_map[self.env_wrapped.env.current_player.seat_id]
         player = self._int_to_name(player_id)
 
@@ -168,6 +164,12 @@ class TianshouEnvWrapper(AECEnv):
             self.truncations = self._convert_to_dict(
                 [False for _ in range(self.num_agents)]
             )
+            # move btn to next player
+            shifted_indices = {}
+            for rel_btn, agent_idx in self.agent_map.items():
+                shifted_indices[rel_btn] = (agent_idx - 1) % self.num_players
+            self.agent_map = shifted_indices
+
         else:
             legal_moves = np.array([0, 0, 0, 0, 0, 0])
             legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
@@ -202,12 +204,14 @@ def make_default_tianshou_env(mc_model_ckpt_path, num_players=2,agents=None):
                   "blinds": [50, 100]}
     # env = init_wrapped_env(**env_config)
     # obs0 = env.reset(config=None)
-
+    # AEC ENV
     env = TianshouEnvWrapper(env=make_env(env_config),
                              agents=agents,
                              mc_ckpt_path=mc_model_ckpt_path,
                              reward_type=RewardType.MBB)
-    wrapped_env = PettingZooEnv(WrappedEnv(env))
+    # to set seed as required by tianshou
+    wrapped_env = WrappedEnv(env)
+    wrapped_env = PettingZooEnv(wrapped_env)
     return wrapped_env
 
 def make_env(cfg):
