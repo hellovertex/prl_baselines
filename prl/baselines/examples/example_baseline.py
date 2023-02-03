@@ -70,7 +70,7 @@ class Player(torch.nn.Module):
         noise = torch.normal(mean=0., std=mutation_std, size=weights.shape)
 
         # Apply mutation by adding noise to weights with a prob mutation_rate
-        mutation = torch.bernoulli(torch.tensor(mutation_rate), size=weights.shape)
+        mutation = torch.bernoulli(torch.full_like(weights, mutation_rate))
         weights = weights + mutation * noise
 
         # Renormalize the weights to have the same norm as before
