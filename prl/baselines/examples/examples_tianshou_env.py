@@ -103,31 +103,6 @@ class TianshouEnvWrapper(AECEnv):
     def _int_to_name(self, ind):
         return self.possible_agents[ind]
 
-    def roll_rewards(self, names: List[str], went_first: int, rewards: List[float], num_players: int):
-        """
-        Rolls indices from relative to button to relative to agent_list.
-        In Backend the button is always at index 0, in PettingZoo env however, any player could be
-        the button.
-        @param names: Player Names as in PettingZoo wrapped PokerRL env.
-        @param went_first: index of player in `agent_list` who started the round after env.reset()
-        @param rewards: Payouts gotten from PokerRL backend. Button is always at index 0
-        @param num_players: Total number of players at the table. Determines who goes first
-        according to the following rule: If number of players is less than four,
-        the button starts, otherwise the UTG in [Button, SmallBlind, BigBlind, UTG, MP, CO]
-        starts.
-        @return: The payouts dictionary with indices relative to the PettingZoo player name list,
-        instead of relative to the button. The backend has the button at index 0/
-        """
-        # player who goes first, either button at index 0 or UTG at index 3
-        offset = 0 if num_players < 4 else 3
-        # Example 1: "Alice" goes first
-        # - ["Bob", "Alice", "Tina"] --> ["Alice", "Tina", "Bob]
-        # Example 2:  "Hans" goes first (implies Tina is button)
-        # - ["Bob", "Alice", "Hans", "Tina"] --> ["Tina", "Bob", "Alice", "Hans"]
-        # Example 3:  "Tina" goes first (implies Alice is button)
-        # - ["Bob", "Alice", "Hans", "Stacy", "Tina"] --> ["Alice", "Hans", "Stacy", "Tina", "Bob"]
-        return list(np.roll(rewards, offset - went_first))
-
     def reset(self,
               seed: Optional[int] = None,
               return_info: bool = False,

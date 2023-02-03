@@ -1,4 +1,93 @@
+from random import random
+
 import numpy as np
+from numba import njit
+from pettingzoo.test import api_test
+from prl.environment.Wrappers.augment import AugmentObservationWrapper
+from prl.environment.Wrappers.base import ActionSpace
+
+from prl.baselines.agents.mc_agent import MCAgent
+from prl.baselines.examples.examples_tianshou_env import make_env, TianshouEnvWrapper, \
+    RewardType
+
+num_players = 2
+starting_stack = 20000
+stack_sizes = [starting_stack for _ in range(num_players)]
+agents = [f'p{i}' for i in range(num_players)]
+env_config = {"env_wrapper_cls": AugmentObservationWrapper,
+              # "stack_sizes": [100, 125, 150, 175, 200, 250],
+              "stack_sizes": stack_sizes,
+              "multiply_by": 1,  # use 100 for floats to remove decimals but we have int stacks
+              "scale_rewards": False,  # we do this ourselves
+              "blinds": [50, 100]}
+# env = init_wrapped_env(**env_config)
+# obs0 = env.reset(config=None)
+mc_model_ckpt_path = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
+env = TianshouEnvWrapper(env=make_env(env_config),
+                         agents=agents,
+                         mc_ckpt_path=mc_model_ckpt_path,
+                         reward_type=RewardType.MBB)
+
+
+def xavier(input_size, output_size):
+    var = 2. / (input_size + output_size)
+    bound = np.sqrt(3.0 * var)
+    return np.random.uniform(-bound, bound, size=(input_size, output_size))
+
+
+sigmoid = lambda x: 1 / (1 + np.exp(-x))
+relu = lambda x: np.maximum(x, 0)
+
+
+class Player:
+    def __init__(self, ckpt_to_mc_agent, num_players=6):
+        self.w0 = xavier(564, 512)
+        self.b0 = np.zeros(512)
+        self.w1 = xavier(512, 512)
+        self.b1 = np.zeros(512)
+        self.w2 = xavier(512, 1)
+        self.mc_agent = MCAgent(ckpt_to_mc_agent, num_players)
+        self.wnb = [self.w0, self.b0, self.w1, self.b1, self.w2]
+
+    @njit
+    def _mutate(self, weights, mutation_rate, mutation_std):
+        # Normalize the weights to have a unit norm
+        norm = np.linalg.norm(weights)
+        weights = weights / norm
+
+        # Generate random noise with a standard deviation of mutation_std
+        noise = np.random.normal(0, mutation_std, size=weights.shape)
+
+        # Apply the mutation by adding the noise to the weights with a probability of mutation_rate
+        mutation = np.random.binomial(1, mutation_rate, size=weights.shape)
+        weights = weights + mutation * noise
+
+        # Renormalize the weights to have the same norm as before
+        weights = weights * norm
+
+        return weights
+
+    def mutate(self, mutation_rate=0.1, mutation_std=0.1):
+        for params in self.wnb:
+            self._mutate(params, mutation_rate, mutation_std)
+    @njit
+    def compute_fold_probability(self, obs):
+        x = obs
+        x = np.dot(x, self.w0) + self.b0
+        x = relu(x)
+        x = np.dot(x, self.w1) + self.b1
+        x * relu(x)
+        x = np.dot(x, self.w2)
+        return sigmoid(x)
+
+    def act(self, obs, legal_moves):
+        fold_prob = self.compute_fold_probability(obs)
+        if fold_prob < random():
+            return ActionSpace.FOLD
+        else:
+            return self.mc_agent.act(obs, legal_moves)
+
+
 class BaselineAgent:
     """
     Has a .ckpt model from game log supervised learning
@@ -9,8 +98,8 @@ class BaselineAgent:
     - VectorEnv?
     - PBT?
     # algo:
-    # 0. define fitness function
-    # 1. init 6 players with random weights
+    # [x] 0. define fitness function -- rewards
+    # [x] 1. init 6 players with random weights
     # 2. play M games -- collect rewards per player
     # 3. evaluate players using rewards collected
     # 4. select the best player P1 using fitness function -- i) mutate ii) save weights to current best
@@ -19,42 +108,33 @@ class BaselineAgent:
 
     todo: figure out how we can use the trained .ckpt MLP quickly(vectorized/mp) with this numpy based approach
     """
-    def __init__(self, base_model):
-        self.base_model = base_model
 
 
-def mutate(weights, mutation_rate=0.1, mutation_std=0.1):
-    # Normalize the weights to have a unit norm
-    norm = np.linalg.norm(weights)
-    weights = weights / norm
+# 1. init 6 players
+players = [Player(mc_model_ckpt_path) for _ in range(6)]
+# 2. play M games
+M = 1000
 
-    # Generate random noise with a standard deviation of mutation_std
-    noise = np.random.normal(0, mutation_std, size=weights.shape)
 
-    # Apply the mutation by adding the noise to the weights with a probability of mutation_rate
-    mutation = np.random.binomial(1, mutation_rate, size=weights.shape)
-    weights = weights + mutation * noise
+def play_game(players, env):
+    obs, rews, done, info = env.reset()
+    while True:
+        players
 
-    # Renormalize the weights to have the same norm as before
-    weights = weights * norm
 
-    return weights
+def play_games(n_games, players, env):
+    for i in range(n_games):
+        play_game(players, env)
 
-def xavier(input_size, output_size):
-    var = 2. / (input_size + output_size)
-    bound = np.sqrt(3.0 * var)
-    return np.random.uniform(-bound, bound, size=(input_size, output_size))
 
-sigmoid = lambda x: 1 / (1 + np.exp(-x))
-relu = lambda x: np.maximum(x, 0)
-
+#
 action_probs = np.random.random(5)
 obs = np.random.random(564)
-w0 = xavier(564,512)
+w0 = xavier(564, 512)
 b0 = np.zeros(512)
-w1 = xavier(512,512)
+w1 = xavier(512, 512)
 b1 = np.zeros(512)
-w2 = xavier(512,1)
+w2 = xavier(512, 1)
 x = obs
 x = np.dot(x, w0) + b0
 x = relu(x)
