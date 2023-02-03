@@ -226,3 +226,6 @@ pprint.pprint(result)
 print(f'took {time.time() - t0} seconds')
 # pprint.pprint(result)
 # watch()
+
+if __name__ == "__main__":
+    pass

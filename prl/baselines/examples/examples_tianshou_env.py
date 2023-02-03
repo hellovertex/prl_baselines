@@ -188,7 +188,7 @@ class TianshouEnvWrapper(AECEnv):
         self.env_wrapped = env
         self.BIG_BLIND = self.env_wrapped.env.BIG_BLIND
         self._mc_agent = MCAgent(
-            ckpt_path=mc_ckpt_path)
+            ckpt_path=mc_ckpt_path, num_players=self.num_players)
         self._last_player_id = -1
 
         obs_space = Box(low=0.0, high=6.0, shape=(564,), dtype=np.float64)

@@ -74,8 +74,12 @@ def get_rainbow_config(params):
     # load from config if possible
     optim = torch.optim.Adam(net.parameters(), lr=params['lr'])
     if 'load_from_ckpt' in params:
-        net.load_state_dict(torch.load(params['load_from_ckpt'], map_location=device)['model'])
-        optim.load_state_dict(torch.load(params['load_from_ckpt'], map_location=device)['optim'])
+        try:
+            net.load_state_dict(torch.load(params['load_from_ckpt'], map_location=device)['model'])
+            optim.load_state_dict(torch.load(params['load_from_ckpt'], map_location=device)['optim'])
+        except FileNotFoundError:
+            # initial state, no checkpoints created yet, ignore silently
+            pass
     # if running on GPU and we want to use cuda move model there
     return {'model': net,
             'optim': optim,
