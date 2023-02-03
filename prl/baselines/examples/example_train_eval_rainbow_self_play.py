@@ -39,7 +39,6 @@ def train_eval(
         episode_per_test=50,
         batch_size=256,
         update_per_step=0.1,
-        learning_agent_ids=(0, 1),
         eps_train=0.2,
         eps_train_final=0.05,
         eps_test=0.0,
@@ -114,8 +113,8 @@ def train_eval(
                   (eps_train - eps_train_final)
         else:
             eps = eps_train_final
-        for aid in learning_agent_ids:
-            policy.policies[agents[aid]].set_eps(eps)
+
+        policy.set_eps(eps)
         if env_step % 1000 == 0:
             logger.write("train/env_step", env_step, {"train/eps": eps})
         if not no_priority:
@@ -129,24 +128,21 @@ def train_eval(
                 logger.write("train/env_step", env_step, {"train/beta": beta})
 
     def test_fn(epoch, env_step):
-        for aid in learning_agent_ids:
-            policy.policies[agents[aid]].set_eps(eps_test)
+        policy.set_eps(eps_test)
 
     def save_best_fn(policy):
-        for aid in learning_agent_ids:
-            model_save_path = os.path.join(
-                *logdir, f'policy_{aid}.pth'
-            )
-            torch.save(
-                policy.policies[agents[aid]].state_dict(), model_save_path
-            )
+        model_save_path = os.path.join(
+            *logdir, f'policy_{dir_suffix}.pth'
+        )
+        torch.save(
+            policy.state_dict(), model_save_path
+        )
 
     def stop_fn(mean_rewards):
         return mean_rewards >= win_rate_early_stopping
 
     def reward_metric(rews):
         # todo: consider computing the sum instead of single agent reward here
-        rews = rews[:, learning_agent_ids[0]]
         return rews
 
     # watch agent's performance
@@ -226,6 +222,10 @@ def train_eval(
                                show_progress=True,
                                test_in_train=False  # whether to test in training phase
                                )
+    for epoch, epoch_stat, info in trainer:
+        print("Epoch:", epoch)
+        print(epoch_stat)
+        print(info)
     result = trainer.run()
     t0 = time.time()
     pprint.pprint(result)
@@ -248,7 +248,9 @@ if __name__ == "__main__":
         global max_reward_sum
 
         for freq in target_update_frequencies:
-            train_eval(f"num_players={num_players},targ_upd_freq={freq}", target_update_freq=freq)
+            train_eval(f"num_players={num_players},targ_upd_freq={freq}",
+            num_players=num_players,
+                       target_update_freq=freq)
             if max_reward_sum > curr_max_rew:
                 curr_max_rew = max_reward_sum
                 max_freq = freq
@@ -258,6 +260,7 @@ if __name__ == "__main__":
 
         for buffer_size in buffer_sizes:
             train_eval(f"num_players={num_players},buffer_size={buffer_size}",
+                       num_players=num_players,
                        buffer_size=buffer_size,
                        target_update_freq=max_freq)
             if max_reward_sum > curr_max_rew:
@@ -269,6 +272,7 @@ if __name__ == "__main__":
 
         for alpha in alphas:
             train_eval(f"num_players={num_players},alpha={alpha}",
+                       num_players=num_players,
                        alpha=alpha,
                        target_update_freq=max_freq,
                        buffer_size=max_buffer_size)
@@ -281,6 +285,7 @@ if __name__ == "__main__":
 
         for beta in betas:
             train_eval(f"num_players={num_players},beta={beta}",
+                       num_players=num_players,
                        alpha=max_alpha,
                        target_update_freq=max_freq,
                        buffer_size=max_buffer_size,
