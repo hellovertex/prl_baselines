@@ -185,6 +185,25 @@ class WrappedEnv(BaseWrapper):
         self.env = env
 
 
+def make_default_tianshou_env(mc_model_ckpt_path, num_players=2):
+    starting_stack = 20000
+    stack_sizes = [starting_stack for _ in range(num_players)]
+    agents = [f'p{i}' for i in range(num_players)]
+    env_config = {"env_wrapper_cls": AugmentObservationWrapper,
+                  # "stack_sizes": [100, 125, 150, 175, 200, 250],
+                  "stack_sizes": stack_sizes,
+                  "multiply_by": 1,  # use 100 for floats to remove decimals but we have int stacks
+                  "scale_rewards": False,  # we do this ourselves
+                  "blinds": [50, 100]}
+    # env = init_wrapped_env(**env_config)
+    # obs0 = env.reset(config=None)
+
+    env = TianshouEnvWrapper(env=make_env(env_config),
+                             agents=agents,
+                             mc_ckpt_path=mc_model_ckpt_path,
+                             reward_type=RewardType.MBB)
+    return env
+
 def make_env(cfg):
     return init_wrapped_env(**cfg)
 

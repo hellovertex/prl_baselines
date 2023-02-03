@@ -2,31 +2,13 @@ from random import random
 
 import numpy as np
 from numba import njit
-from pettingzoo.test import api_test
-from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.base import ActionSpace
 
 from prl.baselines.agents.mc_agent import MCAgent
-from prl.baselines.examples.examples_tianshou_env import make_env, TianshouEnvWrapper, \
-    RewardType
+from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
 
-num_players = 2
-starting_stack = 20000
-stack_sizes = [starting_stack for _ in range(num_players)]
-agents = [f'p{i}' for i in range(num_players)]
-env_config = {"env_wrapper_cls": AugmentObservationWrapper,
-              # "stack_sizes": [100, 125, 150, 175, 200, 250],
-              "stack_sizes": stack_sizes,
-              "multiply_by": 1,  # use 100 for floats to remove decimals but we have int stacks
-              "scale_rewards": False,  # we do this ourselves
-              "blinds": [50, 100]}
-# env = init_wrapped_env(**env_config)
-# obs0 = env.reset(config=None)
 mc_model_ckpt_path = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
-env = TianshouEnvWrapper(env=make_env(env_config),
-                         agents=agents,
-                         mc_ckpt_path=mc_model_ckpt_path,
-                         reward_type=RewardType.MBB)
+env = make_default_tianshou_env(mc_model_ckpt_path, num_players=2)
 
 
 def xavier(input_size, output_size):
@@ -70,6 +52,7 @@ class Player:
     def mutate(self, mutation_rate=0.1, mutation_std=0.1):
         for params in self.wnb:
             self._mutate(params, mutation_rate, mutation_std)
+
     @njit
     def compute_fold_probability(self, obs):
         x = obs
