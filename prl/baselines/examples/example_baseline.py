@@ -1,4 +1,5 @@
 from random import random
+from typing import List
 
 import numpy as np
 from numba import njit
@@ -6,9 +7,6 @@ from prl.environment.Wrappers.base import ActionSpace
 
 from prl.baselines.agents.mc_agent import MCAgent
 from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
-
-mc_model_ckpt_path = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
-env = make_default_tianshou_env(mc_model_ckpt_path, num_players=2)
 
 
 def xavier(input_size, output_size):
@@ -22,7 +20,11 @@ relu = lambda x: np.maximum(x, 0)
 
 
 class Player:
-    def __init__(self, ckpt_to_mc_agent, num_players=6):
+    def __init__(self,
+                 name,
+                 ckpt_to_mc_agent,
+                 num_players=6):
+        self.name = name
         self.w0 = xavier(564, 512)
         self.b0 = np.zeros(512)
         self.w1 = xavier(512, 512)
@@ -30,17 +32,32 @@ class Player:
         self.w2 = xavier(512, 1)
         self.mc_agent = MCAgent(ckpt_to_mc_agent, num_players)
         self.wnb = [self.w0, self.b0, self.w1, self.b1, self.w2]
+        self.collected_rewards = 0
+
+    def save(self, filename):
+        np.savez(filename,
+                 w0=self.w0, w1=self.w1, w2=self.w2,
+                 b0=self.b0, b1=self.b1)
+
+    def load(self, filename):
+        data = np.load(filename)
+        self.w0 = data['w0']
+        self.w1 = data['w1']
+        self.w2 = data['w2']
+        self.b0 = data['b0']
+        self.b1 = data['b1']
+        return self
 
     @njit
     def _mutate(self, weights, mutation_rate, mutation_std):
-        # Normalize the weights to have a unit norm
+        # Normalize weights to apply noise
         norm = np.linalg.norm(weights)
         weights = weights / norm
 
-        # Generate random noise with a standard deviation of mutation_std
+        # Apply noise with a standard deviation of mutation_std
         noise = np.random.normal(0, mutation_std, size=weights.shape)
 
-        # Apply the mutation by adding the noise to the weights with a probability of mutation_rate
+        # Apply mutation by adding noise to weights with a prob mutation_rate
         mutation = np.random.binomial(1, mutation_rate, size=weights.shape)
         weights = weights + mutation * noise
 
@@ -82,8 +99,7 @@ class Player:
             return action
 
 
-class BaselineAgent:
-    """
+"""
     Has a .ckpt model from game log supervised learning
     self.base_model = base_model
     FrameWork requirements:
@@ -94,8 +110,8 @@ class BaselineAgent:
     # algo:
     # [x] 0. define fitness function -- rewards
     # [x] 1. init 6 players with random weights
-    # 2. play M games -- collect rewards per player
-    # 3. evaluate players using rewards collected
+    # [x] 2. play M games -- collect rewards per player
+    # [x] 3. evaluate players using rewards collected
     # 4. select the best player P1 using fitness function -- i) mutate ii) save weights to current best
     # 5. repeat 2,3,4
     It is enough to have a 569 x
@@ -104,16 +120,22 @@ class BaselineAgent:
     """
 
 
-# 1. init 6 players
-players = [Player(mc_model_ckpt_path) for _ in range(6)]
-# 2. play M games
-M = 1000
-
-
 def play_game(players, env):
-    obs, rews, done, info = env.reset()
+    # the environment takes care of moving the button, see eval_tianshou_env.py
+    # we can assume player positions are fixed while in the backend they are not
+    obs = env.reset()
+    agent_id = obs['agent_id']
+    legal_moves = obs['mask']
+    obs = obs['obs']
     while True:
-        players
+        i = player_names.index(agent_id)
+        action = player_names[i].act(obs, legal_moves)
+        obs_dict, cum_rewards, terminated, truncated, info = env.step(action)
+        agent_id = obs_dict['agent_id']
+        players[i].collected_rewards += cum_rewards
+        obs = obs_dict['obs']
+        if terminated:
+            break
 
 
 def play_games(n_games, players, env):
@@ -121,21 +143,48 @@ def play_games(n_games, players, env):
         play_game(players, env)
 
 
-#
-action_probs = np.random.random(5)
-obs = np.random.random(564)
-w0 = xavier(564, 512)
-b0 = np.zeros(512)
-w1 = xavier(512, 512)
-b1 = np.zeros(512)
-w2 = xavier(512, 1)
-x = obs
-x = np.dot(x, w0) + b0
-x = relu(x)
-x = np.dot(x, w1) + b1
-x * relu(x)
-x = np.dot(x, w2)
-fold_prob = sigmoid(x)
-# np.dot()
-a = 1
-print(min(obs), max(obs), obs.shape)
+def select_best_player(players: List[Player]):
+    max_reward = 0
+    best_player = 0
+    for pid, p in enumerate(players):
+        if p.collected_rewards > max_reward:
+            max_reward = p.collected_rewards
+            best_player = p
+    return best_player, max_reward
+
+
+if __name__ == "__main__":
+    n_games = 10
+    #n_games = 10000
+    evolution_steps = 100
+    # evolution_steps = 100_000_000
+    ckpt_to_mc_agent = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
+
+    # 1. init 6 players with random params
+    players = [Player(name=f"Player_{i}",
+                      ckpt_to_mc_agent=ckpt_to_mc_agent) for i in range(6)]
+    player_names = [p.name for p in players]
+
+    # 1.1 Create poker environment that automatically moves btn after reset, see `eval_tianshou_env.py`
+    env = make_default_tianshou_env(ckpt_to_mc_agent,
+                                    agents=player_names,
+                                    num_players=2)
+    epoch = 0
+    while True:
+        # 2. Play many games to let each player accumulate rewards over all games
+        play_games(n_games=10000, players=players, env=env)
+
+        # 3. evaluate players using collected rewards
+        best_player, collected_reward = select_best_player
+
+        # 4. mutate weights to generate new generation
+        new_gen = [best_player for _ in range(6)]
+        [p.mutate(mutation_rate=.2) for p in new_gen]
+
+        # 5. terminate after
+        epoch += 1
+        if epoch > evolution_steps:
+            break
+
+
+

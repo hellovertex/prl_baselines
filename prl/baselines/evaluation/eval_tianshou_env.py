@@ -34,6 +34,7 @@ for epoch in range(4):
         obs_dict, cum_reward, terminated, truncated, info = env.step(action)
         rews = cum_reward
         agent_id = obs_dict['agent_id']
+        print(f'AGENT_ID', agent_id)
         obs = obs_dict['obs']
         print(f'GOT REWARD {cum_reward}')
         if terminated:
