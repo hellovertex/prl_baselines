@@ -11,7 +11,6 @@ from prl.baselines.agents.mc_agent import MCAgent
 from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
 
 
-
 def xavier(m, n):
     return torch.nn.init.xavier_uniform_(torch.empty(m, n))
 
@@ -58,7 +57,7 @@ class Player(torch.nn.Module):
         weights = weights / norm
 
         # Apply noise with a standard deviation of mutation_std
-        noise = torch.normal(mean=0., std=mutation_std, size=weights.shape)
+        noise = torch.normal(mean=0., std=mutation_std, size=weights.shape).to(device)
 
         # Apply mutation by adding noise to weights with a prob mutation_rate
         mutation = torch.bernoulli(torch.full_like(weights, mutation_rate)).to(device)
@@ -67,7 +66,7 @@ class Player(torch.nn.Module):
         # Renormalize the weights to have the same norm as before
         weights = weights * norm
 
-        return weights
+        return torch.nn.Parameter(weights)
 
     def mutate(self, mutation_rate=0.1, mutation_std=0.1):
         self.w0 = self._mutate(self.w0, mutation_rate, mutation_std, self.device)
@@ -103,7 +102,8 @@ def play_game(players, env):
         action = players[i].act(obs, legal_moves)
         obs_dict, rewards, terminated, truncated, info = env.step(action)
         agent_id = obs_dict['agent_id']
-        players[i].collected_rewards += rewards[player_names.index(agent_id)]
+        for pid, rew in enumerate(rewards):
+            players[pid].collected_rewards += rew
         obs = obs_dict['obs']
         if terminated:
             break
@@ -128,36 +128,41 @@ def select_best_player(players: List[Player]):
 
 
 if __name__ == "__main__":
-    n_games = 100
+    n_games = 50
     # n_games = 10000
-    evolution_steps = 100
+    evolution_steps = 10000
     # evolution_steps = 100_000_000
     ckpt_to_mc_agent = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/ckpt_dir/Lucastitos_[256]_1e-06/ckpt.pt"
 
-    # 1. init 6 players with random params
+    # 1. init 6 players with random params or from checkpoint
     players = [Player(name=f"Player_{i}", device="cuda",
                       ckpt_to_mc_agent=ckpt_to_mc_agent) for i in range(6)]
     player_names = [p.name for p in players]
+    try:
+        print(f'Loaded from checkpoint... Continuing evolution')
+        [p.load_weights('./best_player.pt') for p in players]
+    except FileNotFoundError:
+        pass
 
     # 1.1 Create poker environment that automatically moves btn after reset, see `eval_tianshou_env.py`
     env = make_default_tianshou_env(ckpt_to_mc_agent,
                                     agents=player_names,
                                     num_players=6)
     epoch = 0
+    # 2. Play many games to let each player accumulate rewards over all games
     while True:
-        # 2. Play many games to let each player accumulate rewards over all games
         print(f'Playing {n_games} games at epoch {epoch}/{evolution_steps}')
         players = play_games(n_games=n_games, players=players, env=env)
 
         # 3. evaluate players using collected rewards
         best_player, collected_reward = select_best_player(players)
 
+        # 4. mutate weights to generate new generation
+        best_player.save_weights('./best_player.pt')
+        players = [best_player for _ in range(6)]
+        [p.mutate(mutation_rate=.2) for p in players]
+
         # 5. terminate when `evolution_steps` threshold reached
         epoch += 1
         if epoch > evolution_steps:
-            best_player.save('./best_player.pt')
             break
-
-        # 4. mutate weights to generate new generation
-        players = [best_player for _ in range(6)]
-        [p.mutate(mutation_rate=.2) for p in players]

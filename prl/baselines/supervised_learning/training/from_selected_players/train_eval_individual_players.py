@@ -17,8 +17,8 @@ from prl.baselines.supervised_learning.training.utils import init_state, get_in_
 
 def train_eval(abs_input_dir, params, log_interval, eval_interval):
     leaf_dir = abs_input_dir.split('/')[-1]
-    base_logdir = f'./logdir/{leaf_dir}'
-    base_ckptdir = f'./ckpt_dir/{leaf_dir}'
+    base_logdir = f'./with_folds/logdir/{leaf_dir}'
+    base_ckptdir = f'./with_folds/ckpt_dir/{leaf_dir}'
     BATCH_SIZE = params['batch_size']
     traindataset, testdataset = get_in_mem_datasets(abs_input_dir, BATCH_SIZE)
     train_dataloader = DataLoader(traindataset, batch_size=BATCH_SIZE, shuffle=True)
@@ -166,11 +166,11 @@ if __name__ == "__main__":
     params = {'hdims': [[256], [512]],  # [256, 256], [512, 512]], -- not better
               'lrs': [1e-6],  # we ruled out 1e-5 and 1e-7 by hand, 1e-6 is the best we found after multiple trainings
               # 'max_epoch': 5_000_000,
-              'max_epoch': 10_000,
-              'batch_size': 256,
+              'max_epoch': 15_000,
+              'batch_size': 512,
               }
     player_dirs = [x[0] for x in
-                   os.walk("/home/hellovertex/Documents/github.com/prl_baselines/data/02_vectorized/0.25-0.50")][1:]
+                   os.walk("/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50")][1:]
     train_eval_fn = partial(train_eval, params=params, log_interval=log_interval, eval_interval=eval_interval)
     print(f'Starting job. This may take a while.')
 

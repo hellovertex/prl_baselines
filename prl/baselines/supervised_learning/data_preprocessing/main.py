@@ -1,3 +1,4 @@
+import glob
 from functools import partial
 
 import click
@@ -31,12 +32,16 @@ DEFAULT_PREPROCESSED_DATA_PATH = str(DATA_DIR) + '/03_preprocessed'
               help="If True, each label will be downsampled to the number of all ins, "
                    "so that training data is equally distributed. ")
 def main(blind_sizes, path_to_csv_files, output_dir, use_downsampling):
+    # player_folders = glob.glob(
+    #     "/home/hellovertex/Documents/github.com/prl_baselines/data/02_vectorized/0.25-0.50" "/**/*.csv", recursive=True)
+    # for path_to_csv_files in player_folders[1:]:
     if not path_to_csv_files:
         path_to_csv_files = DEFAULT_VECTORIZED_DATA_PATH + f'/{blind_sizes}'
     if not output_dir:
         output_dir = DEFAULT_PREPROCESSED_DATA_PATH + f'/{blind_sizes}'
+    output_dir =output_dir
     callbacks = [partial(to_csv, output_dir=output_dir)]
-    preprocessor = Preprocessor(path_to_csv_files)
+    preprocessor = Preprocessor(path_to_csv_files, recursive=True)
     preprocessor.run(use_downsampling=use_downsampling, callbacks=callbacks)
 
 
