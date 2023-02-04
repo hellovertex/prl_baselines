@@ -220,11 +220,11 @@ class RLStateEncoder(Encoder):
             raise RuntimeError("Seems we need more debugging")
         return observations, actions
 
-    def encode_episode(self, episode: PokerEpisode, selected_players=None) -> Tuple[
+    def encode_episode(self, episode: PokerEpisode, selected_players=None, verbose=True) -> Tuple[
         Observations, Actions_Taken]:
         """Runs environment with steps from PokerEpisode.
         Returns observations and corresponding actions of players that made it to showdown."""
-
+        self.verbose=True
         # Maybe skip game, if selected_players is set and no selected player was in showdown
         if selected_players:
             # skip episode if no selected_players has played in it

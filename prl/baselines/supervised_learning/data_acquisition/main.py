@@ -79,7 +79,7 @@ def parse_encode_write(filename):
 
     # writes training data from encoder to disk
     writer = CSVWriter(out_filename_base=f'6MAX_{blind_sizes}')
-    with open("/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/eda_result_filtered.txt",
+    with open("/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/eda_result_filtered.txt",
               "r") as data:
         player_dict = ast.literal_eval(data.read())
     # Uses the results of parser and encoder to write training data to disk or cloud
@@ -98,13 +98,14 @@ def parse_encode_write(filename):
 
 if __name__ == '__main__':
     # main()
-    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
+    unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_test"
     filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
-    print(f'Starting job. This may take a while.')
-    start = time.time()
-    p = multiprocessing.Pool()
-    t0 = time.time()
-    for x in p.imap_unordered(parse_encode_write, filenames):
-        print(x + f'. Took {time.time() - t0} seconds')
-    print(f'Finished job after {time.time() - start} seconds.')
-    p.close()
+    parse_encode_write(filename=filenames[0])
+    # print(f'Starting job. This may take a while.')
+    # start = time.time()
+    # p = multiprocessing.Pool()
+    # t0 = time.time()
+    # for x in p.imap_unordered(parse_encode_write, filenames):
+    #     print(x + f'. Took {time.time() - t0} seconds')
+    # print(f'Finished job after {time.time() - start} seconds.')
+    # p.close()
