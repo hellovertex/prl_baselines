@@ -258,13 +258,12 @@ class PokerExperimentRunner(ExperimentRunner):
                                                      current_bet_before_action=current_bet_before_action)
             actions_total[stage].append(episode_action)
             actions_total['as_sequence'].append(episode_action)
-
+            print(f'Hole cards of button: {cards2str(self.backend.get_hole_cards_of_player(0))}')
             if done:
                 showdown_hands = self._get_showdown_hands(remaining_players)
 
             legal_moves = self.backend.get_legal_actions()
             observation = {'obs': [obs], 'legal_moves': [legal_moves]}
-
             # -------- SET NEXT AGENT -----------
             agent_idx = self.agent_map[self.backend.current_player.seat_id]
 

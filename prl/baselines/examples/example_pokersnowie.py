@@ -27,7 +27,7 @@ AGENT_INIT_COMPONENTS = Tuple[AGENT_CLS, POLICY_CONFIG, STARTING_STACK]
               help="Absolute path to <FILENAME.pt> torch-checkpoint file. It is used inside"
                    "the agents to load the neural network for inference.")
 def main(model_ckpt_paths):
-    max_episodes = 20
+    max_episodes = 50
     num_players = 3
     verbose = True
     hidden_dims = [512]
