@@ -1,7 +1,9 @@
+import multiprocessing
 import os
 import os
 import pprint
 import time
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -12,6 +14,7 @@ from tianshou.trainer import OffpolicyTrainer
 from tianshou.utils import TensorboardLogger
 from torch.utils.tensorboard import SummaryWriter
 
+from prl.baselines.agents.tianshou_agents import MajorityBaseline
 from prl.baselines.agents.tianshou_policies import get_rainbow_config
 from prl.baselines.examples.examples_tianshou_env import make_vectorized_prl_env, make_vectorized_pettingzoo_env
 
@@ -50,7 +53,7 @@ def train_eval(
     win_rate_early_stopping = np.inf,
     best_rew = -np.inf
     learning_agent_ids = [0]
-    logdir = [".", "v3", "rainbow_self_play", dir_suffix]
+    logdir = [".", "v7", "rainbow_vs_majority", dir_suffix]
     ckpt_save_path = os.path.join(
         *logdir, f'ckpt.pt'
     )
@@ -69,12 +72,29 @@ def train_eval(
     # env = init_wrapped_env(**env_config)
     # obs0 = env.reset(config=None)
     num_envs = 31
+    input_folder = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds/ckpt_dir"
     mc_model_ckpt_path = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/ckpt/ckpt.pt"
+    player_dirs = [x[0] for x in
+                   os.walk(input_folder)][1:]
+    player_dirs = [pdir for pdir in player_dirs if not Path(pdir).stem == 'ckpt']
+    ckpts = [pdir + '/ckpt.pt' for pdir in player_dirs]
+    hidden_dims = [[256] if '[256]' in pname else [512] for pname in ckpts]
+    majority_baseline = MajorityBaseline(ckpts,
+                                         model_hidden_dims=hidden_dims,
+                                         flatten_input=False,
+                                         num_players=num_players)
+    # for pdir in player_dirs:
+    #     if not Path(pdir).stem == 'ckpt':
+    #         # baseline analysis goes by position
+    #         run_analysis_single_baseline(max_episodes=100,
+    #                                      pname=Path(pdir).stem,
+    #                                      ckpt_abs_fpath=pdir + '/ckpt.pt')
+    #         # selected_player analysis goes by available .txt data
+    ckpts = [pdir + '/ckpt.pt' for pdir in player_dirs]
     venv, wrapped_env = make_vectorized_pettingzoo_env(num_envs=num_envs,
                                                        single_env_config=env_config,
                                                        agent_names=agents,
                                                        mc_model_ckpt_path=mc_model_ckpt_path)
-
     params = {'device': device,
               'load_from_ckpt': ckpt_save_path,
               'lr': 1e-6,
@@ -97,7 +117,7 @@ def train_eval(
     rainbow = RainbowPolicy(**rainbow_config)
     policy = MultiAgentPolicyManager([
         rainbow,
-        rainbow,  # share weights
+        majority_baseline,  # share weights
         #    MCPolicy()
     ], wrapped_env)  # policy is made from PettingZooEnv
     # policy = RainbowPolicy(**rainbow_config)
@@ -160,6 +180,7 @@ def train_eval(
         if rew > max_reward.reward:
             max_reward.reward = rew
         return rew
+
     log_path = os.path.join(*logdir)
     writer = SummaryWriter(log_path)
     # writer.add_text("args", str(args))
@@ -211,68 +232,83 @@ def train_eval(
     return max_reward.reward
 
 
+def run_parallel(num_players):
+    # target_update_frequencies = [5000, 50000, 100000, 1_000_000]
+    # alphas = betas = [.4, .6, .8]
+    # buffer_sizes = [10_000, 50_000, 100_000, 1_000_000]
+
+    target_update_frequencies = [5000]
+    alphas = betas = [.4]
+    buffer_sizes = [50_000]
+    curr_max_rew = 0
+    max_freq = None
+    max_alpha = None
+    max_beta = None
+    max_buffer_size = None
+
+    for freq in target_update_frequencies:
+        max_reward_sum = train_eval(f"num_players={num_players},targ_upd_freq={freq}",
+                                    num_players=num_players,
+                                    target_update_freq=freq)
+        if max_reward_sum > curr_max_rew:
+            curr_max_rew = max_reward_sum
+            max_freq = freq
+
+    curr_max_rew = 0
+    max_reward_sum = 0
+
+    for buffer_size in buffer_sizes:
+        max_reward_sum = train_eval(f"num_players={num_players},buffer_size={buffer_size}",
+                                    num_players=num_players,
+                                    buffer_size=buffer_size,
+                                    target_update_freq=max_freq)
+        if max_reward_sum > curr_max_rew:
+            curr_max_rew = max_reward_sum
+            max_buffer_size = buffer_size
+
+    curr_max_rew = 0
+    max_reward_sum = 0
+
+    for alpha in alphas:
+        max_reward_sum = train_eval(f"num_players={num_players},alpha={alpha}",
+                                    num_players=num_players,
+                                    alpha=alpha,
+                                    target_update_freq=max_freq,
+                                    buffer_size=max_buffer_size)
+        if max_reward_sum > curr_max_rew:
+            curr_max_rew = max_reward_sum
+            max_alpha = alpha
+
+    curr_max_rew = 0
+    max_reward_sum = 0
+
+    for beta in betas:
+        max_reward_sum = train_eval(f"num_players={num_players},beta={beta}",
+                                    num_players=num_players,
+                                    alpha=max_alpha,
+                                    target_update_freq=max_freq,
+                                    buffer_size=max_buffer_size,
+                                    beta=beta)
+        if max_reward_sum > curr_max_rew:
+            curr_max_rew = max_reward_sum
+            max_beta = beta
+
+    print(f"Job Finished for num_players={num_players}, best parameters were:"
+          f"target_update_freq={max_freq},\n "
+          f"alpha={max_alpha},\n"
+          f"beta={max_beta},\n"
+          f"buffer_size={max_buffer_size}")
+
+
 if __name__ == "__main__":
     # 1. todo fix reward rolling in AugmentObsWarpper
-    # Single Env
-    for num_players in [2, 6]:
-        target_update_frequencies = [5000, 50000, 100000, 1_000_000]
-        alphas = betas = [.4, .6, .8]
-        buffer_sizes = [10_000, 50_000, 100_000, 1_000_000]
-        curr_max_rew = 0
-        max_freq = None
-        max_alpha = None
-        max_beta = None
-        max_buffer_size = None
+    num_players = [2, 6]
+    start = time.time()
+    p = multiprocessing.Pool()
+    t0 = time.time()
 
-        for freq in target_update_frequencies:
-            max_reward_sum = train_eval(f"num_players={num_players},targ_upd_freq={freq}",
-                                        num_players=num_players,
-                                        target_update_freq=freq)
-            if max_reward_sum > curr_max_rew:
-                curr_max_rew = max_reward_sum
-                max_freq = freq
+    for x in p.imap_unordered(run_parallel, num_players):
+        print(f'{x}. Took {time.time() - t0} seconds')
+    print(f'Finished job after {time.time() - start} seconds.')
 
-        curr_max_rew = 0
-        max_reward_sum = 0
-
-        for buffer_size in buffer_sizes:
-            max_reward_sum = train_eval(f"num_players={num_players},buffer_size={buffer_size}",
-                                        num_players=num_players,
-                                        buffer_size=buffer_size,
-                                        target_update_freq=max_freq)
-            if max_reward_sum > curr_max_rew:
-                curr_max_rew = max_reward_sum
-                max_buffer_size = buffer_size
-
-        curr_max_rew = 0
-        max_reward_sum = 0
-
-        for alpha in alphas:
-            max_reward_sum = train_eval(f"num_players={num_players},alpha={alpha}",
-                                        num_players=num_players,
-                                        alpha=alpha,
-                                        target_update_freq=max_freq,
-                                        buffer_size=max_buffer_size)
-            if max_reward_sum > curr_max_rew:
-                curr_max_rew = max_reward_sum
-                max_alpha = alpha
-
-        curr_max_rew = 0
-        max_reward_sum = 0
-
-        for beta in betas:
-            max_reward_sum = train_eval(f"num_players={num_players},beta={beta}",
-                                        num_players=num_players,
-                                        alpha=max_alpha,
-                                        target_update_freq=max_freq,
-                                        buffer_size=max_buffer_size,
-                                        beta=beta)
-            if max_reward_sum > curr_max_rew:
-                curr_max_rew = max_reward_sum
-                max_beta = beta
-
-        print(f"Job Finished for num_players={num_players}, best parameters were:"
-              f"target_update_freq={max_freq},\n "
-              f"alpha={max_alpha},\n"
-              f"beta={max_beta},\n"
-              f"buffer_size={max_buffer_size}")
+    p.close()
