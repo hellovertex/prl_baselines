@@ -28,6 +28,11 @@ AGENT_INIT_COMPONENTS = Tuple[AGENT_CLS, POLICY_CONFIG, STARTING_STACK]
               help="Absolute path to <FILENAME.pt> torch-checkpoint file. It is used inside"
                    "the agents to load the neural network for inference.")
 def main(model_ckpt_paths):
+    # Input: Playername or Pool
+    # Position
+    # Harmonic Mapping
+    # Output: Corresponding SnowieDatabase and Stat analysis
+
     max_episodes = 50
     num_players = 6
     verbose = True
@@ -76,7 +81,7 @@ def main(model_ckpt_paths):
     positions = positions_two if num_players == 2 else positions_multi[:num_players]
     db_gen = PokerExperimentToPokerSnowie().generate_database(
         verbose=verbose,
-        path_out='./pokersnowie',
+        path_out=f'./pokersnowie/ilaviiitech_256',
         experiment=experiment,
         max_episodes_per_file=1000,
         # hero_names=["StakePlayerImitator_Seat_1"]
