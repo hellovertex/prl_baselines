@@ -46,6 +46,89 @@ class TianshouCallingStation(BasePolicy):
         return {}
 
 
+class MajorityBaseline(BasePolicy):
+    def __init__(self,
+                 model_ckpt_paths: Tuple[str],
+                 num_players,
+                 model_hidden_dims: List[List[int]],
+                 flatten_input=False,
+                 device=None,
+                 observation_space=None,
+                 action_space=None
+                 ):
+        super().__init__(observation_space=observation_space,
+                         action_space=action_space)
+        self.model_ckpt_paths = model_ckpt_paths
+        self.hidden_dims = model_hidden_dims
+        if device is None:
+            # todo: time inference times cuda vs cpu
+            #  in case obs comes from cpu
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = device
+        self.num_players = num_players
+        self._models = []
+        self.load_models(model_ckpt_paths, flatten_input)
+
+    def load_models(self, paths, flatten=False):
+        for mpath, hidden_dim in list(zip(paths, self.hidden_dims)):
+            self._models.append(self.load_model(mpath, False, hidden_dim))
+
+    def load_model(self, ckpt_path, flatten_input, hidden_dims):
+        input_dim = 564
+        classes = [ActionSpace.FOLD,
+                   ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED in CHECK_CALL
+                   ActionSpace.RAISE_MIN_OR_3BB,
+                   ActionSpace.RAISE_HALF_POT,
+                   ActionSpace.RAISE_POT,
+                   ActionSpace.ALL_IN]
+        output_dim = len(classes)
+        model = MLP(input_dim,
+                    output_dim,
+                    hidden_dims,
+                    flatten_input=flatten_input).to(self.device)
+        ckpt = torch.load(ckpt_path,
+                          map_location=self.device)
+        model.load_state_dict(ckpt['net'])
+        model.eval()
+        return model
+
+    def compute_action(self, obs: np.ndarray, legal_moves) -> int:
+        self.next_legal_moves = legal_moves
+        if not type(obs) == torch.Tensor:
+            obs = torch.Tensor(np.array([obs]))
+        logits = []
+        for m in self._models:
+            logits.append(m(obs))
+        predictions = []
+        for l in logits:
+            predictions.append(torch.argmax(l, dim=1))
+
+        return 1
+
+    def act(self, obs: np.ndarray, legal_moves: list, use_pseudo_harmonic_mapping=False):
+        """
+        See "Action translation in extensive-form games with large action spaces:
+        Axioms, paradoxes, and the pseudo-harmonic mapping" by Ganzfried and Sandhol
+
+        for why pseudo-harmonic-mapping is useful to prevent exploitability of a strategy.
+        """
+        self.next_legal_moves = legal_moves
+        if not type(obs) == torch.Tensor:
+            obs = torch.Tensor(np.array([obs])).to(self.device)
+        logits = []
+        for m in self._models:
+            logits.append(m(obs))
+        predictions = torch.mean(torch.stack(logits), dim=0)
+        return torch.argmax(predictions).item()
+
+    def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:
+        nobs = len(batch.obs)
+        return Batch(logits=None, act=[self.CHECK_CALL] * nobs, state=None)
+
+    def learn(self, batch: Batch, **kwargs: Any) -> Dict[str, Any]:
+        return {}
+
+
 class BaselineAgent(BasePolicy):
     """ Tianshou Agent -- used with tianshou training"""
 
