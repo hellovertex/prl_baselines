@@ -92,6 +92,9 @@ class PokerExperimentRunner(ExperimentRunner):
         # initial_stacks are our fixed agents, where anyone could have the button
         # agent_idx relative to button
         for pid, payout in payouts.items():
+            if payout == 1:  # monkey patch rounding errors
+                continue
+
             agent_id = self.agent_map[pid]
             # Note: indices are relative to button
             stack_t0 = self.backend.seats[pid].starting_stack_this_episode
