@@ -27,9 +27,10 @@ AGENT_INIT_COMPONENTS = Tuple[AGENT_CLS, POLICY_CONFIG, STARTING_STACK]
               help="Absolute path to <FILENAME.pt> torch-checkpoint file. It is used inside"
                    "the agents to load the neural network for inference.")
 def main(model_ckpt_paths):
-    max_episodes = 5
+    max_episodes = 20
     num_players = 3
     verbose = True
+    hidden_dims = [512]
     starting_stack = 20000
     stack_sizes = [starting_stack for _ in range(num_players)]
     agent_names = [f'p{i}' for i in range(num_players)]
@@ -41,7 +42,9 @@ def main(model_ckpt_paths):
     if len(model_ckpt_paths) == 1:
         ckpt = model_ckpt_paths[0]
         model_ckpt_paths = [ckpt for _ in range(num_players)]
-    agents = [BaselineAgent(ckpt) for ckpt in model_ckpt_paths]
+    agents = [BaselineAgent(ckpt,
+                            num_players=num_players,
+                            model_hidden_dims=hidden_dims) for ckpt in model_ckpt_paths]
     assert len(agents) == num_players == len(stack_sizes)
     participants = make_participants(agents, starting_stack)
 

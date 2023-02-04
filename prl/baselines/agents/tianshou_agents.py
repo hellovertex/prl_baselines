@@ -1,8 +1,34 @@
-from typing import Union, Optional, Any, Dict
+from random import random
+from typing import Optional, Any, Dict
+from typing import Tuple, List, Union
 
 import numpy as np
+import torch
+from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols
+from prl.environment.Wrappers.base import ActionSpace
 from tianshou.data import Batch
 from tianshou.policy import BasePolicy
+from tianshou.utils.net.common import MLP
+from torch import softmax
+
+from prl.baselines.cpp_hand_evaluator.rank import dict_str_to_sk
+
+IDX_C0_0 = 167  # feature_names.index('0th_player_card_0_rank_0')
+IDX_C0_1 = 184  # feature_names.index('0th_player_card_1_rank_0')
+IDX_C1_0 = 184  # feature_names.index('0th_player_card_1_rank_0')
+IDX_C1_1 = 201  # feature_names.index('1th_player_card_0_rank_0')
+IDX_BOARD_START = 82  #
+IDX_BOARD_END = 167  #
+CARD_BITS_TO_STR = np.array(['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', 'h', 'd', 's', 'c'])
+BOARD_BITS_TO_STR = np.array(['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A',
+                              'h', 'd', 's', 'c', '2', '3', '4', '5', '6', '7', '8', '9', 'T',
+                              'J', 'Q', 'K', 'A', 'h', 'd', 's', 'c', '2', '3', '4', '5', '6',
+                              '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', 'h', 'd', 's', 'c', '2',
+                              '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', 'h',
+                              'd', 's', 'c', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J',
+                              'Q', 'K', 'A', 'h', 'd', 's', 'c'])
+RANK = 0
+SUITE = 1
 
 
 class TianshouCallingStation(BasePolicy):
@@ -20,21 +46,64 @@ class TianshouCallingStation(BasePolicy):
         return {}
 
 
-class BaselineAgent:
+class BaselineAgent(BasePolicy):
     """ Tianshou Agent -- used with tianshou training"""
 
-    def __init__(self, model_ckpt_path: str,
+    def __init__(self,
+                 model_ckpt_path: str,
+                 num_players,
+                 model_hidden_dims=(256,),
+                 device=None,
                  observation_space=None,
-                 action_space=None):
+                 action_space=None
+                 ):
         super().__init__(observation_space=observation_space,
                          action_space=action_space)
         self.model_ckpt_path = model_ckpt_path
+        self.hidden_dims = model_hidden_dims
+        if device is None:
+            # todo: time inference times cuda vs cpu
+            #  in case obs comes from cpu
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = device
+        self.num_players = num_players
+        self.load_model(model_ckpt_path)
 
-    def load_model(self, path_to_ckpt):
-        pass
+    def load_model(self, ckpt_path):
+        input_dim = 564
+        classes = [ActionSpace.FOLD,
+                   ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED in CHECK_CALL
+                   ActionSpace.RAISE_MIN_OR_3BB,
+                   ActionSpace.RAISE_HALF_POT,
+                   ActionSpace.RAISE_POT,
+                   ActionSpace.ALL_IN]
+        output_dim = len(classes)
+        self._model = MLP(input_dim, output_dim, list(self.hidden_dims)).to(self.device)
+        ckpt = torch.load(ckpt_path,
+                          map_location=self.device)
+        self._model.load_state_dict(ckpt['net'])
+        self._model.eval()
 
-    def act(self, obs):
-        pass
+    def compute_action(self, obs: np.ndarray, legal_moves) -> int:
+        self.next_legal_moves = legal_moves
+        if not type(obs) == torch.Tensor:
+            obs = torch.Tensor(np.array([obs]))
+        self._logits = self._model(obs)
+        self._predictions = torch.argmax(self._logits, dim=1)
+        action = self._compute_action(obs)
+        return action
+
+    def act(self, obs: Dict, use_pseudo_harmonic_mapping=False):
+        """
+        See "Action translation in extensive-form games with large action spaces:
+        Axioms, paradoxes, and the pseudo-harmonic mapping" by Ganzfried and Sandhol
+
+        for why pseudo-harmonic-mapping is useful to prevent exploitability of a strategy.
+        """
+        self.legal_moves = obs['legal_moves']
+        self._logits = self._model(torch.Tensor(np.array(obs['obs'])))
+        self._predictions = torch.argmax(self._logits, dim=1)
+        return self._predictions[0].item()
 
     def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:
         nobs = len(batch.obs)

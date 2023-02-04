@@ -237,7 +237,7 @@ class PokerExperimentRunner(ExperimentRunner):
                 a = next(self.iter_actions)
                 action = a.action_type, a.raise_amount
             else:
-                action = self.participants[agent_idx].agent.act(observation, None)
+                action = self.participants[agent_idx].agent.act(observation)
             self._times_taken_to_compute_action.append(time.time() - t0)
             # -------------------------------------
             # -------- STEP ENVIRONMENT -----------
@@ -316,7 +316,7 @@ class PokerExperimentRunner(ExperimentRunner):
             self.iter_actions = iter(next(self.iter_action_plan))
 
         # --- RUN GAME LOOP ---
-        legal_moves = self.backend.get_legal_actions()
+        legal_moves = self.env.get_legal_actions()
         initial_observation = {'obs': [obs], 'legal_moves': [legal_moves]}
         actions_total, showdown_hands, info = self._run_game(initial_observation)
         assert showdown_hands is not None

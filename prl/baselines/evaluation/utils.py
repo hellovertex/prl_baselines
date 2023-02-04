@@ -45,21 +45,33 @@ def print_player_cards(obs):
     print(f'Player 5 cards: {cards[5]}')
 
 
+def _card_bits_to_2d(c):
+    CARD_NOT_VISIBLE_2D = [-127, -127]
+    try:
+        r0, s0 = np.where(c == 1)[0]
+        s0 -= N_RANKS
+
+        return [r0, s0]
+    except ValueError:
+        return CARD_NOT_VISIBLE_2D
+
+
+CARD_NOT_VISIBLE_2D = [-127, -127]
+def card_bits_to_2d(c0, c1):
+    try:
+        r0, s0 = np.where(c0 == 1)[0]
+        s0 -= N_RANKS
+
+        r1, s1 = np.where(c1 == 1)[0]
+        s1 -= N_RANKS
+        cards = [[r0, s0], [r1, s1]]
+    except ValueError:
+        cards = [CARD_NOT_VISIBLE_2D, CARD_NOT_VISIBLE_2D]
+    return cards
+
+
 def get_player_cards(obs):
     """Returns human readable cards of players."""
-
-    def card_bits_to_2d(c0, c1):
-        CARD_NOT_VISIBLE_2D = [-127, -127]
-        try:
-            r0, s0 = np.where(c0 == 1)[0]
-            s0 -= N_RANKS
-
-            r1, s1 = np.where(c1 == 1)[0]
-            s1 -= N_RANKS
-            cards = [[r0, s0], [r1, s1]]
-        except ValueError:
-            cards = [CARD_NOT_VISIBLE_2D, CARD_NOT_VISIBLE_2D]
-        return cards
 
     # first player
     p0_bits = obs[cols.First_player_card_0_rank_0:cols.Second_player_card_0_rank_0]
@@ -120,14 +132,27 @@ def get_round(obs):
                          "no game-round preflop, flop, etc. specified")
 
 
+def get_board_cards(obs):
+    # first player
+    bits = obs[cols.First_board_card_rank_0:cols.Fifth_board_card_suit_3 + 1]
+    cards = []
+    for i in range(1, 6):
+        c0 = bits[(i - 1) * CI:i * CI]
+        card = _card_bits_to_2d(c0)
+        cards.append(card)
+    return cards
+
+
 def pretty_print(player_id, obs, action):
     cards = get_player_cards(obs)
+    board = get_board_cards(obs)
     round = get_round(obs)
     acted = ActionSpace(action).name
     result = f'Player {player_id} performed ' \
              f'action {"CHECK_FOLD" if acted == "FOLD" else acted} ' \
              f'with cards {cards[0]} ' \
-             f'in {round}'
+             f'in {round}. Board cards are' \
+             f'{[cards2str([b]) if b != CARD_NOT_VISIBLE_2D else "" for b in board]}'
     print(result)
     return result
 
@@ -150,8 +175,8 @@ def get_reset_config(player_hands: List[str],
         hands.append(hand)
     initial_board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
     return {'deck_state_dict': {'deck': {'deck_remaining': deck},  # np.ndarray(shape=(52-n_cards*num_players, 2))
-            'board': initial_board,  # np.ndarray(shape=(n_cards, 2))
-            'hand': hands}}
+                                'board': initial_board,  # np.ndarray(shape=(n_cards, 2))
+                                'hand': hands}}
 
 
 def get_default_env(num_players, starting_stack_size=None):
