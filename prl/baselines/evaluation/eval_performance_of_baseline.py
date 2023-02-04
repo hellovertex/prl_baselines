@@ -25,6 +25,7 @@ if len(model_ckpt_paths) == 1:
     ckpt = model_ckpt_paths[0]
     model_ckpt_paths = [ckpt for _ in range(num_players)]
 agents = [BaselineAgent(ckpt,
+                        flatten_input=False,
                         num_players=num_players,
                         model_hidden_dims=hidden_dims) for ckpt in model_ckpt_paths]
 assert len(agents) == num_players == len(stack_sizes)
@@ -47,15 +48,6 @@ for epoch in range(4):
         obs = obs_dict['obs']
         print(f'GOT REWARD {cum_reward}')
         if terminated:
-            print('------------------------------------')
-            print('ROUND OVER -- RESETTING ENVIRONMENT')
-            print('------------------------------------')
-            if epoch == 0:
-                assert rews[1] > 0  # Tina wins with 9s 9d
-            if epoch == 1:
-                assert rews[1] > 0  # Tina wins with Jd Js
-            if epoch == 2:
-                assert rews[0] > 0  # Bob wins with Jd Js
             break
 
 

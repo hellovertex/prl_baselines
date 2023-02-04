@@ -47,6 +47,7 @@ def main(model_ckpt_paths):
         ckpt = model_ckpt_paths[0]
         model_ckpt_paths = [ckpt for _ in range(num_players)]
     agents = [BaselineAgent(ckpt,
+                            flatten_input=False,
                             num_players=num_players,
                             model_hidden_dims=hidden_dims) for ckpt in model_ckpt_paths]
     assert len(agents) == num_players == len(stack_sizes)

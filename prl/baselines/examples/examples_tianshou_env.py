@@ -195,9 +195,6 @@ class WrappedEnv(BaseWrapper):
     def seed(self, seed: Optional[int] = None) -> None:
         np.random.seed(seed)
 
-    def reset(self, *args, **kwargs):
-        return self.env.reset(*args, **kwargs)
-
     def __init__(self, env):
         super().__init__(env)
         self.env = env

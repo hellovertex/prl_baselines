@@ -52,6 +52,7 @@ class BaselineAgent(BasePolicy):
     def __init__(self,
                  model_ckpt_path: str,
                  num_players,
+                 flatten_input=False,
                  model_hidden_dims=(256,),
                  device=None,
                  observation_space=None,
@@ -67,9 +68,9 @@ class BaselineAgent(BasePolicy):
             device = "cuda" if torch.cuda.is_available() else "cpu"
         self.device = device
         self.num_players = num_players
-        self.load_model(model_ckpt_path)
+        self.load_model(model_ckpt_path, flatten_input)
 
-    def load_model(self, ckpt_path):
+    def load_model(self, ckpt_path, flatten_input):
         input_dim = 564
         classes = [ActionSpace.FOLD,
                    ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED in CHECK_CALL
@@ -78,7 +79,10 @@ class BaselineAgent(BasePolicy):
                    ActionSpace.RAISE_POT,
                    ActionSpace.ALL_IN]
         output_dim = len(classes)
-        self._model = MLP(input_dim, output_dim, list(self.hidden_dims)).to(self.device)
+        self._model = MLP(input_dim,
+                          output_dim,
+                          list(self.hidden_dims),
+                          flatten_input=flatten_input).to(self.device)
         ckpt = torch.load(ckpt_path,
                           map_location=self.device)
         self._model.load_state_dict(ckpt['net'])
@@ -93,17 +97,24 @@ class BaselineAgent(BasePolicy):
         action = self._compute_action(obs)
         return action
 
-    def act(self, obs: Dict, use_pseudo_harmonic_mapping=False):
+    def act(self, obs: np.ndarray, legal_moves: list, use_pseudo_harmonic_mapping=False):
         """
         See "Action translation in extensive-form games with large action spaces:
         Axioms, paradoxes, and the pseudo-harmonic mapping" by Ganzfried and Sandhol
 
         for why pseudo-harmonic-mapping is useful to prevent exploitability of a strategy.
         """
-        self.legal_moves = obs['legal_moves']
-        self._logits = self._model(torch.Tensor(np.array(obs['obs'])))
-        self._predictions = torch.argmax(self._logits, dim=1)
-        return self._predictions[0].item()
+        self.legal_moves = legal_moves
+        self._logits = self._model(torch.Tensor(torch.Tensor(np.array(obs))))
+        # if this torch.topk(self._logits, 2) is less than 20%
+        topk = torch.topk(self._logits, 2)
+        diff = topk.values[0] - topk.values[1]
+        thresh = max(topk.values).item() * .2
+        if diff < thresh:
+            # do pseudo-harmonic mapping
+            pass
+        self._prediction = torch.argmax(self._logits)
+        return self._prediction.item()
 
     def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:
         nobs = len(batch.obs)
