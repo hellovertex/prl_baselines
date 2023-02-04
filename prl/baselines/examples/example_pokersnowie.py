@@ -9,6 +9,7 @@ from prl.baselines.agents.tianshou_agents import BaselineAgent
 from prl.baselines.agents.tianshou_policies import default_rainbow_params, get_rainbow_config
 from prl.baselines.evaluation.core.experiment import PokerExperiment, PokerExperimentParticipant, make_participants
 from prl.baselines.evaluation.pokersnowie.export import PokerExperimentToPokerSnowie
+from prl.baselines.evaluation.stats import PlayerStats
 from prl.baselines.evaluation.utils import get_default_env
 from prl.baselines.examples.examples_tianshou_env import MCAgent, make_default_tianshou_env
 
@@ -23,7 +24,7 @@ AGENT_INIT_COMPONENTS = Tuple[AGENT_CLS, POLICY_CONFIG, STARTING_STACK]
               "-p",
               multiple=True,  # can pass multiple files, which are passed in order to agent list
               default=[
-                  "/home/sascha/Documents/github.com/prl_baselines/data/new_snowie/with_folds/ckpt_dir/ilaviiitech_[256]_1e-06/ckpt.pt"],
+                  "/home/sascha/Documents/github.com/prl_baselines/data/new_snowie/with_folds/ckpt_dir/Ma1n1_[256]_1e-06/ckpt.pt"],
               type=str,  # absolute path
               help="Absolute path to <FILENAME.pt> torch-checkpoint file. It is used inside"
                    "the agents to load the neural network for inference.")
@@ -33,7 +34,7 @@ def main(model_ckpt_paths):
     # Harmonic Mapping
     # Output: Corresponding SnowieDatabase and Stat analysis
 
-    max_episodes = 50
+    max_episodes = 500
     num_players = 6
     verbose = True
     hidden_dims = [256]
@@ -57,7 +58,7 @@ def main(model_ckpt_paths):
                             model_hidden_dims=hidden_dims) for ckpt in model_ckpt_paths]
     assert len(agents) == num_players == len(stack_sizes)
     participants = make_participants(agents, starting_stack)
-
+    stats = [PlayerStats(pname=pname) for pname in agent_names]
     # run self play
     experiment = PokerExperiment(
         # env
@@ -71,6 +72,7 @@ def main(model_ckpt_paths):
         cbs_plots=[],
         cbs_misc=[],
         cbs_metrics=[],
+        options={'stats': stats},
         # actors
         participants=participants,  # wrapper around agents that hold rllib policies that act given observation
         from_action_plan=None,  # compute action from fixed series of actions instead of calls to agent.act
@@ -81,11 +83,11 @@ def main(model_ckpt_paths):
     positions = positions_two if num_players == 2 else positions_multi[:num_players]
     db_gen = PokerExperimentToPokerSnowie().generate_database(
         verbose=verbose,
-        path_out=f'./pokersnowie/ilaviiitech_256',
+        path_out=f'./pokersnowie/Ma1n1_[256]_1e-06',
         experiment=experiment,
         max_episodes_per_file=1000,
         # hero_names=["StakePlayerImitator_Seat_1"]
-        hero_names=positions
+        hero_names=[experiment.participants[0].name]
     )
 
 
