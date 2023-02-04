@@ -19,7 +19,7 @@ class PersistentStorage:
     def _write(self, episodes, path_out, filename):
         if not os.path.exists(path_out):
             os.makedirs(os.path.abspath(path_out))
-        with open(path_out, 'a+') as f:
+        with open(os.path.join(path_out, filename), 'a+') as f:
             for e in episodes:
                 f.write(e)
 

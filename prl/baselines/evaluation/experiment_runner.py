@@ -221,7 +221,7 @@ class PokerExperimentRunner(ExperimentRunner):
         info = {'player_hands': []}  # monkey patched
         observation = initial_observation
         # determine who goes first
-        agent_idx = self.agent_map[Positions6Max.BTN] if self.num_players < 4 else Positions6Max.UTG
+        agent_idx = self.agent_map[self.backend.current_player.seat_id]
         # --- SOURCE OF ACTIONS ---
         actions_total = {'preflop': [],
                          'flop': [],
@@ -237,7 +237,8 @@ class PokerExperimentRunner(ExperimentRunner):
                 a = next(self.iter_actions)
                 action = a.action_type, a.raise_amount
             else:
-                action = self.participants[agent_idx].agent.act(observation)
+                action = self.participants[agent_idx].agent.act(observation['obs'],
+                                                                observation['legal_moves'])
             self._times_taken_to_compute_action.append(time.time() - t0)
             # -------------------------------------
             # -------- STEP ENVIRONMENT -----------

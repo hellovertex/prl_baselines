@@ -29,7 +29,7 @@ AGENT_INIT_COMPONENTS = Tuple[AGENT_CLS, POLICY_CONFIG, STARTING_STACK]
                    "the agents to load the neural network for inference.")
 def main(model_ckpt_paths):
     max_episodes = 50
-    num_players = 3
+    num_players = 6
     verbose = True
     hidden_dims = [256]
     starting_stack = 20000
