@@ -247,6 +247,7 @@ class Converter888(PokerSnowieConverter):
         if len(episode.winners) > 2:
             # skip games where pot is split among more than two players
             return ""
+        hero_name = hero_name.replace(' ','')  # some formats dont support whitespaces
         t = datetime.date.strftime(datetime.datetime.now(), '%d %m %y %H:%M:%S')
         sb = episode.blinds[0].amount[1:]
         bb = episode.blinds[1].amount[1:]
