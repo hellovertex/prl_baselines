@@ -244,11 +244,13 @@ class PokerExperimentRunner(ExperimentRunner):
             # -------------------------------------
             remaining_players: List[PlayerWithCards] = self._get_remaining_players()
             stage = Poker.INT2STRING_ROUND[self.backend.current_round]
-            current_bet_before_action = self.env.current_player.current_bet
+            current_bet_before_action = self.backend.current_player.current_bet
             if self.verbose:
                 pretty_print(agent_idx, observation['obs'][0], action)
             t0 = time.time()
-            obs, _, done, info = self.env.step(action)
+            # obs, _, done, info = self.env.step(action)
+            obs_dict, _, done, truncated, info = self.env.step(action)
+            obs = obs_dict['obs']
             self._times_taken_to_step_env.append(time.time() - t0)
             # -------------------------------------
             # -------- RECORD LAST ACTION ---------
@@ -307,7 +309,11 @@ class PokerExperimentRunner(ExperimentRunner):
     def _run_single_episode(self,
                             ep_id) -> PokerEpisode:
         # --- SETUP AND RESET ENVIRONMENT ---
-        obs, _, done, _ = self.env.reset(self.env_reset_config)
+        # obs, _, done, _ = self.env.reset(self.env_reset_config)
+        obs = self.env.reset(self.env_reset_config)
+        agent_id = obs['agent_id']
+        legal_moves = obs['mask']
+        obs = obs['obs']
         initial_player_stacks = self._get_starting_stacks_relative_to_agents()
         ante, blinds = self.post_blinds(obs)
 
@@ -315,9 +321,10 @@ class PokerExperimentRunner(ExperimentRunner):
             self.iter_actions = iter(next(self.iter_action_plan))
 
         # --- RUN GAME LOOP ---
-        legal_moves = self.env.get_legal_actions()
+        # legal_moves = self.env.get_legal_actions()
         initial_observation = {'obs': [obs], 'legal_moves': [legal_moves]}
         actions_total, showdown_hands, info = self._run_game(initial_observation)
+        info = info['info']
         assert showdown_hands is not None
         assert info is not None
 
@@ -387,7 +394,10 @@ class PokerExperimentRunner(ExperimentRunner):
                                    ActionType.RAISE.value: 0}
         self.env = experiment.wrapped_env
         self.env_reset_config = experiment.env_reset_config
-        self.backend = experiment.wrapped_env.env
+        # the chain of inherited envs grew out of control after introducing tianshou + pettingzoo
+        # Hierarchy goes PettingZooEnv -> PettingZooWrapperTianshou -> TianshoEnvWrapper ->
+        # (our) AugmentObservationWrapper -> (our) Backend (PokerRL)
+        self.backend = experiment.wrapped_env.env.env.env_wrapped.env
 
         # maps backend indices to agents/players
         # need this because we move the button but backend has

@@ -10,7 +10,7 @@ from prl.baselines.agents.tianshou_policies import default_rainbow_params, get_r
 from prl.baselines.evaluation.core.experiment import PokerExperiment, PokerExperimentParticipant, make_participants
 from prl.baselines.evaluation.pokersnowie.export import PokerExperimentToPokerSnowie
 from prl.baselines.evaluation.utils import get_default_env
-from prl.baselines.examples.examples_tianshou_env import MCAgent
+from prl.baselines.examples.examples_tianshou_env import MCAgent, make_default_tianshou_env
 
 AGENT_CLS = Type[RllibAgent]
 POLICY_CONFIG = Dict[str, Any]
@@ -22,7 +22,8 @@ AGENT_INIT_COMPONENTS = Tuple[AGENT_CLS, POLICY_CONFIG, STARTING_STACK]
 @click.option("--model_ckpt_paths",
               "-p",
               multiple=True,  # can pass multiple files, which are passed in order to agent list
-              default=["/home/sascha/Documents/github.com/prl_baselines/data/new_snowie/with_folds/ckpt_dir/ilaviiitech_[512]_1e-06/ckpt.pt"],
+              default=[
+                  "/home/sascha/Documents/github.com/prl_baselines/data/new_snowie/with_folds/ckpt_dir/ilaviiitech_[256]_1e-06/ckpt.pt"],
               type=str,  # absolute path
               help="Absolute path to <FILENAME.pt> torch-checkpoint file. It is used inside"
                    "the agents to load the neural network for inference.")
@@ -30,13 +31,16 @@ def main(model_ckpt_paths):
     max_episodes = 50
     num_players = 3
     verbose = True
-    hidden_dims = [512]
+    hidden_dims = [256]
     starting_stack = 20000
     stack_sizes = [starting_stack for _ in range(num_players)]
     agent_names = [f'p{i}' for i in range(num_players)]
     # rainbow_config = get_rainbow_config(default_rainbow_params)
     # RainbowPolicy(**rainbow_config).load_state_dict...
-    env = get_default_env(num_players, starting_stack)
+    # env = get_default_env(num_players, starting_stack)
+    env = make_default_tianshou_env(mc_model_ckpt_path=None,  # dont use mc
+                                    agents=agent_names,
+                                    num_players=len(agent_names))
 
     # make self play agents
     if len(model_ckpt_paths) == 1:

@@ -156,7 +156,6 @@ def pretty_print(player_id, obs, action):
     print(result)
     return result
 
-
 def get_reset_config(player_hands: List[str],
                      board=None) -> Dict:
     """

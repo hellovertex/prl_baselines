@@ -1,3 +1,4 @@
+from copy import deepcopy
 from enum import IntEnum
 from functools import partial
 from typing import Tuple, List, Union, Optional
@@ -44,10 +45,11 @@ class TianshouEnvWrapper(AECEnv):
         self.agents = agents
         self.possible_agents = self.agents[:]
         self.num_players = len(self.possible_agents)
-        self.env_wrapped = env
+        self.env_wrapped = env  # AugmentObservationWrapper
         self.BIG_BLIND = self.env_wrapped.env.BIG_BLIND
-        self._mc_agent = MCAgent(
-            ckpt_path=mc_ckpt_path, num_players=self.num_players)
+        if mc_ckpt_path:
+            self._mc_agent = MCAgent(
+                ckpt_path=mc_ckpt_path, num_players=self.num_players)
         self._last_player_id = -1
 
         obs_space = Box(low=0.0, high=6.0, shape=(564,), dtype=np.float64)
@@ -109,7 +111,7 @@ class TianshouEnvWrapper(AECEnv):
               options: Optional[dict] = None) -> None:
         if seed is not None:
             self.seed(seed=seed)
-        reset_config=None
+        reset_config = None
         if options:
             if 'reset_config' in options:
                 reset_config = options['reset_config']
@@ -130,7 +132,8 @@ class TianshouEnvWrapper(AECEnv):
             [False for _ in range(self.num_agents)]
         )
         self.infos = self._convert_to_dict(
-            [{"legal_moves": []} for _ in range(self.num_agents)]
+            [{"legal_moves": [],
+              "info": info} for _ in range(self.num_agents)]
         )
         legal_moves = np.array([0, 0, 0, 0, 0, 0])
         legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
@@ -154,6 +157,7 @@ class TianshouEnvWrapper(AECEnv):
         next_player = self._int_to_name(next_player_id)
         # roll button to correct position [BTN,...,] to [,...,BTN,...]
         rewards = np.roll(rew, self.agent_map[Positions6Max.BTN])
+
         if done:
             self.rewards = self._convert_to_dict(
                 self._scale_rewards(rewards)
@@ -164,6 +168,7 @@ class TianshouEnvWrapper(AECEnv):
             self.truncations = self._convert_to_dict(
                 [False for _ in range(self.num_agents)]
             )
+
             # move btn to next player
             shifted_indices = {}
             for rel_btn, agent_idx in self.agent_map.items():
@@ -176,6 +181,10 @@ class TianshouEnvWrapper(AECEnv):
             if legal_moves[2] == 1:
                 legal_moves[[3, 4, 5]] = 1
             self.next_legal_moves = legal_moves
+        self.infos = self._convert_to_dict(
+            [{"legal_moves": [],
+              "info": info} for _ in range(self.num_agents)]
+        )
         self._cumulative_rewards[self.agent_selection] = 0
         self.agent_selection = next_player
         self._accumulate_rewards()
@@ -186,12 +195,15 @@ class WrappedEnv(BaseWrapper):
     def seed(self, seed: Optional[int] = None) -> None:
         np.random.seed(seed)
 
+    def reset(self, *args, **kwargs):
+        return self.env.reset(*args, **kwargs)
+
     def __init__(self, env):
         super().__init__(env)
         self.env = env
 
 
-def make_default_tianshou_env(mc_model_ckpt_path, num_players=2,agents=None):
+def make_default_tianshou_env(mc_model_ckpt_path, num_players=2, agents=None):
     starting_stack = 20000
     stack_sizes = [starting_stack for _ in range(num_players)]
     if not agents:
@@ -213,6 +225,7 @@ def make_default_tianshou_env(mc_model_ckpt_path, num_players=2,agents=None):
     wrapped_env = WrappedEnv(env)
     wrapped_env = PettingZooEnv(wrapped_env)
     return wrapped_env
+
 
 def make_env(cfg):
     return init_wrapped_env(**cfg)
