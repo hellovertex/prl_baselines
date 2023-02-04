@@ -231,6 +231,9 @@ class PokerExperimentRunner(ExperimentRunner):
                          'turn': [],
                          'river': [],
                          'as_sequence': []}
+        is_new_hand = True
+        players_acted = 0
+        obs = observation['obs'][0]
         while not done:
             # -------------------------------------
             # --------------- ACT -----------------
@@ -243,6 +246,11 @@ class PokerExperimentRunner(ExperimentRunner):
                 action = self.participants[agent_idx].agent.act(observation['obs'],
                                                                 observation['legal_moves'])
             self._times_taken_to_compute_action.append(time.time() - t0)
+            if self.stats:
+                players_acted += 1
+                self.stats[agent_idx].update_stats(obs, action, is_new_hand)
+                if players_acted == self.num_players:
+                    is_new_hand = False
             # -------------------------------------
             # -------- STEP ENVIRONMENT -----------
             # -------------------------------------
@@ -391,6 +399,7 @@ class PokerExperimentRunner(ExperimentRunner):
         # 1) provide hands and boards
         # 2) provide action sequence
         #
+        self.stats = None
         self.verbose = verbose
         self.num_players = experiment.num_players
         self.total_actions_dict = {ActionType.FOLD.value: 0,
@@ -402,7 +411,9 @@ class PokerExperimentRunner(ExperimentRunner):
         # Hierarchy goes PettingZooEnv -> PettingZooWrapperTianshou -> TianshoEnvWrapper ->
         # (our) AugmentObservationWrapper -> (our) Backend (PokerRL)
         self.backend = experiment.wrapped_env.env.env.env_wrapped.env
-
+        if experiment.options:
+            if 'stats' in experiment.options:
+                self.stats = experiment.options['stats']
         # maps backend indices to agents/players
         # need this because we move the button but backend has
         # button always at position 0

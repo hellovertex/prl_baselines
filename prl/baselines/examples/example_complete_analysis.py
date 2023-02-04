@@ -1,31 +1,46 @@
 import os
 from pathlib import Path
-from typing import Dict, Type, Tuple, Any
 
-import click
-from prl.environment.Wrappers.augment import AugmentObservationWrapper
-from prl.environment.Wrappers.utils import init_wrapped_env
-
-from prl.baselines.agents.core.base_agent import RllibAgent
 from prl.baselines.agents.tianshou_agents import BaselineAgent
-from prl.baselines.agents.tianshou_policies import default_rainbow_params, get_rainbow_config
-from prl.baselines.evaluation.core.experiment import PokerExperiment, PokerExperimentParticipant, make_participants
+from prl.baselines.evaluation.core.experiment import PokerExperiment, make_participants
 from prl.baselines.evaluation.pokersnowie.export import PokerExperimentToPokerSnowie
-from prl.baselines.evaluation.utils import get_default_env
-from prl.baselines.examples.examples_tianshou_env import MCAgent, make_default_tianshou_env
+from prl.baselines.evaluation.stats import PlayerStats
+from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
+
 
 def run_analysis_from_position():
     pass
 
-def run_analysis_single_player(pname, ckpt_abs_fpath):
+
+def run_experiment(experiment,
+                   pname,
+                   criterion,
+                   verbose=True,
+                   max_episodes_per_file=1000):
+    stats = experiment.options['stats']
+    path_out = f'./pokersnowie/{pname}_{criterion}'
+    PokerExperimentToPokerSnowie().generate_database(
+        verbose=verbose,
+        path_out=path_out,
+        experiment=experiment,
+        max_episodes_per_file=max_episodes_per_file,
+        # hero_names=["StakePlayerImitator_Seat_1"]
+        hero_names=[criterion]
+    )
+    for pstat in stats:
+        pstat.to_disk(fpath=f'{path_out}/{pname}.json')
+
+
+def run_analysis_single_baseline(pname, ckpt_abs_fpath):
     num_players = 6
     positions_two = ["BTN", "BB"]
     positions_multi = ["BTN", "SB", "BB", "UTG", "MP", "CO"]
     positions = positions_two if num_players == 2 else positions_multi[:num_players]
 
-    max_episodes = 100
+    max_episodes = 10
+    max_episodes_per_file = 1000
     verbose = True
-    hidden_dims = [256]
+    hidden_dims = [256] if '[256]' in pname else [512]
     starting_stack = 20000
     stack_sizes = [starting_stack for _ in range(num_players)]
     agent_names = [f'{pname}_{i}' for i in range(num_players)]
@@ -35,12 +50,12 @@ def run_analysis_single_player(pname, ckpt_abs_fpath):
 
     # make self play agents
     agents = [BaselineAgent(ckpt_abs_fpath,
-                          flatten_input=False,
-                          num_players=num_players,
-                          model_hidden_dims=hidden_dims) for _ in range(num_players)]
+                            flatten_input=False,
+                            num_players=num_players,
+                            model_hidden_dims=hidden_dims) for _ in range(num_players)]
     assert len(agents) == num_players == len(stack_sizes)
     participants = make_participants(agents, starting_stack)
-
+    stats = [PlayerStats(pname=pname) for pname in agent_names]
     # run self play
     experiment = PokerExperiment(
         # env
@@ -54,20 +69,28 @@ def run_analysis_single_player(pname, ckpt_abs_fpath):
         cbs_plots=[],
         cbs_misc=[],
         cbs_metrics=[],
+        options={'stats': stats},
         # actors
         participants=participants,  # wrapper around agents that hold rllib policies that act given observation
         from_action_plan=None,  # compute action from fixed series of actions instead of calls to agent.act
         # early_stopping_when=PokerExperiment_EarlyStopping.ALWAYS_REBUY_AND_PLAY_UNTIL_NUM_EPISODES_REACHED
     )
+    for pos in positions:
+        # we have to call with heronames=[pos] instead of heronames=[positions]
+        # because pokersnowie will only look at one playername per episode
+        # but heronames=[positions] would generate all positions/playernames in one episode
+        # so we have to run `max_episodes_per_file` episode per position instead
+        run_experiment(experiment=experiment,
+                       pname=pname,
+                       criterion=pos,  # analyze games where player was sitting at position pos
+                       verbose=verbose,
+                       max_episodes_per_file=max_episodes_per_file)
+    run_experiment(experiment=experiment,
+                   pname=pname,
+                   criterion=pname.split("_")[0],  # analyze all games by player
+                   verbose=verbose,
+                   max_episodes_per_file=max_episodes_per_file)
 
-    db_gen = PokerExperimentToPokerSnowie().generate_database(
-        verbose=verbose,
-        path_out=f'./pokersnowie/ilaviiitech_256',
-        experiment=experiment,
-        max_episodes_per_file=1000,
-        # hero_names=["StakePlayerImitator_Seat_1"]
-        hero_names=positions
-    )
 
 def main(input_folder):
     """
@@ -87,18 +110,20 @@ def main(input_folder):
     directory containing subfolder per player and one for pool,
     as well as two json files containing the final player stats.
     """
+    input_folder = "/home/sascha/Documents/github.com/prl_baselines/data/new_snowie/with_folds/ckpt_dir"
     # Input: Playername or Pool
     # Position
     # Harmonic Mapping
     # Output: Corresponding SnowieDatabase and Stat analysis
     player_dirs = [x[0] for x in
-                   os.walk("/home/sascha/Documents/github.com/prl_baselines/data/new_snowie/with_folds/ckpt_dir")][1:]
+                   os.walk(input_folder)][1:]
 
     for pdir in player_dirs:
         if not Path(pdir).stem == 'ckpt':
-            run_analysis_single_player(pname=Path(pdir).stem,
-                                       ckpt_abs_fpath=pdir+'/ckpt.pt')
-
+            # baseline analysis goes by position
+            run_analysis_single_baseline(pname=Path(pdir).stem,
+                                         ckpt_abs_fpath=pdir + '/ckpt.pt')
+            # selected_player analysis goes by available .txt data
 
 
 if __name__ == '__main__':

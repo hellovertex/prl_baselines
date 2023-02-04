@@ -1,3 +1,5 @@
+import json
+
 import numpy as np
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as fts
 from prl.environment.Wrappers.base import ActionSpace
@@ -228,8 +230,7 @@ class PlayerStats:
             self.three_bet_updated_this_hand = False
             hand_played = 1 if action > ActionSpace.FOLD and not self.big_blind_checked_preflop(obs, action) else 0
             self.hands_played += hand_played
-        # self._update_vpip(obs, action)
-        self.vpip = 1  # vpip is always one since we only look at games where player went to showdown
+        self._update_vpip(obs, action)
         self._update_af(obs, action)
         self._update_pfr(obs, action)
         self._update_cbet(obs, action)
@@ -250,7 +251,8 @@ class PlayerStats:
         pass
 
     def to_dict(self):
-        return {'name':self.pname,
+        return {'name': self.pname,
+                'vpip | showdown': 1,
                 'vpip': self.vpip,
                 'pfr': self.pfr,
                 'tightness': self.tightness,
@@ -264,3 +266,10 @@ class PlayerStats:
                 'registered_calls': self.registered_calls,
                 'registered_raises': self.registered_raises,
                 }
+
+    def to_disk(self, fpath):
+        # fpath: <ABS_PATH>.json
+        d = self.to_dict()
+        with open(fpath, "w+") as file:
+            json_str = json.dumps(d, indent=4)
+            file.write(json_str)
