@@ -18,10 +18,10 @@ def run_experiment(experiment,
                    verbose=True,
                    max_episodes_per_file=1000):
     stats = experiment.options['stats']
-    path_out = f'./pokersnowie/{pname}_{criterion}'
+    path_out = f'./pokersnowie/{pname.split("_")[0]}/'
     PokerExperimentToPokerSnowie().generate_database(
         verbose=verbose,
-        path_out=path_out,
+        path_out=path_out+f'{pname}_{criterion}',
         experiment=experiment,
         max_episodes_per_file=max_episodes_per_file,
         # hero_names=["StakePlayerImitator_Seat_1"]
@@ -75,21 +75,26 @@ def run_analysis_single_baseline(pname, ckpt_abs_fpath):
         from_action_plan=None,  # compute action from fixed series of actions instead of calls to agent.act
         # early_stopping_when=PokerExperiment_EarlyStopping.ALWAYS_REBUY_AND_PLAY_UNTIL_NUM_EPISODES_REACHED
     )
+    # analyze all games by player
+    run_experiment(experiment=experiment,
+                   pname=pname,
+                   criterion=participants[0].name,
+                   verbose=verbose,
+                   max_episodes_per_file=max_episodes_per_file)
+    # because we can not use every game if we only look for a specific table position
+    experiment.max_episodes *= num_players
     for pos in positions:
         # we have to call with heronames=[pos] instead of heronames=[positions]
         # because pokersnowie will only look at one playername per episode
         # but heronames=[positions] would generate all positions/playernames in one episode
         # so we have to run `max_episodes_per_file` episode per position instead
+        # analyze games where player was sitting at position pos
         run_experiment(experiment=experiment,
                        pname=pname,
-                       criterion=pos,  # analyze games where player was sitting at position pos
+                       criterion=pos,
                        verbose=verbose,
                        max_episodes_per_file=max_episodes_per_file)
-    run_experiment(experiment=experiment,
-                   pname=pname,
-                   criterion=pname.split("_")[0],  # analyze all games by player
-                   verbose=verbose,
-                   max_episodes_per_file=max_episodes_per_file)
+
 
 
 def main(input_folder):

@@ -1,4 +1,6 @@
 import json
+import os
+from pathlib import Path
 
 import numpy as np
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as fts
@@ -270,6 +272,8 @@ class PlayerStats:
     def to_disk(self, fpath):
         # fpath: <ABS_PATH>.json
         d = self.to_dict()
+        if not os.path.exists(Path(fpath).parent):
+            os.makedirs(Path(fpath).parent)
         with open(fpath, "w+") as file:
             json_str = json.dumps(d, indent=4)
             file.write(json_str)

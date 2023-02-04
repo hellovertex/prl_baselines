@@ -255,11 +255,18 @@ class Converter888(PokerSnowieConverter):
         seats = self._convert_seats(episode)
         blinds = self._convert_blinds(episode)
         dealt_cards = self._convert_dealt_cards(episode, hero_name)
+        # if dealt_cards is None:
+        #     # this is legit if we only want games from certain positions
+        #     assert hero_name in ['BTN', 'SB', 'BB', 'UTG', 'MP', 'CO']
+        #     return ""
         community_cards: dict = self._convert_community_cards(episode)
         moves: dict = self._convert_moves(episode)
         try:
             summary = self._convert_summary(episode, hero_name)
         except self.PlayerOutOfStackError:
+            return ""
+        except KeyError:
+            # in case of splitpot, the episode currently only returns one player, skip these games for now
             return ""
         episode_888 = ""
         # try:
