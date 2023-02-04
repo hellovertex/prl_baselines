@@ -304,11 +304,13 @@ if __name__ == "__main__":
     # 1. todo fix reward rolling in AugmentObsWarpper
     num_players = [2, 6]
     start = time.time()
-    p = multiprocessing.Pool()
-    t0 = time.time()
+    # p = multiprocessing.Pool()
+    # t0 = time.time()
+    # for x in p.imap_unordered(run_parallel, num_players):
+    #     print(f'{x}. Took {time.time() - t0} seconds')
+    # print(f'Finished job after {time.time() - start} seconds.')
+    # p.close()
 
-    for x in p.imap_unordered(run_parallel, num_players):
-        print(f'{x}. Took {time.time() - t0} seconds')
-    print(f'Finished job after {time.time() - start} seconds.')
-
-    p.close()
+    # cant fork cuda in subprocess :(, run sequentially:
+    run_parallel(2)
+    run_parallel(6)
