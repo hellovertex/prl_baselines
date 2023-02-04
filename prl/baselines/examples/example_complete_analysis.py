@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from typing import Dict, Type, Tuple, Any
 
 import click
@@ -12,48 +14,30 @@ from prl.baselines.evaluation.pokersnowie.export import PokerExperimentToPokerSn
 from prl.baselines.evaluation.utils import get_default_env
 from prl.baselines.examples.examples_tianshou_env import MCAgent, make_default_tianshou_env
 
-def main(input_folder):
-    """
-    input_folder subdirs per player. script computes
-    i) pokersnowie exports
-     - per player
-     - per pool
-     - with pseudo-harmonic action mapping enabled and disabled
-    ii) stats analysis given showdown
-     - per player
-     - per pool
-     - with pseudo-harmonic action mapping enabled and disabled
-    out:
-    directory containing subfolder per player and one for pool,
-    as well as two json files containing the final player stats.
-    """
-    # Input: Playername or Pool
-    # Position
-    # Harmonic Mapping
-    # Output: Corresponding SnowieDatabase and Stat analysis
+def run_analysis_from_position():
+    pass
 
-    max_episodes = 50
+def run_analysis_single_player(pname, ckpt_abs_fpath):
     num_players = 6
+    positions_two = ["BTN", "BB"]
+    positions_multi = ["BTN", "SB", "BB", "UTG", "MP", "CO"]
+    positions = positions_two if num_players == 2 else positions_multi[:num_players]
+
+    max_episodes = 100
     verbose = True
     hidden_dims = [256]
     starting_stack = 20000
     stack_sizes = [starting_stack for _ in range(num_players)]
-    agent_names = [f'p{i}' for i in range(num_players)]
-    # rainbow_config = get_rainbow_config(default_rainbow_params)
-    # RainbowPolicy(**rainbow_config).load_state_dict...
-    # env = get_default_env(num_players, starting_stack)
+    agent_names = [f'{pname}_{i}' for i in range(num_players)]
     env = make_default_tianshou_env(mc_model_ckpt_path=None,  # dont use mc
                                     agents=agent_names,
                                     num_players=len(agent_names))
 
     # make self play agents
-    if len(model_ckpt_paths) == 1:
-        ckpt = model_ckpt_paths[0]
-        model_ckpt_paths = [ckpt for _ in range(num_players)]
-    agents = [BaselineAgent(ckpt,
-                            flatten_input=False,
-                            num_players=num_players,
-                            model_hidden_dims=hidden_dims) for ckpt in model_ckpt_paths]
+    agents = [BaselineAgent(ckpt_abs_fpath,
+                          flatten_input=False,
+                          num_players=num_players,
+                          model_hidden_dims=hidden_dims) for _ in range(num_players)]
     assert len(agents) == num_players == len(stack_sizes)
     participants = make_participants(agents, starting_stack)
 
@@ -75,9 +59,7 @@ def main(input_folder):
         from_action_plan=None,  # compute action from fixed series of actions instead of calls to agent.act
         # early_stopping_when=PokerExperiment_EarlyStopping.ALWAYS_REBUY_AND_PLAY_UNTIL_NUM_EPISODES_REACHED
     )
-    positions_two = ["BTN", "BB"]
-    positions_multi = ["BTN", "SB", "BB", "UTG", "MP", "CO"]
-    positions = positions_two if num_players == 2 else positions_multi[:num_players]
+
     db_gen = PokerExperimentToPokerSnowie().generate_database(
         verbose=verbose,
         path_out=f'./pokersnowie/ilaviiitech_256',
@@ -87,6 +69,38 @@ def main(input_folder):
         hero_names=positions
     )
 
+def main(input_folder):
+    """
+    input_folder subdirs per player. script computes
+    i) pokersnowie exports
+     - per player
+     -- per position BTN, SB, BB, UTG, MP, CO
+     - per pool
+     -- per position BTN, SB, BB, UTG, MP, CO
+     # todo consider adding this for NN part: with pseudo-harmonic action mapping enabled and disabled
+    ii) stats analysis given showdown
+     - per player
+     - per pool
+    iii) with pseudo-harmonic action mapping enabled and disabled
+
+    out:
+    directory containing subfolder per player and one for pool,
+    as well as two json files containing the final player stats.
+    """
+    # Input: Playername or Pool
+    # Position
+    # Harmonic Mapping
+    # Output: Corresponding SnowieDatabase and Stat analysis
+    player_dirs = [x[0] for x in
+                   os.walk("/home/sascha/Documents/github.com/prl_baselines/data/new_snowie/with_folds/ckpt_dir")][1:]
+
+    for pdir in player_dirs:
+        if not Path(pdir).stem == 'ckpt':
+            run_analysis_single_player(pname=Path(pdir).stem,
+                                       ckpt_abs_fpath=pdir+'/ckpt.pt')
+
+
 
 if __name__ == '__main__':
-    main()
+    input_folder = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_test"
+    main(input_folder)
