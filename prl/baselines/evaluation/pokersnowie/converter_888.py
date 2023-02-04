@@ -303,7 +303,7 @@ class Converter888(PokerSnowieConverter):
         one episode per player in showdown is created.
         :return: String representation of PokerEpisode that can be imported from PokerSnowie
         """
-        if not hero_names:
+        if not hero_names or hero_names == [None]:
             hero_names = [s.name for s in episode.showdown_hands]
 
         poker_snowie_episodes = []

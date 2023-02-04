@@ -166,7 +166,8 @@ if __name__ == "__main__":
     params = {'hdims': [[256], [512]],  # [256, 256], [512, 512]], -- not better
               'lrs': [1e-6],  # we ruled out 1e-5 and 1e-7 by hand, 1e-6 is the best we found after multiple trainings
               # 'max_epoch': 5_000_000,
-              'max_epoch': 15_000,
+              'max_epoch': 100_000,
+              'max_env_steps': None,
               'batch_size': 512,
               }
     player_dirs = [x[0] for x in

@@ -31,13 +31,12 @@ def run_experiment(experiment,
         pstat.to_disk(fpath=f'{path_out}/{pname}.json')
 
 
-def run_analysis_single_baseline(pname, ckpt_abs_fpath):
+def run_analysis_single_baseline(max_episodes, pname, ckpt_abs_fpath):
     num_players = 6
     positions_two = ["BTN", "BB"]
     positions_multi = ["BTN", "SB", "BB", "UTG", "MP", "CO"]
     positions = positions_two if num_players == 2 else positions_multi[:num_players]
 
-    max_episodes = 10
     max_episodes_per_file = 1000
     verbose = True
     hidden_dims = [256] if '[256]' in pname else [512]
@@ -78,7 +77,7 @@ def run_analysis_single_baseline(pname, ckpt_abs_fpath):
     # analyze all games by player
     run_experiment(experiment=experiment,
                    pname=pname,
-                   criterion=participants[0].name,
+                   criterion=None,
                    verbose=verbose,
                    max_episodes_per_file=max_episodes_per_file)
     # because we can not use every game if we only look for a specific table position
@@ -115,7 +114,7 @@ def main(input_folder):
     directory containing subfolder per player and one for pool,
     as well as two json files containing the final player stats.
     """
-    input_folder = "/home/sascha/Documents/github.com/prl_baselines/data/new_snowie/with_folds/ckpt_dir"
+    input_folder = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds/ckpt_dir"
     # Input: Playername or Pool
     # Position
     # Harmonic Mapping
@@ -126,7 +125,8 @@ def main(input_folder):
     for pdir in player_dirs:
         if not Path(pdir).stem == 'ckpt':
             # baseline analysis goes by position
-            run_analysis_single_baseline(pname=Path(pdir).stem,
+            run_analysis_single_baseline(max_episodes=100,
+                                         pname=Path(pdir).stem,
                                          ckpt_abs_fpath=pdir + '/ckpt.pt')
             # selected_player analysis goes by available .txt data
 

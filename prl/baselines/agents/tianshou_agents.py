@@ -105,7 +105,7 @@ class BaselineAgent(BasePolicy):
         for why pseudo-harmonic-mapping is useful to prevent exploitability of a strategy.
         """
         self.legal_moves = legal_moves
-        self._logits = self._model(torch.Tensor(torch.Tensor(np.array(obs))))
+        self._logits = self._model(torch.Tensor(torch.Tensor(np.array(obs))).to(self.device))
         # if this torch.topk(self._logits, 2) is less than 20%
         topk = torch.topk(self._logits, 2)
         diff = topk.values[0][0] - topk.values[0][1]
