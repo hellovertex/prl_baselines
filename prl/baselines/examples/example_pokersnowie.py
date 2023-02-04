@@ -1,12 +1,15 @@
 from typing import Dict, Type, Tuple, Any
 
+import click
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
 
 from prl.baselines.agents.core.base_agent import RllibAgent
+from prl.baselines.agents.tianshou_agents import BaselineAgent
 from prl.baselines.agents.tianshou_policies import default_rainbow_params, get_rainbow_config
 from prl.baselines.evaluation.core.experiment import PokerExperiment, PokerExperimentParticipant, make_participants
 from prl.baselines.evaluation.pokersnowie.export import PokerExperimentToPokerSnowie
+from prl.baselines.evaluation.utils import get_default_env
 from prl.baselines.examples.examples_tianshou_env import MCAgent
 
 AGENT_CLS = Type[RllibAgent]
@@ -14,37 +17,38 @@ POLICY_CONFIG = Dict[str, Any]
 STARTING_STACK = int
 AGENT_INIT_COMPONENTS = Tuple[AGENT_CLS, POLICY_CONFIG, STARTING_STACK]
 
-if __name__ == '__main__':
-    max_episodes = 100
-    # environment config
+
+@click.command()
+@click.option("--model_ckpt_paths",
+              "-p",
+              multiple=True,  # can pass multiple files, which are passed in order to agent list
+              default=["/home/sascha/Documents/github.com/prl_baselines/data/new_snowie/with_folds/ckpt_dir/ilaviiitech_[512]_1e-06/ckpt.pt"],
+              type=str,  # absolute path
+              help="Absolute path to <FILENAME.pt> torch-checkpoint file. It is used inside"
+                   "the agents to load the neural network for inference.")
+def main(model_ckpt_paths):
+    max_episodes = 5
     num_players = 3
+    verbose = True
     starting_stack = 20000
     stack_sizes = [starting_stack for _ in range(num_players)]
     agent_names = [f'p{i}' for i in range(num_players)]
     # rainbow_config = get_rainbow_config(default_rainbow_params)
     # RainbowPolicy(**rainbow_config).load_state_dict...
-    env_config = {"env_wrapper_cls": AugmentObservationWrapper,
-                  # "stack_sizes": [100, 125, 150, 175, 200, 250],
-                  "stack_sizes": stack_sizes,
-                  "multiply_by": 1,  # use 100 for floats to remove decimals but we have int stacks
-                  "scale_rewards": False,  # we do this ourselves
-                  "blinds": [50, 100]}
-    # env = init_wrapped_env(**env_config)
-    # obs0 = env.reset(config=None)
-    num_envs = 31
-    ckpt = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
-    env = init_wrapped_env(**env_config)
+    env = get_default_env(num_players, starting_stack)
 
-    agents = [
-        MCAgent(ckpt,num_players),
-        MCAgent(ckpt,num_players),
-        MCAgent(ckpt,num_players),
-    ]
+    # make self play agents
+    if len(model_ckpt_paths) == 1:
+        ckpt = model_ckpt_paths[0]
+        model_ckpt_paths = [ckpt for _ in range(num_players)]
+    agents = [BaselineAgent(ckpt) for ckpt in model_ckpt_paths]
     assert len(agents) == num_players == len(stack_sizes)
     participants = make_participants(agents, starting_stack)
+
+    # run self play
     experiment = PokerExperiment(
         # env
-        env=env,  # single environment to run sequential games on
+        wrapped_env=env,  # single environment to run sequential games on
         num_players=num_players,
         starting_stack_sizes=stack_sizes,
         env_reset_config=None,  # can pass {'deck_state_dict': Dict[str, Any]} to init the deck and player cards
@@ -63,9 +67,14 @@ if __name__ == '__main__':
     positions_multi = ["BTN", "SB", "BB", "UTG", "MP", "CO"]
     positions = positions_two if num_players == 2 else positions_multi[:num_players]
     db_gen = PokerExperimentToPokerSnowie().generate_database(
+        verbose=verbose,
         path_out='./pokersnowie',
         experiment=experiment,
         max_episodes_per_file=1000,
         # hero_names=["StakePlayerImitator_Seat_1"]
         hero_names=positions
     )
+
+
+if __name__ == '__main__':
+    main()

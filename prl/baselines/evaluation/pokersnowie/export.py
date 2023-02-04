@@ -1,5 +1,6 @@
 import ast
 import glob
+import os.path
 from pathlib import Path
 from typing import List, Optional, TypeVar, Union
 
@@ -15,7 +16,9 @@ POKER_SNOWIE_CONVERTER_INSTANCE = TypeVar('POKER_SNOWIE_CONVERTER_INSTANCE', bou
 
 
 class PersistentStorage:
-    def _write(self, episodes, path_out):
+    def _write(self, episodes, path_out, filename):
+        if not os.path.exists(path_out):
+            os.makedirs(os.path.abspath(path_out))
         with open(path_out, 'a+') as f:
             for e in episodes:
                 f.write(e)
@@ -32,12 +35,14 @@ class PersistentStorage:
             if (i + 1) % max_episodes_per_file == 0:
                 # flush and write
                 self._write(write_buffer,
-                            path_out+f'_{n_files_written}')
+                            path_out,
+                            filename='snowie'+f'_{n_files_written}')
                 n_files_written += 1
                 write_buffer = []
             write_buffer.append(e)
         self._write(write_buffer,
-                    path_out+f'_{n_files_written+1}')
+                    path_out,
+                    filename='snowie' + f'_{n_files_written}')
 
 
 class HandHistorySmithyToPokerSnowie(PokerSnowieExporteur):
@@ -141,9 +146,10 @@ class PokerExperimentToPokerSnowie(PokerSnowieExporteur):
                           path_out: Union[str, Path],
                           experiment: PokerExperiment,
                           max_episodes_per_file=500,
-                          hero_names: Optional[List[str]] = None):
+                          hero_names: Optional[List[str]] = None,
+                          verbose=False):
         # execute Experiment to generate list of poker episodes
-        poker_episodes = self._runner.run(experiment)
+        poker_episodes = self._runner.run(experiment, verbose=verbose)
         snowie_episodes = []
         # parse list of poker episodes to snowie-formatted string
         for ep in poker_episodes:
