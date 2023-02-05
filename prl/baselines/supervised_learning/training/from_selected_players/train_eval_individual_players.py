@@ -27,6 +27,7 @@ def train_eval(abs_input_dir, params, log_interval, eval_interval):
     use_cuda = torch.cuda.is_available()
     device = "cuda" if use_cuda else "cpu"
     epochs = params['max_epoch']
+    max_env_steps = params['max_env_steps']
     for hdims in params['hdims']:
         for lr in params['lrs']:
             model = get_model(traindata, hidden_dims=hdims, device=device)
@@ -39,10 +40,14 @@ def train_eval(abs_input_dir, params, log_interval, eval_interval):
             best_accuracy = state_dict["best_accuracy"]
             writer = SummaryWriter(log_dir=logdir)
             n_iter = start_n_iter
-            j = 0
+            j = start_n_iter
             for epoch in range(start_epoch, epochs):
+                len_data = round(len(train_dataloader))
+                env_steps = j * len_data
+                if env_steps > max_env_steps:
+                    break
                 pbar = tqdm(enumerate(BackgroundGenerator(train_dataloader)),
-                            total=round(len(train_dataloader)))
+                            total=len_data)
                 pbar.set_description(
                     f'Training epoch {epoch}/{epochs} on {len(traindataset)} '
                     f'examples using batches of size {BATCH_SIZE}...')
@@ -121,7 +126,7 @@ def train_eval(abs_input_dir, params, log_interval, eval_interval):
                             best_accuracy = test_accuracy
                             torch.save({'epoch': epoch,
                                         'net': model.state_dict(),
-                                        'n_iter': n_iter,
+                                        'n_iter': j,  # j * batch_size * len(dataloader) == env_steps
                                         'optim': optim.state_dict(),
                                         'loss': loss,
                                         'best_accuracy': best_accuracy}, ckptdir + '/ckpt.pt')  # net
@@ -166,9 +171,9 @@ if __name__ == "__main__":
     params = {'hdims': [[256], [512]],  # [256, 256], [512, 512]], -- not better
               'lrs': [1e-6],  # we ruled out 1e-5 and 1e-7 by hand, 1e-6 is the best we found after multiple trainings
               # 'max_epoch': 5_000_000,
-              'max_epoch': 100_000,
-              'max_env_steps': None,
-              'batch_size': 512,
+              'max_epoch': 100_000_000,
+              'max_env_steps': 4_000_000,
+              'batch_size': 256,
               }
     player_dirs = [x[0] for x in
                    os.walk("/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50")][1:]
@@ -185,7 +190,7 @@ if __name__ == "__main__":
     # print(f'Finished job after {time.time() - start} seconds.')
 
     # train x NNs at once
-    x = 3
+    x = 5
     chunks = []
     current_chunk = []
     i = 0
