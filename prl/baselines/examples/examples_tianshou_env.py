@@ -37,7 +37,7 @@ class TianshouEnvWrapper(AECEnv):
                  env,
                  agents: List[str],
                  reward_type: RewardType,
-                 mc_ckpt_path: str):
+                 mc_ckpt_path: Optional[str]):
         super().__init__()
         self.name = "env"
         self.reward_type = reward_type
@@ -133,7 +133,8 @@ class TianshouEnvWrapper(AECEnv):
         )
         self.infos = self._convert_to_dict(
             [{"legal_moves": [],
-              "info": info} for _ in range(self.num_agents)]
+              # "info": info} for _ in range(self.num_agents)]
+              "info": []} for _ in range(self.num_agents)]
         )
         legal_moves = np.array([0, 0, 0, 0, 0, 0])
         legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
@@ -150,13 +151,16 @@ class TianshouEnvWrapper(AECEnv):
                 or self.truncations[self.agent_selection]
         ):
             return self._was_dead_step(action)
+        prev = self.env_wrapped.env.current_player.seat_id
         obs, rew, done, info = self.env_wrapped.step(action)
         self._last_obs = obs
         next_player_id = self.env_wrapped.env.current_player.seat_id
         next_player_id = self.agent_map[next_player_id]
         next_player = self._int_to_name(next_player_id)
-        # roll button to correct position [BTN,...,] to [,...,BTN,...]
-        rewards = np.roll(rew, self.agent_map[Positions6Max.BTN])
+        # ~~roll button to correct position [BTN,...,] to [,...,BTN,...]~~
+        # ~~roll relative to observer not to button~~
+        # roll back to starting agent i.e. that reward of self.agents[0] is at 0
+        rewards = np.roll(rew, -self.agent_map[0])
 
         if done:
             self.rewards = self._convert_to_dict(
@@ -172,7 +176,7 @@ class TianshouEnvWrapper(AECEnv):
             # move btn to next player
             shifted_indices = {}
             for rel_btn, agent_idx in self.agent_map.items():
-                shifted_indices[rel_btn] = (agent_idx - 1) % self.num_players
+                shifted_indices[rel_btn] = (agent_idx + 1) % self.num_players
             self.agent_map = shifted_indices
 
         else:
@@ -183,7 +187,8 @@ class TianshouEnvWrapper(AECEnv):
             self.next_legal_moves = legal_moves
         self.infos = self._convert_to_dict(
             [{"legal_moves": [],
-              "info": info} for _ in range(self.num_agents)]
+              # "info": info} for _ in range(self.num_agents)]
+              "info": []} for _ in range(self.num_agents)]
         )
         self._cumulative_rewards[self.agent_selection] = 0
         self.agent_selection = next_player
@@ -238,7 +243,7 @@ def make_vectorized_pettingzoo_env(num_envs: int,
     env = TianshouEnvWrapper(env=make_env(single_env_config),
                              agents=agent_names,
                              reward_type=reward_type,
-                             mc_ckpt_path=mc_model_ckpt_path)
+                             mc_ckpt_path=None)
     wrapped_env_fn = partial(PettingZooEnv, WrappedEnv(env))
     wrapped_env = PettingZooEnv(WrappedEnv(env))
     venv = SubprocVectorEnv([wrapped_env_fn for _ in range(num_envs)])

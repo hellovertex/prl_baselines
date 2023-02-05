@@ -3,6 +3,7 @@ import os
 import os
 import pprint
 import time
+from functools import partial
 from pathlib import Path
 
 import numpy as np
@@ -69,7 +70,7 @@ def train_eval(
                   "multiply_by": 1,  # use 100 for floats to remove decimals but we have int stacks
                   "scale_rewards": False,  # we do this ourselves
                   "blinds": [sb, bb]}
-    # env = init_wrapped_env(**env_config)
+    # env = init_wrapped_env(**env_config)1
     # obs0 = env.reset(config=None)
     num_envs = 31
     input_folder = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds/ckpt_dir"
@@ -79,10 +80,15 @@ def train_eval(
     player_dirs = [pdir for pdir in player_dirs if not Path(pdir).stem == 'ckpt']
     ckpts = [pdir + '/ckpt.pt' for pdir in player_dirs]
     hidden_dims = [[256] if '[256]' in pname else [512] for pname in ckpts]
-    majority_baseline = MajorityBaseline(ckpts,
-                                         model_hidden_dims=hidden_dims,
-                                         flatten_input=False,
-                                         num_players=num_players)
+    majority_baseline = partial(MajorityBaseline,
+                               model_ckpt_paths=ckpts,
+                               model_hidden_dims=hidden_dims,
+                               flatten_input=False,
+                               num_players=num_players)
+    # majority_baseline = MajorityBaseline(model_ckpt_paths=ckpts,
+    #                                      model_hidden_dims=hidden_dims,
+    #                                      flatten_input=False,
+    #                                      num_players=num_players)
     # for pdir in player_dirs:
     #     if not Path(pdir).stem == 'ckpt':
     #         # baseline analysis goes by position
@@ -109,15 +115,19 @@ def train_eval(
     rainbow_policy = RainbowPolicy(**rainbow_config)
     if load_ckpt:
         try:
-            rainbow_policy.load_state_dict(torch.load(ckpt_save_path, map_location=device))
-        except FileNotFoundError:
+            ckpt =torch.load(ckpt_save_path)
+            rainbow_policy.load_state_dict(ckpt['net'])
+            # rainbow_policy.load_state_dict(os.path.join(
+            #     *logdir, f'policy_{0}.pth'
+            # ))
+        except Exception:
             # initial training, no ckpt created yet, ignore silently
             pass
     # # 'load_from_ckpt_dir': None
     rainbow = RainbowPolicy(**rainbow_config)
     policy = MultiAgentPolicyManager([
         rainbow,
-        majority_baseline,  # share weights
+        *[majority_baseline() for _ in range(num_players-1)],
         #    MCPolicy()
     ], wrapped_env)  # policy is made from PettingZooEnv
     # policy = RainbowPolicy(**rainbow_config)
@@ -302,7 +312,7 @@ def run_parallel(num_players):
 
 if __name__ == "__main__":
     # 1. todo fix reward rolling in AugmentObsWarpper
-    num_players = [2, 6]
+    # num_players = [2, 6]
     start = time.time()
     # p = multiprocessing.Pool()
     # t0 = time.time()
@@ -312,5 +322,5 @@ if __name__ == "__main__":
     # p.close()
 
     # cant fork cuda in subprocess :(, run sequentially:
-    run_parallel(2)
+    # run_parallel(2)
     run_parallel(6)

@@ -9,7 +9,7 @@ agent_names3 = ["Alice_2", "Hans_3", "Bob_0", "Tina_1"]
 
 player_hands = ['[6s 6d]', '[9s 9d]', '[Jd Js]', '[Ks Kd]']
 board = '[6h Ts Td 9c Jc]'
-env = make_default_tianshou_env(mc_model_ckpt_path,
+env = make_default_tianshou_env(None,
                                 agents=agent_names,
                                 num_players=len(agent_names))
 agents = [
@@ -41,12 +41,18 @@ for epoch in range(4):
             print('------------------------------------')
             print('ROUND OVER -- RESETTING ENVIRONMENT')
             print('------------------------------------')
+            # if epoch == 0:
+            #     assert rews[1] > 0  # Tina wins with 9s 9d
+            # if epoch == 1:
+            #     assert rews[1] > 0  # Tina wins with Jd Js
+            # if epoch == 2:
+            #     assert rews[0] > 0  # Bob wins with Jd Js
             if epoch == 0:
-                assert rews[1] > 0  # Tina wins with 9s 9d
+                assert rews[1] > 0  # Tina gewinnt
             if epoch == 1:
                 assert rews[1] > 0  # Tina wins with Jd Js
             if epoch == 2:
-                assert rews[0] > 0  # Bob wins with Jd Js
+                assert rews[0] > 0  # Bob wins with Jd Js, Hans was last to act, so it is offset 1 to bob
             break
 
 
