@@ -95,12 +95,12 @@ class Preprocessor:
         n_upsample = round(n_raises / 6)  # so we have balanced FOLD, CHECK, RAISE where raises are 1/6 each
         df_fold_downsampled = downsample_fn(df, label=ActionSpace.FOLD, n_available=n_fold)
         df_checkcall_downsampled = downsample_fn(df, label=ActionSpace.CHECK_CALL, n_available=n_check_call)
-        df_raise_min_downsampled = self.upsample(df, label=ActionSpace.RAISE_MIN_OR_3BB, n_samples=n_upsample)
-        df_raise_6bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_6_BB, n_samples=n_upsample)
-        df_raise_10bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_10_BB, n_samples=n_upsample)
-        df_raise_20bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_20_BB, n_samples=n_upsample)
-        df_raise_50bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_50_BB, n_samples=n_upsample)
-        df_allin_downsampled = self.upsample(df, label=ActionSpace.RAISE_ALL_IN, n_samples=n_upsample)
+        df_raise_min_downsampled = self.upsample(df, label=ActionSpace.RAISE_MIN_OR_3BB, n_samples=max(n_min_raise, n_upsample))
+        df_raise_6bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_6_BB, n_samples=max(n_raise_6bb, n_upsample))
+        df_raise_10bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_10_BB, n_samples=max(n_raise_10bb, n_upsample))
+        df_raise_20bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_20_BB, n_samples=max(n_raise_20bb, n_upsample))
+        df_raise_50bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_50_BB, n_samples=max(n_raise_50bb, n_upsample))
+        df_allin_downsampled = self.upsample(df, label=ActionSpace.RAISE_ALL_IN, n_samples=max(n_allin, n_upsample))
 
         return pd.concat([df_fold_downsampled,
                           df_checkcall_downsampled,

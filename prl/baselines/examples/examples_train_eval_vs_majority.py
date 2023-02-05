@@ -54,7 +54,7 @@ def train_eval(
     win_rate_early_stopping = np.inf,
     best_rew = -np.inf
     learning_agent_ids = [0]
-    logdir = [".", "v7", "rainbow_vs_majority", dir_suffix]
+    logdir = [".", "v8", "rainbow_vs_majority_new_actions", dir_suffix]
     ckpt_save_path = os.path.join(
         *logdir, f'ckpt.pt'
     )

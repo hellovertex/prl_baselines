@@ -136,11 +136,11 @@ class TianshouEnvWrapper(AECEnv):
               # "info": info} for _ in range(self.num_agents)]
               "info": []} for _ in range(self.num_agents)]
         )
-        legal_moves = np.array([0, 0, 0, 0, 0, 0])
-        legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
-        if legal_moves[2] == 1:
-            legal_moves[[3, 4, 5]] = 1
-        self.next_legal_moves = legal_moves
+        # legal_moves = np.array([0, 0, 0, 0, 0, 0, 0, 0])
+        # legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
+        # if legal_moves[2] == 1:
+        #     legal_moves[[3, 4, 5, 6, 7]] = 1
+        self.next_legal_moves = self.env_wrapped.get_legal_actions()
         self._last_obs = obs
 
     def step(self, action):
@@ -180,11 +180,11 @@ class TianshouEnvWrapper(AECEnv):
             self.agent_map = shifted_indices
 
         else:
-            legal_moves = np.array([0, 0, 0, 0, 0, 0])
-            legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
-            if legal_moves[2] == 1:
-                legal_moves[[3, 4, 5]] = 1
-            self.next_legal_moves = legal_moves
+            # legal_moves = np.array([0, 0, 0, 0, 0, 0, 0, 0])
+            # legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
+            # if legal_moves[2] == 1:
+            #     legal_moves[[3, 4, 5, 6, 7]] = 1
+            self.next_legal_moves = self.env_wrapped.get_legal_actions()
         self.infos = self._convert_to_dict(
             [{"legal_moves": [],
               # "info": info} for _ in range(self.num_agents)]

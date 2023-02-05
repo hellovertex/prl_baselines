@@ -147,18 +147,18 @@ def run_analysis_single_baseline(max_episodes, pname, ckpt_abs_fpath):
                    verbose=verbose,
                    max_episodes_per_file=max_episodes_per_file)
     # because we can not use every game if we only look for a specific table position
-    experiment.max_episodes *= num_players
-    for pos in positions:
-        # we have to call with heronames=[pos] instead of heronames=[positions]
-        # because pokersnowie will only look at one playername per episode
-        # but heronames=[positions] would generate all positions/playernames in one episode
-        # so we have to run `max_episodes_per_file` episode per position instead
-        # analyze games where player was sitting at position pos
-        run_experiment(experiment=experiment,
-                       pname=pname,
-                       criterion=pos,
-                       verbose=verbose,
-                       max_episodes_per_file=max_episodes_per_file)
+    # experiment.max_episodes *= num_players
+    # for pos in positions:
+    #     # we have to call with heronames=[pos] instead of heronames=[positions]
+    #     # because pokersnowie will only look at one playername per episode
+    #     # but heronames=[positions] would generate all positions/playernames in one episode
+    #     # so we have to run `max_episodes_per_file` episode per position instead
+    #     # analyze games where player was sitting at position pos
+    #     run_experiment(experiment=experiment,
+    #                    pname=pname,
+    #                    criterion=pos,
+    #                    verbose=verbose,
+    #                    max_episodes_per_file=max_episodes_per_file)
 
 
 def main(input_folder):
