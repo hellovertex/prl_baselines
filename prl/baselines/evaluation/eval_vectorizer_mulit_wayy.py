@@ -20,23 +20,6 @@ from prl.baselines.supervised_learning.data_acquisition.environment_utils import
 from prl.baselines.evaluation.utils import print_player_cards, pretty_print, print_summary
 
 
-def parse_action(env, int_action) -> Tuple:
-    """for testing only, we do not care about raise amounts,
-    as we want to verify the vectorizer works correctly"""
-    if int_action in [0, 1]:
-        return (int_action, -1)
-    elif int_action == ActionSpace.RAISE_MIN_OR_3BB:
-        return (2, 100)
-    elif int_action == ActionSpace.RAISE_HALF_POT:
-        return (2, 100)
-    elif int_action == ActionSpace.RAISE_POT:
-        return (2, 100)
-    elif int_action == ActionSpace.ALL_IN:
-        return (2, 100)
-    else:
-        raise ValueError
-
-
 num_players = 6
 starting_stack_size = 20000
 stack_sizes = [starting_stack_size for _ in range(num_players)]
@@ -93,7 +76,6 @@ i = 0 if num_players < 4 else 3
 while True:
     legal_moves = wrapped_env.get_legal_moves_extended()
     action = agents[i].compute_action(obs, legal_moves)
-    # action = parse_action(wrapped_env, action)
     pred = baseline.compute_action(obs, legal_moves)
     pretty_print(i, obs, action)
     obs, rew, done, info = wrapped_env.step(action)

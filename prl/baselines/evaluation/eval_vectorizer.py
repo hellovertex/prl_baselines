@@ -8,22 +8,6 @@ from prl.environment.steinberger.PokerRL import NoLimitHoldem
 from prl.baselines.examples.examples_tianshou_env import MCAgent
 
 
-def parse_action(env, int_action) -> Tuple:
-    """for testing only, we do not care about raise amounts,
-    as we want to verify the vectorizer works correctly"""
-    if int_action in [0, 1]:
-        return (int_action, -1)
-    elif int_action == ActionSpace.RAISE_MIN_OR_3BB:
-        return (2, 100)
-    elif int_action == ActionSpace.RAISE_HALF_POT:
-        return (2, 100)
-    elif int_action == ActionSpace.RAISE_POT:
-        return (2, 100)
-    elif int_action == ActionSpace.ALL_IN:
-        return (2, 100)
-    else:
-        raise ValueError
-
 
 num_players = 3
 starting_stack_size = 20000
@@ -41,9 +25,9 @@ feature_names = list(wrapped_env.obs_idx_dict.keys())
 ckpt = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
 
 agents = [
-    MCAgent(ckpt),
-    MCAgent(ckpt),
-    MCAgent(ckpt),
+    MCAgent(ckpt, num_players),
+    MCAgent(ckpt, num_players),
+    MCAgent(ckpt, num_players),
 ]
 obs, rew, done, info = wrapped_env.reset()
 assert len(agents) == num_players == len(stack_sizes)

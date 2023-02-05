@@ -1,33 +1,9 @@
-from typing import Tuple
-
-import numpy as np
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as fts
-from prl.environment.Wrappers.base import ActionSpace
-from prl.environment.steinberger.PokerRL import NoLimitHoldem, Poker
+from prl.environment.steinberger.PokerRL import NoLimitHoldem
 
-from prl.baselines.evaluation.analyzer import PlayerAnalyzer
 from prl.baselines.evaluation.utils import get_reset_config
 from prl.baselines.examples.examples_tianshou_env import MCAgent
-from prl.baselines.supervised_learning.data_acquisition.environment_utils import make_board_cards, card_tokens, card
-
-
-def parse_action(env, int_action) -> Tuple:
-    """for testing only, we do not care about raise amounts,
-    as we want to verify the vectorizer works correctly"""
-    if int_action in [0, 1]:
-        return (int_action, -1)
-    elif int_action == ActionSpace.RAISE_MIN_OR_3BB:
-        return (2, 100)
-    elif int_action == ActionSpace.RAISE_HALF_POT:
-        return (2, 100)
-    elif int_action == ActionSpace.RAISE_POT:
-        return (2, 100)
-    elif int_action == ActionSpace.ALL_IN:
-        return (2, 100)
-    else:
-        raise ValueError
-
 
 num_players = 3
 starting_stack_size = 20000

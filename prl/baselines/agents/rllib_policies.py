@@ -193,9 +193,11 @@ class StakeLevelImitationPolicy(BaselinePolicy_Base):
             classes = [ActionSpace.FOLD,
                        ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED in CHECK_CALL
                        ActionSpace.RAISE_MIN_OR_3BB,
-                       ActionSpace.RAISE_HALF_POT,
-                       ActionSpace.RAISE_POT,
-                       ActionSpace.ALL_IN]
+                       ActionSpace.RAISE_6_BB,
+                       ActionSpace.RAISE_10_BB,
+                       ActionSpace.RAISE_20_BB,
+                       ActionSpace.RAISE_50_BB,
+                       ActionSpace.RAISE_ALL_IN]
             hidden_dim = [512, 512]
             output_dim = len(classes)
             net = MLP(input_dim, output_dim, hidden_dim)

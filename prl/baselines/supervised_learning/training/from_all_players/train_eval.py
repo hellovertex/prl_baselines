@@ -32,11 +32,13 @@ def get_datasets(input_dir, batch_size):
 def get_model(traindata):
     # network
     classes = [ActionSpace.FOLD,
-               ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED
+               ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED in CHECK_CALL
                ActionSpace.RAISE_MIN_OR_3BB,
-               ActionSpace.RAISE_HALF_POT,
-               ActionSpace.RAISE_POT,
-               ActionSpace.ALL_IN]
+               ActionSpace.RAISE_6_BB,
+               ActionSpace.RAISE_10_BB,
+               ActionSpace.RAISE_20_BB,
+               ActionSpace.RAISE_50_BB,
+               ActionSpace.RAISE_ALL_IN]
     hidden_dim = [512, 512]
     output_dim = len(classes)
     input_dim = None

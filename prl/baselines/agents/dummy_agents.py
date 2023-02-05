@@ -13,4 +13,4 @@ class DummyAgentCall:
 
 class DummyAgentAllIn:
     def act(self, *args, **kwargs):
-        return ActionSpace.ALL_IN
+        return ActionSpace.RAISE_ALL_IN
