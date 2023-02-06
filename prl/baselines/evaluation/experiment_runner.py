@@ -74,10 +74,11 @@ class PokerExperimentRunner(ExperimentRunner):
         #
         player_stacks = []
         # relative to agents --> roll env->agent_list
-        for seat_id, seat in enumerate(self.backend.seats):
+        for seat_id, seat in enumerate(np.roll(self.backend.seats, self.agent_map[0])):
             agent_id = self.agent_map[seat_id]
             player_name = f'{self.player_names[agent_id]}'
-            seat_display_name = f'Seat {seat_id + 1}'  # index starts at 1
+            #seat_display_name = f'Seat {seat_id + 1}'  # index starts at 1
+            seat_display_name = player_name  # index starts at 1
             stack = "$" + str(seat.starting_stack_this_episode)
             player_stacks.append(PlayerStack(seat_display_name,
                                              player_name,
