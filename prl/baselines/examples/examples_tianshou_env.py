@@ -160,7 +160,8 @@ class TianshouEnvWrapper(AECEnv):
         # ~~roll button to correct position [BTN,...,] to [,...,BTN,...]~~
         # ~~roll relative to observer not to button~~
         # roll back to starting agent i.e. that reward of self.agents[0] is at 0
-        rewards = np.roll(rew, -self.agent_map[0])
+        rewards = np.roll(rew, self.agent_map[0])  # roll -self.agent_map[0] instead if we chose to
+        # update button with (agent_idx + 1) % self.num_players inseat of (agent_idx - 1) % self.num_players
 
         if done:
             self.rewards = self._convert_to_dict(
@@ -176,7 +177,7 @@ class TianshouEnvWrapper(AECEnv):
             # move btn to next player
             shifted_indices = {}
             for rel_btn, agent_idx in self.agent_map.items():
-                shifted_indices[rel_btn] = (agent_idx + 1) % self.num_players
+                shifted_indices[rel_btn] = (agent_idx - 1) % self.num_players
             self.agent_map = shifted_indices
 
         else:

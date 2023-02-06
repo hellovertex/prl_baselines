@@ -36,7 +36,8 @@ unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25
 filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
 parser = HSmithyParser()
 ckpt_path = "/home/sascha/Documents/github.com/prl_baselines/data/ckpt/ckpt.pt"
-baseline = MCAgent(ckpt_path)
+# baseline = MCAgent(ckpt_path)
+baseline = None
 player_stats = []
 for ifile, filename in enumerate(filenames):
     pname = Path(filename).stem
