@@ -191,8 +191,8 @@ class RLStateEncoder(Encoder):
             action_formatted = self.build_action(action)
             action_label = self._wrapped_env.discretize(action_formatted)
             next_to_act = env.current_player.seat_id
-            if self.verbose:
-                pretty_print(next_to_act, obs, action_label)
+            # if self.verbose:
+            #     pretty_print(next_to_act, obs, action_label)
             for player in table:
                 # if player reached showdown we can see his cards
                 filtered_players = showdown_players if not selected_players else [p for p in showdown_players if
@@ -204,9 +204,9 @@ class RLStateEncoder(Encoder):
                 # only store obs and action of showdown player
                 if player.position_index == next_to_act and player.player_name in filtered_players:
                     observations.append(obs)
-                    #if not selected_players:
-                    # if not player.player_name in [winner.name for winner in episode.winners]:
-                    if not player.player_name in selected_players:
+                    # if not selected_players:
+                    if not player.player_name in [winner.name for winner in episode.winners]:
+                        # if not player.player_name in selected_players:
                         # replace action call/raise with fold
                         action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
                     actions.append(action_label)
@@ -224,7 +224,7 @@ class RLStateEncoder(Encoder):
         Observations, Actions_Taken]:
         """Runs environment with steps from PokerEpisode.
         Returns observations and corresponding actions of players that made it to showdown."""
-        self.verbose=True
+        self.verbose = True
         # Maybe skip game, if selected_players is set and no selected player was in showdown
         if selected_players:
             # skip episode if no selected_players has played in it

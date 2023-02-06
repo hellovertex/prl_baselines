@@ -95,13 +95,15 @@ class Preprocessor:
         n_raise_20bb = len(df[df['label'] == ActionSpace.RAISE_20_BB])
         n_raise_50bb = len(df[df['label'] == ActionSpace.RAISE_50_BB])
         n_allin = len(df[df['label'] == ActionSpace.RAISE_ALL_IN])
-        n_upsamples = n_downsamples = max([n_min_raise,
-                                      n_raise_6bb,
-                                           n_raise_10bb,
-                                           n_raise_20bb,
-                                           n_raise_50bb,
-                                           n_allin])
-        downsample_fn = partial(self.extract_subset, n_samples=n_downsamples)
+        # n_upsamples = n_downsamples = max([n_min_raise,
+        #                               n_raise_6bb,
+        #                                    n_raise_10bb,
+        #                                    n_raise_20bb,
+        #                                    n_raise_50bb,
+        #                                    n_allin])
+        n_upsamples=12000
+        downsample_fn = partial(self.extract_subset, n_samples=90000)
+        # downsample_fn = partial(self.extract_subset, n_samples=n_samples)
         # n_upsample = round(n_raises / 6)  # so we have balanced FOLD, CHECK, RAISE where raises are 1/6 each
         df_fold_downsampled = downsample_fn(df, label=ActionSpace.FOLD, n_available=n_fold)
         df_checkcall_downsampled = downsample_fn(df, label=ActionSpace.CHECK_CALL, n_available=n_check_call)

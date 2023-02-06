@@ -128,7 +128,7 @@ class Runner:
         n_samples = 0
         for i, hand in enumerate(from_parsed_hands):
             observations, actions = self.encoder.encode_episode(hand,
-                                                                verbose=True,
+                                                                verbose=False,
                                                                 selected_players=self._selected_players)
             if not observations:
                 continue
