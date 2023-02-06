@@ -69,16 +69,21 @@ class Preprocessor:
                        n_samples: int,
                        n_available: int) -> pd.DataFrame:
         return resample(df[df['label'] == label],
-                        replace=True,
+                        replace=False,
                         n_samples=min(n_available, n_samples),
                         random_state=1)
+
     def upsample(self, df: pd.DataFrame,
-                       label: ActionSpace,
-                       n_samples: int) -> pd.DataFrame:
-        return resample(df[df['label'] == label],
-                        replace=True,
-                        n_samples=n_samples,
-                        random_state=1)
+                 label: ActionSpace,
+                 n_samples: int) -> pd.DataFrame:
+        df_base = df[df['label'] == label]
+        samples = resample(df[df['label'] == label],
+                           replace=True,
+                           n_samples=max(n_samples - len(df_base), 0),
+                           random_state=1)
+
+        return pd.concat([df_base, samples])
+
     def downsample(self, df, n_samples):
         """ Each label in df will be downsampled to the number of all ins, "
             so that training data is equally distributed. """
@@ -90,17 +95,27 @@ class Preprocessor:
         n_raise_20bb = len(df[df['label'] == ActionSpace.RAISE_20_BB])
         n_raise_50bb = len(df[df['label'] == ActionSpace.RAISE_50_BB])
         n_allin = len(df[df['label'] == ActionSpace.RAISE_ALL_IN])
-        downsample_fn = partial(self.extract_subset, n_samples=n_samples)
-        n_raises = n_samples
-        n_upsample = round(n_raises / 6)  # so we have balanced FOLD, CHECK, RAISE where raises are 1/6 each
+        n_upsamples = n_downsamples = max([n_min_raise,
+                                      n_raise_6bb,
+                                           n_raise_10bb,
+                                           n_raise_20bb,
+                                           n_raise_50bb,
+                                           n_allin])
+        downsample_fn = partial(self.extract_subset, n_samples=n_downsamples)
+        # n_upsample = round(n_raises / 6)  # so we have balanced FOLD, CHECK, RAISE where raises are 1/6 each
         df_fold_downsampled = downsample_fn(df, label=ActionSpace.FOLD, n_available=n_fold)
         df_checkcall_downsampled = downsample_fn(df, label=ActionSpace.CHECK_CALL, n_available=n_check_call)
-        df_raise_min_downsampled = self.upsample(df, label=ActionSpace.RAISE_MIN_OR_3BB, n_samples=max(n_min_raise, n_upsample))
-        df_raise_6bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_6_BB, n_samples=max(n_raise_6bb, n_upsample))
-        df_raise_10bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_10_BB, n_samples=max(n_raise_10bb, n_upsample))
-        df_raise_20bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_20_BB, n_samples=max(n_raise_20bb, n_upsample))
-        df_raise_50bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_50_BB, n_samples=max(n_raise_50bb, n_upsample))
-        df_allin_downsampled = self.upsample(df, label=ActionSpace.RAISE_ALL_IN, n_samples=max(n_allin, n_upsample))
+        df_raise_min_downsampled = self.upsample(df, label=ActionSpace.RAISE_MIN_OR_3BB,
+                                                 n_samples=n_upsamples)
+        df_raise_6bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_6_BB,
+                                                 n_samples=n_upsamples)
+        df_raise_10bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_10_BB,
+                                                  n_samples=n_upsamples)
+        df_raise_20bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_20_BB,
+                                                  n_samples=n_upsamples)
+        df_raise_50bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_50_BB,
+                                                  n_samples=n_upsamples)
+        df_allin_downsampled = self.upsample(df, label=ActionSpace.RAISE_ALL_IN, n_samples=n_upsamples)
 
         return pd.concat([df_fold_downsampled,
                           df_checkcall_downsampled,
