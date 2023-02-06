@@ -136,7 +136,7 @@ class TianshouEnvWrapper(AECEnv):
               "info": info} for _ in range(self.num_agents)]
               # "info": []} for _ in range(self.num_agents)]
         )
-        legal_moves = np.array([0, 0, 0, 0, 0, 0])
+        legal_moves = np.array([0, 0, 0, 0, 0, 0, 0, 0])
         legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
         if legal_moves[2] == 1:
             legal_moves[[3, 4, 5]] = 1
@@ -207,7 +207,7 @@ class WrappedEnv(BaseWrapper):
         self.env = env
 
 
-def make_default_tianshou_env(mc_model_ckpt_path, num_players=2, agents=None):
+def make_default_tianshou_env(num_players=2, mc_model_ckpt_path=None,  agents=None):
     starting_stack = 20000
     stack_sizes = [starting_stack for _ in range(num_players)]
     if not agents:

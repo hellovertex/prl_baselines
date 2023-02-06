@@ -4,25 +4,25 @@ from prl.baselines.evaluation.core.experiment import make_participants, PokerExp
 from prl.baselines.evaluation.experiment_runner import PokerExperimentRunner
 
 from prl.baselines.evaluation.utils import get_default_env, print_player_stacks, get_reset_config
-
+from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
 
 n_players = 4
 starting_stack_size = 20000
-env = get_default_env(n_players, starting_stack_size=starting_stack_size)
 
 agent_fold = DummyAgentFold()
 agent_call = DummyAgentCall()
 agent_allin = DummyAgentAllIn()
+agent_names = [f'agent_call_{i}' for i in range(n_players)]
+env = make_default_tianshou_env(n_players,agents=agent_names)
 agents = [agent_call for i in range(n_players)]
 # make experiment with reset config that has cards so we know exactly who wins
 board = '[6h Ts Td 9c Jc]'
 player_hands = ['[6s 6d]', '[9s 9d]', '[Jd Js]', '[Th Tc]']
 env_reset_config = get_reset_config(player_hands, board)
-
 participants = make_participants(agents, starting_stack_size)
 experiment = make_default_experiment(env,
                                      participants,
-                                     max_episodes=1,
+                                     max_episodes=3,
                                      env_reset_config=env_reset_config)
 # let the corresponding agents move and compare the text outputs
 runner = PokerExperimentRunner()

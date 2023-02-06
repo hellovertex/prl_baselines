@@ -73,11 +73,11 @@ class PokerExperiment:
     cbs_metrics: Optional[List[Callable]]
     cbs_plots: Optional[List[Callable]]
     cbs_misc: Optional[List[Callable]]
-    options: Optional[Dict]
     # When no participants are passed, you can use an action plan instead.
     # An action plan contains a single ordered list of actions to execute per episode
     # This means len(from_action_plan) == max_episodes
     from_action_plan: Optional[List[List[Action]]]
+    options: Optional[Dict] = None
     early_stopping_when: Optional[PokerExperiment_EarlyStopping] = None
 
 

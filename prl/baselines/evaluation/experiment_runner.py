@@ -77,7 +77,7 @@ class PokerExperimentRunner(ExperimentRunner):
         for seat_id, seat in enumerate(self.backend.seats):
             agent_id = self.agent_map[seat_id]
             player_name = f'{self.player_names[agent_id]}'
-            seat_display_name = f'Seat {seat + 1}'  # index starts at 1
+            seat_display_name = f'Seat {seat_id + 1}'  # index starts at 1
             stack = "$" + str(seat.starting_stack_this_episode)
             player_stacks.append(PlayerStack(seat_display_name,
                                              player_name,
@@ -327,7 +327,7 @@ class PokerExperimentRunner(ExperimentRunner):
                             ep_id) -> PokerEpisode:
         # --- SETUP AND RESET ENVIRONMENT ---
         # obs, _, done, _ = self.env.reset(self.env_reset_config)
-        obs = self.env.reset(self.env_reset_config)
+        obs = self.env.reset(options={'reset_config':self.env_reset_config})
         agent_id = obs['agent_id']
         legal_moves = self.env.env.env.env_wrapped.get_legal_actions()
         obs = obs['obs']

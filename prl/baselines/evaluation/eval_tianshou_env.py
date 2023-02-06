@@ -9,9 +9,8 @@ agent_names3 = ["Alice_2", "Hans_3", "Bob_0", "Tina_1"]
 
 player_hands = ['[6s 6d]', '[9s 9d]', '[Jd Js]', '[Ks Kd]']
 board = '[6h Ts Td 9c Jc]'
-env = make_default_tianshou_env(None,
-                                agents=agent_names,
-                                num_players=len(agent_names))
+env = make_default_tianshou_env(num_players=len(agent_names),
+                                agents=agent_names)
 agents = [
     DummyAgentAllIn,  # Bob
     DummyAgentCall,  # Tina
@@ -31,6 +30,7 @@ for epoch in range(4):
         action = agents[i].act(obs, legal_moves)
         print(f'AGNET_ID = {agent_id}')
         pretty_print(i, obs, action)
+        print(f'legal_moves = {legal_moves}')
         obs_dict, cum_reward, terminated, truncated, info = env.step(action)
         rews = cum_reward
         agent_id = obs_dict['agent_id']
