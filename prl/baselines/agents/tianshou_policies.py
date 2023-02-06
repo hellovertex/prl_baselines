@@ -76,6 +76,9 @@ def get_rainbow_config(params):
     # load from config if possible
     optim = torch.optim.Adam(net.parameters(), lr=params['lr'])
     if 'load_from_ckpt' in params:
+        # rainbow_policy.load_state_dict(os.path.join(
+        #     *logdir, f'policy_{0}.pth'
+        # ))
         try:
             net.load_state_dict(torch.load(params['load_from_ckpt'], map_location=device)['model'])
             optim.load_state_dict(torch.load(params['load_from_ckpt'], map_location=device)['optim'])
