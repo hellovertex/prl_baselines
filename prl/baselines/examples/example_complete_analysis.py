@@ -104,7 +104,7 @@ def run_analysis_single_baseline(max_episodes, pname, ckpt_abs_fpath):
 
     max_episodes_per_file = 1000
     verbose = True
-    hidden_dims = [256] if '[256]' in pname else [512]
+    hidden_dims = [256, 256] # if '[256]' in pname else [512]
     starting_stack = 20000
     stack_sizes = [starting_stack for _ in range(num_players)]
     agent_names = [f'{pname}_{i}' for i in range(num_players)]
@@ -194,8 +194,14 @@ def main(input_folder):
     #                                      pname=Path(pdir).stem,
     #                                      ckpt_abs_fpath=pdir + '/ckpt.pt')
     #         # selected_player analysis goes by available .txt data
-    ckpts = [pdir + '/ckpt.pt' for pdir in player_dirs]
-    run_analysis_majority_baseline(max_episodes=10, ckpts=ckpts)
+    # 2.
+    # ckpts = [pdir + '/ckpt.pt' for pdir in player_dirs]
+    # run_analysis_majority_baseline(max_episodes=10, ckpts=ckpts)
+    # 2NL
+    pdir = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/with_folds_2NL_all_players/ckpt_dir_[256, 256]_1e-06"
+    run_analysis_single_baseline(max_episodes=100,
+                                 pname=Path(pdir).stem,
+                                 ckpt_abs_fpath=pdir + '/ckpt.pt')
 
 
 if __name__ == '__main__':
