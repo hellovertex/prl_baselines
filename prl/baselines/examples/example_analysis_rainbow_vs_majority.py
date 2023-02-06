@@ -43,7 +43,7 @@ class Rainbow:
         batch.obs = obs
         batch.info = {}
         result = self.policy.forward(batch)
-        return result.action.item()
+        return result.act.item()
 
 
 def run_analysis_majority_baseline(max_episodes, ckpts):
