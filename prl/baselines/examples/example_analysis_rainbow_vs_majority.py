@@ -35,7 +35,19 @@ def run_experiment(experiment,
         pstat.to_disk(fpath=f'{path_out}/{pname}.json')
 
 
+class Rainbow:
+    def __init__(self, policy):
+        self.policy = policy
+
+    def act(self):
+        # query policy
+        pass
+
+
 def run_analysis_majority_baseline(max_episodes, ckpts):
+    # todo fix checkpointing for rainbow
+    #  implement rainbow.act method
+    #
     pname = "MajorityVoting"
     num_players = 6
     positions_two = ["BTN", "BB"]

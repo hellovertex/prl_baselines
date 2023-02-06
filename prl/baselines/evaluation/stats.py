@@ -70,10 +70,7 @@ class PlayerStats:
                     # any other call or raise increments vpip
                     self.n_vpip += 1
             self.vpip = self.n_vpip / self.hands_total
-        self.vpip_updated_this_round = True
-
-
-
+        self.vpip_updated_this_hand = True
 
     def _update_af(self, obs, action):
         """Agression factor: #(Bet + Raise) / #(Call, checking or folding).
