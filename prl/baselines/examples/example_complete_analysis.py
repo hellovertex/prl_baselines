@@ -18,7 +18,7 @@ def run_experiment(experiment,
                    verbose=True,
                    max_episodes_per_file=1000):
     stats = experiment.options['stats']
-    path_out = f'./pokersnowie/{pname.split("_")[0]}/'
+    path_out = f'./stats_div_6/{pname.split("_")[0]}/'
     PokerExperimentToPokerSnowie().generate_database(
         verbose=verbose,
         path_out=path_out + f'{pname}_{criterion}',
@@ -179,7 +179,7 @@ def main(input_folder):
     directory containing subfolder per player and one for pool,
     as well as two json files containing the final player stats.
     """
-    input_folder = "/home/hellovertex/Documents/github.com/hellovertex/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds/ckpt_dir"
+    input_folder = "/home/hellovertex/Documents/github.com/hellovertex/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds_div_6.tar_[256]/with_folds_div_6/ckpt_dir"
     # Input: Playername or Pool
     # Position
     # Harmonic Mapping
@@ -195,7 +195,7 @@ def main(input_folder):
     #                                      ckpt_abs_fpath=pdir + '/ckpt.pt')
     #         # selected_player analysis goes by available .txt data
     ckpts = [pdir + '/ckpt.pt' for pdir in player_dirs]
-    run_analysis_majority_baseline(max_episodes=10000, ckpts=ckpts)
+    run_analysis_majority_baseline(max_episodes=1000, ckpts=ckpts)
 
 
 if __name__ == '__main__':

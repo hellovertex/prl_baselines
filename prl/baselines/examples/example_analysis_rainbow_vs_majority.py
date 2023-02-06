@@ -233,7 +233,7 @@ def main(input_folder):
     #                                      ckpt_abs_fpath=pdir + '/ckpt.pt')
     #         # selected_player analysis goes by available .txt data
     ckpts = [pdir + '/ckpt.pt' for pdir in player_dirs]
-    run_analysis_majority_baseline(max_episodes=1, ckpts=ckpts)
+    run_analysis_majority_baseline(max_episodes=10000, ckpts=ckpts)
 
 
 if __name__ == '__main__':
