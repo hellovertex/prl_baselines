@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 import torch
+from tianshou.data import Batch
 from tianshou.policy import RainbowPolicy
 
 from prl.baselines.agents.tianshou_agents import BaselineAgent, MajorityBaseline
@@ -10,10 +11,6 @@ from prl.baselines.evaluation.core.experiment import PokerExperiment, make_parti
 from prl.baselines.evaluation.pokersnowie.export import PokerExperimentToPokerSnowie
 from prl.baselines.evaluation.stats import PlayerStats
 from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
-
-
-def run_analysis_from_position():
-    pass
 
 
 def run_experiment(experiment,
@@ -39,9 +36,15 @@ class Rainbow:
     def __init__(self, policy):
         self.policy = policy
 
-    def act(self):
+    def act(self, observation, legal_moves):
         # query policy
-        pass
+        batch = Batch()
+        obs = {'obs': observation, 'mask': legal_moves}
+        batch.obs = obs
+        batch.info = {}
+        act = self.policy.forward(batch)
+        a = 1
+        return a
 
 
 def run_analysis_majority_baseline(max_episodes, ckpts):
@@ -70,7 +73,7 @@ def run_analysis_majority_baseline(max_episodes, ckpts):
                                flatten_input=False,
                                num_players=num_players) for _ in range(num_players)]
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    ckpt_save_path = ""
+    ckpt_save_path = "/home/sascha/Documents/github.com/prl_baselines/prl/baselines/examples/v8/rainbow_vs_majority_new_actions/num_players=6,targ_upd_freq=5000/ckpt.pt"
     params = {'device': device,
               'load_from_ckpt': ckpt_save_path,
               'lr': 1e-6,
@@ -83,8 +86,8 @@ def run_analysis_majority_baseline(max_episodes, ckpts):
               }
     rainbow_config = get_rainbow_config(params)
     rainbow_policy = RainbowPolicy(**rainbow_config)
-
-    agents[0] = rainbow_policy
+    rainbow = Rainbow(rainbow_policy)
+    agents[0] = rainbow
 
     assert len(agents) == num_players == len(stack_sizes)
     participants = make_participants(agents, starting_stack)
@@ -212,7 +215,7 @@ def main(input_folder):
     directory containing subfolder per player and one for pool,
     as well as two json files containing the final player stats.
     """
-    input_folder = "/home/hellovertex/Documents/github.com/hellovertex/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds/ckpt_dir"
+    input_folder = "/home/sascha/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds_div_1/with_folds/ckpt_dir"
     # Input: Playername or Pool
     # Position
     # Harmonic Mapping

@@ -80,11 +80,14 @@ def get_rainbow_config(params):
         #     *logdir, f'policy_{0}.pth'
         # ))
         try:
-            net.load_state_dict(torch.load(params['load_from_ckpt'], map_location=device)['model'])
-            optim.load_state_dict(torch.load(params['load_from_ckpt'], map_location=device)['optim'])
+            ckpt = torch.load(params['load_from_ckpt'],
+                                           map_location=device)
+            net.load_state_dict(ckpt['model'])
+            optim.load_state_dict(ckpt['optim'])
         except FileNotFoundError:
             # initial state, no checkpoints created yet, ignore silently
-            pass
+            print(f'CHECKPOINT NOT LOADED')
+
     # if running on GPU and we want to use cuda move model there
     return {'model': net,
             'optim': optim,

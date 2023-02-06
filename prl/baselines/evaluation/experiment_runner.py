@@ -276,7 +276,7 @@ class PokerExperimentRunner(ExperimentRunner):
             if done:
                 showdown_hands = self._get_showdown_hands(remaining_players)
 
-            legal_moves = self.backend.get_legal_actions()
+            legal_moves = self.env.env.env.env_wrapped.get_legal_actions()
             observation = {'obs': [obs], 'legal_moves': [legal_moves]}
             # -------- SET NEXT AGENT -----------
             agent_idx = self.agent_map[self.backend.current_player.seat_id]
@@ -324,7 +324,7 @@ class PokerExperimentRunner(ExperimentRunner):
         # obs, _, done, _ = self.env.reset(self.env_reset_config)
         obs = self.env.reset(self.env_reset_config)
         agent_id = obs['agent_id']
-        legal_moves = obs['mask']
+        legal_moves = self.env.env.env.env_wrapped.get_legal_actions()
         obs = obs['obs']
         initial_player_stacks = self._get_starting_stacks_relative_to_agents()
         ante, blinds = self.post_blinds(obs)
