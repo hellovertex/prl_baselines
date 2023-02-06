@@ -427,6 +427,10 @@ class PokerExperimentRunner(ExperimentRunner):
             self.run_from_action_plan = True
             self.participants = []
             self.iter_action_plan = iter(experiment.from_action_plan)
+            # let indices start at 0 when btn starts and at 3 when utg starts
+            inds = [i for i in range(self.num_players)] if self.num_players < 4 else [(i%self.num_players) for i in range(3, 3+self.num_players)]
+            for i, pid in enumerate(inds):
+                self.agent_summary[i] = {i: PlayerStats(self.player_names[i])}
         else:
             self.run_from_action_plan = False
             self.participants = experiment.participants

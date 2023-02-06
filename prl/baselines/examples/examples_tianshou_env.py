@@ -133,14 +133,14 @@ class TianshouEnvWrapper(AECEnv):
         )
         self.infos = self._convert_to_dict(
             [{"legal_moves": [],
-              # "info": info} for _ in range(self.num_agents)]
-              "info": []} for _ in range(self.num_agents)]
+              "info": info} for _ in range(self.num_agents)]
+              # "info": []} for _ in range(self.num_agents)]
         )
-        # legal_moves = np.array([0, 0, 0, 0, 0, 0, 0, 0])
-        # legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
-        # if legal_moves[2] == 1:
-        #     legal_moves[[3, 4, 5, 6, 7]] = 1
-        self.next_legal_moves = self.env_wrapped.get_legal_actions()
+        legal_moves = np.array([0, 0, 0, 0, 0, 0])
+        legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
+        if legal_moves[2] == 1:
+            legal_moves[[3, 4, 5]] = 1
+        self.next_legal_moves = legal_moves
         self._last_obs = obs
 
     def step(self, action):
@@ -160,7 +160,8 @@ class TianshouEnvWrapper(AECEnv):
         # ~~roll button to correct position [BTN,...,] to [,...,BTN,...]~~
         # ~~roll relative to observer not to button~~
         # roll back to starting agent i.e. that reward of self.agents[0] is at 0
-        rewards = np.roll(rew, -self.agent_map[0])
+        rewards = np.roll(rew, self.agent_map[0])  # roll -self.agent_map[0] instead if we chose to
+        # update button with (agent_idx + 1) % self.num_players inseat of (agent_idx - 1) % self.num_players
 
         if done:
             self.rewards = self._convert_to_dict(
@@ -176,19 +177,20 @@ class TianshouEnvWrapper(AECEnv):
             # move btn to next player
             shifted_indices = {}
             for rel_btn, agent_idx in self.agent_map.items():
-                shifted_indices[rel_btn] = (agent_idx + 1) % self.num_players
+                shifted_indices[rel_btn] = (agent_idx - 1) % self.num_players
             self.agent_map = shifted_indices
 
         else:
-            # legal_moves = np.array([0, 0, 0, 0, 0, 0, 0, 0])
-            # legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
-            # if legal_moves[2] == 1:
-            #     legal_moves[[3, 4, 5, 6, 7]] = 1
-            self.next_legal_moves = self.env_wrapped.get_legal_actions()
+            legal_moves = np.array([0, 0, 0, 0, 0, 0])
+            legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
+            if legal_moves[2] == 1:
+                legal_moves[[3, 4, 5]] = 1
+            self.next_legal_moves = legal_moves
+
         self.infos = self._convert_to_dict(
             [{"legal_moves": [],
-              # "info": info} for _ in range(self.num_agents)]
-              "info": []} for _ in range(self.num_agents)]
+              "info": info} for _ in range(self.num_agents)]
+              # "info": []} for _ in range(self.num_agents)]
         )
         self._cumulative_rewards[self.agent_selection] = 0
         self.agent_selection = next_player
