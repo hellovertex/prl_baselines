@@ -2,7 +2,7 @@ import ast
 import glob
 import os.path
 from pathlib import Path
-from typing import List, Optional, TypeVar, Union
+from typing import List, Optional, TypeVar, Union, Dict
 
 from prl.baselines.evaluation.core.experiment import PokerExperiment
 from prl.baselines.evaluation.experiment_runner import PokerExperimentRunner
@@ -160,3 +160,7 @@ class PokerExperimentToPokerSnowie(PokerSnowieExporteur):
         # write snowie-formatted string to text file
         self._storage.export_to_text_file(snowie_episodes=snowie_episodes,
                                           path_out=path_out)
+
+    def summary(self) -> Dict[str, List]:
+        # res = self._runner
+        return self._runner.winnings

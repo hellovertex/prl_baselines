@@ -20,7 +20,7 @@ def run_experiment(experiment,
                    max_episodes_per_file=1000):
     stats = experiment.options['stats']
     path_out = f'./pokersnowie/{pname.split("_")[0]}/'
-    PokerExperimentToPokerSnowie().generate_database(
+    res = PokerExperimentToPokerSnowie().generate_database(
         verbose=verbose,
         path_out=path_out + f'{pname}_{criterion}',
         experiment=experiment,
@@ -30,7 +30,11 @@ def run_experiment(experiment,
     )
     for pstat in stats:
         pstat.to_disk(fpath=f'{path_out}/{pname}.json')
+    d = res.summary()
+    import json
 
+    with open('winnings.json', 'w') as file:
+        json.dump(d, file)
 
 class Rainbow:
     def __init__(self, policy):

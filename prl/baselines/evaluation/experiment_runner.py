@@ -60,6 +60,7 @@ class PokerExperimentRunner(ExperimentRunner):
         self.num_players = None
         self._times_taken_to_compute_action = []
         self._times_taken_to_step_env = []
+        self.winnings = {}
 
     def _make_board(self) -> str:
         board = self.backend.cards2str(self.backend.board)
@@ -108,6 +109,10 @@ class PokerExperimentRunner(ExperimentRunner):
                 PlayerWinningsCollected(player_name=f'{self.player_names[agent_id]}',
                                         collected="$" + str(int(gain)),
                                         rake=None))
+            if not f'{self.player_names[agent_id]}' in self.winnings:
+                self.winnings[f'{self.player_names[agent_id]}'] = [gain]
+            else:
+                self.winnings[f'{self.player_names[agent_id]}'].append(gain)
         return money_collected
 
     def _get_blinds(self) -> List[Blind]:
