@@ -160,7 +160,7 @@ class PokerExperimentToPokerSnowie(PokerSnowieExporteur):
         # write snowie-formatted string to text file
         self._storage.export_to_text_file(snowie_episodes=snowie_episodes,
                                           path_out=path_out)
-
+        return self
     def summary(self) -> Dict[str, List]:
         # res = self._runner
         return self._runner.winnings
