@@ -42,9 +42,8 @@ class Rainbow:
         obs = {'obs': observation, 'mask': legal_moves}
         batch.obs = obs
         batch.info = {}
-        act = self.policy.forward(batch)
-        a = 1
-        return a
+        result = self.policy.forward(batch)
+        return result.action.item()
 
 
 def run_analysis_majority_baseline(max_episodes, ckpts):
