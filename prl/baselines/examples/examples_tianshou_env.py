@@ -119,6 +119,10 @@ class TianshouEnvWrapper(AECEnv):
         player_id = self.agent_map[self.env_wrapped.env.current_player.seat_id]
         player = self._int_to_name(player_id)
         self.btn = self.agents[self.agent_map[0]]
+
+        # self.starting_stacks = []
+        # for i, seat in enumerate(self.env_wrapped.env.seats):
+        #     pass
         self.agents = self.possible_agents[:]
         self.agent_selection = player
         self.rewards = self._convert_to_dict([0 for _ in range(self.num_agents)])

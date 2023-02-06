@@ -74,8 +74,8 @@ class PokerExperimentRunner(ExperimentRunner):
         #
         player_stacks = []
         # relative to agents --> roll env->agent_list
-        for seat_id, seat in enumerate(np.roll(self.backend.seats, self.agent_map[0])):
-            agent_id = self.agent_map[seat_id]
+        for agent_id, seat in enumerate(np.roll(self.backend.seats, self.agent_map[0])):
+            # agent_id = self.agent_map[seat_id]
             player_name = f'{self.player_names[agent_id]}'
             #seat_display_name = f'Seat {seat_id + 1}'  # index starts at 1
             seat_display_name = player_name  # index starts at 1
@@ -331,6 +331,7 @@ class PokerExperimentRunner(ExperimentRunner):
         obs = self.env.reset(options={'reset_config':self.env_reset_config})
         agent_id = obs['agent_id']
         legal_moves = self.env.env.env.env_wrapped.get_legal_actions()
+        btn = self.env.env.env.btn
         obs = obs['obs']
         initial_player_stacks = self._get_starting_stacks_relative_to_agents()
         ante, blinds = self.post_blinds(obs)
