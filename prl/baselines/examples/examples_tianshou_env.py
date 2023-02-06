@@ -70,7 +70,7 @@ class TianshouEnvWrapper(AECEnv):
         self.agent_map = {}
         for i in range(self.num_players):
             self.agent_map[i] = i
-
+        self.btn = self.agent_map[0]
     def seed(self, seed: Optional[int] = None) -> None:
         self.seed = np.random.seed(seed)
 
@@ -118,7 +118,7 @@ class TianshouEnvWrapper(AECEnv):
         obs, rew, done, info = self.env_wrapped.reset(reset_config)
         player_id = self.agent_map[self.env_wrapped.env.current_player.seat_id]
         player = self._int_to_name(player_id)
-
+        self.btn = self.agents[self.agent_map[0]]
         self.agents = self.possible_agents[:]
         self.agent_selection = player
         self.rewards = self._convert_to_dict([0 for _ in range(self.num_agents)])
@@ -161,6 +161,11 @@ class TianshouEnvWrapper(AECEnv):
         # ~~roll relative to observer not to button~~
         # roll back to starting agent i.e. that reward of self.agents[0] is at 0
         rewards = np.roll(rew, self.agent_map[0])  # roll -self.agent_map[0] instead if we chose to
+        payouts = info['payouts']
+        rpay = {}
+        for k,v in payouts.items():
+            rpay[self.agent_map[k]] = v
+        info['payouts'] = payouts
         # update button with (agent_idx + 1) % self.num_players inseat of (agent_idx - 1) % self.num_players
 
         if done:
