@@ -1,9 +1,9 @@
 # one game predefined agent
 from prl.baselines.agents.dummy_agents import DummyAgentFold, DummyAgentCall, DummyAgentAllIn
-from prl.baselines.evaluation.core.experiment import make_participants, PokerExperiment, make_default_experiment
-from prl.baselines.evaluation.experiment_runner import PokerExperimentRunner
+from prl.baselines.evaluation.core.experiment import make_participants, make_default_experiment
+from prl.baselines.analysis.core.experiment_runner import PokerExperimentRunner
 
-from prl.baselines.evaluation.utils import get_default_env, print_player_stacks, get_reset_config
+from prl.baselines.evaluation.utils import get_reset_config
 from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
 
 n_players = 4

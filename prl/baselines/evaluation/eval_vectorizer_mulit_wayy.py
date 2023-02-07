@@ -5,19 +5,15 @@
 # convert episodes to 888 format (done)
 # write episodes to text file
 
-from typing import Tuple
-
 import numpy as np
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as fts
-from prl.environment.Wrappers.base import ActionSpace
 from prl.environment.steinberger.PokerRL import NoLimitHoldem, Poker
 
-from prl.baselines.evaluation.analyzer import PlayerAnalyzer
 from prl.baselines.examples.examples_tianshou_env import MCAgent
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import make_board_cards, card_tokens, card
 
-from prl.baselines.evaluation.utils import print_player_cards, pretty_print, print_summary
+from prl.baselines.evaluation.utils import pretty_print, print_summary
 
 
 num_players = 6

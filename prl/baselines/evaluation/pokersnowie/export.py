@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Optional, TypeVar, Union, Dict
 
 from prl.baselines.evaluation.core.experiment import PokerExperiment
-from prl.baselines.evaluation.experiment_runner import PokerExperimentRunner
+from prl.baselines.analysis.core.experiment_runner import PokerExperimentRunner
 from prl.baselines.evaluation.pokersnowie.converter_888 import Converter888
 from prl.baselines.evaluation.pokersnowie.core.converter import PokerSnowieConverter, SnowieEpisode
 from prl.baselines.evaluation.pokersnowie.core.db_generator import PokerSnowieExporteur

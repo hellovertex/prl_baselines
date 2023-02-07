@@ -9,7 +9,7 @@ from prl.baselines.agents.agents import CallingStation
 from prl.baselines.evaluation.core.experiment import PokerExperiment, DEFAULT_DATE, \
     DEFAULT_VARIANT, DEFAULT_CURRENCY
 from prl.baselines.evaluation.example_eval_with_pokersnowie import make_participants
-from prl.baselines.evaluation.experiment_runner import PokerExperimentRunner
+from prl.baselines.analysis.core.experiment_runner import PokerExperimentRunner
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Blind, PlayerStack, ActionType, \
     Action, PlayerWithCards, PlayerWinningsCollected
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import card_tokens, card

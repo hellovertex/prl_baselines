@@ -9,7 +9,7 @@ from prl.environment.steinberger.PokerRL import Poker
 from prl.baselines.evaluation.core.experiment import DEFAULT_DATE, DEFAULT_VARIANT, DEFAULT_CURRENCY
 from prl.baselines.evaluation.core.experiment import PokerExperiment
 from prl.baselines.evaluation.core.runner import ExperimentRunner
-from prl.baselines.evaluation.stats import PlayerStats
+from prl.baselines.analysis.core.stats import PlayerStats
 from prl.baselines.evaluation.utils import pretty_print, cards2str
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Action

@@ -4,7 +4,7 @@ from pathlib import Path
 from prl.baselines.agents.tianshou_agents import BaselineAgent, MajorityBaseline
 from prl.baselines.evaluation.core.experiment import PokerExperiment, make_participants
 from prl.baselines.evaluation.pokersnowie.export import PokerExperimentToPokerSnowie
-from prl.baselines.evaluation.stats import PlayerStats
+from prl.baselines.analysis.core.stats import PlayerStats
 from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
 
 

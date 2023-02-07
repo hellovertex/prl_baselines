@@ -12,8 +12,8 @@ from pathlib import Path
 
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 
-from prl.baselines.evaluation.analyzer import PlayerAnalyzer
-from prl.baselines.evaluation.stats import PlayerStats
+from prl.baselines.analysis.core.analyzer import PlayerAnalyzer
+from prl.baselines.analysis.core.stats import PlayerStats
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
 
 

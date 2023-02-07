@@ -4,12 +4,11 @@ import numpy as np
 from prl.environment.steinberger.PokerRL.game.Poker import Poker
 from prl.environment.steinberger.PokerRL.game.games import NoLimitHoldem
 
-from prl.baselines.evaluation.stats import PlayerStats
-from prl.baselines.supervised_learning.data_acquisition.core.encoder import Encoder, PlayerInfo, Positions6Max
-from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Action, ActionType, Blind, \
+from prl.baselines.analysis.core.stats import PlayerStats
+from prl.baselines.supervised_learning.data_acquisition.core.encoder import PlayerInfo, Positions6Max
+from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Action, Blind, \
     PlayerWithCards
-from prl.baselines.supervised_learning.data_acquisition.environment_utils import DICT_RANK, DICT_SUITE, \
-    make_board_cards, card_tokens, card
+from prl.baselines.supervised_learning.data_acquisition.environment_utils import make_board_cards, card_tokens, card
 
 MULTIPLY_BY = 100  # because env expects Integers, we convert $2,58 to $258
 

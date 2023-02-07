@@ -1,17 +1,13 @@
 from typing import Dict, Type, Tuple, Any
 
 import click
-from prl.environment.Wrappers.augment import AugmentObservationWrapper
-from prl.environment.Wrappers.utils import init_wrapped_env
 
 from prl.baselines.agents.core.base_agent import RllibAgent
 from prl.baselines.agents.tianshou_agents import BaselineAgent
-from prl.baselines.agents.tianshou_policies import default_rainbow_params, get_rainbow_config
-from prl.baselines.evaluation.core.experiment import PokerExperiment, PokerExperimentParticipant, make_participants
+from prl.baselines.evaluation.core.experiment import PokerExperiment, make_participants
 from prl.baselines.evaluation.pokersnowie.export import PokerExperimentToPokerSnowie
-from prl.baselines.evaluation.stats import PlayerStats
-from prl.baselines.evaluation.utils import get_default_env
-from prl.baselines.examples.examples_tianshou_env import MCAgent, make_default_tianshou_env
+from prl.baselines.analysis.core.stats import PlayerStats
+from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
 
 AGENT_CLS = Type[RllibAgent]
 POLICY_CONFIG = Dict[str, Any]
