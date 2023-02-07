@@ -52,4 +52,4 @@ def inspection(model_ckpt_abs_path):
 
 if __name__ == "__main__":
     model_ckpt_abs_path = "/home/sascha/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds_div_1/with_folds/ckpt_dir/ilaviiitech_[512]_1e-06/ckpt.pt"
-
+    inspection(model_ckpt_abs_path)

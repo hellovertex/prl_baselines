@@ -182,10 +182,10 @@ class BaselineAgent(BasePolicy):
         self.next_legal_moves = legal_moves
         if not type(obs) == torch.Tensor:
             obs = torch.Tensor(np.array([obs]))
-        self._logits = self._model(obs)
-        self._predictions = torch.argmax(self._logits, dim=1)
-        action = self._compute_action(obs)
-        return action
+        self.logits = self._model(obs)
+        self.prediction = torch.argmax(self.logits, dim=1)
+        # action = self._compute_action(obs)
+        return self.prediction.item()
 
     def act(self, obs: np.ndarray, legal_moves: list, use_pseudo_harmonic_mapping=False):
         """
@@ -195,16 +195,16 @@ class BaselineAgent(BasePolicy):
         for why pseudo-harmonic-mapping is useful to prevent exploitability of a strategy.
         """
         self.legal_moves = legal_moves
-        self._logits = self._model(torch.Tensor(torch.Tensor(np.array(obs))).to(self.device))
-        # if this torch.topk(self._logits, 2) is less than 20%
-        # topk = torch.topk(self._logits, 2)
+        self.logits = self._model(torch.Tensor(torch.Tensor(np.array(obs))).to(self.device))
+        # if this torch.topk(self.logits, 2) is less than 20%
+        # topk = torch.topk(self.logits, 2)
         # diff = topk.values[0][0] - topk.values[0][1]
         # thresh = torch.max(topk.values).item() * .2
         # if diff < thresh:
         #     # do pseudo-harmonic mapping
         #     # print('pseudo harmonic mapping')
         #     pass
-        self._prediction = torch.argmax(self._logits)
+        self._prediction = torch.argmax(self.logits)
         return self._prediction.item()
 
     def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:

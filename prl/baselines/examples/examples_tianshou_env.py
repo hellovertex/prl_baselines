@@ -149,8 +149,9 @@ class TianshouEnvWrapper(AECEnv):
         self._last_obs = obs
 
     def step(self, action):
-        if action == MultiAgentActionFlags.TriggerMC:
-            action = self._mc_agent.compute_action(self._last_obs, self.next_legal_moves)
+        # if isinstance(action, tuple):
+        # if action == MultiAgentActionFlags.TriggerMC:
+        #     action = self._mc_agent.compute_action(self._last_obs, self.next_legal_moves)
         if (
                 self.terminations[self.agent_selection]
                 or self.truncations[self.agent_selection]
@@ -227,7 +228,7 @@ def make_default_tianshou_env(num_players=2,
         blinds = [50, 100]
     if stack_sizes is None:
         stack_sizes = [starting_stack for _ in range(num_players)]
-    if not agents:
+    if agents is None:
         agents = [f'p{i}' for i in range(num_players)]
     env_config = {"env_wrapper_cls": AugmentObservationWrapper,
                   # "stack_sizes": [100, 125, 150, 175, 200, 250],

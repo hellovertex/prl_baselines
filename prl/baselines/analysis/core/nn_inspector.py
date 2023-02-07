@@ -28,7 +28,6 @@ class Inspector:
         self.true = {}  # for every true prediction: get all logits
         self.n_iter = 0
 
-
     class _EnvironmentEdgeCaseEncounteredError(ValueError):
         """This error is thrown in rare cases where the PokerEnv written by Erich Steinberger,
         fails due to edge cases. I filtered these edge cases by hand, and labelled them with the hand id.
@@ -230,9 +229,10 @@ class Inspector:
         # todo step tianshou env as well and compare obs
         state_dict = {'deck_state_dict': cards_state_dict, 'table': table}
         obs, _, done, _ = env.reset(config=state_dict)
-
-
-
+        obst_dict = self.tianshou_env.reset(options={'reset_config': state_dict})
+        obs_tianshou = obst_dict['obs']
+        legal_moves = obst_dict['mask']
+        assert np.array_equal(obs, obst_dict['obs'])
         assert obs[-1] in [0, 1, 2, 3, 4, 5], f"obs[-1] = {obs[-1]}. " \
                                               f"get_current_obs should have caught this already. check the wrapper impl"
 
@@ -262,11 +262,15 @@ class Inspector:
                     observations.append(obs)
                     action_label = self._wrapped_env.discretize(action_formatted)
                     actions.append(action_label)
-                    pred = self.baseline.compute_action(obs)
+                    pred = self.baseline.compute_action(obs, legal_moves)
+                    a=  1
                     # todo: collect logits
                     #
             debug_action_list.append(action_formatted)
             obs, _, done, _ = env.step(action_formatted)
+            obs_dict, _, _, _, _ = self.tianshou_env.step(action_formatted)
+            obs_tianshou = obs_dict['obs']
+            assert np.array_equal(obs, obs_tianshou)
             it += 1
             if not done:
                 i = self._wrapped_env.env.current_player.seat_id
@@ -305,12 +309,11 @@ class Inspector:
         self._wrapped_env.env.SMALL_BLIND, self._wrapped_env.env.BIG_BLIND = self.make_blinds(episode.blinds)
         self._wrapped_env.env.ANTE = self._make_ante(episode.ante)
         cards_state_dict = self._build_cards_state_dict(table, episode)
-
-        # todo: make tianshou env here too
-        # self.tianshou_env = make_default_tianshou_env(stack_sizes=stacks,
-        #                                 blinds=[25, 50],
-        #                                 agents=agent_names,
-        #                                 num_players=len(agent_names))
+        agent_names = np.roll([a.player_name for a in episode.player_stacks], -episode.btn_idx)
+        self.tianshou_env = make_default_tianshou_env(stack_sizes=stacks,
+                                                      blinds=[25, 50],
+                                                      agents=agent_names,
+                                                      num_players=len(agent_names))
         # Collect observations and actions, observations are possibly augmented
         try:
             return self._simulate_environment(env=self._wrapped_env,
