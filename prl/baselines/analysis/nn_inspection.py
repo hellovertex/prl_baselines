@@ -53,13 +53,14 @@ def plot_heatmap(label_logits: dict,
     rgba = im.to_rgba(.1)
     # rgb = tuple(map(int, 255 * rgba[:3]))
     hex_value = matplotlib.colors.rgb2hex(rgba, keep_alpha=True)
-    ax1.set_title("Heatmap")
+    what = 'mis-' if 'false' in path_out_png else 'correctly '
+    ax1.set_title(f"Average probabilities of the network on {what}predicting correct label")
     ax2.bar(df.columns,
             l,
             color=[hex_value for _ in range(8)])
     ax2.set_xlabel("Which Action")
-    ax2.set_ylabel("Number of times action was taken")
-    ax2.set_title("Magnitude of values in list 'l'")
+    ax2.set_ylabel("Number of times label was present")
+    ax2.set_title("Number of actions taken")
     df['Sum'] = l
     df.columns = [f'Predicted {ActionSpace(i)}' for i in range(len(ActionSpace))] + ['Sum']
     df.index = rows
@@ -131,7 +132,7 @@ if __name__ == "__main__":
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/2.5NL/unzipped"
     # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     path_out = './results/2NL'
-    max_files = 5
+    max_files = 1000
     # todo make this parallelizable for multiple networks
     inspection(model_ckpt_abs_path=model_ckpt_abs_path,
                unzipped_dir=unzipped_dir,
