@@ -39,3 +39,7 @@ class HandCounter:
                 if (action != ActionSpace.FOLD) or (not self.bb_checked_preflop(obs, action)):
                     self.hands_played[i][j] += 1
             self.current_hand = i, j
+
+    def to_disk(self):
+        """Consider some rendering here to include in .tex docs"""
+        pass
