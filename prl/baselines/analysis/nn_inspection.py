@@ -8,11 +8,13 @@ import glob
 import time
 from pathlib import Path
 
+import matplotlib
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import torch.cuda
 from matplotlib import pyplot as plt
+from matplotlib.colors import ListedColormap
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 
 from prl.baselines.agents.tianshou_agents import BaselineAgent
@@ -27,18 +29,36 @@ def plot_heatmap(label_logits: dict,
     for label, logits in label_logits.items():
         normalize = label_counts[label]
         detached[label.value] = logits.detach().numpy()[0] / normalize
-        detached[label.value] = np.hstack([detached[label.value],[label_counts[label]]])
+        # detached[label.value] = np.hstack([detached[label.value],[label_counts[label]]])
     # detached["Sum"] = [v for _, v in label_counts.items()]
     # idx = cols = [i for i in range(len(ActionSpace))]
     cols = ["Fold", "Check/Call", "Raise3BB", "Raise6BB", "Raise10BB", "Raise20BB",
             "Raise50BB", "RaiseALLIN", "Sum"]
     df = pd.DataFrame(detached).T  # do we need , index=idx, columns=cols?
-    plt.figure(figsize=(12, 7))
-    mask = np.zeros((8, 9))
-    mask[:, 8] = True
-    sns.heatmap(df, mask=mask)
-    # sns.heatmap(df, alpha=0, cbar=False, annot=True, annot_kws={"size": 20, "color": "g"})
-    # plt.savefig(path_out_png)
+    # plot the heatmap with annotations
+    flatui = ["#9b59b6", "#3498db", "#95a5a6", "#e74c3c", "#34495e", "#2ecc71"]
+    my_cmap = ListedColormap(sns.color_palette(flatui).as_hex())
+    fig, (ax1, ax2) = plt.subplots(1, 2,
+                                   figsize=(16, 6),
+                                   gridspec_kw={'width_ratios': [3, 1]})
+
+    # sns.heatmap(df, annot=True, ax=ax1, cmap='coolwarm')
+    cm = sns.heatmap(df, annot=True, ax=ax1, cmap='Purples')
+    im = cm.collections[0]
+    rgba = im.to_rgba(.2)
+    rgb = tuple(map(int, 255 * rgba[:3]))
+    hex_value = matplotlib.colors.rgb2hex(rgba, keep_alpha=True)
+    ax1.set_title("Heatmap")
+    # plot the magnitude of each number in l
+    l = [114, 21, 16, 9, 5, 5, 1, 8]
+    # plot the magnitude of each number in l in the second subplot
+    ax2.bar(df.columns, l, color=[hex_value for _ in range(8)])
+    ax2.set_xlabel("Keys")
+    ax2.set_ylabel("Values")
+    ax2.set_title("Magnitude of values in list 'l'")
+
+    # adjust the subplots to occupy equal space
+    # fig.tight_layout()
     plt.show()
 
     return df
