@@ -11,7 +11,7 @@ from prl.baselines.analysis.core.stats import PlayerStats
 from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import PlayerInfo, Positions6Max
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Action, Blind, \
-    PlayerWithCards
+    PlayerWithCards, ActionType
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import make_board_cards, card_tokens, card
 
 MULTIPLY_BY = 100  # because env expects Integers, we convert $2,58 to $258
@@ -300,6 +300,12 @@ class Inspector:
                     actions.append(action_label)
                     pred = self.baseline.compute_action(obs, legal_moves)
                     # todo make one for winner and one for folds
+                    if not player.player_name in [winner.name for winner in episode.winners]:
+                        # if not player.player_name in selected_players:
+                        # replace action call/raise with fold
+                        action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
+
+                    # Update neural network stats
                     if pred == action_label:
                         self.true[action_label] += torch.softmax(self.baseline.logits.cpu(), dim=1)
                         self.label_counts_true[action_label] += 1
@@ -308,6 +314,7 @@ class Inspector:
                         self.false[action_label] += torch.softmax(self.baseline.logits.cpu(), dim=1)
                         self.label_counts_false[action_label] += 1
                         # self.wrong[action_label] /= self.label_counts_wrong[action_label]
+
             debug_action_list.append(action_formatted)
             obs, _, done, _ = env.step(action_formatted)
             obs_dict, _, _, _, _ = self.tianshou_env.step(action_formatted)

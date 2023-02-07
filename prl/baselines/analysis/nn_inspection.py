@@ -19,7 +19,7 @@ from matplotlib.colors import ListedColormap
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.base import ActionSpace
 
-from prl.baselines.agents.tianshou_agents import BaselineAgent
+from prl.baselines.agents.tianshou_agents import BaselineAgent, MajorityBaseline
 from prl.baselines.analysis.core.nn_inspector import Inspector
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
 
@@ -67,6 +67,14 @@ def plot_heatmap(label_logits: dict,
     df.index = rows
     # adjust the subplots to occupy equal space
     fig.tight_layout()
+    # fpath = os.path.join(os.getcwd(), 'result')
+    # fpath = os.path.join(fpath, Path(path_out_png).stem)
+
+    if not os.path.exists(Path(path_out_png).parent):
+        os.makedirs(Path(path_out_png).parent)
+    plt.savefig(os.path.join(Path(path_out_png).parent,
+                             Path(path_out_png).stem),
+                bbox_inches='tight')
     plt.show()
 
     return df
@@ -77,21 +85,21 @@ def make_results(inspector, path_out):
     df = plot_heatmap(label_logits=inspector.false,
                       label_counts=inspector.label_counts_false,
                       path_out_png=f'{path_out}/false.png')
-    if not os.path.exists(f'./results/{path_out}'):
-        os.makedirs(f'./results/{path_out}')
-    df.to_csv(f'./results/{path_out}/false_probabs.csv')
+    if not os.path.exists(path_out):
+        os.makedirs(path_out)
+    df.to_csv(f'{path_out}/false_probabs.csv')
     df = pd.DataFrame(inspector.label_counts_false,
                       index=[k.name for k in list(inspector.label_counts_false.keys())])
-    df.to_csv(f'./results/{path_out}/false_labels.csv')
+    df.to_csv(f'{path_out}/false_labels.csv')
     print(df)
     # TRUE PREDICTIONS
     df = plot_heatmap(label_logits=inspector.true,
                       label_counts=inspector.label_counts_true,
                       path_out_png=f'{path_out}/correct.png')
-    df.to_csv(f'./results/{path_out}/correct_probas.csv')
+    df.to_csv(f'{path_out}/correct_probas.csv')
     df = pd.DataFrame(inspector.label_counts_true,
                       index=[k.name for k in list(inspector.label_counts_true.keys())])
-    df.to_csv(f'./results/{path_out}/true_labels.csv')
+    df.to_csv(f'{path_out}/true_labels.csv')
     print(df)
 
     # todo write back model inspection
@@ -111,12 +119,19 @@ def inspection(model_ckpt_abs_path,
 
     parser = HSmithyParser()
     pname = Path(model_ckpt_abs_path).parent.stem
-    hidden_dims = [256] if '256' in pname else [512]
 
-    baseline = BaselineAgent(model_ckpt_abs_path,  # MajorityBaseline
-                             device="cuda" if torch.cuda.is_available() else "cpu",
-                             flatten_input=False,
-                             model_hidden_dims=hidden_dims)
+    if type(model_ckpt_abs_path) == str or type(model_ckpt_abs_path) == Path:
+        hidden_dims = [256] if '256' in pname else [512]
+        baseline = BaselineAgent(model_ckpt_abs_path,  # MajorityBaseline
+                                 device="cuda" if torch.cuda.is_available() else "cpu",
+                                 flatten_input=False,
+                                 model_hidden_dims=hidden_dims)
+    else:  # list of checkpoints
+        hidden_dims = [[256] if '[256]' in pname else [512] for pname in model_ckpt_abs_path]
+        baseline = MajorityBaseline(model_ckpt_paths=model_ckpt_abs_path,  # MajorityBaseline
+                                    model_hidden_dims=hidden_dims,
+                                    device="cuda" if torch.cuda.is_available() else "cpu",
+                                    flatten_input=False)
     inspector = Inspector(baseline=baseline, env_wrapper_cls=AugmentObservationWrapper)
     for filename in filenames[:max_files]:
         t0 = time.time()
