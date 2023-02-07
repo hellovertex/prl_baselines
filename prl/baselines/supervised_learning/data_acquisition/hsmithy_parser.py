@@ -356,8 +356,8 @@ class HSmithyParser(Parser):
             showdown = self.get_showdown(current)
 
             # skip if player did not show hand
-            if 'mucks' in showdown:
-                continue
+            # if 'mucks' in showdown:
+            #     continue
 
             try:
                 hand = self._parse_episode(current, showdown)
