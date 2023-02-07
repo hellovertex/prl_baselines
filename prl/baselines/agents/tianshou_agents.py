@@ -198,13 +198,13 @@ class BaselineAgent(BasePolicy):
         self.legal_moves = legal_moves
         self._logits = self._model(torch.Tensor(torch.Tensor(np.array(obs))).to(self.device))
         # if this torch.topk(self._logits, 2) is less than 20%
-        topk = torch.topk(self._logits, 2)
-        diff = topk.values[0][0] - topk.values[0][1]
-        thresh = torch.max(topk.values).item() * .2
-        if diff < thresh:
-            # do pseudo-harmonic mapping
-            # print('pseudo harmonic mapping')
-            pass
+        # topk = torch.topk(self._logits, 2)
+        # diff = topk.values[0][0] - topk.values[0][1]
+        # thresh = torch.max(topk.values).item() * .2
+        # if diff < thresh:
+        #     # do pseudo-harmonic mapping
+        #     # print('pseudo harmonic mapping')
+        #     pass
         self._prediction = torch.argmax(self._logits)
         return self._prediction.item()
 

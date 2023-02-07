@@ -30,7 +30,6 @@ class PokerExperimentParticipant:
     """Might change in the future"""
     id: int
     name: str
-    alias: Optional[str]
     starting_stack: Union[int, float]
     agent: tianshou.policy.BasePolicy
     config: Optional[Dict]
@@ -41,8 +40,7 @@ def make_participants(agents, agent_names, starting_stack, **kwargs) -> Tuple[Po
     participants = []
     for i, (agent, name) in enumerate(list(zip(agents, agent_names))):
         participants.append(PokerExperimentParticipant(id=i,
-                                                       name=f'{type(agent).__name__}_Seat_{i + 1}',
-                                                       alias=f'Agent_{i}',
+                                                       name=name,
                                                        starting_stack=starting_stack,
                                                        agent=agent,
                                                        config={}))
