@@ -1,6 +1,9 @@
 from typing import List, Tuple, Dict, Optional
+
+import torch
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as fts
 import numpy as np
+from prl.environment.Wrappers.base import ActionSpace
 from prl.environment.steinberger.PokerRL.game.Poker import Poker
 from prl.environment.steinberger.PokerRL.game.games import NoLimitHoldem
 
@@ -24,8 +27,16 @@ class Inspector:
         self._currency_symbol = None
         self._feature_names = None
         self.baseline = baseline  # inspection is computed against baseline
-        self.wrong = {}  # for every wrong prediction: get all logits
-        self.true = {}  # for every true prediction: get all logits
+        self.wrong = self.true = {ActionSpace.FOLD: torch.zeros(1, len(ActionSpace)),
+                                  ActionSpace.CHECK_CALL: torch.zeros(1, len(ActionSpace)),
+                                  ActionSpace.RAISE_MIN_OR_3BB: torch.zeros(1, len(ActionSpace)),
+                                  ActionSpace.RAISE_6_BB: torch.zeros(1, len(ActionSpace)),
+                                  ActionSpace.RAISE_10_BB: torch.zeros(1, len(ActionSpace)),
+                                  ActionSpace.RAISE_20_BB: torch.zeros(1, len(ActionSpace)),
+                                  ActionSpace.RAISE_50_BB: torch.zeros(1, len(ActionSpace)),
+                                  ActionSpace.RAISE_ALL_IN: torch.zeros(1, len(ActionSpace)),
+                                  }  # for every wrong prediction: get all logits
+        # self.true = {}  # for every true prediction: get all logits
         self.n_iter = 0
 
     class _EnvironmentEdgeCaseEncounteredError(ValueError):
@@ -263,9 +274,11 @@ class Inspector:
                     action_label = self._wrapped_env.discretize(action_formatted)
                     actions.append(action_label)
                     pred = self.baseline.compute_action(obs, legal_moves)
-                    a=  1
-                    # todo: collect logits
-                    #
+                    if pred == action_label:
+                        self.wrong[action_label] += self.baseline.logits
+                    else:
+                        self.true[action_label] += self.baseline.logits
+                    self.n_iter += 1
             debug_action_list.append(action_formatted)
             obs, _, done, _ = env.step(action_formatted)
             obs_dict, _, _, _, _ = self.tianshou_env.step(action_formatted)
