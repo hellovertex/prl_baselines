@@ -22,7 +22,8 @@ def run_experiment(experiment,
         hero_names=[pname]
     )
     for pstat in stats:
-        pstat.to_disk(fpath=f'{path_out}/{pname}.json')
+        if pstat.pname == pname:
+            pstat.to_disk(fpath=f'{path_out}/{pname}.json')
 
 
 def main(max_episodes,
