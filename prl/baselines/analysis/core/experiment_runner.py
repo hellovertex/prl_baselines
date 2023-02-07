@@ -390,7 +390,7 @@ class PokerExperimentRunner(ExperimentRunner):
             # [BTN UTG SB BB MP CO] will become [UTG SB BB MP CO BTN]
             shifted_indices = {}
             for rel_btn, agent_idx in self.agent_map.items():
-                shifted_indices[rel_btn] = (agent_idx - 1) % exp.num_players
+                shifted_indices[rel_btn] = (agent_idx + 1) % exp.num_players
             self.agent_map = shifted_indices
 
         print(self.total_actions_dict)
