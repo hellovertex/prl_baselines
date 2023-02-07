@@ -79,7 +79,7 @@ def main(model_ckpt_paths):
     positions = positions_two if num_players == 2 else positions_multi[:num_players]
     db_gen = PokerExperimentToPokerSnowie().generate_database(
         verbose=verbose,
-        path_out=f'./pokersnowie/Ma1n1_[256]_1e-06',
+        path_out=f'../pokersnowie/Ma1n1_[256]_1e-06',
         experiment=experiment,
         max_episodes_per_file=1000,
         # hero_names=["StakePlayerImitator_Seat_1"]

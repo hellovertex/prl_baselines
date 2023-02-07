@@ -14,7 +14,7 @@ def run_experiment(experiment,
     # path_out = f'./stats_div_6/{pname.split("_")[0]}/'
     PokerExperimentToPokerSnowie().generate_database(
         verbose=verbose,
-        path_out=path_out + f'{pname}',
+        path_out=path_out + f'/{pname}',
         experiment=experiment,
         max_episodes_per_file=max_episodes_per_file,
         # hero_names=["StakePlayerImitator_Seat_1"]
@@ -32,7 +32,8 @@ def main(max_episodes,
     pname = '2NL_256x2'
     ckpt_abs_fpath = ""
     path_out = "./results"
-    agent_names = [f'{pname}_{i}' for i in range(num_players)]
+    agent_names = [f'{pname}', '2', '3', '4', '5', '6']
+    # agent_names = [f'{pname}_{i}' for i in range(num_players)]
     experiment = make_experiment(max_episodes=max_episodes,
                                  num_players=num_players,
                                  agent_names=agent_names,
