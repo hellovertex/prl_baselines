@@ -232,16 +232,17 @@ class RLStateEncoder(Encoder):
                 # if player reached showdown we can see his cards
                 filtered_players = showdown_players if not selected_players else [p for p in showdown_players if
                                                                                   p in selected_players]
+                # As long as selected player is in showdown (win or lose) we use his data
                 if selected_players:
                     for p in showdown_players:
                         if p in selected_players:
                             filtered_players = showdown_players
                 # only store obs and action of showdown player
                 if player.position_index == next_to_act and player.player_name in filtered_players:
-                    # if not selected_players:
-                    if not player.player_name in [winner.name for winner in episode.winners]:
+                    # if not selected_players overwrite action with fold and randomize cards:
+                    if not player.player_name in selected_players:#[winner.name for winner in episode.winners]:
                         # if not player.player_name in selected_players:
-                        # overwrite cards with random cards # todo finish
+                        # overwrite cards with random cards
                         obs = self.overwrite_hand_cards_with_random_cards(obs)
                         # replace action call/raise with fold
                         action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
