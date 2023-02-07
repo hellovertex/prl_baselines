@@ -55,7 +55,7 @@ def plot_heatmap(label_logits: dict,
     # rgb = tuple(map(int, 255 * rgba[:3]))
     hex_value = matplotlib.colors.rgb2hex(rgba, keep_alpha=True)
     what = 'mis-' if 'false' in path_out_png else 'correctly '
-    ax1.set_title(f"Average probabilities of the network on {what}predicting correct label")
+    ax1.set_title(f"Average probabilities of the network on {what}predicting label")
     ax2.bar(df.columns,
             l,
             color=[hex_value for _ in range(8)])
@@ -80,7 +80,8 @@ def make_results(inspector, path_out):
     if not os.path.exists(f'./results/{path_out}'):
         os.makedirs(f'./results/{path_out}')
     df.to_csv(f'./results/{path_out}/false_probabs.csv')
-    df = pd.DataFrame(inspector.label_counts_false)
+    df = pd.DataFrame(inspector.label_counts_false,
+                      index=[k.name for k in list(inspector.label_counts_false.keys())])
     df.to_csv(f'./results/{path_out}/false_labels.csv')
     print(df)
     # TRUE PREDICTIONS
@@ -88,7 +89,8 @@ def make_results(inspector, path_out):
                       label_counts=inspector.label_counts_true,
                       path_out_png=f'{path_out}/correct.png')
     df.to_csv(f'./results/{path_out}/correct_probas.csv')
-    df = pd.DataFrame(inspector.label_counts_true)
+    df = pd.DataFrame(inspector.label_counts_true,
+                      index=[k.name for k in list(inspector.label_counts_true.keys())])
     df.to_csv(f'./results/{path_out}/true_labels.csv')
     print(df)
 
@@ -135,7 +137,7 @@ if __name__ == "__main__":
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/2.5NL/unzipped"
     # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     path_out = './results/2NL'
-    max_files = 10
+    max_files = 1000
     # todo make this parallelizable for multiple networks
     inspection(model_ckpt_abs_path=model_ckpt_abs_path,
                unzipped_dir=unzipped_dir,
