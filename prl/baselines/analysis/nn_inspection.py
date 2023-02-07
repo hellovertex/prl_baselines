@@ -43,7 +43,7 @@ def plot_heatmap(label_logits: dict,
                                    gridspec_kw={'width_ratios': [3, 1]})
 
     # sns.heatmap(df, annot=True, ax=ax1, cmap='coolwarm')
-    cm = sns.heatmap(df, annot=True, ax=ax1, cmap='Purples')
+    cm = sns.heatmap(df, annot=True, ax=ax1, cmap='viridis')
     im = cm.collections[0]
     rgba = im.to_rgba(.2)
     rgb = tuple(map(int, 255 * rgba[:3]))
