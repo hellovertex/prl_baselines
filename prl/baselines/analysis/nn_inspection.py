@@ -67,6 +67,7 @@ def plot_heatmap(label_logits: dict,
     df.index = rows
     # adjust the subplots to occupy equal space
     fig.tight_layout()
+    plt.savefig(path_out_png)
     plt.show()
 
     return df
