@@ -37,7 +37,14 @@ class Inspector:
                                   ActionSpace.RAISE_ALL_IN: torch.zeros(1, len(ActionSpace)),
                                   }  # for every wrong prediction: get all logits
         # self.true = {}  # for every true prediction: get all logits
-        self.n_iter = 0
+        self.label_counts_true = self.label_counts_wrong = {ActionSpace.FOLD: 0,
+                                                            ActionSpace.CHECK_CALL: 0,
+                                                            ActionSpace.RAISE_MIN_OR_3BB: 0,
+                                                            ActionSpace.RAISE_6_BB: 0,
+                                                            ActionSpace.RAISE_10_BB: 0,
+                                                            ActionSpace.RAISE_20_BB: 0,
+                                                            ActionSpace.RAISE_50_BB: 0,
+                                                            ActionSpace.RAISE_ALL_IN: 0}
 
     class _EnvironmentEdgeCaseEncounteredError(ValueError):
         """This error is thrown in rare cases where the PokerEnv written by Erich Steinberger,
@@ -275,10 +282,11 @@ class Inspector:
                     actions.append(action_label)
                     pred = self.baseline.compute_action(obs, legal_moves)
                     if pred == action_label:
-                        self.wrong[action_label] += self.baseline.logits
-                    else:
                         self.true[action_label] += self.baseline.logits
-                    self.n_iter += 1
+                        self.label_counts_true[action_label] += 1
+                    else:
+                        self.wrong[action_label] += self.baseline.logits
+                        self.label_counts_wrong[action_label] += 1
             debug_action_list.append(action_formatted)
             obs, _, done, _ = env.step(action_formatted)
             obs_dict, _, _, _, _ = self.tianshou_env.step(action_formatted)

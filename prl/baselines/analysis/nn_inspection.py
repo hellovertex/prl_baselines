@@ -10,7 +10,12 @@ import multiprocessing
 import time
 from pathlib import Path
 
+import pandas as pd
+import seaborn
+from matplotlib import pyplot as plt
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
+from prl.environment.Wrappers.base import ActionSpace
+from sklearn.metrics import confusion_matrix
 
 from prl.baselines.agents.tianshou_agents import BaselineAgent
 from prl.baselines.analysis.core.analyzer import PlayerAnalyzer
@@ -42,10 +47,17 @@ def inspection(model_ckpt_abs_path):
             print(f'Inspecting model on hand {ihand} / {num_parsed_hands}')
             inspector.inspect_episode(hand, pname=pname)
 
-    n = inspector.n_iter
     # todo compute confusion matrix
-    confusion_matrix = []
+    detached = {}
+    for label, logits in inspector.wrong.items():
+        normalize = inspector.label_counts_wrong[label]
+        detached[label.value] = logits.detach().numpy()[0]/normalize
 
+    df = pd.DataFrame(detached)
+    plt.figure(figsize=(12, 7))
+    seaborn.heatmap(df, annot=True)
+    # plt.savefig('output.png')
+    plt.show()
     # todo write back model inspection
     # with open(f'model_inspection_{pname}.txt', 'a+') as f:
     #     for stat in inspector.player_stats:
