@@ -29,7 +29,8 @@ def plot_heatmap(label_logits: dict, label_counts: dict) -> pd.DataFrame:
     df = pd.DataFrame(detached).T  # do we need , index=idx, columns=cols?
     plt.figure(figsize=(12, 7))
     seaborn.heatmap(df, annot=True)
-    # plt.savefig('output.png')
+# todo make path customizable
+    plt.savefig('results/output.png')
     plt.show()
 
     return df
