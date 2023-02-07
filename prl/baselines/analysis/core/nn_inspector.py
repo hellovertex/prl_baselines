@@ -5,6 +5,7 @@ from prl.environment.steinberger.PokerRL.game.Poker import Poker
 from prl.environment.steinberger.PokerRL.game.games import NoLimitHoldem
 
 from prl.baselines.analysis.core.stats import PlayerStats
+from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import PlayerInfo, Positions6Max
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Action, Blind, \
     PlayerWithCards
@@ -297,7 +298,6 @@ class Inspector:
         self._currency_symbol = episode.currency_symbol
 
         # Initialize environment for simulation of PokerEpisode
-        # todo: make tianshou env here too
         # get starting stacks, starting with button at index 0
         stacks = [player.stack_size for player in table]
         self._init_wrapped_env(stacks)
@@ -306,6 +306,11 @@ class Inspector:
         self._wrapped_env.env.ANTE = self._make_ante(episode.ante)
         cards_state_dict = self._build_cards_state_dict(table, episode)
 
+        # todo: make tianshou env here too
+        # self.tianshou_env = make_default_tianshou_env(stack_sizes=stacks,
+        #                                 blinds=[25, 50],
+        #                                 agents=agent_names,
+        #                                 num_players=len(agent_names))
         # Collect observations and actions, observations are possibly augmented
         try:
             return self._simulate_environment(env=self._wrapped_env,

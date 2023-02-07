@@ -16,21 +16,23 @@ from prl.baselines.agents.tianshou_agents import BaselineAgent
 from prl.baselines.analysis.core.analyzer import PlayerAnalyzer
 from prl.baselines.analysis.core.nn_inspector import Inspector
 from prl.baselines.analysis.core.stats import PlayerStats
+from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
 
-def inspection(model_ckpt_abs_path):
 
+def inspection(model_ckpt_abs_path):
     unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
 
     parser = HSmithyParser()
     pname = Path(model_ckpt_abs_path).parent.stem
     hidden_dims = [256] if '256' in pname else [512]
-    inspector = Inspector(baseline=None, env_wrapper_cls=AugmentObservationWrapper)
+
     baseline = BaselineAgent(model_ckpt_abs_path,  # MajorityBaseline
                              flatten_input=False,
                              model_hidden_dims=hidden_dims)
-    for filename in filenames:
+    inspector = Inspector(baseline=baseline, env_wrapper_cls=AugmentObservationWrapper)
+    for filename in filenames[:5]:
         t0 = time.time()
         parsed_hands = list(parser.parse_file(filename))
         print(f'Parsing file {filename} took {time.time() - t0} seconds.')
@@ -39,9 +41,11 @@ def inspection(model_ckpt_abs_path):
         for ihand, hand in enumerate(parsed_hands):
             print(f'Inspecting model on hand {ihand} / {num_parsed_hands}')
             inspector.inspect_episode(hand, pname=pname)
-        with open(f'model_inspection_{pname}.txt', 'a+') as f:
-            for stat in inspector.player_stats:
-                f.write(json.dumps(stat.to_dict()))
+
+        # todo write back model inspection
+        # with open(f'model_inspection_{pname}.txt', 'a+') as f:
+        #     for stat in inspector.player_stats:
+        #         f.write(json.dumps(stat.to_dict()))
 
     # return f"Success. Wrote stats to {f'stats_{pname}.txt'}"
 

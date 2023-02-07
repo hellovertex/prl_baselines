@@ -71,6 +71,7 @@ class TianshouEnvWrapper(AECEnv):
         for i in range(self.num_players):
             self.agent_map[i] = i
         self.btn = self.agent_map[0]
+
     def seed(self, seed: Optional[int] = None) -> None:
         self.seed = np.random.seed(seed)
 
@@ -138,7 +139,7 @@ class TianshouEnvWrapper(AECEnv):
         self.infos = self._convert_to_dict(
             [{"legal_moves": [],
               "info": info} for _ in range(self.num_agents)]
-              # "info": []} for _ in range(self.num_agents)]
+            # "info": []} for _ in range(self.num_agents)]
         )
         legal_moves = np.array([0, 0, 0, 0, 0, 0, 0, 0])
         legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
@@ -167,7 +168,7 @@ class TianshouEnvWrapper(AECEnv):
         rewards = np.roll(rew, -self.agent_map[0])  # roll -self.agent_map[0] instead if we chose to
         payouts = info['payouts']
         rpay = {}
-        for k,v in payouts.items():
+        for k, v in payouts.items():
             rpay[self.agent_map[k]] = v
         info['payouts'] = payouts
         # update button with (agent_idx + 1) % self.num_players inseat of (agent_idx - 1) % self.num_players
@@ -199,7 +200,7 @@ class TianshouEnvWrapper(AECEnv):
         self.infos = self._convert_to_dict(
             [{"legal_moves": [],
               "info": info} for _ in range(self.num_agents)]
-              # "info": []} for _ in range(self.num_agents)]
+            # "info": []} for _ in range(self.num_agents)]
         )
         self._cumulative_rewards[self.agent_selection] = 0
         self.agent_selection = next_player
@@ -216,9 +217,16 @@ class WrappedEnv(BaseWrapper):
         self.env = env
 
 
-def make_default_tianshou_env(num_players=2, mc_model_ckpt_path=None,  agents=None):
+def make_default_tianshou_env(num_players=2,
+                              mc_model_ckpt_path=None,
+                              agents=None,
+                              stack_sizes=None,
+                              blinds: List[int] = None):
     starting_stack = 20000
-    stack_sizes = [starting_stack for _ in range(num_players)]
+    if blinds is None:
+        blinds = [50, 100]
+    if stack_sizes is None:
+        stack_sizes = [starting_stack for _ in range(num_players)]
     if not agents:
         agents = [f'p{i}' for i in range(num_players)]
     env_config = {"env_wrapper_cls": AugmentObservationWrapper,
@@ -226,7 +234,7 @@ def make_default_tianshou_env(num_players=2, mc_model_ckpt_path=None,  agents=No
                   "stack_sizes": stack_sizes,
                   "multiply_by": 1,  # use 100 for floats to remove decimals but we have int stacks
                   "scale_rewards": False,  # we do this ourselves
-                  "blinds": [50, 100]}
+                  "blinds": blinds}
     # env = init_wrapped_env(**env_config)
     # obs0 = env.reset(config=None)
     # AEC ENV
