@@ -88,6 +88,8 @@ class HSmithyParser(Parser):
         hands_played = re.split(r'\*\*\* SHOW DOWN \*\*\*', episode)
         assert len(hands_played) == 2, \
             f"Splitting showdown string went wrong: splits are {hands_played} "
+        if 'mucked' in hands_played[1]:
+            a = 1
         return hands_played[1]
 
     def get_winner(self, showdown: str) -> Tuple[List[PlayerWithCards], List[PlayerWithCards]]:
@@ -109,7 +111,10 @@ class HSmithyParser(Parser):
             re.UNICODE)
         showdown_hands = re_showdown_hands.findall(showdown)
         winners = re_winner.findall(showdown)
-
+        # for hand in showdown_hands:
+        #     if 'mucked' in hand[0] or 'mucked' in hand[1]:
+        #         print('debug')
+        #         a = 1
         # remove whitespaces in name field
         showdown_hands = [PlayerWithCards(name=hand[0].strip(), cards=hand[1])
                           for hand in showdown_hands]
@@ -355,9 +360,10 @@ class HSmithyParser(Parser):
             # get showdown
             showdown = self.get_showdown(current)
 
+            # todo: remove this -- requires changes in showdown hand parsing
             # skip if player did not show hand
-            # if 'mucks' in showdown:
-            #     continue
+            if 'mucks' in showdown:
+                continue
 
             try:
                 hand = self._parse_episode(current, showdown)

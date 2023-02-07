@@ -4,7 +4,7 @@ import numpy as np
 from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL.game.Poker import Poker
 from prl.environment.steinberger.PokerRL.game.games import NoLimitHoldem
-
+from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as fts
 from prl.baselines.evaluation.utils import pretty_print
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Encoder, PlayerInfo, Positions6Max
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Action, ActionType, Blind, \
@@ -162,6 +162,41 @@ class RLStateEncoder(Encoder):
         """Converts ante string to float, e.g. '$0.00' -> float(0.00)"""
         return float(ante.split(self._currency_symbol)[1]) * MULTIPLY_BY
 
+    def _update_card(self):
+        c = np.zeros(17)
+        rand_rank = np.random.randint(0, 13)
+        rand_suite = np.random.randint(13, 17)
+        c[rand_rank] += 1
+        c[rand_suite] += 1
+        return c
+
+    def update_card(self):
+        obs_card_bits = self._update_card()
+        # while we drew cards that already are on board or other player hand, repeat until we have available cards
+        while np.any(np.all(obs_card_bits == self.occupied_cards, axis=1)):
+            obs_card_bits = self._update_card()
+        assert sum(obs_card_bits[:13] == 1)
+        assert sum(obs_card_bits[13:] == 1)
+        assert len(obs_card_bits) == 17
+        return obs_card_bits
+
+    def overwrite_hand_cards_with_random_cards(self, obs):
+        """This is useful because if we only have showdown data,
+        it will be skewed towards playable hands and there will be no data on weak hands."""
+        # remove old cards from observing player
+        obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_rank_0] = 0
+        obs[fts.First_player_card_1_rank_0:fts.First_player_card_1_suit_3+1] = 0
+        # todo sample new hand from remaining cards and overwrite observation
+        # update c0
+        obs_bits_c0 = self.update_card()
+        obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_rank_0] = obs_bits_c0
+        # update c1
+        obs_bits_c1 = self.update_card()
+        obs[fts.First_player_card_1_rank_0:fts.First_player_card_1_suit_3+1] = obs_bits_c1
+        assert sum(obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_suit_3+1]) == 4
+
+        return obs
+
     def _simulate_environment(self, env, episode, cards_state_dict, table, starting_stack_sizes_list,
                               selected_players=None):
         """Runs poker environment from episode and returns observations and actions emitted for selected players.
@@ -203,13 +238,15 @@ class RLStateEncoder(Encoder):
                             filtered_players = showdown_players
                 # only store obs and action of showdown player
                 if player.position_index == next_to_act and player.player_name in filtered_players:
-                    observations.append(obs)
                     # if not selected_players:
                     if not player.player_name in [winner.name for winner in episode.winners]:
                         # if not player.player_name in selected_players:
+                        # overwrite cards with random cards # todo finish
+                        obs = self.overwrite_hand_cards_with_random_cards(obs)
                         # replace action call/raise with fold
                         action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
                     actions.append(action_label)
+                    observations.append(obs)
             debug_action_list.append(action_formatted)
 
             obs, _, done, _ = env.step(action_formatted)
@@ -219,6 +256,23 @@ class RLStateEncoder(Encoder):
             print(actions)
             raise RuntimeError("Seems we need more debugging")
         return observations, actions
+
+    def cards2dtolist(self, cards2d):
+        bits = np.zeros(17)
+        bits[cards2d[0]] += 1
+        bits[13+cards2d[1]] += 1
+        return bits
+    def get_occupied_cards(self) -> List[np.ndarray]:
+        bit_arr = []
+        hands = self.state_dict['hand']
+        board = self.state_dict['deck']['deck_remaining'][:5]  # before reset so all cards are in the deck in the order theyre drawn
+        for hand in hands:
+            if hand[0] != [-127, -127]:
+                bit_arr.append(self.cards2dtolist(hand[0]))
+                bit_arr.append(self.cards2dtolist(hand[1]))
+        for card in board:
+            bit_arr.append(self.cards2dtolist(card))
+        return bit_arr
 
     def encode_episode(self, episode: PokerEpisode, selected_players=None, verbose=True) -> Tuple[
         Observations, Actions_Taken]:
@@ -253,7 +307,8 @@ class RLStateEncoder(Encoder):
         self._wrapped_env.env.SMALL_BLIND, self._wrapped_env.env.BIG_BLIND = self.make_blinds(episode.blinds)
         self._wrapped_env.env.ANTE = self._make_ante(episode.ante)
         cards_state_dict = self._build_cards_state_dict(table, episode)
-
+        self.state_dict = cards_state_dict
+        self.occupied_cards = self.get_occupied_cards()
         # Collect observations and actions, observations are possibly augmented
         try:
             return self._simulate_environment(env=self._wrapped_env,

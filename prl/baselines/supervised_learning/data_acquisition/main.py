@@ -49,7 +49,7 @@ def main(blind_sizes, from_gdrive_id, unzipped_dir, version_two, use_player_name
     blind_sizes = "2NL"
     use_player_names_as_outdir = False
     version_two = False
-    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/2.5NL/unzipped"
+    unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     # Creates PokerEpisode instances from raw .txt files
     parser = HSmithyParser()
 
