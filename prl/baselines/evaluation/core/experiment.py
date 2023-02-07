@@ -36,10 +36,10 @@ class PokerExperimentParticipant:
     config: Optional[Dict]
 
 
-def make_participants(agents, starting_stack, **kwargs) -> Tuple[PokerExperimentParticipant]:
+def make_participants(agents, agent_names, starting_stack, **kwargs) -> Tuple[PokerExperimentParticipant]:
     """Returns list of agents using default participant represenation"""
     participants = []
-    for i, agent in enumerate(agents):
+    for i, agent, name in enumerate(list(zip(agents, agent_names))):
         participants.append(PokerExperimentParticipant(id=i,
                                                        name=f'{type(agent).__name__}_Seat_{i + 1}',
                                                        alias=f'Agent_{i}',

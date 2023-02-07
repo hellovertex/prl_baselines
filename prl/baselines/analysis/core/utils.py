@@ -16,7 +16,9 @@ def make_experiment(max_episodes,
                                     num_players=len(agent_names))
 
     assert len(agents) == num_players
-    participants = make_participants(agents, starting_stack)
+    participants = make_participants(agents=agents,
+                                     agent_names=agent_names,
+                                     starting_stack=starting_stack)
     stats = [PlayerStats(pname=pname) for pname in agent_names]
     # run self play
     experiment = PokerExperiment(
