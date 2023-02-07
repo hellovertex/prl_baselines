@@ -5,8 +5,6 @@ Agression Factor (AF): #raises / #calls
 Tightness: % hands played (not folded immediately preflop)
 """
 import glob
-import json
-import multiprocessing
 import time
 from pathlib import Path
 
@@ -15,14 +13,25 @@ import seaborn
 from matplotlib import pyplot as plt
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.base import ActionSpace
-from sklearn.metrics import confusion_matrix
 
 from prl.baselines.agents.tianshou_agents import BaselineAgent
-from prl.baselines.analysis.core.analyzer import PlayerAnalyzer
 from prl.baselines.analysis.core.nn_inspector import Inspector
-from prl.baselines.analysis.core.stats import PlayerStats
-from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
+
+
+def plot_heatmap(label_logits: dict, label_counts: dict) -> pd.DataFrame:
+    detached = {}
+    for label, logits in label_logits.items():
+        normalize = label_counts[label]
+        detached[label.value] = logits.detach().numpy()[0] / normalize
+    # idx = cols = [i for i in range(len(ActionSpace))]
+    df = pd.DataFrame(detached)  # do we need , index=idx, columns=cols?
+    plt.figure(figsize=(12, 7))
+    seaborn.heatmap(df, annot=True)
+    # plt.savefig('output.png')
+    plt.show()
+
+    return df
 
 
 def inspection(model_ckpt_abs_path):
@@ -47,30 +56,16 @@ def inspection(model_ckpt_abs_path):
             print(f'Inspecting model on hand {ihand} / {num_parsed_hands}')
             inspector.inspect_episode(hand, pname=pname)
 
-    # todo compute confusion matrix
-    detached = {}
-    for label, logits in inspector.wrong.items():
-        normalize = inspector.label_counts_wrong[label]
-        detached[label.value] = logits.detach().numpy()[0]/normalize
+    # plots logits against true labels and saves csv with result to disk
+    df = plot_heatmap(label_logits=inspector.wrong.items(),
+                      label_counts=inspector.label_counts_wrong)
+    df.to_csv('./results/wrong.csv')
+    print(df)
+    df = plot_heatmap(label_logits=inspector.true.items(),
+                      label_counts=inspector.label_counts_true)
+    df.to_csv('./results/true.csv')
+    print(df)
 
-    df_false = pd.DataFrame(detached)
-    print(df_false)
-    plt.figure(figsize=(12, 7))
-    seaborn.heatmap(df_false, annot=True)
-    # plt.savefig('output.png')
-    plt.show()
-    detached = {}
-    for label, logits in inspector.true.items():
-        normalize = inspector.label_counts_true[label]
-        detached[label.value] = logits.detach().numpy()[0]/normalize
-
-    idx = cols = [i for i in range(len(ActionSpace))]
-    df_true = pd.DataFrame(detached, index=idx, columns=cols)
-    plt.figure(figsize=(12, 7))
-    seaborn.heatmap(df_true, annot=True)
-    # plt.savefig('output.png')
-    plt.show()
-    print(df_true)
     # todo write back model inspection
     # with open(f'model_inspection_{pname}.txt', 'a+') as f:
     #     for stat in inspector.player_stats:

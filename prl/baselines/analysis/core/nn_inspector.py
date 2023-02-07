@@ -281,6 +281,7 @@ class Inspector:
                     action_label = self._wrapped_env.discretize(action_formatted)
                     actions.append(action_label)
                     pred = self.baseline.compute_action(obs, legal_moves)
+                    # todo make one for winner and one for folds
                     if pred == action_label:
                         self.true[action_label] += self.baseline.logits
                         self.label_counts_true[action_label] += 1
