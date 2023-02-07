@@ -42,10 +42,14 @@ def inspection(model_ckpt_abs_path):
             print(f'Inspecting model on hand {ihand} / {num_parsed_hands}')
             inspector.inspect_episode(hand, pname=pname)
 
-        # todo write back model inspection
-        # with open(f'model_inspection_{pname}.txt', 'a+') as f:
-        #     for stat in inspector.player_stats:
-        #         f.write(json.dumps(stat.to_dict()))
+    n = inspector.n_iter
+    # todo compute confusion matrix
+    confusion_matrix = []
+
+    # todo write back model inspection
+    # with open(f'model_inspection_{pname}.txt', 'a+') as f:
+    #     for stat in inspector.player_stats:
+    #         f.write(json.dumps(stat.to_dict()))
 
     # return f"Success. Wrote stats to {f'stats_{pname}.txt'}"
 
