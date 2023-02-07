@@ -50,7 +50,7 @@ def inspection():
                              flatten_input=False,
                              model_hidden_dims=hidden_dims)
     inspector = Inspector(baseline=baseline, env_wrapper_cls=AugmentObservationWrapper)
-    for filename in filenames:
+    for filename in filenames[:500]:
         t0 = time.time()
         parsed_hands = list(parser.parse_file(filename))
         print(f'Parsing file {filename} took {time.time() - t0} seconds.')
@@ -59,7 +59,8 @@ def inspection():
         for ihand, hand in enumerate(parsed_hands):
             print(f'Inspecting model on hand {ihand} / {num_parsed_hands}')
             inspector.inspect_episode(hand, pname=pname)
-
+    # todo add total counts of correct/wrong predictions
+    # todo make this parallelizable for multiple networks
     # plots logits against true labels and saves csv with result to disk
     df = plot_heatmap(label_logits=inspector.false,
                       label_counts=inspector.label_counts_false)
