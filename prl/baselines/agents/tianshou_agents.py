@@ -118,8 +118,9 @@ class MajorityBaseline(BasePolicy):
         logits = []
         for m in self._models:
             logits.append(m(obs))
-        predictions = torch.mean(torch.stack(logits), dim=0)
-        return torch.argmax(predictions).item()
+        # predictions = torch.mean(torch.stack(logits), dim=0)
+        self.logits = torch.mean(torch.stack(logits), dim=0)
+        return torch.argmax(self.logits).item()
 
     def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:
         tobs = torch.Tensor(batch.obs['obs']).to(self.device)
