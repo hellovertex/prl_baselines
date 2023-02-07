@@ -5,6 +5,7 @@ Agression Factor (AF): #raises / #calls
 Tightness: % hands played (not folded immediately preflop)
 """
 import glob
+import os
 import time
 from pathlib import Path
 
@@ -76,6 +77,8 @@ def make_results(inspector, path_out):
     df = plot_heatmap(label_logits=inspector.false,
                       label_counts=inspector.label_counts_false,
                       path_out_png=f'{path_out}/false.png')
+    if not os.path.exists(f'./results/{path_out}'):
+        os.makedirs(f'./results/{path_out}')
     df.to_csv(f'./results/{path_out}/false_probabs.csv')
     df = pd.DataFrame(inspector.label_counts_false)
     df.to_csv(f'./results/{path_out}/false_labels.csv')
@@ -132,7 +135,7 @@ if __name__ == "__main__":
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/2.5NL/unzipped"
     # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     path_out = './results/2NL'
-    max_files = 1000
+    max_files = 10
     # todo make this parallelizable for multiple networks
     inspection(model_ckpt_abs_path=model_ckpt_abs_path,
                unzipped_dir=unzipped_dir,
