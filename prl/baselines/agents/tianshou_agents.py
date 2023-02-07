@@ -49,7 +49,6 @@ class TianshouCallingStation(BasePolicy):
 class MajorityBaseline(BasePolicy):
     def __init__(self,
                  model_ckpt_paths: List[str],
-                 num_players,
                  model_hidden_dims: List[List[int]],
                  flatten_input=False,
                  device=None,
@@ -65,7 +64,6 @@ class MajorityBaseline(BasePolicy):
             #  in case obs comes from cpu
             device = "cuda" if torch.cuda.is_available() else "cpu"
         self.device = device
-        self.num_players = num_players
         self._models = []
         self.load_models(model_ckpt_paths, flatten_input)
 
