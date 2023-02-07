@@ -25,7 +25,7 @@ def plot_heatmap(label_logits: dict, label_counts: dict) -> pd.DataFrame:
         normalize = label_counts[label]
         detached[label.value] = logits.detach().numpy()[0] / normalize
     # idx = cols = [i for i in range(len(ActionSpace))]
-    df = pd.DataFrame(detached)  # do we need , index=idx, columns=cols?
+    df = pd.DataFrame(detached).T  # do we need , index=idx, columns=cols?
     plt.figure(figsize=(12, 7))
     seaborn.heatmap(df, annot=True)
     # plt.savefig('output.png')
