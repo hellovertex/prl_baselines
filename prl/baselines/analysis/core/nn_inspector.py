@@ -17,7 +17,7 @@ class Inspector:
     Observations = Optional[List[List]]
     Actions_Taken = Optional[List[Tuple[int, int]]]
 
-    def __init__(self, baseline, player_stats, env_wrapper_cls=None):
+    def __init__(self, baseline, env_wrapper_cls=None):
         self.env_wrapper_cls = env_wrapper_cls
         self._wrapped_env = None
         self._currency_symbol = None
@@ -25,6 +25,7 @@ class Inspector:
         self.baseline = baseline  # inspection is computed against baseline
         self.wrong = {}  # for every wrong prediction: get all logits
         self.true = {}  # for every true prediction: get all logits
+        self.n_iter = 0
 
 
     class _EnvironmentEdgeCaseEncounteredError(ValueError):
@@ -223,17 +224,17 @@ class Inspector:
         # if episode.hand_id == 216163387520 or episode.hand_id == 214211025466:
         for s in starting_stack_sizes_list:
             if s == env.env.SMALL_BLIND or s == env.env.BIG_BLIND:
-                # skip edge case of player all in by calling big blind
                 raise self._EnvironmentEdgeCaseEncounteredError("Edge case 1 encountered. See docstring for details.")
-        #
-        # if episode.hand_id == 213304492236:
-        #    debug = 1
-        # todo: remove key 'table' from config - not needed anymore
+
+        # todo step tianshou env as well and compare obs
         state_dict = {'deck_state_dict': cards_state_dict, 'table': table}
         obs, _, done, _ = env.reset(config=state_dict)
-        is_new_hand = True
+
+
+
         assert obs[-1] in [0, 1, 2, 3, 4, 5], f"obs[-1] = {obs[-1]}. " \
                                               f"get_current_obs should have caught this already. check the wrapper impl"
+
         # --- Step Environment with action --- #
         observations = []
         actions = []
@@ -245,18 +246,10 @@ class Inspector:
         while not done:
             try:
                 action = episode.actions_total['as_sequence'][it]
-                # # use only observations, for which next_action.player_name == top_player
-                # if it+1 < len(episode.actions_total['as_sequence']):
-                #     next_action = episode.actions_total['as_sequence'][it+1]
-
             except IndexError:
                 raise self._EnvironmentDidNotTerminateInTimeError
-
             action_formatted = self.build_action(action)
-            # store up to two actions per player per stage
-            # self._actions_per_stage[action.player_name][action.stage].append(action_formatted)
             next_to_act = env.current_player.seat_id
-            player = None
             for player in table:
                 # if player reached showdown (we can see his cards)
                 # can use showdown players actions and observations or use only top_players actions and observations
@@ -266,61 +259,14 @@ class Inspector:
                 # only store obs and action of acting player
                 if player.position_index == next_to_act and player.player_name in filtered_players:
                     observations.append(obs)
-                    # # use showdown player actions as labels, 0 for loser and action for winner
-                    # if not selected_players:
-                    #     # player that won showdown -- can be multiple (split pot)
-                    #     if player.player_name in [winner.name for winner in episode.winners]:
-                    #         action_label = self._wrapped_env.discretize(action_formatted)
-                    #         # actions.append(action_formatted)  # use his action as supervised label
-                    #     # player that lost showdown
-                    #     else:
-                    #         # replace action call/raise with fold
-                    #         action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
-                    #         # actions.append((ActionType.FOLD.value, -1))  # replace action with FOLD for now
-                    # # use top players actions as labels, take actions as labels directly 0 for fold 1 for checkcall etc
-                    # else:
-                    # todo: need switch that prevents baseline.compute_action
-                    #  to be called when cards are unknown (e.g. when running from
-                    #  handhistory smithy files and player folded early
-                    #  on the other hand if we analyze games were all cards are known
-                    #  i.e. self play, then we can query baseline.compute_action anytime
                     action_label = self._wrapped_env.discretize(action_formatted)
                     actions.append(action_label)
-                    if player.player_name == pname:
-                        if self.baseline:
-                            action_prediction = self.baseline.compute_action(obs, self._wrapped_env.get_legal_actions())
-                            self.baseline_stats.update_stats(obs, action_prediction, is_new_hand=is_new_hand)
-                        for s in self.player_stats:
-                            if s.pname == pname:
-                                s.update_stats(obs,
-                                               self._wrapped_env.discretize(action_formatted),
-                                               is_new_hand=is_new_hand)
-                                break
-                        is_new_hand = False
-                    # if action_label == 0 and player.player_name == pname:
-                    #     print('debug')
-                    # analysis
-                    # if player.player_name == pname:
-                    #     legal_moves = np.array([0, 0, 0, 0, 0, 0])
-                    #     legal_moves[self._wrapped_env.get_legal_actions()] += 1
-                    #     if legal_moves[2] == 1:
-                    #         legal_moves[[3, 4, 5]] = 1
-                    #     action_prediction = self.baseline.compute_action(obs, legal_moves)
-                    #     self.baseline_stats.update_stats(obs, action_prediction, is_new_hand=is_new_hand)
-                    #     for s in self.player_stats:
-                    #         if s.pname == pname:
-                    #             s.update_stats(obs, action_label, is_new_hand=is_new_hand)
-                    #             break
-                    #     is_new_hand = False
+                    pred = self.baseline.compute_action(obs)
+                    # todo: collect logits
+                    #
             debug_action_list.append(action_formatted)
-
-
-            # if action_formatted == (1, 107):
-            #     print("debug")
-            # step env
             obs, _, done, _ = env.step(action_formatted)
             it += 1
-            # i = (i+1) % len(starting_stack_sizes_list)
             if not done:
                 i = self._wrapped_env.env.current_player.seat_id
             self.run_assertions(obs, i, done)

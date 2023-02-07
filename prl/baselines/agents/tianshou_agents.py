@@ -138,27 +138,6 @@ class MajorityBaseline(BasePolicy):
 class BaselineAgent(BasePolicy):
     """ Tianshou Agent -- used with tianshou training"""
 
-    def __init__(self,
-                 model_ckpt_path: str,
-                 num_players,
-                 flatten_input=False,
-                 model_hidden_dims=(256,),
-                 device=None,
-                 observation_space=None,
-                 action_space=None
-                 ):
-        super().__init__(observation_space=observation_space,
-                         action_space=action_space)
-        self.model_ckpt_path = model_ckpt_path
-        self.hidden_dims = model_hidden_dims
-        if device is None:
-            # todo: time inference times cuda vs cpu
-            #  in case obs comes from cpu
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.device = device
-        self.num_players = num_players
-        self.load_model(model_ckpt_path, flatten_input)
-
     def load_model(self, ckpt_path, flatten_input):
         input_dim = 564
         classes = [ActionSpace.FOLD,
@@ -178,6 +157,26 @@ class BaselineAgent(BasePolicy):
                           map_location=self.device)
         self._model.load_state_dict(ckpt['net'])
         self._model.eval()
+
+    def __init__(self,
+                 model_ckpt_path: str,
+                 flatten_input=False,
+                 model_hidden_dims=(256,),
+                 device=None,
+                 observation_space=None,
+                 num_players=None,
+                 action_space=None
+                 ):
+        super().__init__(observation_space=observation_space,
+                         action_space=action_space)
+        self.model_ckpt_path = model_ckpt_path
+        self.hidden_dims = model_hidden_dims
+        if device is None:
+            # todo: time inference times cuda vs cpu
+            #  in case obs comes from cpu
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = device
+        self.load_model(model_ckpt_path, flatten_input)
 
     def compute_action(self, obs: np.ndarray, legal_moves) -> int:
         self.next_legal_moves = legal_moves
