@@ -283,13 +283,13 @@ class Inspector:
                     pred = self.baseline.compute_action(obs, legal_moves)
                     # todo make one for winner and one for folds
                     if pred == action_label:
-                        self.true[action_label] += self.baseline.logits
+                        self.true[action_label] += torch.softmax(self.baseline.logits,dim=1)
                         self.label_counts_true[action_label] += 1
-                        self.true[action_label] /= self.label_counts_true[action_label]
+                        # self.true[action_label] /= self.label_counts_true[action_label]
                     else:
-                        self.wrong[action_label] += self.baseline.logits
+                        self.wrong[action_label] += torch.softmax(self.baseline.logits,dim=1)
                         self.label_counts_wrong[action_label] += 1
-                        self.wrong[action_label] /= self.label_counts_wrong[action_label]
+                        # self.wrong[action_label] /= self.label_counts_wrong[action_label]
             debug_action_list.append(action_formatted)
             obs, _, done, _ = env.step(action_formatted)
             obs_dict, _, _, _, _ = self.tianshou_env.step(action_formatted)

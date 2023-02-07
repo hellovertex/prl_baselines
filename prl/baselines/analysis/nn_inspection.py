@@ -27,7 +27,7 @@ def plot_heatmap(label_logits: dict, label_counts: dict) -> pd.DataFrame:
     # idx = cols = [i for i in range(len(ActionSpace))]
     df = pd.DataFrame(detached)  # do we need , index=idx, columns=cols?
     plt.figure(figsize=(12, 7))
-    seaborn.heatmap(df, annot=True)
+    seaborn.heatmap(df.T, annot=True)
     # plt.savefig('output.png')
     plt.show()
 
@@ -57,11 +57,11 @@ def inspection(model_ckpt_abs_path):
             inspector.inspect_episode(hand, pname=pname)
 
     # plots logits against true labels and saves csv with result to disk
-    df = plot_heatmap(label_logits=inspector.wrong.items(),
+    df = plot_heatmap(label_logits=inspector.wrong,
                       label_counts=inspector.label_counts_wrong)
     df.to_csv('./results/wrong.csv')
     print(df)
-    df = plot_heatmap(label_logits=inspector.true.items(),
+    df = plot_heatmap(label_logits=inspector.true,
                       label_counts=inspector.label_counts_true)
     df.to_csv('./results/true.csv')
     print(df)
