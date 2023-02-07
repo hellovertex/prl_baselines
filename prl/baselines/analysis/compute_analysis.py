@@ -1,5 +1,7 @@
 """
 """
+from pathlib import Path
+
 from prl.baselines.agents.tianshou_agents import BaselineAgent
 from prl.baselines.analysis.core.utils import make_experiment
 from prl.baselines.evaluation.pokersnowie.export import PokerExperimentToPokerSnowie
@@ -30,9 +32,13 @@ def main(max_episodes,
          num_players,
          max_episodes_per_file,
          verbose):
-    hidden_dims = [256, 256]  # if '[256]' in pname else [512]
-    pname = '2NL_256x2'
-    ckpt_abs_fpath = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/with_folds_2NL_all_players/ckpt_dir_[256, 256]_1e-06/ckpt.pt"
+    # hidden_dims = [256, 256]  # if '[256]' in pname else [512]
+    # pname = '2NL_256x2'
+    # 2.5NL ckpt_abs_fpath = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/with_folds_2NL_all_players/ckpt_dir_[256, 256]_1e-06/ckpt.pt"
+
+    ckpt_abs_fpath = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds/ckpt_dir/Sakhacop_[256]_1e-06/ckpt.pt"
+    pname = Path(ckpt_abs_fpath).parent.stem
+    hidden_dims = [256] if '256' in pname else [512]
     path_out = "./results"
     agent_names = [f'{pname}', '2', '3', '4', '5', '6']
     # make self play agents
@@ -58,7 +64,7 @@ def main(max_episodes,
 
 
 if __name__ == '__main__':
-    main(max_episodes=10,
+    main(max_episodes=1000,
          num_players=6,
          max_episodes_per_file=1000,
          verbose=True)
