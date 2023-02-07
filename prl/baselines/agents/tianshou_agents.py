@@ -181,7 +181,7 @@ class BaselineAgent(BasePolicy):
     def compute_action(self, obs: np.ndarray, legal_moves) -> int:
         self.next_legal_moves = legal_moves
         if not type(obs) == torch.Tensor:
-            obs = torch.Tensor(np.array([obs]))
+            obs = torch.Tensor(np.array([obs])).to(self.device)
         self.logits = self._model(obs)
         self.prediction = torch.argmax(self.logits, dim=1)
         # action = self._compute_action(obs)

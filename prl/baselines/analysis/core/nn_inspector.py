@@ -268,7 +268,7 @@ class Inspector:
         obst_dict = self.tianshou_env.reset(options={'reset_config': state_dict})
         obs_tianshou = obst_dict['obs']
         legal_moves = obst_dict['mask']
-        assert np.array_equal(obs, obst_dict['obs'])
+        assert np.array_equal(obs, obs_tianshou)
         assert obs[-1] in [0, 1, 2, 3, 4, 5], f"obs[-1] = {obs[-1]}. " \
                                               f"get_current_obs should have caught this already. check the wrapper impl"
 
@@ -301,11 +301,11 @@ class Inspector:
                     pred = self.baseline.compute_action(obs, legal_moves)
                     # todo make one for winner and one for folds
                     if pred == action_label:
-                        self.true[action_label] += torch.softmax(self.baseline.logits, dim=1)
+                        self.true[action_label] += torch.softmax(self.baseline.logits.cpu(), dim=1)
                         self.label_counts_true[action_label] += 1
                         # self.true[action_label] /= self.label_counts_true[action_label]
                     else:
-                        self.false[action_label] += torch.softmax(self.baseline.logits, dim=1)
+                        self.false[action_label] += torch.softmax(self.baseline.logits.cpu(), dim=1)
                         self.label_counts_false[action_label] += 1
                         # self.wrong[action_label] /= self.label_counts_wrong[action_label]
             debug_action_list.append(action_formatted)
@@ -347,13 +347,13 @@ class Inspector:
         # get starting stacks, starting with button at index 0
         stacks = [player.stack_size for player in table]
         self._init_wrapped_env(stacks)
-
-        self._wrapped_env.env.SMALL_BLIND, self._wrapped_env.env.BIG_BLIND = self.make_blinds(episode.blinds)
+        sb, bb = self.make_blinds(episode.blinds)
+        self._wrapped_env.env.SMALL_BLIND, self._wrapped_env.env.BIG_BLIND = sb, bb
         self._wrapped_env.env.ANTE = self._make_ante(episode.ante)
         cards_state_dict = self._build_cards_state_dict(table, episode)
         agent_names = np.roll([a.player_name for a in episode.player_stacks], -episode.btn_idx)
         self.tianshou_env = make_default_tianshou_env(stack_sizes=stacks,
-                                                      blinds=[25, 50],
+                                                      blinds=[sb, bb],
                                                       agents=agent_names,
                                                       num_players=len(agent_names))
         # Collect observations and actions, observations are possibly augmented
