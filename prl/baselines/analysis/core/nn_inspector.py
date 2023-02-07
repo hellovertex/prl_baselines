@@ -284,9 +284,11 @@ class Inspector:
                     if pred == action_label:
                         self.true[action_label] += self.baseline.logits
                         self.label_counts_true[action_label] += 1
+                        self.true[action_label] /= self.label_counts_true[action_label]
                     else:
                         self.wrong[action_label] += self.baseline.logits
                         self.label_counts_wrong[action_label] += 1
+                        self.wrong[action_label] /= self.label_counts_wrong[action_label]
             debug_action_list.append(action_formatted)
             obs, _, done, _ = env.step(action_formatted)
             obs_dict, _, _, _, _ = self.tianshou_env.step(action_formatted)

@@ -53,11 +53,24 @@ def inspection(model_ckpt_abs_path):
         normalize = inspector.label_counts_wrong[label]
         detached[label.value] = logits.detach().numpy()[0]/normalize
 
-    df = pd.DataFrame(detached)
+    df_false = pd.DataFrame(detached)
+    print(df_false)
     plt.figure(figsize=(12, 7))
-    seaborn.heatmap(df, annot=True)
+    seaborn.heatmap(df_false, annot=True)
     # plt.savefig('output.png')
     plt.show()
+    detached = {}
+    for label, logits in inspector.true.items():
+        normalize = inspector.label_counts_true[label]
+        detached[label.value] = logits.detach().numpy()[0]/normalize
+
+    idx = cols = [i for i in range(len(ActionSpace))]
+    df_true = pd.DataFrame(detached, index=idx, columns=cols)
+    plt.figure(figsize=(12, 7))
+    seaborn.heatmap(df_true, annot=True)
+    # plt.savefig('output.png')
+    plt.show()
+    print(df_true)
     # todo write back model inspection
     # with open(f'model_inspection_{pname}.txt', 'a+') as f:
     #     for stat in inspector.player_stats:
