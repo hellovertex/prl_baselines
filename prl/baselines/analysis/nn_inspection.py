@@ -57,8 +57,8 @@ def inspection(model_ckpt_abs_path):
             inspector.inspect_episode(hand, pname=pname)
 
     # plots logits against true labels and saves csv with result to disk
-    df = plot_heatmap(label_logits=inspector.wrong,
-                      label_counts=inspector.label_counts_wrong)
+    df = plot_heatmap(label_logits=inspector.false,
+                      label_counts=inspector.label_counts_false)
     df.to_csv('./results/wrong.csv')
     print(df)
     df = plot_heatmap(label_logits=inspector.true,
