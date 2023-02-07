@@ -7,18 +7,13 @@ from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_e
 def make_experiment(max_episodes,
                     num_players,
                     agent_names,
+                    agents,
                     ckpt_abs_fpath,
                     hidden_dims):
     starting_stack = 20000
     env = make_default_tianshou_env(mc_model_ckpt_path=None,  # dont use mc
                                     agents=agent_names,
                                     num_players=len(agent_names))
-
-    # make self play agents
-    agents = [BaselineAgent(ckpt_abs_fpath,  # MajorityBaseline
-                            flatten_input=False,
-                            num_players=num_players,
-                            model_hidden_dims=hidden_dims) for _ in range(num_players)]  # make self play agents
 
     assert len(agents) == num_players
     participants = make_participants(agents, starting_stack)

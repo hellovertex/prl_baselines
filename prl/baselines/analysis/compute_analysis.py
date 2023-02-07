@@ -1,5 +1,6 @@
 """
 """
+from prl.baselines.agents.tianshou_agents import BaselineAgent
 from prl.baselines.analysis.core.utils import make_experiment
 from prl.baselines.evaluation.pokersnowie.export import PokerExperimentToPokerSnowie
 
@@ -33,9 +34,16 @@ def main(max_episodes,
     ckpt_abs_fpath = ""
     path_out = "./results"
     agent_names = [f'{pname}', '2', '3', '4', '5', '6']
+    # make self play agents
+    agents = [BaselineAgent(ckpt_abs_fpath,  # MajorityBaseline
+                            flatten_input=False,
+                            num_players=num_players,
+                            model_hidden_dims=hidden_dims) for _ in range(num_players)]  # make self play agents
+
     # agent_names = [f'{pname}_{i}' for i in range(num_players)]
     experiment = make_experiment(max_episodes=max_episodes,
                                  num_players=num_players,
+                                 agents=agents,
                                  agent_names=agent_names,
                                  ckpt_abs_fpath=ckpt_abs_fpath,
                                  hidden_dims=hidden_dims)
