@@ -187,8 +187,8 @@ if __name__ == "__main__":
     # abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/2NL/2NL'
     # abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50'
     abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50/randomized_cards_no_downsampling'
-    base_logdir = f'./randomized_folds_no_downsampling_0_25NL_all_players/logdir'
-    base_ckptdir = f'./randomized_folds_no_downsampling_0_25NL_all_players/ckpt_dir'
+    base_logdir = f'./randomized_folds_with_downsamplingv1_0_25NL_all_players/logdir'
+    base_ckptdir = f'./randomized_folds_with_downsamplingv1_0_25NL_all_players/ckpt_dir'
     # train_eval(abs_path,
     #            params=params,
     #            log_interval=log_interval,
@@ -202,9 +202,9 @@ if __name__ == "__main__":
                             eval_interval=eval_interval,
                             base_ckptdir=base_ckptdir,
                             base_logdir=base_logdir)
-    # train_eval_fn(params0)
-    for x in p.imap_unordered(train_eval_fn, [params0, params1]):
-        print(x + f'. Took {time.time() - t0} seconds')
-    print(f'Finished job after {time.time() - start} seconds.')
+    train_eval_fn(params1)
+    # for x in p.imap_unordered(train_eval_fn, [params0, params1]):
+    #     print(x + f'. Took {time.time() - t0} seconds')
+    # print(f'Finished job after {time.time() - start} seconds.')
 
     p.close()
