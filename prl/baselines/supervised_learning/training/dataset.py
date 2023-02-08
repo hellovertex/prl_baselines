@@ -23,7 +23,7 @@ class InMemoryDataset(Dataset):
         if not path_to_csv_files:
             path_to_csv_files = str(DATA_DIR) + '/03_preprocessed' + f'/{blind_sizes}'
 
-        files = glob.glob(path_to_csv_files + "/*.csv", recursive=False)
+        files = glob.glob(path_to_csv_files + "/**/*.csv", recursive=True)
         frame = pd.concat((pd.read_csv(f,
                                        sep=',',
                                        dtype='float32',

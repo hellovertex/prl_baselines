@@ -16,6 +16,9 @@ from prl.baselines.supervised_learning.training.utils import init_state, get_in_
 
 
 def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir, base_logdir):
+    """abs_intput_dir can be single file or directory that is globbed recursively. in both cases
+    and in memory dataset will be created with all csv files found in abs_input_dir and its subfolders.
+    """
     BATCH_SIZE = params['batch_size']
     traindataset, testdataset = get_in_mem_datasets(abs_input_dir, BATCH_SIZE)
     train_dataloader = DataLoader(traindataset, batch_size=BATCH_SIZE, shuffle=True)
@@ -181,9 +184,10 @@ if __name__ == "__main__":
                'batch_size': 512,
                }
     # preprocess_flat_data_dir
-    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/2NL/2NL'
-    base_logdir = f'./with_folds_2NL_all_players/logdir'
-    base_ckptdir = f'./with_folds_2NL_all_players/ckpt_dir'
+    # abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/2NL/2NL'
+    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50'
+    base_logdir = f'./randomized_folds_no_downsampling_0_25NL_all_players/logdir'
+    base_ckptdir = f'./randomized_folds_no_downsampling_0_25NL_all_players/ckpt_dir'
     # train_eval(abs_path,
     #            params=params,
     #            log_interval=log_interval,
@@ -197,9 +201,9 @@ if __name__ == "__main__":
                             eval_interval=eval_interval,
                             base_ckptdir=base_ckptdir,
                             base_logdir=base_logdir)
+    train_eval_fn(params0)
     # for x in p.imap_unordered(train_eval_fn, [params0, params1]):
-    for x in p.imap_unordered(train_eval_fn, [params0]):
-        print(x + f'. Took {time.time() - t0} seconds')
-    print(f'Finished job after {time.time() - start} seconds.')
+    #     print(x + f'. Took {time.time() - t0} seconds')
+    # print(f'Finished job after {time.time() - start} seconds.')
 
     p.close()
