@@ -173,19 +173,20 @@ if __name__ == "__main__":
                'lrs': [1e-6],  # we ruled out 1e-5 and 1e-7 by hand, 1e-6 is the best we found after multiple trainings
                # 'max_epoch': 5_000_000,
                'max_epoch': 100_000_000,
-               'max_env_steps': 4_000_000,
+               'max_env_steps': 5_000_000,
                'batch_size': 512,
                }
     params1 = {'hdims': [[512]],  # [256, 256], [512, 512]], -- not better
                'lrs': [1e-6],  # we ruled out 1e-5 and 1e-7 by hand, 1e-6 is the best we found after multiple trainings
                # 'max_epoch': 5_000_000,
                'max_epoch': 100_000_000,
-               'max_env_steps': 4_000_000,
+               'max_env_steps': 5_000_000,
                'batch_size': 512,
                }
     # preprocess_flat_data_dir
     # abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/2NL/2NL'
-    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50'
+    # abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50'
+    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50/randomized_cards_no_downsampling'
     base_logdir = f'./randomized_folds_no_downsampling_0_25NL_all_players/logdir'
     base_ckptdir = f'./randomized_folds_no_downsampling_0_25NL_all_players/ckpt_dir'
     # train_eval(abs_path,
@@ -201,9 +202,9 @@ if __name__ == "__main__":
                             eval_interval=eval_interval,
                             base_ckptdir=base_ckptdir,
                             base_logdir=base_logdir)
-    train_eval_fn(params0)
-    # for x in p.imap_unordered(train_eval_fn, [params0, params1]):
-    #     print(x + f'. Took {time.time() - t0} seconds')
-    # print(f'Finished job after {time.time() - start} seconds.')
+    # train_eval_fn(params0)
+    for x in p.imap_unordered(train_eval_fn, [params0, params1]):
+        print(x + f'. Took {time.time() - t0} seconds')
+    print(f'Finished job after {time.time() - start} seconds.')
 
     p.close()
