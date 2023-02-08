@@ -35,7 +35,8 @@ def main(blind_sizes, path_to_csv_files, output_dir, use_downsampling):
     # player_folders = glob.glob(
     #     "/home/hellovertex/Documents/github.com/prl_baselines/data/02_vectorized/0.25-0.50" "/**/*.csv", recursive=True)
     # for path_to_csv_files in player_folders[1:]:
-    blind_sizes = "2NL"
+    # blind_sizes = "2NL"
+    use_downsampling = False
     if not path_to_csv_files:
         path_to_csv_files = DEFAULT_VECTORIZED_DATA_PATH + f'/{blind_sizes}'
     if not output_dir:
