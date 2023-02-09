@@ -14,10 +14,10 @@ class DatasetStats:
         # and discretizing the action space
 
     def _upd(self, hands_played):
-        # increment total hands
-        # increment showdowns no mucks
-        # increment showdowns with mucks
-        # check for showdown in string and muckin string
+        # todo increment total hands
+        #  increment showdowns no mucks
+        #  increment showdowns with mucks
+        #  check for showdown in string and muckin string
         pass
 
     def update_from_file(self, file_path):
