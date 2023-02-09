@@ -19,7 +19,10 @@ class RLStateEncoder(Encoder):
     Observations = Optional[List[List]]
     Actions_Taken = Optional[List[Tuple[int, int]]]
 
-    def __init__(self, env_wrapper_cls=None, verbose=False):
+    def __init__(self, no_folds,
+                 env_wrapper_cls=None,
+                 verbose=False):
+        self.no_folds = no_folds
         self.verbose = verbose
         self.env_wrapper_cls = env_wrapper_cls
         self._wrapped_env = None
@@ -183,6 +186,8 @@ class RLStateEncoder(Encoder):
     def overwrite_hand_cards_with_random_cards(self, obs):
         """This is useful because if we only have showdown data,
         it will be skewed towards playable hands and there will be no data on weak hands."""
+        # self.initial_villain_cards = obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_rank_0],
+        # obs[fts.First_player_card_1_rank_0:fts.First_player_card_1_suit_3+1]
         # remove old cards from observing player
         obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_rank_0] = 0
         obs[fts.First_player_card_1_rank_0:fts.First_player_card_1_suit_3+1] = 0
@@ -241,8 +246,12 @@ class RLStateEncoder(Encoder):
                 if player.position_index == next_to_act and player.player_name in filtered_players:
                     # if not selected_players overwrite action with fold and randomize cards:
                     if not player.player_name in selected_players:#[winner.name for winner in episode.winners]:
+                        # todo though it is correct we never get here when selected_players is set,
+                        #  make this more explicit with a variable `use_folds` for example
                         # if not player.player_name in selected_players:
-                        # overwrite cards with random cards
+                        # overwrite cards with random cards every step to generate enough noise
+                        # it does not matter if the last hand is inconsistent with who wins
+                        # because the winning is not part of the observation vector
                         obs = self.overwrite_hand_cards_with_random_cards(obs)
                         # replace action call/raise with fold
                         action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
