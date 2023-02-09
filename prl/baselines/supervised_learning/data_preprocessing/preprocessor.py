@@ -23,46 +23,18 @@ class Preprocessor:
         Additional callbacks can be provided, e.g. to write the file back as .csv file """
 
         cbs = [] if not callbacks else callbacks
-
+        df_total = pd.DataFrame()
         for file in self._csv_files:
             df = pd.read_csv(file, sep=',',
                              dtype='float32',
                              encoding='cp1252')
             fn_to_numeric = partial(pd.to_numeric, errors="coerce")
             df = df.apply(fn_to_numeric).dropna()
+            df_total = pd.concat([df_total, df])
 
-            df_fold = df[df['label'] == ActionSpace.FOLD]
-            df_checkcall = df[df['label'] == ActionSpace.CHECK_CALL]
-            df_raise_min = df[df['label'] == ActionSpace.RAISE_MIN_OR_3BB]
-            df_raise_6bb = df[df['label'] == ActionSpace.RAISE_6_BB]
-            df_raise_10bb = df[df['label'] == ActionSpace.RAISE_10_BB]
-            df_raise_20bb = df[df['label'] == ActionSpace.RAISE_20_BB]
-            df_raise_50bb = df[df['label'] == ActionSpace.RAISE_50_BB]
-            df_allin = df[df['label'] == ActionSpace.RAISE_ALL_IN]
-
-            df = pd.concat([df_fold,
-                            df_checkcall,
-                            df_raise_min,
-                            df_raise_6bb,
-                            df_raise_10bb,
-                            df_raise_20bb,
-                            df_raise_50bb,
-                            df_allin])
-            label_freqs = df['label'].value_counts()
-            n_samples = sum([
-                label_freqs[ActionSpace.RAISE_MIN_OR_3BB],
-                label_freqs[ActionSpace.RAISE_6_BB],
-                label_freqs[ActionSpace.RAISE_10_BB],
-                label_freqs[ActionSpace.RAISE_20_BB],
-                label_freqs[ActionSpace.RAISE_50_BB],
-                label_freqs[ActionSpace.RAISE_ALL_IN]]
-            )
-            if use_downsampling:
-                df = self.downsample(df, n_samples)
-            print(f'Label_frequencies for player {Path(file).parent.name}: {label_freqs}')
-            # shuffle
-            df = df.sample(frac=1)
-            [c(df, file) for c in cbs]
+        print(df_total.head())
+        # todo: do downsampling on total df not individual dfs
+        a = 1
 
     def extract_subset(self, df: pd.DataFrame,
                        label: ActionSpace,
@@ -101,7 +73,7 @@ class Preprocessor:
         #                                    n_raise_20bb,
         #                                    n_raise_50bb,
         #                                    n_allin])
-        n_upsamples=12000
+        n_upsamples = 12000
         downsample_fn = partial(self.extract_subset, n_samples=90000)
         # downsample_fn = partial(self.extract_subset, n_samples=n_samples)
         # n_upsample = round(n_raises / 6)  # so we have balanced FOLD, CHECK, RAISE where raises are 1/6 each

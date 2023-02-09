@@ -76,7 +76,7 @@ def main(blind_sizes, from_gdrive_id, unzipped_dir, version_two, use_player_name
 
 
 def parse_encode_write(filename):
-    blind_sizes = "2.5NL"
+    blind_sizes = "0.25-0.50_no_folds"
     parser = HSmithyParser()
 
     # Steps Steinberger Poker Environment, augments observations and vectorizes them
@@ -116,7 +116,7 @@ if __name__ == '__main__':
     #unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/2.5NL/unzipped"
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
     filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
-    debug = True
+    debug = False
     if debug:
         parse_encode_write(filename=filenames[16])
     else:
