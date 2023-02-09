@@ -12,7 +12,7 @@ import glob
 import multiprocessing
 import time
 
-from prl.baselines.supervised_learning.data_acquisition import hsmithy_selector
+from prl.baselines.analysis.core.stats_from_txt_string import HSmithySelector, HSmithyStats
 
 # todo using mutliprocessing on player names
 # rewrite _select_hands(...) such that it
@@ -45,7 +45,7 @@ best_players = ['ishuha',
 def filter_games_for_player(pname: str) -> str:
     folder_out = f"/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/dstar_with_folded_hands/{pname}"
     folder_in__unzipped_txt_files = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
-    extr = hsmithy_selector.HSmithySelector()
+    stats = HSmithyStats(pname=pname)
     filenames = glob.glob(
         f'{folder_in__unzipped_txt_files}**/*.txt',
         recursive=True)
@@ -54,9 +54,9 @@ def filter_games_for_player(pname: str) -> str:
     for i, f in enumerate(filenames):
         # print(f'Extracting file {i} / {n_files}')
         try:
-            extr.select_from_file(file_path_in=f,
-                                  file_path_out=folder_out,
-                                  target_player=pname)
+            stats.compute_from_file(file_path_in=f,
+                                   file_path_out=folder_out,
+                                   target_player=pname)
         except UnicodeDecodeError:
             n_files_skipped += 1
     return f"Done. Extracted {n_files - n_files_skipped}. {n_files_skipped} files were skipped."
