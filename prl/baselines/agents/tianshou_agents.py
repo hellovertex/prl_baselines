@@ -99,11 +99,13 @@ class MajorityBaseline(BasePolicy):
         logits = []
         for m in self._models:
             logits.append(m(obs))
-        predictions = []
-        for l in logits:
-            predictions.append(torch.argmax(l, dim=1))
+        self.logits = torch.mean(torch.stack(logits), dim=0)
+        # # in case we ever need the individual predictions:
+        # predictions = []
+        # for l in logits:
+        #     predictions.append(torch.argmax(l, dim=1))
+        return torch.argmax(self.logits).item()
 
-        return 1
 
     def act(self, obs: np.ndarray, legal_moves: list, use_pseudo_harmonic_mapping=False):
         """
