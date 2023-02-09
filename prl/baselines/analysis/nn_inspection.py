@@ -122,14 +122,14 @@ def inspection(filename,
     if type(model_ckpt_abs_path) == str or type(model_ckpt_abs_path) == Path:
         hidden_dims = [256] if '256' in pname else [512]
         baseline = BaselineAgent(model_ckpt_abs_path,  # MajorityBaseline
-                                 device="cuda" if torch.cuda.is_available() else "cpu",
+                                 device="cpu",  # "cuda" if torch.cuda.is_available() else "cpu",
                                  flatten_input=False,
                                  model_hidden_dims=hidden_dims)
     else:  # list of checkpoints
         hidden_dims = [[256] if '[256]' in pname else [512] for pname in model_ckpt_abs_path]
         baseline = MajorityBaseline(model_ckpt_paths=model_ckpt_abs_path,  # MajorityBaseline
                                     model_hidden_dims=hidden_dims,
-                                    device="cuda" if torch.cuda.is_available() else "cpu",
+                                    device="cpu",  # "cuda" if torch.cuda.is_available() else "cpu",
                                     flatten_input=False)
     inspector = Inspector(baseline=baseline, env_wrapper_cls=AugmentObservationWrapper)
     # for filename in filenames[:max_files]:
