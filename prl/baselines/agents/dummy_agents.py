@@ -1,4 +1,14 @@
+import random
+
 from prl.environment.Wrappers.base import ActionSpace
+
+
+class RandomAgent:
+    def __init__(self):
+        self.n_actions = len(ActionSpace)
+
+    def act(self, *args, **kwargs):
+        return random.randint(0, self.n_actions)
 
 
 class DummyAgentFold:

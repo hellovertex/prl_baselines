@@ -2,6 +2,7 @@
 """
 from pathlib import Path
 
+from prl.baselines.agents.dummy_agents import RandomAgent
 from prl.baselines.agents.tianshou_agents import BaselineAgent
 from prl.baselines.analysis.core.utils import make_experiment
 from prl.baselines.evaluation.pokersnowie.export import PokerExperimentToPokerSnowie
@@ -45,7 +46,8 @@ def main(max_episodes,
     agents = [BaselineAgent(ckpt_abs_fpath,  # MajorityBaseline
                             flatten_input=False,
                             num_players=num_players,
-                            model_hidden_dims=hidden_dims) for _ in range(num_players)]  # make self play agents
+                            model_hidden_dims=hidden_dims)]  # dont make self play agents
+    agents += [RandomAgent() for _ in range(num_players-1)]  # make random opponents instead
 
     # agent_names = [f'{pname}_{i}' for i in range(num_players)]
     experiment = make_experiment(max_episodes=max_episodes,
