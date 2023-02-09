@@ -116,12 +116,15 @@ if __name__ == '__main__':
     #unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/2.5NL/unzipped"
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
     filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
-    parse_encode_write(filename=filenames[0])
-    print(f'Starting job. This may take a while.')
-    start = time.time()
-    p = multiprocessing.Pool()
-    t0 = time.time()
-    for x in p.imap_unordered(parse_encode_write, filenames):
-        print(x + f'. Took {time.time() - t0} seconds')
-    print(f'Finished job after {time.time() - start} seconds.')
-    p.close()
+    debug = False
+    if debug:
+        parse_encode_write(filename=filenames[0])
+    else:
+        print(f'Starting job. This may take a while.')
+        start = time.time()
+        p = multiprocessing.Pool()
+        t0 = time.time()
+        for x in p.imap_unordered(parse_encode_write, filenames):
+            print(x + f'. Took {time.time() - t0} seconds')
+        print(f'Finished job after {time.time() - start} seconds.')
+        p.close()

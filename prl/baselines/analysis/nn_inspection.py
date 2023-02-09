@@ -155,7 +155,7 @@ if __name__ == "__main__":
     # model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/randomized_folds_with_downsamplingv1_0_25NL_all_players/ckpt_dir_[512]_1e-06/ckpt.pt"
 
     # Multiple Baseline checkpoints --> Creates Majority Agent in inspect function
-    debug = False
+    debug = True
     model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds_rand_cards/ckpt_dir"
     player_dirs = [x[0] for x in
                    os.walk(model_ckpt_abs_path)][1:]
