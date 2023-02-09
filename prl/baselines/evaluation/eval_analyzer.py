@@ -41,7 +41,8 @@ if __name__ == "__main__":
     acceptance_levels = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1]
     # ppl and ppool filenames -- single file and globbed files
     # implement parser, encoder, analyzer pipeline
-    unzipped_dir = "/home/hellovertex/Documents/github.com/hellovertex/prl_baselines/data/player_data_test"
+    #unzipped_dir = "/home/hellovertex/Documents/github.com/hellovertex/prl_baselines/data/player_data_test"
+    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
     filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
 
     start = time.time()

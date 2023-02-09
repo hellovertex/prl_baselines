@@ -44,8 +44,7 @@ best_players = ['ishuha',
 
 
 def filter_games_for_player(pname: str) -> str:
-    folder_out = f"/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/dstar_with_folded_hands/{pname}"
-    folder_in__unzipped_txt_files = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
+    folder_in__unzipped_txt_files = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
 
     stats = HSmithyStats(pname=pname)
 
@@ -60,7 +59,6 @@ def filter_games_for_player(pname: str) -> str:
         # print(f'Extracting file {i} / {n_files}')
         try:
             stats.compute_from_file(file_path_in=f,
-                                    file_path_out=folder_out,
                                     target_player=pname)
         except UnicodeDecodeError:
             # should not occur too often, less than 1% of files have some continuation byte errs
@@ -75,7 +73,7 @@ def filter_games_for_player(pname: str) -> str:
 
 
 def main():
-    debug = True
+    debug = False
     if not debug:
         start = time.time()
         p = multiprocessing.Pool()
@@ -87,6 +85,7 @@ def main():
     else:
         for p in best_players:
             filter_games_for_player(p)
+
 
 if __name__ == '__main__':
     main()

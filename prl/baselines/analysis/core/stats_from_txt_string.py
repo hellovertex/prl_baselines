@@ -24,11 +24,11 @@ CURRENCY_SYMBOLS = ['$', '€', '￡', 'Â£']  # only these are currently suppo
 class SelectedPlayerStats:
     def __init__(self,
                  pname,
-                 preflop_sep="HOLE CARDS",
-                 flop_sep="FLOP",
-                 turn_sep="TURN",
-                 river_sep="RIVER",
-                 summary_sep="SUMMARY"):
+                 preflop_sep="*** HOLE CARDS ***",
+                 flop_sep="*** FLOP ***",
+                 turn_sep="*** TURN ***",
+                 river_sep="*** RIVER ***",
+                 summary_sep="*** SUMMARY ***"):
         self.pname = pname
         self.total_number_of_hands_seen = 0
         self.preflop_sep = preflop_sep
@@ -242,10 +242,9 @@ class HSmithyStats:
             # accumulate stats
             self.pstats.update(current)
 
-    def compute_from_file(self, file_path_in, file_path_out, target_player):
+    def compute_from_file(self, file_path_in, target_player):
         self._variant = 'NoLimitHoldem'  # todo parse variant from filename
         self.target_player = target_player
-        self.file_path_out = file_path_out
         with open(file_path_in, 'r', encoding='utf-8') as f:  # pylint: disable=invalid-name,unspecified-encoding
             hand_database = f.read()
             hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
