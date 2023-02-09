@@ -9,13 +9,11 @@ for each observation, compare actions taken
 
 """
 import glob
+import multiprocessing
+import time
 
 from prl.baselines.supervised_learning.data_acquisition import hsmithy_selector
 
-folder_out = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
-extr = hsmithy_selector.HSmithySelector()
-filenames = glob.glob("/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped/**/*.txt",
-                      recursive=True)
 # todo using mutliprocessing on player names
 # rewrite _select_hands(...) such that it
 # counts hands where player has folded
@@ -42,16 +40,37 @@ best_players = ['ishuha',
                 'ilaviiitech',
                 'm0bba',
                 'KDV707']
-n_files = len(filenames)
-n_files_skipped = 0
-for i, f in enumerate(filenames):
-    print(f'Extractin file {i} / {n_files}')
-    for pname in best_players:
+
+
+def filter_games_for_player(pname: str) -> str:
+    folder_out = f"/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/dstar_with_folded_hands/{pname}"
+    folder_in__unzipped_txt_files = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
+    extr = hsmithy_selector.HSmithySelector()
+    filenames = glob.glob(
+        f'{folder_in__unzipped_txt_files}**/*.txt',
+        recursive=True)
+    n_files = len(filenames)
+    n_files_skipped = 0
+    for i, f in enumerate(filenames):
+        # print(f'Extracting file {i} / {n_files}')
         try:
             extr.select_from_file(file_path_in=f,
-                              file_path_out=folder_out,
-                              target_player=pname)
+                                  file_path_out=folder_out,
+                                  target_player=pname)
         except UnicodeDecodeError:
             n_files_skipped += 1
-print(f"Done. Extracted {n_files - n_files_skipped}. {n_files_skipped} files were skipped.")
+    return f"Done. Extracted {n_files - n_files_skipped}. {n_files_skipped} files were skipped."
 
+
+def main():
+    start = time.time()
+    p = multiprocessing.Pool()
+    t0 = time.time()
+    for x in p.imap_unordered(filter_games_for_player, best_players):
+        print(x + f'. Took {time.time() - t0} seconds')
+    print(f'Finished job after {time.time() - start} seconds.')
+    p.close()
+
+
+if __name__ == '__main__':
+    main()

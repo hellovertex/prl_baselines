@@ -1,6 +1,7 @@
 """ This module will
  - read .txt files inside ./data/
  - parse them to create corresponding PokerEpisode objects. """
+import os
 import re
 from typing import List, Tuple, Dict, Iterator, Iterable, Generator
 
@@ -29,15 +30,19 @@ class HSmithySelector:
     def _select_hands(self, hands_played):
         for current in hands_played:  # c for current_hand
             # Only parse hands that went to Showdown stage, i.e. were shown
-            if not '*** SHOW DOWN ***' in current:
-                continue
-
             # skip hands without target player
             if not self.target_player in current:
                 continue
+            if f'{self.target_player}: sits out' in current:
+                continue
+            if not '*** SHOW DOWN ***' in current:
+                # todo remove this if clause as we want all games where playre participated
+                a = 1
 
+            if not os.path.exists(self.file_path_out):
+                os.makedirs(self.file_path_out)
             result = "PokerStars Hand #" + current
-            with open(f'{self.file_path_out+"/"+self.target_player}.txt', 'a+', encoding='utf-8') as f:
+            with open(f'{self.file_path_out + "/" + self.target_player}.txt', 'a+', encoding='utf-8') as f:
                 f.write(result)
 
     def select_from_file(self, file_path_in, file_path_out, target_player):
