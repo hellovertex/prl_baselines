@@ -19,10 +19,10 @@ class RLStateEncoder(Encoder):
     Observations = Optional[List[List]]
     Actions_Taken = Optional[List[Tuple[int, int]]]
 
-    def __init__(self, no_folds,
+    def __init__(self, # no_folds,
                  env_wrapper_cls=None,
                  verbose=False):
-        self.no_folds = no_folds
+        # self.no_folds = no_folds
         self.verbose = verbose
         self.env_wrapper_cls = env_wrapper_cls
         self._wrapped_env = None
@@ -212,6 +212,9 @@ class RLStateEncoder(Encoder):
                 # skip edge case of player all in by calling big blind
                 raise self._EnvironmentEdgeCaseEncounteredError("Edge case 1 encountered. See docstring for details.")
         state_dict = {'deck_state_dict': cards_state_dict}
+        if episode.hand_id == 220485600493:
+            print('break at this line for debug')
+            a = 1
         obs, _, done, _ = env.reset(config=state_dict)
         assert obs[-1] in [0, 1, 2, 3, 4, 5], f"obs[-1] = {obs[-1]}. " \
                                               f"get_current_obs should have caught this already. check the wrapper impl"
@@ -219,7 +222,9 @@ class RLStateEncoder(Encoder):
         observations = []
         actions = []
         showdown_players: List[str] = [player.name for player in episode.showdown_hands]
-
+        # if player reached showdown we can see his cards
+        filtered_players = showdown_players if not selected_players else [p for p in showdown_players if
+                                                                          p in selected_players]
         it = 0
         debug_action_list = []
         while not done:
@@ -234,9 +239,6 @@ class RLStateEncoder(Encoder):
             # if self.verbose:
             #     pretty_print(next_to_act, obs, action_label)
             for player in table:
-                # if player reached showdown we can see his cards
-                filtered_players = showdown_players if not selected_players else [p for p in showdown_players if
-                                                                                  p in selected_players]
                 # As long as selected player is in showdown (win or lose) we use his data
                 # todo: we temporarily removed this to generate Dprime without folds, uncomment when done
                 # if selected_players:
@@ -256,6 +258,9 @@ class RLStateEncoder(Encoder):
                     #     obs = self.overwrite_hand_cards_with_random_cards(obs)
                     #     # replace action call/raise with fold
                     #     action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
+                    if action_label == 0:
+                        print('very intersting')
+                        a = 1
                     actions.append(action_label)
                     observations.append(obs)
             debug_action_list.append(action_formatted)
@@ -311,7 +316,9 @@ class RLStateEncoder(Encoder):
         stacks = [player.stack_size for player in table]
 
         self._wrapped_env = init_wrapped_env(self.env_wrapper_cls,
-                                             stacks)
+                                             stacks,
+                                             multiply_by=1,   # already multiplied in self.make_table()
+                                             )
         # will be used for naming feature index in training data vector
         self._feature_names = list(self._wrapped_env.obs_idx_dict.keys())
 

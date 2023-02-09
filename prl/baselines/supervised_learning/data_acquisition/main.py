@@ -116,9 +116,9 @@ if __name__ == '__main__':
     #unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/2.5NL/unzipped"
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
     filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
-    debug = False
+    debug = True
     if debug:
-        parse_encode_write(filename=filenames[0])
+        parse_encode_write(filename=filenames[16])
     else:
         print(f'Starting job. This may take a while.')
         start = time.time()
