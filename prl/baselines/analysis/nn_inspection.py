@@ -117,15 +117,16 @@ def inspection(filename,
                path_out,
                max_files=5):
     parser = HSmithyParser()
-    pname = Path(model_ckpt_abs_path).parent.stem
 
     if type(model_ckpt_abs_path) == str or type(model_ckpt_abs_path) == Path:
+        pname = Path(model_ckpt_abs_path).parent.stem
         hidden_dims = [256] if '256' in pname else [512]
         baseline = BaselineAgent(model_ckpt_abs_path,  # MajorityBaseline
                                  device="cpu",  # "cuda" if torch.cuda.is_available() else "cpu",
                                  flatten_input=False,
                                  model_hidden_dims=hidden_dims)
     else:  # list of checkpoints
+        pname = "MajorityVoting"
         hidden_dims = [[256] if '[256]' in pname else [512] for pname in model_ckpt_abs_path]
         baseline = MajorityBaseline(model_ckpt_paths=model_ckpt_abs_path,  # MajorityBaseline
                                     model_hidden_dims=hidden_dims,
@@ -138,7 +139,7 @@ def inspection(filename,
     print(f'Parsing file {filename} took {time.time() - t0} seconds.')
     num_parsed_hands = len(parsed_hands)
     print(f'num_parsed_hands = {num_parsed_hands}')
-    for ihand, hand in enumerate(parsed_hands[:10000]):
+    for ihand, hand in enumerate(parsed_hands[:5000]):
         print(f'Inspecting model on hand {ihand} / {num_parsed_hands}')
         inspector.inspect_episode(hand, pname=pname)
     # plots logits against true labels and saves csv with result to disk
@@ -149,27 +150,41 @@ def inspection(filename,
 if __name__ == "__main__":
     # model_ckpt_abs_path = "/home/sascha/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds_div_1/with_folds/ckpt_dir/ilaviiitech_[512]_1e-06/ckpt.pt"
     # model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/with_folds_2NL_all_players/ckpt_dir_[512]_1e-06/ckpt.pt"
-    model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/randomized_folds_with_downsamplingv1_0_25NL_all_players/ckpt_dir_[512]_1e-06/ckpt.pt"
+
+    # Single Baseline checkpoint
+    # model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/randomized_folds_with_downsamplingv1_0_25NL_all_players/ckpt_dir_[512]_1e-06/ckpt.pt"
+
+    # Multiple Baseline checkpoints --> Creates Majority Agent in inspect function
+    debug = False
+    model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds_rand_cards/ckpt_dir"
+    player_dirs = [x[0] for x in
+                   os.walk(model_ckpt_abs_path)][1:]
+    player_dirs = [pdir for pdir in player_dirs if not Path(pdir).stem == 'ckpt']
+    ckpts = [pdir + '/ckpt.pt' for pdir in player_dirs]
+    model_ckpt_abs_path = ckpts
+
+    # ctd
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
     # unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/2.5NL/unzipped"
     # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
-    path_out = './results/dprime_rand_folds'
+    path_out = './results/dprime_rand_folds_majority_agent'
     max_files = 1000
     # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
 
-    start = time.time()
-    p = multiprocessing.Pool()
-    t0 = time.time()
-
     inspect_fn = partial(inspection, model_ckpt_abs_path=model_ckpt_abs_path,
                          path_out=path_out,
                          max_files=max_files)
-    for x in p.imap_unordered(inspect_fn, filenames):
-        print(x + f'. Took {time.time() - t0} seconds')
-    print(f'Finished job after {time.time() - start} seconds.')
-
-    p.close()
+    if debug:
+        inspect_fn(filenames[0])
+    else:
+        start = time.time()
+        p = multiprocessing.Pool()
+        t0 = time.time()
+        for x in p.imap_unordered(inspect_fn, filenames):
+            print(x + f'. Took {time.time() - t0} seconds')
+        print(f'Finished job after {time.time() - start} seconds.')
+        p.close()
 
 # if __name__ == "__main__":
 #     # model_ckpt_abs_path = "/home/sascha/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds_div_1/with_folds/ckpt_dir/ilaviiitech_[512]_1e-06/ckpt.pt"
