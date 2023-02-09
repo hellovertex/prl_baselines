@@ -238,23 +238,24 @@ class RLStateEncoder(Encoder):
                 filtered_players = showdown_players if not selected_players else [p for p in showdown_players if
                                                                                   p in selected_players]
                 # As long as selected player is in showdown (win or lose) we use his data
-                if selected_players:
-                    for p in showdown_players:
-                        if p in selected_players:
-                            filtered_players = showdown_players
+                # todo: we temporarily removed this to generate Dprime without folds, uncomment when done
+                # if selected_players:
+                #     for p in showdown_players:
+                #         if p in selected_players:
+                #             filtered_players = showdown_players
                 # only store obs and action of showdown player
                 if player.position_index == next_to_act and player.player_name in filtered_players:
-                    # if not selected_players overwrite action with fold and randomize cards:
-                    if not player.player_name in selected_players:#[winner.name for winner in episode.winners]:
-                        # todo though it is correct we never get here when selected_players is set,
-                        #  make this more explicit with a variable `use_folds` for example
-                        # if not player.player_name in selected_players:
-                        # overwrite cards with random cards every step to generate enough noise
-                        # it does not matter if the last hand is inconsistent with who wins
-                        # because the winning is not part of the observation vector
-                        obs = self.overwrite_hand_cards_with_random_cards(obs)
-                        # replace action call/raise with fold
-                        action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
+                    # todo: we temporarily removed the following if clause to generate Dprime without folds, uncomment when done
+                    # if not player.player_name in selected_players:#[winner.name for winner in episode.winners]:
+                    #     # todo though it is correct we never get here when selected_players is set,
+                    #     #  make this more explicit with a variable `use_folds` for example
+                    #     # if not player.player_name in selected_players:
+                    #     # overwrite cards with random cards every step to generate enough noise
+                    #     # it does not matter if the last hand is inconsistent with who wins
+                    #     # because the winning is not part of the observation vector
+                    #     obs = self.overwrite_hand_cards_with_random_cards(obs)
+                    #     # replace action call/raise with fold
+                    #     action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
                     actions.append(action_label)
                     observations.append(obs)
             debug_action_list.append(action_formatted)
