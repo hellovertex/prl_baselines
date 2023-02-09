@@ -4,7 +4,7 @@
 import os
 import re
 from typing import List, Tuple, Dict, Iterator, Iterable, Generator
-
+from pprint import pprint as print
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Parser, PokerEpisode, Action, ActionType, \
     PlayerStack, Blind, PlayerWithCards, PlayerWinningsCollected
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
@@ -65,16 +65,57 @@ class SelectedPlayerStats:
 
     def rounds(self, current_episode: str) -> Dict[str, str]:
         hole_cards = self.split_at_round(self.preflop_sep, current_episode)
-        # split at flop and strip from turn onwards
         flop = self.split_at_round(self.flop_sep, current_episode)
-        flop = self.strip_next_round(self.turn_sep, flop)
-        # split at turn and strip from river onwards
         turn = self.split_at_round(self.turn_sep, current_episode)
-        turn = self.strip_next_round(self.river_sep, turn)
-        # split at river and strip from summary onwards
         river = self.split_at_round(self.river_sep, current_episode)
+
+        # strip each round from the other rounds, so we isolate them for stat updates
+        # flop, turn, river may be empty string, so we have to find out where to
+        # strip each round
+        # 1. strip hole cards
+        if flop:
+            next_round = self.flop_sep
+            hole_cards = self.strip_next_round(self.flop_sep, hole_cards)
+        else:
+            hole_cards = self.strip_next_round(self.summary_sep, hole_cards)
+        # 2. strip flop cards
+        if turn:
+            # split at flop and strip from turn onwards
+            flop = self.strip_next_round(self.turn_sep, flop)
+        else:
+            flop = self.strip_next_round(self.summary_sep, flop)
+        # 3. strip turn cards
+        if river:
+            # split at turn and strip from river onwards
+            turn = self.strip_next_round(self.river_sep, turn)
+        else:
+            turn = self.strip_next_round(self.summary_sep, turn)
+        # 4. strip river cards
         river = self.strip_next_round(self.summary_sep, river)
-        summary = self.split_at_round(self.summary_sep, current_episode)
+        summary \
+            = self.split_at_round(self.summary_sep, current_episode)
+
+        # Assertions
+        # PREFLOP
+        assert not self.flop_sep in hole_cards
+        assert not self.turn_sep in hole_cards
+        assert not self.river_sep in hole_cards
+        assert not self.summary_sep in hole_cards
+        # FLOP
+        assert not self.preflop_sep in flop
+        assert not self.turn_sep in flop
+        assert not self.river_sep in flop
+        assert not self.summary_sep in flop
+        # TURN
+        assert not self.preflop_sep in turn
+        assert not self.flop_sep in turn
+        assert not self.river_sep in turn
+        assert not self.summary_sep in turn
+        # RIVER
+        assert not self.preflop_sep in river
+        assert not self.flop_sep in river
+        assert not self.turn_sep in river
+        assert not self.summary_sep in river
 
         return {'preflop': hole_cards,
                 'flop': flop,
@@ -103,10 +144,6 @@ class SelectedPlayerStats:
             self.n_raises_or_bets_preflop += 1
 
     def update_preflop(self, preflop_str):
-        assert not self.flop_sep in preflop_str
-        assert not self.turn_sep in preflop_str
-        assert not self.river_sep in preflop_str
-        assert not self.summary_sep in preflop_str
         # VPIP: Voluntarily Put money In Pot
         self.update_vpip(preflop_str)
         # PFR: Preflop Raises
@@ -122,53 +159,64 @@ class SelectedPlayerStats:
                 'n_calls': round_str.count(f'{self.pname}: calls')}
 
     def update_flop(self, flop_str):
-        assert not self.preflop_sep in flop_str
-        assert not self.turn_sep in flop_str
-        assert not self.river_sep in flop_str
-        assert not self.summary_sep in flop_str
         # AF: Aggression factor: (N bets + N raises) / N calls
         af = self.update_af(flop_str)
         self.times_called_f += af['n_calls']
         self.times_bet_or_raised_f += af['n_bets'] + af['n_raises']
 
     def update_turn(self, turn_str):
-        assert not self.preflop_sep in turn_str
-        assert not self.flop_sep in turn_str
-        assert not self.river_sep in turn_str
-        assert not self.summary_sep in turn_str
         # AF: Aggression factor: (N bets + N raises) / N calls
         af = self.update_af(turn_str)
         self.times_called_t += af['n_calls']
         self.times_bet_or_raised_t += af['n_bets'] + af['n_raises']
 
     def update_river(self, river_str):
-        assert not self.preflop_sep in river_str
-        assert not self.flop_sep in river_str
-        assert not self.turn_sep in river_str
-        assert not self.summary_sep in river_str
         # AF: Aggression factor: (N bets + N raises) / N calls
         af = self.update_af(river_str)
         self.times_called_r += af['n_calls']
         self.times_bet_or_raised_r += af['n_bets'] + af['n_raises']
 
+    def skip_invalid(self, current_episode: str):
+        # Skip weird games
+        if "*** SECOND FLOP ***" in current_episode:
+            return True
+        if "*** SECOND TURN ***" in current_episode:
+            return True
+        if "*** SECOND RIVER ***" in current_episode:
+            return True
+        return False
+
     def update(self, current_episode: str):
+        if self.skip_invalid(current_episode):
+            return
         self.total_number_of_hands_seen += 1
         rounds = self.rounds(current_episode)
         self.update_preflop(rounds['preflop'])
 
     def to_dict(self):
         vpiped = self.total_number_of_hands_seen - self.n_immediate_preflop_folds - self.n_big_blind_checked_preflop
-        af = (self.times_bet_or_raised_pf +
-              self.times_bet_or_raised_f +
-              self.times_bet_or_raised_t +
-              self.times_bet_or_raised_r) / (self.times_called_pf +
+        n_calls = (self.times_called_pf +
                                              self.times_called_f +
                                              self.times_called_t +
                                              self.times_called_r)
+        n_bets_or_raises = (self.times_bet_or_raised_pf +
+              self.times_bet_or_raised_f +
+              self.times_bet_or_raised_t +
+              self.times_bet_or_raised_r)
+        if n_calls == 0:
+            af = n_bets_or_raises
+        else:
+            af = n_bets_or_raises/n_calls
+        if self.total_number_of_hands_seen == 0:
+            return {'vpip': -127,
+                    'pfr': -127,
+                    'af': -127,
+                    'total_number_of_samples': 0}
         return {
             'vpip': vpiped / self.total_number_of_hands_seen,
             'pfr': self.n_raises_or_bets_preflop / self.total_number_of_hands_seen,
-            'af': af
+            'af': af,
+            'total_number_of_samples': self.total_number_of_hands_seen
         }
 
 
@@ -202,3 +250,4 @@ class HSmithyStats:
             hand_database = f.read()
             hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
             self._compute_stats(hands_played)
+
