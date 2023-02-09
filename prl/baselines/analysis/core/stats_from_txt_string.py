@@ -196,17 +196,17 @@ class SelectedPlayerStats:
     def to_dict(self):
         vpiped = self.total_number_of_hands_seen - self.n_immediate_preflop_folds - self.n_big_blind_checked_preflop
         n_calls = (self.times_called_pf +
-                                             self.times_called_f +
-                                             self.times_called_t +
-                                             self.times_called_r)
+                   self.times_called_f +
+                   self.times_called_t +
+                   self.times_called_r)
         n_bets_or_raises = (self.times_bet_or_raised_pf +
-              self.times_bet_or_raised_f +
-              self.times_bet_or_raised_t +
-              self.times_bet_or_raised_r)
+                            self.times_bet_or_raised_f +
+                            self.times_bet_or_raised_t +
+                            self.times_bet_or_raised_r)
         if n_calls == 0:
             af = n_bets_or_raises
         else:
-            af = n_bets_or_raises/n_calls
+            af = n_bets_or_raises / n_calls
         if self.total_number_of_hands_seen == 0:
             return {'vpip': -127,
                     'pfr': -127,
@@ -249,4 +249,3 @@ class HSmithyStats:
             hand_database = f.read()
             hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
             self._compute_stats(hands_played)
-
