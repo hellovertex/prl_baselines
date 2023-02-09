@@ -138,11 +138,12 @@ def inspection(filename,
     print(f'Parsing file {filename} took {time.time() - t0} seconds.')
     num_parsed_hands = len(parsed_hands)
     print(f'num_parsed_hands = {num_parsed_hands}')
-    for ihand, hand in enumerate(parsed_hands[:30000]):
+    for ihand, hand in enumerate(parsed_hands[:10000]):
         print(f'Inspecting model on hand {ihand} / {num_parsed_hands}')
         inspector.inspect_episode(hand, pname=pname)
     # plots logits against true labels and saves csv with result to disk
-    make_results(inspector, path_out)
+    make_results(inspector, path_out + Path(filename).stem)
+    return f"Succes. Wrote file to {path_out + '/' + Path(filename).stem}"
 
 
 if __name__ == "__main__":
