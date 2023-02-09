@@ -104,6 +104,14 @@ def parse_encode_write(filename):
 
 
 if __name__ == '__main__':
+    # selected_players: pass list of players to use only showdowns with at least on of em in
+    # use_fold: set to true to generate fold labels
+    # -- if selected players is set, fold labels will be the other players actions + their cards are randomized
+    # the following will only be necessary for 2NL for which we have no time left
+    # todo: assume data is present per player folder
+    #  that means we can ignore 2NL completely for now
+    # -- if not selected players, the fold labels will be the losing players action + their cards are randomized
+    # data present per player (0.25NL) or total files (2NL)
     #main()
     #unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/2.5NL/unzipped"
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"

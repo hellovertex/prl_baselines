@@ -5,8 +5,10 @@ Agression Factor (AF): #raises / #calls
 Tightness: % hands played (not folded immediately preflop)
 """
 import glob
+import multiprocessing
 import os
 import time
+from functools import partial
 from pathlib import Path
 
 import matplotlib
@@ -110,13 +112,10 @@ def make_results(inspector, path_out):
     # return f"Success. Wrote stats to {f'stats_{pname}.txt'}"
 
 
-def inspection(model_ckpt_abs_path,
-               unzipped_dir,
+def inspection(filename,
+               model_ckpt_abs_path,
                path_out,
                max_files=5):
-    # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
-    filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
-
     parser = HSmithyParser()
     pname = Path(model_ckpt_abs_path).parent.stem
 
@@ -133,33 +132,43 @@ def inspection(model_ckpt_abs_path,
                                     device="cuda" if torch.cuda.is_available() else "cpu",
                                     flatten_input=False)
     inspector = Inspector(baseline=baseline, env_wrapper_cls=AugmentObservationWrapper)
-    for filename in filenames[:max_files]:
-        t0 = time.time()
-        parsed_hands = list(parser.parse_file(filename))
-        print(f'Parsing file {filename} took {time.time() - t0} seconds.')
-        num_parsed_hands = len(parsed_hands)
-        print(f'num_parsed_hands = {num_parsed_hands}')
-        for ihand, hand in enumerate(parsed_hands):
-            print(f'Inspecting model on hand {ihand} / {num_parsed_hands}')
-            inspector.inspect_episode(hand, pname=pname)
+    # for filename in filenames[:max_files]:
+    t0 = time.time()
+    parsed_hands = list(parser.parse_file(filename))
+    print(f'Parsing file {filename} took {time.time() - t0} seconds.')
+    num_parsed_hands = len(parsed_hands)
+    print(f'num_parsed_hands = {num_parsed_hands}')
+    for ihand, hand in enumerate(parsed_hands[:30000]):
+        print(f'Inspecting model on hand {ihand} / {num_parsed_hands}')
+        inspector.inspect_episode(hand, pname=pname)
     # plots logits against true labels and saves csv with result to disk
     make_results(inspector, path_out)
 
 
 if __name__ == "__main__":
     # model_ckpt_abs_path = "/home/sascha/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds_div_1/with_folds/ckpt_dir/ilaviiitech_[512]_1e-06/ckpt.pt"
-    #model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/with_folds_2NL_all_players/ckpt_dir_[512]_1e-06/ckpt.pt"
+    # model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/with_folds_2NL_all_players/ckpt_dir_[512]_1e-06/ckpt.pt"
     model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/randomized_folds_with_downsamplingv1_0_25NL_all_players/ckpt_dir_[512]_1e-06/ckpt.pt"
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
-    #unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/2.5NL/unzipped"
+    # unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/2.5NL/unzipped"
     # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     path_out = './results/dprime_rand_folds'
     max_files = 1000
-    # todo make this parallelizable for multiple networks
-    inspection(model_ckpt_abs_path=model_ckpt_abs_path,
-               unzipped_dir=unzipped_dir,
-               path_out=path_out,
-               max_files=max_files)
+    # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
+    filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
+
+    start = time.time()
+    p = multiprocessing.Pool()
+    t0 = time.time()
+
+    inspect_fn = partial(inspection, model_ckpt_abs_path=model_ckpt_abs_path,
+                         path_out=path_out,
+                         max_files=max_files)
+    for x in p.imap_unordered(inspect_fn, filenames):
+        print(x + f'. Took {time.time() - t0} seconds')
+    print(f'Finished job after {time.time() - start} seconds.')
+
+    p.close()
 
 # if __name__ == "__main__":
 #     # model_ckpt_abs_path = "/home/sascha/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds_div_1/with_folds/ckpt_dir/ilaviiitech_[512]_1e-06/ckpt.pt"
