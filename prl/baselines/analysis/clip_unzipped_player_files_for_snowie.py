@@ -18,8 +18,7 @@ def write_shortened_version_for_snowie_analysis(filename, n_hands, path_out):
     with open(os.path.join(path_out, Path(filename).stem)+".txt", 'a+') as f:
         for e in hands_played[:n_hands]:
             f.write("PokerStars Hand #" + e)
-
-
+    return f"Success. Wrote to {path_out + '/'+Path(filename).stem} from {filename}. "
 
 if __name__ == '__main__':
     # load player dirs via multiprocessing and write back stripped down files for pokersnowie eval
