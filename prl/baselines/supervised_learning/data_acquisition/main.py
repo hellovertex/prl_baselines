@@ -66,7 +66,7 @@ def parse_encode_write(filename,
     return runner.parse_encode_write(filename)
 
 
-def make_datasets(filenames, params, debug):
+def make_datasets_selected_players_from_Dprime(filenames, params, debug):
     # from_selected_players = False
     # drop_folds = False
     # randomize_folds_cards = False
@@ -87,6 +87,35 @@ def make_datasets(filenames, params, debug):
         p = multiprocessing.Pool()
         t0 = time.time()
         for x in p.imap_unordered(run_fn, filenames):
+            print(x + f'. Took {time.time() - t0} seconds')
+        print(f'Finished job after {time.time() - start} seconds.')
+        p.close()
+
+
+def make_datasets_all_players_from_D(filenames, params_list, debug):
+    """ Runs in parallel on parameters because filenames will be a list with 250k files.
+    As opposed to the player generation which runs on 17 files one for each player.
+    parallelization runs on filenames there."""
+    # from_selected_players = False
+    # drop_folds = False
+    # randomize_folds_cards = False
+    # the `params` define which name the output dataset folder has:
+    # path_out_D_nf = 'actions_all_winners__do_not_generate_fold_labels'
+    # path_out_D_f_nr = 'actions_all_winners__generate_folds__keep_folded_cards'
+    # path_out_D_f_r = 'actions_all_winners__generate_folds__randomize_folded_cards'
+    # path_out_Ds_nf = 'actions_selected_players__do_not_generate_folds'
+    # path_out_Ds_f_nr = 'actions_selected_players__generate_folds__keep_folded_cards'
+    # path_out_Ds_f_r = 'actions_selected_players__generate_folds__randomize_folded_cards'
+
+    run_fn = partial(parse_encode_write, filenames)
+    if debug:
+        run_fn(params=params_list[0])
+    else:
+        print(f'Starting job. This may take a while.')
+        start = time.time()
+        p = multiprocessing.Pool()
+        t0 = time.time()
+        for x in p.imap_unordered(run_fn, params_list):
             print(x + f'. Took {time.time() - t0} seconds')
         print(f'Finished job after {time.time() - start} seconds.')
         p.close()
@@ -118,24 +147,41 @@ def make_datasets(filenames, params, debug):
 #               default=False,
 #               help="See runner.run docstring for an explanation of what changed with version two.")
 def main(out_dir, from_gdrive_id, unzipped_dir):
-    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
+    # unzpped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
+    # unzinames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
+    # fileipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
+    debug = False
+
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
     filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
-    debug = False
-    for from_selected_players in [True, False]:
-        for drop_folds in [True, False]:
-            if drop_folds:
-                params = {'from_selected_players': from_selected_players,
-                          'drop_folds': drop_folds,
-                          'randomize_fold_cards': False}
-                make_datasets(filenames, params, debug)
-            else:
-                for randomize_folds_cards in [True, False]:
-                    # parse encode write here
-                    params = {'from_selected_players': from_selected_players,
-                              'drop_folds': drop_folds,
-                              'randomize_fold_cards': randomize_folds_cards}
-                    make_datasets(filenames, params, debug)
+    params_0 = {'from_selected_players': True,
+                'drop_folds': True,
+                'randomize_fold_cards': False}
+    params_1 = {'from_selected_players': True,
+                'drop_folds': False,
+                'randomize_fold_cards': False}
+    params_2 = {'from_selected_players': True,
+                'drop_folds': False,
+                'randomize_fold_cards': True}
+    make_datasets_selected_players_from_Dprime(filenames, params_0, debug)
+    make_datasets_selected_players_from_Dprime(filenames, params_1, debug)
+    make_datasets_selected_players_from_Dprime(filenames, params_2, debug)
+
+    # todo consider making extra function for this repeated snippet
+    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
+    filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
+    params_0 = {'from_selected_players': False,
+                'drop_folds': False,
+                'randomize_fold_cards': False}
+    params_1 = {'from_selected_players': False,
+                'drop_folds': False,
+                'randomize_fold_cards': True}
+    params_2 = {'from_selected_players': False,
+                'drop_folds': True,
+                'randomize_fold_cards': False  # this will be ignored when `drop_folds=true`
+                }
+    params_list = [params_0, params_1, params_2]
+    make_datasets_all_players_from_D(filenames, params_list, debug)
 
 
 if __name__ == '__main__':
