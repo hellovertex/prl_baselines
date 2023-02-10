@@ -40,7 +40,7 @@ class Runner:
                  use_outdir_per_player=False,
                  out_dir="0.25-0.50",
                  only_from_selected_players=False,
-                 selected_players: List[str]=None
+                 selected_players: List[str] = None
                  ):
         self.use_outdir_per_player = use_outdir_per_player
         self._n_files_written_this_run = 0
@@ -112,18 +112,18 @@ class Runner:
         return out_dir
 
     def _log(self, file_dir, abs_filepath):
-
-        if not os.path.exists(os.path.dirname(self.logfile)):
-            os.makedirs(os.path.realpath(os.path.dirname(self.logfile)), exist_ok=True)
-
-        # Store which files we parsed
-        with open(self.logfile, "a") as f:
-            f.write(abs_filepath + "\n")
+        pass
+        # if not os.path.exists(os.path.dirname(self.logfile)):
+        #     os.makedirs(os.path.realpath(os.path.dirname(self.logfile)), exist_ok=True)
+        #
+        # # Store which files we parsed
+        # with open(self.logfile, "a") as f:
+        #     f.write(abs_filepath + "\n")
         # Store how many showdowns in total we parsed
-        file_path_metadata = os.path.join(file_dir, f"{self.writer.out_filename_base}.meta")
-        with open(file_path_metadata, "w") as file:
-            file.write({'n_showdowns': self._n_showdowns}.__repr__() + "\n")
-        return file_path_metadata
+        # file_path_metadata = os.path.join(file_dir, f"{self.writer.out_filename_base}.meta")
+        # with open(file_path_metadata, "w") as file:
+        #     file.write({'n_showdowns': self._n_showdowns}.__repr__() + "\n")
+        # return file_path_metadata
 
     def _encode(self, from_parsed_hands):
         training_data, labels = None, None
