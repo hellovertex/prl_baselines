@@ -251,7 +251,7 @@ class RLStateEncoder(Encoder):
                 if player.position_index == next_to_act and player.player_name in filtered_players:
                     # take (obs, action) from selected player or winner if selected players is None
                     target_players = selected_players if selected_players else [winner.name for winner in episode.winners]
-                    if player.name in target_players:
+                    if player.player_name in target_players:
                         actions.append(action_label)
                         observations.append(obs)
                     # Maybe select opponents (obs, action) where we set action=FOLD
