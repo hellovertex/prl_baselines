@@ -57,7 +57,7 @@ class HSmithyExtractor:
                       target_players):
         n_files = len(fpaths)
         n_files_skipped = 0
-        for i, f in enumerate(fpaths):
+        for i, f in enumerate(fpaths[:-1]):
             print(f'Extracting file {i}/{n_files}....')
             try:
                 self.extract_file(f, file_path_out, target_players)
