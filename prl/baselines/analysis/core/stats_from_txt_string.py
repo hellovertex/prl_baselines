@@ -53,6 +53,10 @@ class SelectedPlayerStats:
         self.times_called_t = 0
         self.times_called_r = 0
 
+        # WTSD: Went to showdown
+        self.participated_in_showdown = 0
+        self.won_showdown = 0
+
     def strip_next_round(self, strip_round, episode_str):
         return episode_str.split(strip_round)[0]
 
@@ -186,12 +190,28 @@ class SelectedPlayerStats:
             return True
         return False
 
+    def update_summary(self, summary_str):
+        # todo: update wtsd
+        lines = summary_str.split('\n')
+        if 'share' in summary_str:
+            a = 1
+        for l in lines:
+            if self.pname in l:
+                if 'mucked' in l or 'showed' in l:
+                    self.participated_in_showdown += 1
+                if 'won' in l:
+                    self.won_showdown += 1
+
     def update(self, current_episode: str):
         if self.skip_invalid(current_episode):
             return
         self.total_number_of_hands_seen += 1
         rounds = self.rounds(current_episode)
         self.update_preflop(rounds['preflop'])
+        self.update_flop(rounds['flop'])
+        self.update_turn(rounds['turn'])
+        self.update_river(rounds['river'])
+        self.update_summary(rounds['summary'])
 
     def to_dict(self):
         vpiped = self.total_number_of_hands_seen - self.n_immediate_preflop_folds - self.n_big_blind_checked_preflop
@@ -211,12 +231,15 @@ class SelectedPlayerStats:
             return {'vpip': -127,
                     'pfr': -127,
                     'af': -127,
+                    'wtsd': -127,
                     'total_number_of_samples': 0}
         return {
             'vpip': vpiped / self.total_number_of_hands_seen,
             'pfr': self.n_raises_or_bets_preflop / self.total_number_of_hands_seen,
             'af': af,
-            'total_number_of_samples': self.total_number_of_hands_seen
+            'total_number_of_samples': self.total_number_of_hands_seen,
+            'wtsd': self.participated_in_showdown / self.total_number_of_hands_seen,
+            'won': self.won_showdown
         }
 
 

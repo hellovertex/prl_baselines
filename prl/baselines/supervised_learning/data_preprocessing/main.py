@@ -1,11 +1,15 @@
 import glob
+from enum import IntEnum
 from functools import partial
+from pathlib import Path
 
 import click
+from prl.environment.Wrappers.base import ActionSpace
 
 from prl.baselines.supervised_learning.config import DATA_DIR
 from prl.baselines.supervised_learning.data_preprocessing.callbacks import to_csv
 from prl.baselines.supervised_learning.data_preprocessing.preprocessor import Preprocessor
+from prl.baselines.supervised_learning.data_preprocessing.preprocessor import DatasetLabelBalanceFactor__PercentageOf
 
 DEFAULT_VECTORIZED_DATA_PATH = str(DATA_DIR) + '/02_vectorized'
 DEFAULT_PREPROCESSED_DATA_PATH = str(DATA_DIR) + '/03_preprocessed'
@@ -36,18 +40,31 @@ def main(blind_sizes, path_to_csv_files, output_dir, use_downsampling):
     #     "/home/hellovertex/Documents/github.com/prl_baselines/data/02_vectorized/0.25-0.50" "/**/*.csv", recursive=True)
     # for path_to_csv_files in player_folders[1:]:
     # out_dir = "2NL"
+    sampling_fractions = [1 for _ in range(len(ActionSpace))]
+    percentage_of = DatasetLabelBalanceFactor__PercentageOf.MAX_RAISE_LABELS
 
-    use_downsampling = False
+    """Want two predefined sets of balanced label frequencies.
+    make folder naming accordingly. pipe input dir and append labelling strategy name
+    
+    """
     if not path_to_csv_files:
         path_to_csv_files = DEFAULT_VECTORIZED_DATA_PATH + f'/{blind_sizes}'
-        path_to_csv_files = "/home/hellovertex/Documents/github.com/prl_baselines/data/02_vectorized/0.25-0.50_no_folds"
     if not output_dir:
         output_dir = DEFAULT_PREPROCESSED_DATA_PATH + f'/{blind_sizes}'
-        output_dir = DEFAULT_PREPROCESSED_DATA_PATH + f'/no_folds'
-    output_dir =output_dir
+    subdir = Path(path_to_csv_files).stem
+    output_dir += f'/{subdir}'
     callbacks = [partial(to_csv, output_dir=output_dir)]
-    preprocessor = Preprocessor(path_to_csv_files, recursive=True)
-    preprocessor.run(use_downsampling=use_downsampling, callbacks=callbacks)
+    preprocessor = Preprocessor(path_to_csv_files,
+                                recursive=True)
+
+    use_label_balancing = True
+    preprocessor.run(use_label_balancing=use_label_balancing,
+                     sampling_fractions=sampling_fractions,
+                     percentage_of=percentage_of,
+                     callbacks=callbacks)
+    # preprocess per player dataset
+    # run for and write to individual files
+    # preprocess whole dataset
 
 
 if __name__ == '__main__':
