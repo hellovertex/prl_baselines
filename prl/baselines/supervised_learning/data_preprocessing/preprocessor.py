@@ -1,23 +1,36 @@
 import glob
-import os
+from enum import IntEnum
 from functools import partial
 from pathlib import Path
+from typing import List
 
 import pandas as pd
 from prl.environment.Wrappers.augment import ActionSpace
 from sklearn.utils import resample
 
-from prl.baselines.supervised_learning.config import DATA_DIR
+
+class DatasetLabelBalanceFactor__PercentageOf(IntEnum):
+    MAX_RAISE_LABELS = 0
+    N_FOLDS = 1
+    N_CALLS = 2
+    DISABLE_LABEL_BALANCING = 99
 
 
 class Preprocessor:
-    def __init__(self, path_to_csv_files, recursive=False):
+    def __init__(self,
+                 path_to_csv_files,
+                 writer=None,
+                 recursive=False):
         self._path_to_csv_files = path_to_csv_files
         self._csv_files = glob.glob(path_to_csv_files.__str__() + '**/*.csv', recursive=recursive)
         if not self._csv_files:
             self._csv_files = glob.glob(path_to_csv_files.__str__() + '/**/*.csv', recursive=recursive)
 
-    def run(self, use_downsampling=True, callbacks=None):
+    def run(self,
+            use_label_balancing,
+            sampling_fractions: List[float] = None,
+            percentage_of: DatasetLabelBalanceFactor__PercentageOf = None,
+            callbacks=None):
         """
         For each csv file, create a numerical dataframe and remove erroneous lines
         Additional callbacks can be provided, e.g. to write the file back as .csv file """
@@ -34,6 +47,18 @@ class Preprocessor:
 
         print(df_total.head())
         # todo: do downsampling on total df not individual dfs
+        if use_label_balancing:
+            assert percentage_of
+            assert sampling_fractions
+            df_total = self.downsample(df_total, sampling_fractions, percentage_of)
+        label_freqs = df_total['label'].value_counts()
+        print(f'Label_frequencies for dataset: {label_freqs}')
+        # shuffle
+        # todo wip: fix this
+        # todo MAYBE THIS IS TOO LARGE WITH 60GB then we have to fall back to
+        #  looping individual files
+        df_total = df_total.sample(frac=1)
+        [c(df_total, file) for c in cbs]
         a = 1
 
     def extract_subset(self, df: pd.DataFrame,
