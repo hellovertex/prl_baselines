@@ -255,6 +255,9 @@ class RLStateEncoder(Encoder):
                         actions.append(action_label)
                         observations.append(obs)
                     # Maybe select opponents (obs, action) where we set action=FOLD
+                    # Note that opponent may be the winner if selected players is not None,
+                    # but we assume that selected players have the better strategy even
+                    # if they lose to variance here, so we drop the winners action in this case
                     else:
                         if not self.drop_folds:
                             action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
@@ -262,20 +265,6 @@ class RLStateEncoder(Encoder):
                                 obs = self.overwrite_hand_cards_with_random_cards(obs)
                             actions.append(action_label)
                             observations.append(obs)
-
-
-                    # if not player.player_name in selected_players:#[winner.name for winner in episode.winners]:
-                    #     # todo though it is correct we never get here when selected_players is set,
-                    #     #  make this more explicit with a variable `use_folds` for example
-                    #     # if not player.player_name in selected_players:
-                    #     # overwrite cards with random cards every step to generate enough noise
-                    #     # it does not matter if the last hand is inconsistent with who wins
-                    #     # because the winning is not part of the observation vector
-                    #     obs = self.overwrite_hand_cards_with_random_cards(obs)
-                    #     # replace action call/raise with fold
-                    #     action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
-                    
-                    
             debug_action_list.append(action_formatted)
 
             obs, _, done, _ = env.step(action_formatted)
