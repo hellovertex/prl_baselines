@@ -45,6 +45,7 @@ best_players = ['ishuha',
 
 def filter_games_for_player(pname: str) -> str:
     folder_in__unzipped_txt_files = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
+    folder_in__unzipped_txt_files = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
 
     stats = HSmithyStats(pname=pname)
 

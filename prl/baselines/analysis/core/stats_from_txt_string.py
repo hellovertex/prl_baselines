@@ -192,7 +192,15 @@ class SelectedPlayerStats:
 
     def update_summary(self, summary_str):
         # todo: update wtsd
-        pass
+        lines = summary_str.split('\n')
+        if 'share' in summary_str:
+            a = 1
+        for l in lines:
+            if self.pname in l:
+                if 'mucked' in l or 'showed' in l:
+                    self.participated_in_showdown += 1
+                if 'won' in l:
+                    self.won_showdown += 1
 
     def update(self, current_episode: str):
         if self.skip_invalid(current_episode):
@@ -223,12 +231,15 @@ class SelectedPlayerStats:
             return {'vpip': -127,
                     'pfr': -127,
                     'af': -127,
+                    'wtsd': -127,
                     'total_number_of_samples': 0}
         return {
             'vpip': vpiped / self.total_number_of_hands_seen,
             'pfr': self.n_raises_or_bets_preflop / self.total_number_of_hands_seen,
             'af': af,
-            'total_number_of_samples': self.total_number_of_hands_seen
+            'total_number_of_samples': self.total_number_of_hands_seen,
+            'wtsd': self.participated_in_showdown / self.total_number_of_hands_seen,
+            'won': self.won_showdown
         }
 
 
