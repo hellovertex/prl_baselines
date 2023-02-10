@@ -11,13 +11,13 @@ TEST_BATCH_SIZE = 512
 
 
 @click.command()
-@click.option("--blind_sizes",
+@click.option("--out_dir",
               default="0.25-0.50",
               type=str,
               help="Possible values are e.g. '0.25-0.50', '0.50-1.00', '1.00-2.00'")
 @click.option("--path_to_csv_files",
               type=str,
-              help="Optional if you do not want to use training data from data/03_preprocessed/{blind_sizes}, "
+              help="Optional if you do not want to use training data from data/03_preprocessed/{out_dir}, "
                    "e.g. if you want to train using data that is (not) down-sampled.")
 @click.option("--ckpt_dir",
               type=str,

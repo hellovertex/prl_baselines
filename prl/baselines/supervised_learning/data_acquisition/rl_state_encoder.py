@@ -223,8 +223,16 @@ class RLStateEncoder(Encoder):
         actions = []
         showdown_players: List[str] = [player.name for player in episode.showdown_hands]
         # if player reached showdown we can see his cards
-        filtered_players = showdown_players if not selected_players else [p for p in showdown_players if
-                                                                          p in selected_players]
+        # filtered_players = showdown_players if not selected_players else [p for p in showdown_players if
+        #                                                                           p in selected_players]
+        filtered_players = None
+        if not selected_players:
+            filtered_players = showdown_players
+        else:
+            for p in showdown_players:
+                if p in selected_players:
+                    filtered_players = showdown_players
+        assert filtered_players is not None, "filtered players must be equal to showdown players"
         it = 0
         debug_action_list = []
         while not done:
@@ -239,15 +247,23 @@ class RLStateEncoder(Encoder):
             # if self.verbose:
             #     pretty_print(next_to_act, obs, action_label)
             for player in table:
-                # As long as selected player is in showdown (win or lose) we use his data
-                # todo: we temporarily removed this to generate Dprime without folds, uncomment when done
-                # if selected_players:
-                #     for p in showdown_players:
-                #         if p in selected_players:
-                #             filtered_players = showdown_players
-                # only store obs and action of showdown player
+                # If player is showdown player
                 if player.position_index == next_to_act and player.player_name in filtered_players:
-                    # todo: we temporarily removed the following if clause to generate Dprime without folds, uncomment when done
+                    # take (obs, action) from selected player or winner if selected players is None
+                    target_players = selected_players if selected_players else [winner.name for winner in episode.winners]
+                    if player.name in target_players:
+                        actions.append(action_label)
+                        observations.append(obs)
+                    # Maybe select opponents (obs, action) where we set action=FOLD
+                    else:
+                        if not self.drop_folds:
+                            action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
+                            if self.randomize_fold_cards:
+                                obs = self.overwrite_hand_cards_with_random_cards(obs)
+                            actions.append(action_label)
+                            observations.append(obs)
+
+
                     # if not player.player_name in selected_players:#[winner.name for winner in episode.winners]:
                     #     # todo though it is correct we never get here when selected_players is set,
                     #     #  make this more explicit with a variable `use_folds` for example
@@ -258,11 +274,8 @@ class RLStateEncoder(Encoder):
                     #     obs = self.overwrite_hand_cards_with_random_cards(obs)
                     #     # replace action call/raise with fold
                     #     action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
-                    if action_label == 0:
-                        print('very intersting')
-                        a = 1
-                    actions.append(action_label)
-                    observations.append(obs)
+                    
+                    
             debug_action_list.append(action_formatted)
 
             obs, _, done, _ = env.step(action_formatted)
@@ -290,11 +303,18 @@ class RLStateEncoder(Encoder):
             bit_arr.append(self.cards2dtolist(card))
         return bit_arr
 
-    def encode_episode(self, episode: PokerEpisode, selected_players=None, verbose=True) -> Tuple[
+    def encode_episode(self,
+                       episode: PokerEpisode,
+                       drop_folds=False,
+                       randomize_fold_cards=False,
+                       selected_players=None,
+                       verbose=True) -> Tuple[
         Observations, Actions_Taken]:
         """Runs environment with steps from PokerEpisode.
         Returns observations and corresponding actions of players that made it to showdown."""
         self.verbose = True
+        self.drop_folds = drop_folds
+        self.randomize_fold_cards = randomize_fold_cards
         # Maybe skip game, if selected_players is set and no selected player was in showdown
         if selected_players:
             # skip episode if no selected_players has played in it

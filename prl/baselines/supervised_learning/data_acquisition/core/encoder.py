@@ -47,7 +47,7 @@ class Encoder:  # pylint: disable=too-few-public-methods
     """ Abstract Encoder Interface. All encoders should be derived from this base class
     and implement the method "encode_episode"."""
 
-    def encode_episode(self, episode: PokerEpisode, **kwargs):
+    def encode_episode(self, episode: PokerEpisode, *args, **kwargs):
         """Encodes one PokerEpisode to a vector that can be used for machine learning.
             Args:
                 episode: A PokerEpisode returned by a Parser object.

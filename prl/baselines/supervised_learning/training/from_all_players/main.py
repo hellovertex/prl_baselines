@@ -15,17 +15,17 @@ TEST_BATCH_SIZE = 64
 
 
 @click.command
-@click.option("--blind_sizes",
+@click.option("--out_dir",
               default="0.25-0.50",
               type=str,
               help="Possible values are e.g. '0.25-0.50', '0.50-1.00', '1.00-2.00'")
 @click.option("--path_to_datasamples",
               type=str,
-              help="Optional if you do not want to use training data from data/03_preprocessed/{blind_sizes}, "
+              help="Optional if you do not want to use training data from data/03_preprocessed/{out_dir}, "
                    "e.g. if you want to train using data that is not down-sampled.")
 @click.option("--path_to_testsamples",
               type=str,
-              help="Optional if you do not want to use test data from data/03_preprocessed/{blind_sizes}/test, "
+              help="Optional if you do not want to use test data from data/03_preprocessed/{out_dir}/test, "
                    "e.g. if you want to test using data that is not down-sampled.")
 def main(blind_sizes, path_to_datasamples, path_to_testsamples):
     """ Call with `python main.py --output_dir_preprocessing <PATH_TO_DATAFOLDER>/03_preprocessed

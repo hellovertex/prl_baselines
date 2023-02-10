@@ -12,7 +12,7 @@ DEFAULT_PREPROCESSED_DATA_PATH = str(DATA_DIR) + '/03_preprocessed'
 
 
 @click.command()
-@click.option("--blind_sizes",
+@click.option("--out_dir",
               default="0.25-0.50",
               type=str,
               help="Possible values are e.g. '0.25-0.50', '0.50-1.00', '1.00-2.00'")
@@ -20,12 +20,12 @@ DEFAULT_PREPROCESSED_DATA_PATH = str(DATA_DIR) + '/03_preprocessed'
               default="",
               type=str,  # absolute path
               help="Passing path_to_csv_files we can bypass the naming convention "
-                   "that will look up data/02_vectorized/{blind_sizes} for data to preprocess. ")
+                   "that will look up data/02_vectorized/{out_dir} for data to preprocess. ")
 @click.option("--output_dir",
               default="",
               type=str,  # absolute path
               help="Optionally pass an output dir to circumvent convetion of writing to "
-                   "./data/03_preprocessed/{blind_sizes} ")
+                   "./data/03_preprocessed/{out_dir} ")
 @click.option("--use_downsampling",
               default=True,
               type=bool,  # absolute path
@@ -35,7 +35,7 @@ def main(blind_sizes, path_to_csv_files, output_dir, use_downsampling):
     # player_folders = glob.glob(
     #     "/home/hellovertex/Documents/github.com/prl_baselines/data/02_vectorized/0.25-0.50" "/**/*.csv", recursive=True)
     # for path_to_csv_files in player_folders[1:]:
-    # blind_sizes = "2NL"
+    # out_dir = "2NL"
     use_downsampling = False
     if not path_to_csv_files:
         path_to_csv_files = DEFAULT_VECTORIZED_DATA_PATH + f'/{blind_sizes}'
