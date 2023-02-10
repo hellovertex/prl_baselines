@@ -9,31 +9,80 @@ for each observation, compare actions taken
 
 """
 import glob
+import multiprocessing
+import time
+from functools import partial
 
 from prl.baselines.supervised_learning.data_acquisition import hsmithy_extractor
 
-folder_out = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
-extr = hsmithy_extractor.HSmithyExtractor()
-filenames = glob.glob("/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped/**/*.txt",
-                      recursive=True)
 
-best_players = ['ishuha',
-                'Sakhacop',
-                'nastja336',
-                'Lucastitos',
-                'I LOVE RUS34',
-                'SerAlGog',
-                'Ma1n1',
-                'zMukeha',
-                'SoLongRain',
-                'LuckyJO777',
-                'Nepkin1',
-                'blistein',
-                'ArcticBearDK',
-                'Creator_haze',
-                'ilaviiitech',
-                'm0bba',
-                'KDV707']
+best_players_over20k_gains = ['ishuha',
+                              'Sakhacop',
+                              'nastja336',
+                              'Lucastitos',
+                              'I LOVE RUS34',
+                              'SerAlGog',
+                              'Ma1n1',
+                              'zMukeha',
+                              'SoLongRain',
+                              'LuckyJO777',
+                              'Nepkin1',
+                              'blistein',
+                              'ArcticBearDK',
+                              'Creator_haze',
+                              'ilaviiitech',
+                              'm0bba',
+                              'KDV707']
+best_players_over5k_gains = ['Maximysss85', 'Fumizja', 'Rusyaha', 'KimWanHull', 'kolykam', 'Fabian_PL', 'Reg1N55',
+                             'mantas79', 'riddle017', 'vadjkeee', 'Punzzzer', 'Shaftey11', 'symkalaila', 'OJIEHb222',
+                             'Jzzz99', 'RichRiu4', 'JahSoldier69', 'illarins', 'MurdocPwR', 'realphenom', 'MaCe90',
+                             'danuuutz', 'philhell24', 'delpalo', 'ChrisChamber', 'bulhakau', 'fire9372', 'Justice2k17',
+                             'R_Silis93', 'extinction51', 'sven219', 'Myk2004', 'TheFranchiss', 'shootingGRID',
+                             'Geconiel', 'VirteKs', 'bigBUG1488', 'Bratishok', 'chechoraiser', 'yzuk', 'epiLewg',
+                             'master_pc06', 'onepiece314', 'Naughty_ept', 'Fosca999', 'badmadrabbit', '4ikibumbella',
+                             'LilTonyV', 'easy_sarcasm', 'clww', 'X-Triha-X', 'spartaknv', 'Voodgchoo', 'andutu34',
+                             'IC1MALE', 'lol19899', 'Rysiff', 'Heaton#RISES', 'morraish', 'fate_eyed', 'bekonja',
+                             'vIpClubFish', 'VR13', 'GeoflexPoker', 'Red.Jh0nn', 'Pegasus2102', 'Korifei94',
+                             'rusher_NiNja', 'Foccc', 'XxDragomanxX', 'trewq123', 'nepkin', 'doselka', 'Iuckyfluke',
+                             'dexeosRankX', 'WYIYW', 'ShoutToDeath', 'shnur221087', 'jardinero9', '2pokTG', 'spensor1',
+                             'dawnerr', 'Retschy', 'vadimstryha', 'sisojla', 'DirtyRuble', 'danycreep', 'Communist654',
+                             'mind.in.aBox', 'LichtVS', 'GaussJordan24', 'xxxZeka', 'odisseas1989', 'SugarRayLeon',
+                             'N_Rimer', 'ivan_graf', 'VCardKiller', 'FuchsJ', 'MoZL9', 'SGralex', 'Lakaem45', 'Y_19',
+                             'fish my nuts', 'max21rus1988', 'MARGARCIA09', 'Tigristen', 'Julnin', 'reeqar',
+                             'Kach_2010', 'voshod561', 'Hidey7', 'geopaok4', '23RoChe23', 'Aleqseuka', 'scenotaph',
+                             'Icefire00627', 'fandorin2005', 'jwu63', 'irenicus24', 'Winterds', 'xSilverKx',
+                             'FreshLocky', 'santa88188', 'Shirachi90', 'manashov', 'ACnuJkee', 'maxxll', 'BorissKGB',
+                             'Chess_pub', 'kaiaman', 'Lange1es', 'sircatres', 'Kolyan2114', 'luis619angel',
+                             'Gallofree333', 'iai86', 'MaximUSNG', 'Sanctigallus', 'mradon', 'Mr. Itsco', 'Jo_jpp',
+                             'RCAMDESSUS', 'KOCTA47', 'Fantom979', 'pomkaPWNZ', 'worth303', 'Dspn', 'solbi86', 'Pewbie',
+                             'shameShamee', 'Bkmbx86', 'WINDTOY', 'santamariya89', 'spr1teg', 'HELOTS', 'prophet436',
+                             'Becar_06', 'One23drumm', 'jjohnys85', 'Soulfrozz', 'zver1596357', 'PinnacleUa', 'pupan45',
+                             'salamandryko', 'fcardu25', 'N1leon', 'Russia163', 'Furbzzzzz', 'BefirsSt', 'DUICA611',
+                             'crist_89870', 'grahpAA', 'derek5858', 'ChikoKz740', 'ExperimentoPS', 'soplak',
+                             'RiggedBoy', 'feelgroundik', 'yorke132', 'aandrushaa', 'edmundtrebus', 'Radzko', 'ruQx01',
+                             'borneodreams', 'jext', 'drosser321', 'Thxmoon1', 'olo0olo', 'razukhin', 'malabar357',
+                             'kvitun', 'GabOo175', 'BenjiPL', 'Roma_Demiden', 'lebowskiguy', 'Bostya', 'Anton Tr',
+                             'drakula110', 'Lurst', 'gitarist74', 'orobertino', 'Gerafont', 'Dioprest', 'koksskrt',
+                             '1Spanec', 'quadroq3', 'Gluck35', 'nguyenthianhdao', 'Daorin', 'Becks Baker',
+                             'Maks Bavenko', 'Eretik1985', 'MaksCh1', 'tommyteckers', 'goldmel', 'eeeLOVEnkov',
+                             'eyesellbeams', 'Marklar1992', 'BinaryStorm', 'Pgaliley', 'AceKingMir', 'Faine mist0',
+                             'O_Buda', 'Gaben ICM', 'tyabutani', '1TOP1', 'shaykee', 'DXJ7', 'Subaru52rus',
+                             'dontbetme27', 'Degtyaryov', 'Yaruk7', 'PuRpL_M4mbA', 'Rezzonner', 'vest78', 'Smogg96',
+                             'alf51321', 'LJGDMBC', '7bekon7', 'Heidy_T', 'super_pavel9', 'eraser2308', 'patriot424',
+                             'chikan0k', 'G.Andrei95', 'PotatoMonste', 'MyBestPokeR', 'Belvedera', 'Infusorium',
+                             'sil3ntium8', 'Strelok1974', 'mixailll99', 'Shivas prana', 'Yspenyanin', 'Solovyova',
+                             'vampire131313', 'MordOleg', 'EasyGamerrr', 'Kuemmerlinge', 'Apuctokpat777', 'wanax777',
+                             'Maxi Goldman', 'Xenicide', '1kum', 'juipelo', 'Ext.HuliGan', '0neLevel', 'dragu419',
+                             'SATAN0SS', 'EddyFelson90', 'Andrew Dee F', 'jimbo_fast', 'Redman3008', 'aldair68',
+                             'vbnote', 'oxxxy', 'AndreiCoz', 'duk555', 'rgkkk', 'irc122', 'MarderIII', 'L.A.Casillaz',
+                             'Arlongur', 'CashfishT', 'dimakryt1', 'Ikmpnp', 'qpuwapa', '03upuc', 'uuzka',
+                             'GranMaster87', 'censored2013', 'ibaCker', 'cool9393', 'Bu11iT', 'orbcrazyk', 'BorisRoyaL',
+                             'andru_rock', 'Lin_Habey', 'ooak182', 'bandluchok', 'vestimokrec', 'Stepaniuk',
+                             'Pavel Podkur', 'S1HED', 'skars07', 'AstrumNatale', '13tochka5', 'pabliq9', 'G.HANSEN333',
+                             'pashka148', 'FRED47056', 'Ladybird1367', 'Sensei2212', 'BELGAZ', 'kozirek', 'Godlike1379',
+                             'Geka4an', 'titanik80', 'Kreayshawn', 'Lucastitos', 'Creator_haze', 'blistein', 'zMukeha',
+                             'I LOVE RUS34', 'Nepkin1', 'SoLongRain', 'ilaviiitech', 'KDV707', 'ArcticBearDK', 'Ma1n1',
+                             'SerAlGog', 'm0bba', 'LuckyJO777', 'nastja336', 'ishuha', 'Sakhacop']
 gains = {"ishuha": {"n_hands_played": 59961, "n_showdowns": 18050, "n_won": 10598, "total_earnings": 37425.32000000013},
          "Sakhacop": {"n_hands_played": 54873, "n_showdowns": 14718, "n_won": 9235,
                       "total_earnings": 43113.86000000007},
@@ -61,16 +110,48 @@ gains = {"ishuha": {"n_hands_played": 59961, "n_showdowns": 18050, "n_won": 1059
                          "total_earnings": 22407.82999999994},
          "m0bba": {"n_hands_played": 24384, "n_showdowns": 6349, "n_won": 4325, "total_earnings": 25772.450000000015},
          "KDV707": {"n_hands_played": 25570, "n_showdowns": 6241, "n_won": 3492, "total_earnings": 23929.970000000063}}
+
+folder_out = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_336"
+extr = hsmithy_extractor.HSmithyExtractor()
+filenames = glob.glob("/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped/**/*.txt",
+                      recursive=True)
+# n_files = len(filenames)
+# n_files_skipped = 0
+# for i, f in enumerate(filenames):
+#     print(f'Extractin file {i} / {n_files}')
+#     for pname in best_players_over5k_gains:
+#         try:
+#             extr.extract_file(file_path_in=f,
+#                               file_path_out=folder_out,
+#                               target_player=pname)
+#         except UnicodeDecodeError:
+#             n_files_skipped += 1
+# print(f"Done. Extracted {n_files - n_files_skipped}. {n_files_skipped} files were skipped.")
+x = 10000
+chunks = []
+current_chunk = []
+i = 0
+for file in filenames:
+    current_chunk.append(file)
+    if (i + 1) % x == 0:
+        chunks.append(current_chunk)
+        current_chunk = []
+    i += 1
+# trick to avoid multiprocessing writes to same file
+for i, chunk in enumerate(chunks):
+    chunk.append(f'CHUNK_INDEX_{i}')
+
+fn = partial(extr.extract_files, file_path_out=folder_out, target_players=best_players_over5k_gains)
+start = time.time()
+p = multiprocessing.Pool()
+# run f0
+for x in p.imap_unordered(fn, chunks):
+    print(x + f'. Took {time.time() - start} seconds')
+print(f'Finished job after {time.time() - start} seconds.')
+
+p.close()
+
 n_files = len(filenames)
 n_files_skipped = 0
-for i, f in enumerate(filenames):
-    print(f'Extractin file {i} / {n_files}')
-    for pname in best_players:
-        try:
-            extr.extract_file(file_path_in=f,
-                              file_path_out=folder_out,
-                              target_player=pname)
-        except UnicodeDecodeError:
-            n_files_skipped += 1
-print(f"Done. Extracted {n_files - n_files_skipped}. {n_files_skipped} files were skipped.")
 
+print(f"Done. Extracted {n_files - n_files_skipped}. {n_files_skipped} files were skipped.")

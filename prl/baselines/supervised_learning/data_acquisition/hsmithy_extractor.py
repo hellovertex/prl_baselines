@@ -1,6 +1,7 @@
 """ This module will
  - read .txt files inside ./data/
  - parse them to create corresponding PokerEpisode objects. """
+import os
 import re
 from typing import List, Tuple, Dict, Iterator, Iterable, Generator
 
@@ -32,19 +33,34 @@ class HSmithyExtractor:
             if not '*** SHOW DOWN ***' in current:
                 continue
 
-            # skip hands without target player
-            if not self.target_player in current:
-                continue
+            for target_player in self.target_players:
+                if target_player in current:
+                    result = "PokerStars Hand #" + current
+                    if not os.path.exists(self.file_path_out):
+                        os.makedirs(self.file_path_out)
+                    with open(f'{self.file_path_out+"/"+target_player}.txt', 'a+', encoding='utf-8') as f:
+                        f.write(result)
 
-            result = "PokerStars Hand #" + current
-            with open(f'{self.file_path_out+"/"+self.target_player}.txt', 'a+', encoding='utf-8') as f:
-                f.write(result)
-
-    def extract_file(self, file_path_in, file_path_out, target_player):
-        self._variant = 'NoLimitHoldem'  # todo parse variant from filename
-        self.target_player = target_player
+    def extract_file(self, file_path_in, file_path_out, target_players):
+        self._variant = 'NoLimitHoldem'
+        self.target_players = target_players
         self.file_path_out = file_path_out
+
         with open(file_path_in, 'r', encoding='utf-8') as f:  # pylint: disable=invalid-name,unspecified-encoding
             hand_database = f.read()
             hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
             self._extract_hands(hands_played)
+            
+    def extract_files(self,
+                      fpaths,
+                      file_path_out,
+                      target_players):
+        n_files = len(fpaths)
+        n_files_skipped = 0
+        for i, f in enumerate(fpaths):
+            print(f'Extracting file {i}/{n_files}....')
+            try:
+                self.extract_file(f, file_path_out, target_players)
+            except UnicodeDecodeError:
+                n_files_skipped += 1
+        return f"Success. Skipped {n_files_skipped} / {n_files}."
