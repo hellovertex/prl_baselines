@@ -21,8 +21,8 @@ class CSVWriter(Writer):
     def write_train_data(self, data, labels, feature_names, n_samples, subdir):
         file_dir = os.path.join(str(DATA_DIR) + "/02_vectorized/", subdir)
         self.num_lines_written += n_samples
-        # create new file every 500k lines
-        file_name = self.out_filename_base + '_' + str(int(self.num_lines_written / 500000)) + '.csv'
+        # create new file every 100k lines
+        file_name = self.out_filename_base + '_' + str(int(self.num_lines_written / 100000)) + '.csv'
         file_path = os.path.join(file_dir, file_name)
         columns = None
         header = False

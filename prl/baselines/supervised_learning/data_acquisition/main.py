@@ -92,33 +92,58 @@ def make_datasets_selected_players_from_Dprime(filenames, params, debug):
         p.close()
 
 
-def make_datasets_all_players_from_D(filenames, params_list, debug):
-    """ Runs in parallel on parameters because filenames will be a list with 250k files.
-    As opposed to the player generation which runs on 17 files one for each player.
-    parallelization runs on filenames there."""
-    # from_selected_players = False
-    # drop_folds = False
-    # randomize_folds_cards = False
-    # the `params` define which name the output dataset folder has:
-    # path_out_D_nf = 'actions_all_winners__do_not_generate_fold_labels'
-    # path_out_D_f_nr = 'actions_all_winners__generate_folds__keep_folded_cards'
-    # path_out_D_f_r = 'actions_all_winners__generate_folds__randomize_folded_cards'
-    # path_out_Ds_nf = 'actions_selected_players__do_not_generate_folds'
-    # path_out_Ds_f_nr = 'actions_selected_players__generate_folds__keep_folded_cards'
-    # path_out_Ds_f_r = 'actions_selected_players__generate_folds__randomize_folded_cards'
+def make_datasets_all_players_from_D(filenames,
+                                     debug,
+                                     from_selected_players,
+                                     drop_folds,
+                                     randomize_fold_cards
+                                     ):
+    blind_sizes = "0.25-0.50"
+    out_filename_base = f'6MAX_{blind_sizes}_{filenames[-1]}'
+    parser = HSmithyParser()
+    output_path = get_output_name(from_selected_players,
+                                  drop_folds,
+                                  randomize_fold_cards)
+    # Steps Steinberger Poker Environment, augments observations and vectorizes them
+    encoder = RLStateEncoder(env_wrapper_cls=AugmentObservationWrapper)
 
-    run_fn = partial(parse_encode_write, filenames)
+    # writes training data from encoder to disk
+    writer = CSVWriter(out_filename_base=out_filename_base)
+    with open("/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/eda_result_filtered.txt",
+              "r") as data:
+        player_dict = ast.literal_eval(data.read())
+
+    # Uses the results of parser and encoder to write training data to disk or cloud
+    runner = Runner(parser=parser,
+                    out_dir=blind_sizes + f'/{output_path}',  # todo change this name to output path
+                    encoder=encoder,
+                    writer=writer,
+                    write_azure=False,
+                    logfile=LOGFILE,
+                    drop_folds=drop_folds,
+                    randomize_fold_cards=randomize_fold_cards,
+                    use_outdir_per_player=from_selected_players,
+                    only_from_selected_players=from_selected_players,
+                    selected_players=list(player_dict.keys()) if from_selected_players else None)
+    # parse PokerEpisodes, encode, vectorize, write training data and labels to disk
+    # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     if debug:
-        run_fn(params=params_list[0])
+        for filename in filenames[:1]:
+            runner.parse_encode_write(filename)
     else:
-        print(f'Starting job. This may take a while.')
-        start = time.time()
-        p = multiprocessing.Pool()
-        t0 = time.time()
-        for x in p.imap_unordered(run_fn, params_list):
-            print(x + f'. Took {time.time() - t0} seconds')
-        print(f'Finished job after {time.time() - start} seconds.')
-        p.close()
+        for filename in filenames[:-1]:
+            runner.parse_encode_write(filename)
+    return "Success."
+
+def run_make_datasets(fn, chunks):
+    start = time.time()
+    p = multiprocessing.Pool()
+    # run f0
+    for x in p.imap_unordered(fn, chunks):
+        print(x + f'. Took {time.time() - start} seconds')
+    print(f'Finished job after {time.time() - start} seconds.')
+
+    p.close()
 
 
 @click.command()
@@ -150,24 +175,25 @@ def main(out_dir, from_gdrive_id, unzipped_dir):
     # unzpped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     # unzinames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
     # fileipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
-    debug = False
+    debug = True
 
-    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
-    filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
-    params_0 = {'from_selected_players': True,
-                'drop_folds': True,
-                'randomize_fold_cards': False}
-    params_1 = {'from_selected_players': True,
-                'drop_folds': False,
-                'randomize_fold_cards': False}
-    params_2 = {'from_selected_players': True,
-                'drop_folds': False,
-                'randomize_fold_cards': True}
-    make_datasets_selected_players_from_Dprime(filenames, params_0, debug)
-    make_datasets_selected_players_from_Dprime(filenames, params_1, debug)
-    make_datasets_selected_players_from_Dprime(filenames, params_2, debug)
+    # unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
+    # filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
+    # params_0 = {'from_selected_players': True,
+    #             'drop_folds': True,
+    #             'randomize_fold_cards': False}
+    # params_1 = {'from_selected_players': True,
+    #             'drop_folds': False,
+    #             'randomize_fold_cards': False}
+    # params_2 = {'from_selected_players': True,
+    #             'drop_folds': False,
+    #             'randomize_fold_cards': True}
+    # make_datasets_selected_players_from_Dprime(filenames, params_0, debug)
+    # make_datasets_selected_players_from_Dprime(filenames, params_1, debug)
+    # make_datasets_selected_players_from_Dprime(filenames, params_2, debug)
 
     # todo consider making extra function for this repeated snippet
+    debug = False
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
     params_0 = {'from_selected_players': False,
@@ -180,8 +206,26 @@ def main(out_dir, from_gdrive_id, unzipped_dir):
                 'drop_folds': True,
                 'randomize_fold_cards': False  # this will be ignored when `drop_folds=true`
                 }
-    params_list = [params_0, params_1, params_2]
-    make_datasets_all_players_from_D(filenames, params_list, debug)
+    x = 10000
+    chunks = []
+    current_chunk = []
+    i = 0
+    for file in filenames:
+        current_chunk.append(file)
+        if (i + 1) % x == 0:
+            chunks.append(current_chunk)
+            current_chunk = []
+        i += 1
+    # trick to avoid multiprocessing writes to same file
+    for i, chunk in enumerate(chunks):
+        chunk.append(f'CHUNK_INDEX_{i}')
+    run_fn_0 = partial(make_datasets_all_players_from_D, **params_0, debug=debug)
+    run_fn_1 = partial(make_datasets_all_players_from_D, **params_1, debug=debug)
+    run_fn_2 = partial(make_datasets_all_players_from_D, **params_2, debug=debug)
+    run_make_datasets(run_fn_0, chunks=chunks)
+    run_make_datasets(run_fn_1, chunks=chunks)
+    run_make_datasets(run_fn_2, chunks=chunks)
+    print("ALL DONE")
 
 
 if __name__ == '__main__':
