@@ -179,33 +179,36 @@ if __name__ == "__main__":
                    os.walk("/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50/randomized_cards_no_downsampling")][1:]
     train_eval_fn = partial(train_eval, params=params, log_interval=log_interval, eval_interval=eval_interval)
     print(f'Starting job. This may take a while.')
+    debug = True
+    if debug:
+        for player_subdir in player_dirs:
+            train_eval_fn(abs_input_dir=player_subdir)
+    else:
+        start = time.time()
+        p = multiprocessing.Pool()
+        t0 = time.time()
 
-    start = time.time()
-    p = multiprocessing.Pool()
-    t0 = time.time()
+        # # train all 17 NNs at once (is this gonna blow up my machine??)
+        # for x in p.imap_unordered(train_eval_fn, player_dirs):
+        #     print(x + f'. Took {time.time() - t0} seconds')
+        # print(f'Finished job after {time.time() - start} seconds.')
 
-    # # train all 17 NNs at once (is this gonna blow up my machine??)
-    # for x in p.imap_unordered(train_eval_fn, player_dirs):
-    #     print(x + f'. Took {time.time() - t0} seconds')
-    # print(f'Finished job after {time.time() - start} seconds.')
+        # train x NNs at once
+        x = 3
+        chunks = []
+        current_chunk = []
+        i = 0
+        for subdir in player_dirs:
+            current_chunk.append(subdir)
+            if (i+1) % x == 0:
+                chunks.append(current_chunk)
+                current_chunk = []
+            i += 1
+        for dirs in chunks:
+            for x in p.imap_unordered(train_eval_fn, dirs):
+                print(x + f'. Took {time.time() - t0} seconds')
+            print(f'Finished job after {time.time() - start} seconds.')
 
-    # train x NNs at once
-    x = 3
-    chunks = []
-    current_chunk = []
-    i = 0
-    for subdir in player_dirs:
-        current_chunk.append(subdir)
-        if (i+1) % x == 0:
-            chunks.append(current_chunk)
-            current_chunk = []
-        i += 1
-    for dirs in chunks:
-        for x in p.imap_unordered(train_eval_fn, dirs):
-            print(x + f'. Took {time.time() - t0} seconds')
-        print(f'Finished job after {time.time() - start} seconds.')
+        p.close()
 
-    p.close()
 
-    # for player_subdir in player_dirs:
-    #     train_eval_fn(abs_input_dir=player_subdir)
