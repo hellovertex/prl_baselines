@@ -3,6 +3,7 @@ import glob
 import multiprocessing
 import time
 from functools import partial
+from pathlib import Path
 
 import click
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
@@ -92,14 +93,15 @@ def make_datasets_selected_players_from_Dprime(filenames, params, debug):
         p.close()
 
 
-def make_datasets_all_players_from_D(filenames,
+def make_datasets_all_players_from_D(filename,
                                      debug,
                                      from_selected_players,
                                      drop_folds,
                                      randomize_fold_cards
                                      ):
     blind_sizes = "0.25-0.50"
-    out_filename_base = f'6MAX_{blind_sizes}_{filenames[-1]}'
+    # out_filename_base = f'6MAX_{blind_sizes}_{filenames[-1]}'
+    # out_filename_base = f'6MAX_{blind_sizes}_{filenames[-1]}'
     parser = HSmithyParser()
     output_path = get_output_name(from_selected_players,
                                   drop_folds,
@@ -107,10 +109,20 @@ def make_datasets_all_players_from_D(filenames,
     # Steps Steinberger Poker Environment, augments observations and vectorizes them
     encoder = RLStateEncoder(env_wrapper_cls=AugmentObservationWrapper)
 
+    # parse PokerEpisodes, encode, vectorize, write training data and labels to disk
+    # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
+    # if debug:
+    #     pass
+    # #     for filename in filenames[:1]:
+    # #         runner.parse_encode_write(filename)
+    # else:
+    #     for filename in filenames[:-1]:
+    out_filename_base = f'6MAX_{blind_sizes}_{Path(filename).stem}'
     # writes training data from encoder to disk
     writer = CSVWriter(out_filename_base=out_filename_base)
-    with open("/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/eda_result_filtered.txt",
-              "r") as data:
+    with open(
+            "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/eda_result_filtered.txt",
+            "r") as data:
         player_dict = ast.literal_eval(data.read())
 
     # Uses the results of parser and encoder to write training data to disk or cloud
@@ -125,21 +137,15 @@ def make_datasets_all_players_from_D(filenames,
                     use_outdir_per_player=from_selected_players,
                     only_from_selected_players=from_selected_players,
                     selected_players=list(player_dict.keys()) if from_selected_players else None)
-    # parse PokerEpisodes, encode, vectorize, write training data and labels to disk
-    # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
-    if debug:
-        for filename in filenames[:1]:
-            runner.parse_encode_write(filename)
-    else:
-        for filename in filenames[:-1]:
-            runner.parse_encode_write(filename)
+    runner.parse_encode_write(filename)
     return "Success."
 
-def run_make_datasets(fn, chunks):
+
+def run_make_datasets(fn, filenames):
     start = time.time()
     p = multiprocessing.Pool()
     # run f0
-    for x in p.imap_unordered(fn, chunks):
+    for x in p.imap_unordered(fn, filenames):
         print(x + f'. Took {time.time() - start} seconds')
     print(f'Finished job after {time.time() - start} seconds.')
 
@@ -223,9 +229,9 @@ def main(out_dir, from_gdrive_id, unzipped_dir):
     run_fn_0 = partial(make_datasets_all_players_from_D, **params_0, debug=debug)
     run_fn_1 = partial(make_datasets_all_players_from_D, **params_1, debug=debug)
     run_fn_2 = partial(make_datasets_all_players_from_D, **params_2, debug=debug)
-    run_make_datasets(run_fn_0, chunks=chunks)
-    run_make_datasets(run_fn_1, chunks=chunks)
-    run_make_datasets(run_fn_2, chunks=chunks)
+    # run_make_datasets(run_fn_0, chunks=chunks)
+    run_make_datasets(run_fn_1, filenames=filenames)
+    # run_make_datasets(run_fn_2, chunks=chunks)
     print("ALL DONE")
 
 

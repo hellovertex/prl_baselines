@@ -8,7 +8,7 @@ class RandomAgent:
         self.n_actions = len(ActionSpace)
 
     def act(self, *args, **kwargs):
-        return random.randint(0, self.n_actions)
+        return random.randint(0, 2)
 
 
 class DummyAgentFold:

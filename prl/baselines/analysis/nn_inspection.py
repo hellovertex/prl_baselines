@@ -249,7 +249,7 @@ def run(filename,
 
     df_correct_means = plot_heatmap(results_correct['means'],
                                     action_freqs=results_correct['action_freqs'],
-                                    title=f"Average probabilities of the network on mis-correctly icting label",
+                                    title=f"Average probabilities of the network on correctly predicting label",
                                     path_out_png=path_out_png + '/means_correct.png')
     df_correct_abs_std = plot_heatmap(results_correct['abs_std'],
                                       action_freqs=results_correct['action_freqs'],
@@ -305,7 +305,7 @@ def start():
     # model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/with_folds_2NL_all_players/ckpt_dir_[512]_1e-06/ckpt.pt"
 
     # Multiple Baseline checkpoints --> Creates Majority Agent in inspect function
-    debug = False
+    debug = True
     model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds_rand_cards/ckpt_dir"
     player_dirs = [x[0] for x in
                    os.walk(model_ckpt_abs_path)][1:]
@@ -322,7 +322,7 @@ def start():
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     # unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/2.5NL/unzipped"
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_5"
-    path_out = './results/selected_players_no_fold'
+    path_out = './results/selected_players_only_fold_random_cards'
     max_files = 1000
     # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)

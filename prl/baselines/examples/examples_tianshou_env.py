@@ -223,9 +223,9 @@ def make_default_tianshou_env(num_players=2,
                               agents=None,
                               stack_sizes=None,
                               blinds: List[int] = None):
-    starting_stack = 20000
+    starting_stack = 5000
     if blinds is None:
-        blinds = [50, 100]
+        blinds = [25, 50]
     if stack_sizes is None:
         stack_sizes = [starting_stack for _ in range(num_players)]
     if agents is None:

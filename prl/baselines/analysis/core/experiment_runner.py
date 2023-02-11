@@ -252,11 +252,12 @@ class PokerExperimentRunner(ExperimentRunner):
                 action = self.participants[agent_idx].agent.act(observation['obs'],
                                                                 observation['legal_moves'])
             self._times_taken_to_compute_action.append(time.time() - t0)
-            if self.stats:
-                players_acted += 1
-                self.stats[agent_idx].update_stats(obs, action, is_new_hand)
-                if players_acted == self.num_players:
-                    is_new_hand = False
+            # kept for reference: (this code is moved to after experiment has been run)
+            # if self.stats:
+            #     players_acted += 1
+            #     self.stats[agent_idx].update_stats(obs, action, is_new_hand)
+            #     if players_acted == self.num_players:
+            #         is_new_hand = False
             # -------------------------------------
             # -------- STEP ENVIRONMENT -----------
             # -------------------------------------
@@ -328,11 +329,20 @@ class PokerExperimentRunner(ExperimentRunner):
                             ep_id) -> PokerEpisode:
         # --- SETUP AND RESET ENVIRONMENT ---
         # obs, _, done, _ = self.env.reset(self.env_reset_config)
-        obs = self.env.reset(options={'reset_config':self.env_reset_config})
+        obs = self.env.reset(options={'reset_config': self.env_reset_config})
+        # obs_test, _, _, _ = self.test_env.reset(self.env_reset_config)
+
         agent_id = obs['agent_id']
         legal_moves = self.env.env.env.env_wrapped.get_legal_actions()
         btn = self.env.env.env.btn
         obs = obs['obs']
+        #assert np.array_equal(obs, obs_test)
+        """
+        from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols
+        for i, o in enumerate(obs == obs_test):
+            if not o:
+                print(f'{cols(i).name}: {obs[i], obs_test[i]}')
+        """
         initial_player_stacks = self._get_starting_stacks_relative_to_agents()
         ante, blinds = self.post_blinds(obs)
 
@@ -407,6 +417,7 @@ class PokerExperimentRunner(ExperimentRunner):
         # 2) provide action sequence
         #
         self.stats = None
+        self.test_env = experiment.options['test_env']
         self.verbose = verbose
         self.num_players = experiment.num_players
         self.total_actions_dict = {ActionType.FOLD.value: 0,

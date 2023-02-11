@@ -12,6 +12,7 @@ from tianshou.utils.net.common import MLP
 from torch import softmax
 
 from prl.baselines.cpp_hand_evaluator.rank import dict_str_to_sk
+from prl.baselines.evaluation.utils import pretty_print
 
 IDX_C0_0 = 167  # feature_names.index('0th_player_card_0_rank_0')
 IDX_C0_1 = 184  # feature_names.index('0th_player_card_1_rank_0')
@@ -106,7 +107,6 @@ class MajorityBaseline(BasePolicy):
         #     predictions.append(torch.argmax(l, dim=1))
         return torch.argmax(self.logits).item()
 
-
     def act(self, obs: np.ndarray, legal_moves: list, use_pseudo_harmonic_mapping=False):
         """
         See "Action translation in extensive-form games with large action spaces:
@@ -196,8 +196,11 @@ class BaselineAgent(BasePolicy):
 
         for why pseudo-harmonic-mapping is useful to prevent exploitability of a strategy.
         """
+        obs = obs[0]
+        self.threshold = .8
         self.legal_moves = legal_moves
         self.logits = self._model(torch.Tensor(torch.Tensor(np.array(obs))).to(self.device))
+        self.probas = torch.softmax(self.logits, dim=0)
         # if this torch.topk(self.logits, 2) is less than 20%
         # topk = torch.topk(self.logits, 2)
         # diff = topk.values[0][0] - topk.values[0][1]
@@ -207,6 +210,11 @@ class BaselineAgent(BasePolicy):
         #     # print('pseudo harmonic mapping')
         #     pass
         self._prediction = torch.argmax(self.logits)
+        if self.threshold <= torch.max(self.probas).detach().cpu().item():
+            pretty_print(99, obs, self._prediction.detach().cpu().item())
+            print(f'Previous action has been performed with probas {self.probas}')
+        if self.threshold > torch.max(self.probas).detach().cpu().item():
+            return ActionSpace.FOLD
         return self._prediction.item()
 
     def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:

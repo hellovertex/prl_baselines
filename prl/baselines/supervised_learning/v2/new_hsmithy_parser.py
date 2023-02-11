@@ -57,12 +57,14 @@ class ParseHsmithyTextToPokerEpisode:
                  flop_sep="*** FLOP ***",
                  turn_sep="*** TURN ***",
                  river_sep="*** RIVER ***",
+                 showdown_sep="*** SHOW DOWN ***",
                  summary_sep="*** SUMMARY ***"):
         self.preflop_sep = preflop_sep
         self.flop_sep = flop_sep
         self.turn_sep = turn_sep
         self.river_sep = river_sep
         self.summary_sep = summary_sep
+        self.showdown_sep = showdown_sep
 
     def strip_next_round(self, strip_round, episode_str):
         return episode_str.split(strip_round)[0]
@@ -102,7 +104,7 @@ class ParseHsmithyTextToPokerEpisode:
         else:
             turn = self.strip_next_round(self.summary_sep, turn)
         # 4. strip river cards
-        river = self.strip_next_round(self.summary_sep, river)
+        river = self.strip_next_round(self.showdown_sep, river)
         summary \
             = self.split_at_round(self.summary_sep, current_episode)
 
@@ -140,6 +142,8 @@ class ParseHsmithyTextToPokerEpisode:
         table = hand_str.split("*** HOLE CARDS ***")[0]
         lines = table.split('\n')
         for line in lines:
+            if "Table \'" in line:
+                continue
             if 'Seat' in line:
                 seat, player = line.split(':')
                 seat_num = seat[-1]
@@ -153,23 +157,67 @@ class ParseHsmithyTextToPokerEpisode:
                 players[pname] = player
             elif 'posts small blind' in line:
                 sb_name: str = line.split(":")[0]
-                sb_amt = round(float(line.split("$")) * 100)
+                sb_amt = round(float(line.split("$")[1]) * 100)
                 players[sb_name].position = Positions6Max.SB
                 blinds['sb'] = {sb_name: sb_amt}
             elif 'posts big blind' in line:
                 bb_name: str = line.split(":")[0]
-                bb_amt = round(float(line.split("$")) * 100)
+                bb_amt = round(float(line.split("$")[1]) * 100)
                 players[bb_name].position = Positions6Max.BB
                 blinds['bb'] = {bb_name: bb_amt}
         num_players = len(players)
         return players, blinds
 
+    def get_action(self, line):
+        pname, action = line.split(':')
+        if 'folds' in action:
+            return Action(who=pname, what=ActionSpace.FOLD, how_much=-1)
+        elif 'checks' in action:
+            return Action(who=pname, what=ActionSpace.CHECK_CALL, how_much=-1)
+        elif 'calls' in action:
+            amt = round(float(action.split('$')[1]) * 100)
+            return Action(who=pname, what=ActionSpace.CHECK_CALL, how_much=amt)
+        elif 'bets' in action:
+            amt = round(float(action.split('$')[1]) * 100)
+            return Action(who=pname, what=ActionSpace.RAISE_MIN_OR_3BB, how_much=amt)
+        elif 'raises' in action:
+            amt = round(float(action.split('to ')[1].split('$')[1]) * 100)
+            return Action(who=pname, what=ActionSpace.RAISE_MIN_OR_3BB, how_much=amt)
+        else:
+            raise ValueError(f"Unknown action in {line}.")
+
+    def _get_actions(self, lines):
+        lines = lines.split('\n')
+        actions = []
+        for line in lines:
+            if not line:
+                continue
+            if not ':' in line:
+                continue
+            action = self.get_action(line)
+            actions.append(action)
+        return actions
+
+    def get_actions(self, info):
+        actions_preflop = self._get_actions(info['preflop'])
+        actions_flop = self._get_actions(info['flop'])
+        actions_turn = self._get_actions(info['turn'])
+        actions_river = self._get_actions(info['river'])
+        as_sequence = []
+
+        for actions in [actions_preflop, actions_flop, actions_turn, actions_river]:
+            for action in actions:
+                as_sequence.append(action)
+        return {'actions_preflop': actions_preflop,
+                'actions_flop': actions_flop,
+                'actions_turn': actions_turn,
+                'actions_river': actions_river,
+                'as_sequence': as_sequence}
+
     def parse_hand(self, hand_str):
         players, blinds = self.get_players_and_blinds(hand_str)
-        actions_flop = None
-        action_turn = None
-        actions_river = None
-        actions_as_sequence = None
+        info = self.rounds(hand_str)
+        actions = self.get_actions(info)
         board_cards = None
 
         return PokerEpisode()
@@ -199,6 +247,7 @@ class ParseHsmithyTextToPokerEpisode:
 
 if __name__ == "__main__":
     unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
+    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_test"
     out_dir = "example.txt"
     filenames = glob.glob(unzipped_dir + "/**/*.txt", recursive=True)
     parser = ParseHsmithyTextToPokerEpisode()

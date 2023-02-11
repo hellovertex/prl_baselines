@@ -38,7 +38,9 @@ def main(max_episodes,
     # 2.5NL ckpt_abs_fpath = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/with_folds_2NL_all_players/ckpt_dir_[256, 256]_1e-06/ckpt.pt"
 
     ckpt_abs_fpath = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds/ckpt_dir/Sakhacop_[256]_1e-06/ckpt.pt"
+    ckpt_abs_fpath = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/no_folds_selected_players/ckpt_dir_[512]_1e-06/ckpt.pt"
     pname = Path(ckpt_abs_fpath).parent.stem
+    pname = 'AI_AGENT'
     hidden_dims = [256] if '256' in pname else [512]
     path_out = "./results"
     agent_names = [f'{pname}', '2', '3', '4', '5', '6']

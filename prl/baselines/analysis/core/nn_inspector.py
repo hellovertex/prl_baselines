@@ -238,7 +238,42 @@ class Inspector:
             if hands[(i + 1) % num_players][0][0] != Poker.CARD_NOT_DEALT_TOKEN_1D:
                 assert sum(p1_first_card) == 2
                 assert sum(p1_second_card) == 2
+    def _update_card(self):
+        c = np.zeros(17)
+        rand_rank = np.random.randint(0, 13)
+        rand_suite = np.random.randint(13, 17)
+        c[rand_rank] += 1
+        c[rand_suite] += 1
+        return c
 
+    def update_card(self):
+        obs_card_bits = self._update_card()
+        # while we drew cards that already are on board or other player hand, repeat until we have available cards
+        while np.any(np.all(obs_card_bits == self.occupied_cards, axis=1)):
+            obs_card_bits = self._update_card()
+        assert sum(obs_card_bits[:13] == 1)
+        assert sum(obs_card_bits[13:] == 1)
+        assert len(obs_card_bits) == 17
+        return obs_card_bits
+
+    def overwrite_hand_cards_with_random_cards(self, obs):
+        """This is useful because if we only have showdown data,
+        it will be skewed towards playable hands and there will be no data on weak hands."""
+        # self.initial_villain_cards = obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_rank_0],
+        # obs[fts.First_player_card_1_rank_0:fts.First_player_card_1_suit_3+1]
+        # remove old cards from observing player
+        obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_rank_0] = 0
+        obs[fts.First_player_card_1_rank_0:fts.First_player_card_1_suit_3+1] = 0
+        # todo sample new hand from remaining cards and overwrite observation
+        # update c0
+        obs_bits_c0 = self.update_card()
+        obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_rank_0] = obs_bits_c0
+        # update c1
+        obs_bits_c1 = self.update_card()
+        obs[fts.First_player_card_1_rank_0:fts.First_player_card_1_suit_3+1] = obs_bits_c1
+        assert sum(obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_suit_3+1]) == 4
+
+        return obs
     def _simulate_environment(self, pname, env, episode, cards_state_dict, table, starting_stack_sizes_list,
                               selected_players=None):
         """Under Construction."""
@@ -280,8 +315,12 @@ class Inspector:
                 # filtered_players = [pname]
                 # only store obs and action of acting player
                 if player.position_index == next_to_act and player.player_name in filtered_players:
+                    # uncomment this line to make random cards
+                    obs = self.overwrite_hand_cards_with_random_cards(obs)
                     observations.append(obs)
                     action_label = self._wrapped_env.discretize(action_formatted)
+                    # uncomment this line to set all actions to fold
+                    action_label = ActionSpace.FOLD
                     actions.append(action_label)
                     pred = self.baseline.compute_action(obs, legal_moves)
                     # todo make one for winner and one for folds
@@ -333,6 +372,22 @@ class Inspector:
             raise RuntimeError("Seems we need more debugging")
         return observations, actions
 
+    def cards2dtolist(self, cards2d):
+        bits = np.zeros(17)
+        bits[cards2d[0]] += 1
+        bits[13 + cards2d[1]] += 1
+        return bits
+    def get_occupied_cards(self) -> List[np.ndarray]:
+        bit_arr = []
+        hands = self.state_dict['hand']
+        board = self.state_dict['deck']['deck_remaining'][:5]  # before reset so all cards are in the deck in the order theyre drawn
+        for hand in hands:
+            if hand[0] != [-127, -127]:
+                bit_arr.append(self.cards2dtolist(hand[0]))
+                bit_arr.append(self.cards2dtolist(hand[1]))
+        for card in board:
+            bit_arr.append(self.cards2dtolist(card))
+        return bit_arr
     def inspect_episode(self, episode: PokerEpisode, pname: str, selected_players=None) -> Tuple[
         Observations, Actions_Taken]:
         """Runs environment with steps from PokerEpisode.
@@ -363,6 +418,8 @@ class Inspector:
         self._wrapped_env.env.SMALL_BLIND, self._wrapped_env.env.BIG_BLIND = sb, bb
         self._wrapped_env.env.ANTE = self._make_ante(episode.ante)
         cards_state_dict = self._build_cards_state_dict(table, episode)
+        self.state_dict = cards_state_dict
+        self.occupied_cards = self.get_occupied_cards()
         agent_names = np.roll([a.player_name for a in episode.player_stacks], -episode.btn_idx)
         self.tianshou_env = make_default_tianshou_env(stack_sizes=stacks,
                                                       blinds=[sb, bb],
