@@ -26,15 +26,20 @@ from prl.baselines.agents.tianshou_agents import BaselineAgent, MajorityBaseline
 from prl.baselines.analysis.core.nn_inspector import Inspector
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
 
+rows = ["Fold",
+        "Check/Call",
+        "Raise3BB",
+        "Raise6BB",
+        "Raise10BB",
+        "Raise20BB",
+        "Raise50BB",
+        "RaiseALLIN"]
+
 
 def plot_heatmap(input_dict,
+                 action_freqs,
                  path_out_png):
-    means = input_dict['means']
-    l = input_dict['l']
-    rows = ["Fold", "Check/Call", "Raise3BB", "Raise6BB", "Raise10BB", "Raise20BB",
-            "Raise50BB", "RaiseALLIN"]
-
-    df = pd.DataFrame(means).T  # do we need , index=idx, columns=cols?
+    df = pd.DataFrame(input_dict).T  # do we need , index=idx, columns=cols?
 
     # plot the heatmap with annotations
     flatui = ["#9b59b6", "#3498db", "#95a5a6", "#e74c3c", "#34495e", "#2ecc71"]
@@ -52,12 +57,12 @@ def plot_heatmap(input_dict,
     what = 'mis-' if 'false' in path_out_png else 'correctly '
     ax1.set_title(f"Average probabilities of the network on {what}predicting label")
     ax2.bar(df.columns,
-            l,
+            action_freqs,
             color=[hex_value for _ in range(8)])
     ax2.set_xlabel("Which Action")
     ax2.set_ylabel("Number of times label was present")
     ax2.set_title("Number of actions taken")
-    df['Sum'] = l
+    df['Sum'] = action_freqs
     df.columns = [f'Predicted {ActionSpace(i)}' for i in range(len(ActionSpace))] + ['Sum']
     df.index = rows
     # adjust the subplots to occupy equal space
@@ -74,27 +79,29 @@ def plot_heatmap(input_dict,
     return df
 
 
-def flush(results, path_out, inspector):
-    pass
-    # df = results['means']
+def flush_to_disk(df,
+          label_counts,
+          path_out):
+    raise NotImplementedError
     # if not os.path.exists(path_out):
     #     os.makedirs(path_out)
     # df.to_csv(f'{path_out}/false_probabs.csv')
-    # df = pd.DataFrame(inspector.label_counts_false,
-    #                   index=[k.name for k in list(inspector.label_counts_false.keys())])
+    # df = pd.DataFrame(label_counts,
+    #                   index=[k.name for k in list(label_counts.keys())])
     # df.to_csv(f'{path_out}/false_labels.csv')
     # print(df)
     # # TRUE PREDICTIONS
     # df = plot_heatmap(results,
     #                   path_out_png=f'{path_out}/correct.png')
     # df.to_csv(f'{path_out}/correct_probas.csv')
-    # df = pd.DataFrame(inspector.label_counts_true,
-    #                   index=[k.name for k in list(inspector.label_counts_true.keys())])
+    # df = pd.DataFrame(label_counts,
+    #                   index=[k.name for k in list(label_counts_true.keys())])
     # df.to_csv(f'{path_out}/true_labels.csv')
     # print(df)
 
 
-def compute(label_logits, label_counts) -> Dict[str, Union[torch.Tensor, Dict]]:
+def compute(label_logits, label_counts) \
+        -> Dict[str, Dict[ActionSpace, torch.Tensor]]:
     means = {}
     maas = {}
     mins = {}
@@ -105,13 +112,13 @@ def compute(label_logits, label_counts) -> Dict[str, Union[torch.Tensor, Dict]]:
     percentile_75 = {}
     percentile_90 = {}
 
-    l = []
+    action_freqs = []
     # from dictionary of action to stacked tensors with list of action probability vectors
     # we want to compute statistics min, max, 25, 50, 75 percentile
     # mean, std
     for label, probas in label_logits.items():
         normalize = label_counts[label]
-        l.append(normalize)
+        action_freqs.append(normalize)
         if probas is None:
             continue
         assert sum(normalize) == probas.shape[0]
@@ -156,7 +163,7 @@ def compute(label_logits, label_counts) -> Dict[str, Union[torch.Tensor, Dict]]:
                'percentile_50': percentile_50,
                'percentile_75': percentile_75,
                'percentile_90': percentile_90,
-               'l': l  # todo rename
+               'action_freqs': action_freqs  # todo re-name
                }
 
     return results
@@ -206,12 +213,16 @@ def run(filename,
     results_correct = compute(inspector.logits_when_correct,
                               inspector.label_counts_true)
     # plot heatmaps
-    plot_heatmap(results_wrong, path_out_png=path_out + '/wrong.png')
-    plot_heatmap(results_correct, path_out_png=path_out + '/correct.png')
+    df_wrong_means = plot_heatmap(results_wrong['means'],
+                                  action_freqs=results_wrong['action_freqs'],
+                                  path_out_png=path_out + '/means_wrong.png')
+    df_correct_means = plot_heatmap(results_correct['means'],
+                                    action_freqs=results_wrong['action_freq'],
+                                    path_out_png=path_out + '/means_correct.png')
 
     # write files to disk using df.to_csv()
-    flush(results_wrong, path_out, inspector)
-    flush(results_correct, path_out, inspector)
+    flush_to_disk(df_wrong_means, inspector.label_counts_false, path_out + '/means_wrong.csv')
+    flush_to_disk(df_correct_means, inspector.label_counts_true, path_out + '/means_correct.csv')
     # plots logits against true labels and saves csv with result to disk
     return f"Succes. Wrote file to {path_out + '/' + Path(filename).stem}"
 

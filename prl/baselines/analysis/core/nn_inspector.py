@@ -306,7 +306,7 @@ class Inspector:
                         action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
 
                     # Update neural network stats
-                    if pred == action_label:
+                    if pred == acinspector.label_counts_falsetion_label:
                         # self.true[action_label] += torch.softmax(self.baseline.logits.cpu(), dim=1)
                         if self.logits_when_correct[action_label] is None:
                             # noinspection PyTypeChecker
