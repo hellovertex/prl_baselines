@@ -10,7 +10,7 @@ import os
 import time
 from functools import partial
 from pathlib import Path
-from typing import Dict, Union
+from typing import Dict, Union, List
 
 import matplotlib
 import numpy as np
@@ -36,11 +36,17 @@ rows = ["Fold",
         "RaiseALLIN"]
 
 
-def plot_heatmap(input_dict,
+def plot_heatmap(input_dict: Dict[ActionSpace, torch.Tensor],
                  action_freqs,
                  path_out_png):
-    df = pd.DataFrame(input_dict).T  # do we need , index=idx, columns=cols?
-
+    detached = {}
+    for action, probas in input_dict.items():
+        if probas is not torch.nan:
+            detached[action] = probas.detach().numpy()[0]
+        else:
+            detached[action] = probas
+    df = pd.DataFrame(detached).T  # do we need , index=idx, columns=cols?
+    action_freqs = torch.sum(torch.row_stack(action_freqs), dim=0)
     # plot the heatmap with annotations
     flatui = ["#9b59b6", "#3498db", "#95a5a6", "#e74c3c", "#34495e", "#2ecc71"]
     my_cmap = ListedColormap(sns.color_palette(flatui).as_hex())
@@ -60,7 +66,7 @@ def plot_heatmap(input_dict,
             action_freqs,
             color=[hex_value for _ in range(8)])
     ax2.set_xlabel("Which Action")
-    ax2.set_ylabel("Number of times label was present")
+    ax2.set_ylabel("Number of actions")
     ax2.set_title("Number of actions taken")
     df['Sum'] = action_freqs
     df.columns = [f'Predicted {ActionSpace(i)}' for i in range(len(ActionSpace))] + ['Sum']
@@ -80,24 +86,11 @@ def plot_heatmap(input_dict,
 
 
 def flush_to_disk(df,
-          label_counts,
-          path_out):
-    raise NotImplementedError
-    # if not os.path.exists(path_out):
-    #     os.makedirs(path_out)
-    # df.to_csv(f'{path_out}/false_probabs.csv')
-    # df = pd.DataFrame(label_counts,
-    #                   index=[k.name for k in list(label_counts.keys())])
-    # df.to_csv(f'{path_out}/false_labels.csv')
-    # print(df)
-    # # TRUE PREDICTIONS
-    # df = plot_heatmap(results,
-    #                   path_out_png=f'{path_out}/correct.png')
-    # df.to_csv(f'{path_out}/correct_probas.csv')
-    # df = pd.DataFrame(label_counts,
-    #                   index=[k.name for k in list(label_counts_true.keys())])
-    # df.to_csv(f'{path_out}/true_labels.csv')
-    # print(df)
+                  label_counts,
+                  path_out):
+    if not os.path.exists(path_out):
+        os.makedirs(path_out)
+    df.to_csv(path_out)
 
 
 def compute(label_logits, label_counts) \
@@ -120,6 +113,15 @@ def compute(label_logits, label_counts) \
         normalize = label_counts[label]
         action_freqs.append(normalize)
         if probas is None:
+            means[label.value] = torch.nan
+            maas[label.value] = torch.nan
+            mins[label.value] = torch.nan
+            maxs[label.value] = torch.nan
+            percentile_10[label.value] = torch.nan
+            percentile_25[label.value] = torch.nan
+            percentile_50[label.value] = torch.nan
+            percentile_75[label.value] = torch.nan
+            percentile_90[label.value] = torch.nan
             continue
         assert sum(normalize) == probas.shape[0]
 
@@ -213,16 +215,18 @@ def run(filename,
     results_correct = compute(inspector.logits_when_correct,
                               inspector.label_counts_true)
     # plot heatmaps
+    path_out_png = path_out + '/' + Path(filename).stem + '/plots'
     df_wrong_means = plot_heatmap(results_wrong['means'],
                                   action_freqs=results_wrong['action_freqs'],
-                                  path_out_png=path_out + '/means_wrong.png')
+                                  path_out_png=path_out_png + '/means_false.png')
     df_correct_means = plot_heatmap(results_correct['means'],
-                                    action_freqs=results_wrong['action_freq'],
-                                    path_out_png=path_out + '/means_correct.png')
+                                    action_freqs=results_correct['action_freqs'],
+                                    path_out_png=path_out_png + '/means_correct.png')
 
     # write files to disk using df.to_csv()
-    flush_to_disk(df_wrong_means, inspector.label_counts_false, path_out + '/means_wrong.csv')
-    flush_to_disk(df_correct_means, inspector.label_counts_true, path_out + '/means_correct.csv')
+    path_out_csv = path_out + '/' + Path(filename).stem + '/csv_files'
+    flush_to_disk(df_wrong_means, inspector.label_counts_false, path_out_csv + '/means_wrong.csv')
+    flush_to_disk(df_correct_means, inspector.label_counts_true, path_out_csv + '/means_correct.csv')
     # plots logits against true labels and saves csv with result to disk
     return f"Succes. Wrote file to {path_out + '/' + Path(filename).stem}"
 
