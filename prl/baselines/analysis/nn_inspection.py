@@ -81,6 +81,16 @@ def plot_heatmap(label_logits: dict,
         # detached[label.value] = np.hstack([detached[label.value],[label_counts[label]]])
     # detached["Sum"] = [v for _, v in label_counts.items()]
     # idx = cols = [i for i in range(len(ActionSpace))]
+    results = {'means': means,
+               'maas': maas,
+               'mins': mins,
+               'maxs': maxs,
+               'percentile_10': percentile_10,
+               'percentile_25': percentile_25,
+               'percentile_50': percentile_50,
+               'percentile_75': percentile_75,
+               'percentile_90': percentile_90,
+               }
     rows = ["Fold", "Check/Call", "Raise3BB", "Raise6BB", "Raise10BB", "Raise20BB",
             "Raise50BB", "RaiseALLIN"]
 
@@ -122,14 +132,15 @@ def plot_heatmap(label_logits: dict,
                 bbox_inches='tight')
     plt.show()
 
-    return df
+    return results
 
 
 def make_results(inspector, path_out):
     # WRONG PREDICTIONS
-    df = plot_heatmap(label_logits=inspector.logits_when_wrong,
+    results = plot_heatmap(label_logits=inspector.logits_when_wrong,
                       label_counts=inspector.label_counts_false,
                       path_out_png=f'{path_out}/false.png')
+    df = results['means']
     if not os.path.exists(path_out):
         os.makedirs(path_out)
     df.to_csv(f'{path_out}/false_probabs.csv')
@@ -193,7 +204,6 @@ def inspection(filename,
 if __name__ == "__main__":
     # model_ckpt_abs_path = "/home/sascha/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds_div_1/with_folds/ckpt_dir/ilaviiitech_[512]_1e-06/ckpt.pt"
     # model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/with_folds_2NL_all_players/ckpt_dir_[512]_1e-06/ckpt.pt"
-
 
     # Multiple Baseline checkpoints --> Creates Majority Agent in inspect function
     debug = True
