@@ -198,7 +198,7 @@ def collect(filename,
     print(f'Parsing file {filename} took {time.time() - t0} seconds.')
     num_parsed_hands = len(parsed_hands)
     print(f'num_parsed_hands = {num_parsed_hands}')
-    for ihand, hand in enumerate(parsed_hands[:5000]):
+    for ihand, hand in enumerate(parsed_hands[:3000]):
         print(f'Inspecting model on hand {ihand} / {num_parsed_hands}')
         inspector.inspect_episode(hand, pname=pname)
     return inspector
@@ -305,7 +305,7 @@ def start():
     # model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/with_folds_2NL_all_players/ckpt_dir_[512]_1e-06/ckpt.pt"
 
     # Multiple Baseline checkpoints --> Creates Majority Agent in inspect function
-    debug = True
+    debug = False
     model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds_rand_cards/ckpt_dir"
     player_dirs = [x[0] for x in
                    os.walk(model_ckpt_abs_path)][1:]
@@ -319,9 +319,9 @@ def start():
     model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/no_folds_selected_players/ckpt_dir_[512]_1e-06/ckpt.pt"
     # ctd
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
-    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_10"
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     # unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/2.5NL/unzipped"
+    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_5"
     path_out = './results/selected_players_no_fold'
     max_files = 1000
     # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"

@@ -300,10 +300,10 @@ class Inspector:
                     actions.append(action_label)
                     pred = self.baseline.compute_action(obs, legal_moves)
                     # todo make one for winner and one for folds
-                    if not player.player_name in [winner.name for winner in episode.winners]:
-                        # if not player.player_name in selected_players:
-                        # replace action call/raise with fold
-                        action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
+                    # if not player.player_name in [winner.name for winner in episode.winners]:
+                    #     # if not player.player_name in selected_players:
+                    #     # replace action call/raise with fold
+                    #     action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
 
                     # Update neural network stats
                     if pred == action_label:
