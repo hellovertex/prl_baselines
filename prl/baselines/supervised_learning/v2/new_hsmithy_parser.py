@@ -35,6 +35,7 @@ class Player:
     seat_num_one_indexed: int
     stack: int
     position: Optional[Positions6Max] = None
+    cards: Optional[str] = None
     is_showdown_player: Optional[bool] = None
     money_won_this_round: Optional[int] = None
 
@@ -50,7 +51,11 @@ class Action:
 class PokerEpisode:
     players: Dict[str, Player]
     blinds: Dict[str, Dict[str, int]]  # sb/bb -> player -> amount
+    board: Optional[str]
     actions: Dict[str, List[Action]]
+    has_showdown: Optional[bool]
+    showdown_players: Optional[List[Player]]
+    winners: Optional[List[Player]]
 
 
 class ParseHsmithyTextToPokerEpisode:
@@ -230,22 +235,37 @@ class ParseHsmithyTextToPokerEpisode:
         players, blinds = self.get_players_and_blinds(hand_str)
         info = self.rounds(hand_str)
         actions = self.get_actions(info)
-        board_cards = None
+        board_cards = ''
         showdown_players = []
         winners = []
-
+        has_showdown = False
         for line in info['summary']:
             if 'Board' in line:
                 # Board [9d Th 3h 7d 6h]
                 board_cards = line.split('Board ')[1]
             if 'showed' in line:
-                pname = line.split(':')[1].split('(')[0].strip(' ')
-                cards = line.split('showed ')[1].split(' and')
-                a = 1
+                has_showdown = True
+                pname = line.split(':')[1].split('(')[0].strip()
+                cards = line.split('showed ')[1].split(' and')[0]
+                players[pname].cards = cards
+                players[pname].is_showdown_player = True
+                if 'won' in line:
+                    amt = line.split(f'({self.currency_symbol}')[0].split(')')[0]
+                    amt = round(float(amt) * 1000)
+                    players[pname].money_won_this_round = amt
 
+        for pname, player in players.items():
+            if player.is_showdown_player:
+                showdown_players.append(player)
+                if player.money_won_this_round:
+                    winners.append(player)
         return PokerEpisode(players=players,
                             blinds=blinds,
-                            actions=actions)
+                            actions=actions,
+                            board=board_cards,
+                            has_showdown=has_showdown,
+                            showdown_players=showdown_players,
+                            winners=winners)
 
     def parse_file(self, f: str,
                    out: str,
