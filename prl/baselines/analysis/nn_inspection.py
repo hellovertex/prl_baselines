@@ -38,6 +38,7 @@ rows = ["Fold",
 
 def plot_heatmap(input_dict: Dict[ActionSpace, torch.Tensor],
                  action_freqs,
+                 title,
                  path_out_png):
     detached = {}
     for action, probas in input_dict.items():
@@ -45,7 +46,7 @@ def plot_heatmap(input_dict: Dict[ActionSpace, torch.Tensor],
             detached[action] = probas.detach().numpy()[0]
         else:
             detached[action] = probas
-    df = pd.DataFrame(detached).T  # do we need , index=idx, columns=cols?
+    df = pd.DataFrame(detached, index=rows).T  # do we need , index=idx, columns=cols?
     action_freqs = torch.sum(torch.row_stack(action_freqs), dim=0)
     # plot the heatmap with annotations
     flatui = ["#9b59b6", "#3498db", "#95a5a6", "#e74c3c", "#34495e", "#2ecc71"]
@@ -61,8 +62,8 @@ def plot_heatmap(input_dict: Dict[ActionSpace, torch.Tensor],
     # rgb = tuple(map(int, 255 * rgba[:3]))
     hex_value = matplotlib.colors.rgb2hex(rgba, keep_alpha=True)
     what = 'mis-' if 'false' in path_out_png else 'correctly '
-    ax1.set_title(f"Average probabilities of the network on {what}predicting label")
-    ax2.bar(df.columns,
+    ax1.set_title(title)
+    ax2.bar(df.index,
             action_freqs,
             color=[hex_value for _ in range(8)])
     ax2.set_xlabel("Which Action")
@@ -88,8 +89,8 @@ def plot_heatmap(input_dict: Dict[ActionSpace, torch.Tensor],
 def flush_to_disk(df,
                   label_counts,
                   path_out):
-    if not os.path.exists(path_out):
-        os.makedirs(path_out)
+    if not os.path.exists(Path(path_out).parent):
+        os.makedirs(Path(path_out).parent)
     df.to_csv(path_out)
 
 
@@ -132,7 +133,8 @@ def compute(label_logits, label_counts) \
         ma = probas - m
         ma_abs = ma.abs()
         # mean absolute deviations per action label
-        maas[label.value] = ma_abs
+        # mean of the absolute deviation of each feature-probability from its mean probability
+        maas[label.value] = torch.mean(ma_abs, dim=0)
         # min, max
         mins[label.value] = torch.min(probas, dim=0)
         maxs[label.value] = torch.max(probas, dim=0)
@@ -157,7 +159,7 @@ def compute(label_logits, label_counts) \
     # detached["Sum"] = [v for _, v in label_counts.items()]
     # idx = cols = [i for i in range(len(ActionSpace))]
     results = {'means': means,
-               'maas': maas,
+               'abs_std': maas,
                'mins': mins,
                'maxs': maxs,
                'percentile_10': percentile_10,
@@ -218,15 +220,82 @@ def run(filename,
     path_out_png = path_out + '/' + Path(filename).stem + '/plots'
     df_wrong_means = plot_heatmap(results_wrong['means'],
                                   action_freqs=results_wrong['action_freqs'],
+                                  title=f"Average probabilities of the network on mis-predicting label",
                                   path_out_png=path_out_png + '/means_false.png')
+    df_wrong_abs_std = plot_heatmap(results_wrong['abs_std'],
+                                    action_freqs=results_wrong['action_freqs'],
+                                    title=f"Absolute mean-deviation of the network probabilities on mis-predicting label",
+                                    path_out_png=path_out_png + '/abs_std_false.png')
+    # df_wrong_percentile_10 = plot_heatmap(results_wrong['percentile_10'],
+    #                                       action_freqs=results_wrong['action_freqs'],
+    #                                       title=f"10% Percentile of the networks action probabilities on mis-predicting label",
+    #                                       path_out_png=path_out_png + '/percentile_10_false.png')
+    # df_wrong_percentile_25 = plot_heatmap(results_wrong['percentile_25'],
+    #                                       action_freqs=results_wrong['action_freqs'],
+    #                                       title=f"25% Percentile of the networks action probabilities on mis-predicting label",
+    #                                       path_out_png=path_out_png + '/percentile_25_false.png')
+    # df_wrong_percentile_50 = plot_heatmap(results_wrong['percentile_50'],
+    #                                       action_freqs=results_wrong['action_freqs'],
+    #                                       title=f"50% Percentile of the networks action probabilities on mis-predicting label",
+    #                                       path_out_png=path_out_png + '/percentile_50_false.png')
+    # df_wrong_percentile_75 = plot_heatmap(results_wrong['percentile_75'],
+    #                                       action_freqs=results_wrong['action_freqs'],
+    #                                       title=f"75% Percentile of the networks action probabilities on mis-predicting label",
+    #                                       path_out_png=path_out_png + '/percentile_75_false.png')
+    # df_wrong_percentile_90 = plot_heatmap(results_wrong['percentile_90'],
+    #                                       action_freqs=results_wrong['action_freqs'],
+    #                                       title=f"90% Percentile of the networks action probabilities on mis-predicting label",
+    #                                       path_out_png=path_out_png + '/percentile_90_false.png')
+
     df_correct_means = plot_heatmap(results_correct['means'],
                                     action_freqs=results_correct['action_freqs'],
+                                    title=f"Average probabilities of the network on mis-correctly icting label",
                                     path_out_png=path_out_png + '/means_correct.png')
+    df_correct_abs_std = plot_heatmap(results_correct['abs_std'],
+                                      action_freqs=results_correct['action_freqs'],
+                                      title=f"Absolute mean-deviation of the network probabilities on correctly predicting label",
+                                      path_out_png=path_out_png + '/abs_std_correct.png')
+    # df_correct_percentile_10 = plot_heatmap(results_correct['percentile_10'],
+    #                                         action_freqs=results_correct['action_freqs'],
+    #                                         title=f"10% Percentile of the networks action probabilities on mis-correctly icting label",
+    #                                         path_out_png=path_out_png + '/percentile_10_correct.png')
+    # df_correct_percentile_25 = plot_heatmap(results_correct['percentile_25'],
+    #                                         action_freqs=results_correct['action_freqs'],
+    #                                         title=f"25% Percentile of the networks action probabilities on mis-correctly icting label",
+    #                                         path_out_png=path_out_png + '/percentile_25_correct.png')
+    # df_correct_percentile_50 = plot_heatmap(results_correct['percentile_50'],
+    #                                         action_freqs=results_correct['action_freqs'],
+    #                                         title=f"50% Percentile of the networks action probabilities on mis-correctly icting label",
+    #                                         path_out_png=path_out_png + '/percentile_50_correct.png')
+    # df_correct_percentile_75 = plot_heatmap(results_correct['percentile_75'],
+    #                                         action_freqs=results_correct['action_freqs'],
+    #                                         title=f"75% Percentile of the networks action probabilities on mis-correctly icting label",
+    #                                         path_out_png=path_out_png + '/percentile_75_correct.png')
+    # df_correct_percentile_90 = plot_heatmap(results_correct['percentile_90'],
+    #                                         action_freqs=results_correct['action_freqs'],
+    #                                         title=f"90% Percentile of the networks action probabilities on mis-correctly icting label",
+    #                                         path_out_png=path_out_png + '/percentile_90_correct.png')
 
     # write files to disk using df.to_csv()
     path_out_csv = path_out + '/' + Path(filename).stem + '/csv_files'
+    # mis-predicted labels
     flush_to_disk(df_wrong_means, inspector.label_counts_false, path_out_csv + '/means_wrong.csv')
+    flush_to_disk(df_wrong_abs_std, inspector.label_counts_false, path_out_csv + '/abs_std_wrong.csv')
+    # flush_to_disk(df_wrong_percentile_10, inspector.label_counts_false, path_out_csv + '/percentile_10_wrong.csv')
+    # flush_to_disk(df_wrong_percentile_25, inspector.label_counts_false, path_out_csv + '/percentile_25_wrong.csv')
+    # flush_to_disk(df_wrong_percentile_50, inspector.label_counts_false, path_out_csv + '/percentile_50_wrong.csv')
+    # flush_to_disk(df_wrong_percentile_75, inspector.label_counts_false, path_out_csv + '/percentile_75_wrong.csv')
+    # flush_to_disk(df_wrong_percentile_90, inspector.label_counts_false, path_out_csv + '/percentile_90_wrong.csv')
+
+    # correctly predicted labels
     flush_to_disk(df_correct_means, inspector.label_counts_true, path_out_csv + '/means_correct.csv')
+    flush_to_disk(df_correct_abs_std, inspector.label_counts_true, path_out_csv + '/abs_std_correct.csv')
+    # flush_to_disk(df_correct_percentile_10, inspector.label_counts_true, path_out_csv + '/percentile_10_correct.csv')
+    # flush_to_disk(df_correct_percentile_25, inspector.label_counts_true, path_out_csv + '/percentile_25_correct.csv')
+    # flush_to_disk(df_correct_percentile_50, inspector.label_counts_true, path_out_csv + '/percentile_50_correct.csv')
+    # flush_to_disk(df_correct_percentile_75, inspector.label_counts_true, path_out_csv + '/percentile_75_correct.csv')
+    # flush_to_disk(df_correct_percentile_90, inspector.label_counts_true, path_out_csv + '/percentile_90_correct.csv')
+
     # plots logits against true labels and saves csv with result to disk
     return f"Succes. Wrote file to {path_out + '/' + Path(filename).stem}"
 
