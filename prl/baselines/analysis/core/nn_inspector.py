@@ -4,6 +4,7 @@ import torch
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as fts
 import numpy as np
 from prl.environment.Wrappers.base import ActionSpace
+from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL.game.Poker import Poker
 from prl.environment.steinberger.PokerRL.game.games import NoLimitHoldem
 
@@ -196,22 +197,6 @@ class Inspector:
                 'board': initial_board,  # np.ndarray(shape=(n_cards, 2))
                 'hand': player_hands}
 
-    def _init_wrapped_env(self, stack_sizes: List[float]):
-        """Initializes environment used to generate observations.
-        Assumes Btn is at index 0."""
-        # make args for env
-        args = NoLimitHoldem.ARGS_CLS(n_seats=len(stack_sizes),
-                                      starting_stack_sizes_list=stack_sizes,
-                                      use_simplified_headsup_obs=False,
-                                      )
-        # return wrapped env instance
-        env = NoLimitHoldem(is_evaluating=True,
-                            env_args=args,
-                            lut_holder=NoLimitHoldem.get_lut_holder())
-        self._wrapped_env = self.env_wrapper_cls(env)
-        # will be used for naming feature index in training data vector
-        self._feature_names = list(self._wrapped_env.obs_idx_dict.keys())
-
     def _make_ante(self, ante: str) -> float:
         """Converts ante string to float, e.g. '$0.00' -> float(0.00)"""
         return float(ante.split(self._currency_symbol)[1]) * MULTIPLY_BY
@@ -371,7 +356,9 @@ class Inspector:
         # Initialize environment for simulation of PokerEpisode
         # get starting stacks, starting with button at index 0
         stacks = [player.stack_size for player in table]
-        self._init_wrapped_env(stacks)
+        self._wrapped_env = init_wrapped_env(self.env_wrapper_cls,
+                                             stacks,
+                                             multiply_by=1)
         sb, bb = self.make_blinds(episode.blinds)
         self._wrapped_env.env.SMALL_BLIND, self._wrapped_env.env.BIG_BLIND = sb, bb
         self._wrapped_env.env.ANTE = self._make_ante(episode.ante)
