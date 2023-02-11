@@ -27,16 +27,16 @@ class Inspector:
         self._currency_symbol = None
         self._feature_names = None
         self.baseline = baseline  # inspection is computed against baseline
-        self.true = {ActionSpace.FOLD: torch.zeros(1, len(ActionSpace)),
-                     ActionSpace.CHECK_CALL: torch.zeros(1, len(ActionSpace)),
-                     ActionSpace.RAISE_MIN_OR_3BB: torch.zeros(1, len(ActionSpace)),
-                     ActionSpace.RAISE_6_BB: torch.zeros(1, len(ActionSpace)),
-                     ActionSpace.RAISE_10_BB: torch.zeros(1, len(ActionSpace)),
-                     ActionSpace.RAISE_20_BB: torch.zeros(1, len(ActionSpace)),
-                     ActionSpace.RAISE_50_BB: torch.zeros(1, len(ActionSpace)),
-                     ActionSpace.RAISE_ALL_IN: torch.zeros(1, len(ActionSpace)),
-                     }  # for every wrong prediction: get all logits
-        # self.true = {}  # for every true prediction: get all logits
+        self.logits_when_correct = {ActionSpace.FOLD: None,
+                                    ActionSpace.CHECK_CALL: None,
+                                    ActionSpace.RAISE_MIN_OR_3BB: None,
+                                    ActionSpace.RAISE_6_BB: None,
+                                    ActionSpace.RAISE_10_BB: None,
+                                    ActionSpace.RAISE_20_BB: None,
+                                    ActionSpace.RAISE_50_BB: None,
+                                    ActionSpace.RAISE_ALL_IN: None,
+                                    }  # for every wrong prediction: get all logits
+        # self.true = {}  # for every true prediction: count prediction for each label
         self.label_counts_true = {ActionSpace.FOLD: 0,
                                   ActionSpace.CHECK_CALL: 0,
                                   ActionSpace.RAISE_MIN_OR_3BB: 0,
@@ -45,24 +45,24 @@ class Inspector:
                                   ActionSpace.RAISE_20_BB: 0,
                                   ActionSpace.RAISE_50_BB: 0,
                                   ActionSpace.RAISE_ALL_IN: 0}
-        self.false = {ActionSpace.FOLD: torch.zeros(1, len(ActionSpace)),
-                     ActionSpace.CHECK_CALL: torch.zeros(1, len(ActionSpace)),
-                     ActionSpace.RAISE_MIN_OR_3BB: torch.zeros(1, len(ActionSpace)),
-                     ActionSpace.RAISE_6_BB: torch.zeros(1, len(ActionSpace)),
-                     ActionSpace.RAISE_10_BB: torch.zeros(1, len(ActionSpace)),
-                     ActionSpace.RAISE_20_BB: torch.zeros(1, len(ActionSpace)),
-                     ActionSpace.RAISE_50_BB: torch.zeros(1, len(ActionSpace)),
-                     ActionSpace.RAISE_ALL_IN: torch.zeros(1, len(ActionSpace)),
-                     }  # for every wrong prediction: get all logits
-        # self.true = {}  # for every true prediction: get all logits
-        self.label_counts_false = {ActionSpace.FOLD: 0,
-                                  ActionSpace.CHECK_CALL: 0,
-                                  ActionSpace.RAISE_MIN_OR_3BB: 0,
-                                  ActionSpace.RAISE_6_BB: 0,
-                                  ActionSpace.RAISE_10_BB: 0,
-                                  ActionSpace.RAISE_20_BB: 0,
-                                  ActionSpace.RAISE_50_BB: 0,
-                                  ActionSpace.RAISE_ALL_IN: 0}
+        self.logits_when_wrong = {ActionSpace.FOLD: None,
+                                  ActionSpace.CHECK_CALL: None,
+                                  ActionSpace.RAISE_MIN_OR_3BB: None,
+                                  ActionSpace.RAISE_6_BB: None,
+                                  ActionSpace.RAISE_10_BB: None,
+                                  ActionSpace.RAISE_20_BB: None,
+                                  ActionSpace.RAISE_50_BB: None,
+                                  ActionSpace.RAISE_ALL_IN: None,
+                                  }  # for every wrong prediction: get all logits
+        # self.true = {}  # for every false prediction: count predictions for each label
+        self.label_counts_false = {ActionSpace.FOLD: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.CHECK_CALL: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.RAISE_MIN_OR_3BB: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.RAISE_6_BB: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.RAISE_10_BB: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.RAISE_20_BB: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.RAISE_50_BB: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.RAISE_ALL_IN: torch.zeros(len(ActionSpace))}
 
     class _EnvironmentEdgeCaseEncounteredError(ValueError):
         """This error is thrown in rare cases where the PokerEnv written by Erich Steinberger,
@@ -307,12 +307,28 @@ class Inspector:
 
                     # Update neural network stats
                     if pred == action_label:
-                        self.true[action_label] += torch.softmax(self.baseline.logits.cpu(), dim=1)
+                        # self.true[action_label] += torch.softmax(self.baseline.logits.cpu(), dim=1)
+                        if self.logits_when_correct[action_label] is None:
+                            # noinspection PyTypeChecker
+                            self.logits_when_correct[action_label] = torch.softmax(self.baseline.logits.cpu(), dim=1).reshape(1,1,8)
+                        else:
+                            # noinspection PyTypeChecker
+                            self.logits_when_correct[action_label] = torch.row_stack(
+                                [self.logits_when_correct[action_label],
+                                 torch.softmax(self.baseline.logits.cpu(), dim=1).reshape(1, 1, 8)])
                         self.label_counts_true[action_label] += 1
                         # self.true[action_label] /= self.label_counts_true[action_label]
                     else:
-                        self.false[action_label] += torch.softmax(self.baseline.logits.cpu(), dim=1)
-                        self.label_counts_false[action_label] += 1
+                        if self.logits_when_wrong[action_label] is None:
+                            # noinspection PyTypeChecker
+                            self.logits_when_wrong[action_label] = torch.softmax(self.baseline.logits.cpu(), dim=1).reshape(1,1,8)
+                        else:
+                            # noinspection PyTypeChecker
+                            self.logits_when_wrong[action_label] = torch.row_stack(
+                                [self.logits_when_wrong[action_label],
+                                 torch.softmax(self.baseline.logits.cpu(), dim=1).reshape(1, 1, 8)])
+
+                        self.label_counts_false[action_label][pred] += 1
                         # self.wrong[action_label] /= self.label_counts_wrong[action_label]
 
             debug_action_list.append(action_formatted)

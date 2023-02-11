@@ -46,19 +46,12 @@ class Preprocessor:
             df_total = pd.concat([df_total, df])
 
         print(df_total.head())
-        # todo: do downsampling on total df not individual dfs
-        if use_label_balancing:
-            assert percentage_of
-            assert sampling_fractions
-            df_total = self.downsample(df_total, sampling_fractions, percentage_of)
+        df_total = self.downsample(df_total)
         label_freqs = df_total['label'].value_counts()
         print(f'Label_frequencies for dataset: {label_freqs}')
         # shuffle
-        # todo wip: fix this
-        # todo MAYBE THIS IS TOO LARGE WITH 60GB then we have to fall back to
-        #  looping individual files
         df_total = df_total.sample(frac=1)
-        [c(df_total, file) for c in cbs]
+        [c(df_total, 'out.csv') for c in cbs]
         a = 1
 
     def extract_subset(self, df: pd.DataFrame,
@@ -81,7 +74,7 @@ class Preprocessor:
 
         return pd.concat([df_base, samples])
 
-    def downsample(self, df, n_samples):
+    def downsample(self, df):
         """ Each label in df will be downsampled to the number of all ins, "
             so that training data is equally distributed. """
         n_fold = len(df[df['label'] == ActionSpace.FOLD])
@@ -92,17 +85,16 @@ class Preprocessor:
         n_raise_20bb = len(df[df['label'] == ActionSpace.RAISE_20_BB])
         n_raise_50bb = len(df[df['label'] == ActionSpace.RAISE_50_BB])
         n_allin = len(df[df['label'] == ActionSpace.RAISE_ALL_IN])
-        # n_upsamples = n_downsamples = max([n_min_raise,
-        #                               n_raise_6bb,
-        #                                    n_raise_10bb,
-        #                                    n_raise_20bb,
-        #                                    n_raise_50bb,
-        #                                    n_allin])
-        n_upsamples = 12000
-        downsample_fn = partial(self.extract_subset, n_samples=90000)
+        n_upsamples = n_downsamples = max([n_min_raise,
+                                           n_raise_6bb,
+                                           n_raise_10bb,
+                                           n_raise_20bb,
+                                           n_raise_50bb,
+                                           n_allin])
+        downsample_fn = partial(self.extract_subset, n_samples=n_downsamples)
         # downsample_fn = partial(self.extract_subset, n_samples=n_samples)
         # n_upsample = round(n_raises / 6)  # so we have balanced FOLD, CHECK, RAISE where raises are 1/6 each
-        df_fold_downsampled = downsample_fn(df, label=ActionSpace.FOLD, n_available=n_fold)
+        #df_fold_downsampled = downsample_fn(df, label=ActionSpace.FOLD, n_available=n_fold)
         df_checkcall_downsampled = downsample_fn(df, label=ActionSpace.CHECK_CALL, n_available=n_check_call)
         df_raise_min_downsampled = self.upsample(df, label=ActionSpace.RAISE_MIN_OR_3BB,
                                                  n_samples=n_upsamples)
@@ -116,7 +108,7 @@ class Preprocessor:
                                                   n_samples=n_upsamples)
         df_allin_downsampled = self.upsample(df, label=ActionSpace.RAISE_ALL_IN, n_samples=n_upsamples)
 
-        return pd.concat([df_fold_downsampled,
+        return pd.concat([#df_fold_downsampled,
                           df_checkcall_downsampled,
                           df_raise_min_downsampled,
                           df_raise_6bb_downsampled,

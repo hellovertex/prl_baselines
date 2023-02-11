@@ -29,19 +29,62 @@ from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HS
 def plot_heatmap(label_logits: dict,
                  label_counts: dict,
                  path_out_png: str) -> pd.DataFrame:
-    detached = {}
+    means = {}
+    maas = {}
+    mins = {}
+    maxs = {}
+    percentile_10 = {}
+    percentile_25 = {}
+    percentile_50 = {}
+    percentile_75 = {}
+    percentile_90 = {}
+
     l = []
-    for label, logits in label_logits.items():
+    # from dictionary of action to stacked tensors with list of action probability vectors
+    # we want to compute statistics min, max, 25, 50, 75 percentile
+    # mean, std
+    for label, probas in label_logits.items():
         normalize = label_counts[label]
         l.append(normalize)
-        detached[label.value] = logits.detach().numpy()[0] / normalize
+        if probas is None:
+            continue
+        assert sum(normalize) == probas.shape[0]
+
+        # means[label.value] = logits.detach().numpy()[0] / normalize
+        m = torch.mean(probas, dim=0)
+        # mean action probabilities per action label
+        means[label.value] = m
+        ma = probas - m
+        ma_abs = ma.abs()
+        # mean absolute deviations per action label
+        maas[label.value] = ma_abs
+        # min, max
+        mins[label.value] = torch.min(probas, dim=0)
+        maxs[label.value] = torch.max(probas, dim=0)
+        # percentiles
+        num_samples = probas.shape[0]
+        p = probas.reshape(num_samples, len(ActionSpace))
+        p = p.sort(dim=0)[0]
+        # x % of the data falls below the VALUE of the x-percentile so
+        # percentile_50[ActionSpace.FOLD][ActionSpace.MIN_RAISE] = .8
+        #  --> True action was fold, the predicted probability to call is below .8 in exactly 50% of the data
+        percentile_10_index = int(0.10 * num_samples)
+        percentile_10[label.value] = p[percentile_10_index, :]
+        percentile_25_index = int(0.25 * num_samples)
+        percentile_25[label.value] = p[percentile_25_index, :]
+        percentile_50_index = int(0.50 * num_samples)
+        percentile_50[label.value] = p[percentile_50_index, :]
+        percentile_75_index = int(0.75 * num_samples)
+        percentile_75[label.value] = p[percentile_75_index, :]
+        percentile_90_index = int(0.90 * num_samples)
+        percentile_90[label.value] = p[percentile_90_index, :]
         # detached[label.value] = np.hstack([detached[label.value],[label_counts[label]]])
     # detached["Sum"] = [v for _, v in label_counts.items()]
     # idx = cols = [i for i in range(len(ActionSpace))]
     rows = ["Fold", "Check/Call", "Raise3BB", "Raise6BB", "Raise10BB", "Raise20BB",
             "Raise50BB", "RaiseALLIN"]
 
-    df = pd.DataFrame(detached).T  # do we need , index=idx, columns=cols?
+    df = pd.DataFrame(means).T  # do we need , index=idx, columns=cols?
 
     # plot the heatmap with annotations
     flatui = ["#9b59b6", "#3498db", "#95a5a6", "#e74c3c", "#34495e", "#2ecc71"]
@@ -84,7 +127,7 @@ def plot_heatmap(label_logits: dict,
 
 def make_results(inspector, path_out):
     # WRONG PREDICTIONS
-    df = plot_heatmap(label_logits=inspector.false,
+    df = plot_heatmap(label_logits=inspector.logits_when_wrong,
                       label_counts=inspector.label_counts_false,
                       path_out_png=f'{path_out}/false.png')
     if not os.path.exists(path_out):
@@ -95,7 +138,7 @@ def make_results(inspector, path_out):
     df.to_csv(f'{path_out}/false_labels.csv')
     print(df)
     # TRUE PREDICTIONS
-    df = plot_heatmap(label_logits=inspector.true,
+    df = plot_heatmap(label_logits=inspector.logits_when_correct,
                       label_counts=inspector.label_counts_true,
                       path_out_png=f'{path_out}/correct.png')
     df.to_csv(f'{path_out}/correct_probas.csv')
@@ -151,8 +194,6 @@ if __name__ == "__main__":
     # model_ckpt_abs_path = "/home/sascha/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_selected_players/with_folds_div_1/with_folds/ckpt_dir/ilaviiitech_[512]_1e-06/ckpt.pt"
     # model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/with_folds_2NL_all_players/ckpt_dir_[512]_1e-06/ckpt.pt"
 
-    # Single Baseline checkpoint
-    # model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/randomized_folds_with_downsamplingv1_0_25NL_all_players/ckpt_dir_[512]_1e-06/ckpt.pt"
 
     # Multiple Baseline checkpoints --> Creates Majority Agent in inspect function
     debug = True
@@ -163,16 +204,22 @@ if __name__ == "__main__":
     ckpts = [pdir + '/ckpt.pt' for pdir in player_dirs]
     model_ckpt_abs_path = ckpts
 
+    # Single Baseline checkpoint
+    # model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/randomized_folds_with_downsamplingv1_0_25NL_all_players/ckpt_dir_[512]_1e-06/ckpt.pt"
+    model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/data/no_folds_selected_players_70%/ckpt_dir_[512]_1e-06/ckpt.pt"
+    model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/no_folds_selected_players/ckpt_dir_[512]_1e-06/ckpt.pt"
     # ctd
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
+    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_10"
+    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     # unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/2.5NL/unzipped"
-    # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
-    path_out = './results/dprime_rand_folds_majority_agent'
+    path_out = './results/selected_players_no_fold'
     max_files = 1000
     # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
 
-    inspect_fn = partial(inspection, model_ckpt_abs_path=model_ckpt_abs_path,
+    inspect_fn = partial(inspection,
+                         model_ckpt_abs_path=model_ckpt_abs_path,
                          path_out=path_out,
                          max_files=max_files)
     if debug:

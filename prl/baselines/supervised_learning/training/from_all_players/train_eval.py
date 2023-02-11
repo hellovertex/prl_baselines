@@ -169,33 +169,34 @@ if __name__ == "__main__":
     # export TRAIN_EVAL_SOURCE_DIR=/home/.../Documents/github.com/prl_baselines/data/02_vectorized/0.25-0.50/...
     # filenames = glob.glob(os.environ["TRAIN_EVAL_SOURCE_DIR"]+"/**/*.txt",recursive=True)
     log_interval = eval_interval = 5  # epochs (i.e BATCH_SIZE * train_steps) environment steps
-    params0 = {'hdims': [[256, 256]],  # [256, 256], [512, 512]], -- not better
-               'lrs': [1e-6],  # we ruled out 1e-5 and 1e-7 by hand, 1e-6 is the best we found after multiple trainings
-               # 'max_epoch': 5_000_000,
-               'max_epoch': 100_000_000,
-               'max_env_steps': 5_000_000,
-               'batch_size': 512,
-               }
+    # params0 = {'hdims': [[256, 256]],  # [256, 256], [512, 512]], -- not better
+    #            'lrs': [1e-6],  # we ruled out 1e-5 and 1e-7 by hand, 1e-6 is the best we found after multiple trainings
+    #            # 'max_epoch': 5_000_000,
+    #            'max_epoch': 100_000_000,
+    #            'max_env_steps': 5_000_000,
+    #            'batch_size': 512,
+    #            }
     params1 = {'hdims': [[512]],  # [256, 256], [512, 512]], -- not better
                'lrs': [1e-6],  # we ruled out 1e-5 and 1e-7 by hand, 1e-6 is the best we found after multiple trainings
                # 'max_epoch': 5_000_000,
                'max_epoch': 100_000_000,
                'max_env_steps': 5_000_000,
-               'batch_size': 512,
+               'batch_size': 1024,
                }
     # preprocess_flat_data_dir
     # abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/2NL/2NL'
     # abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50'
-    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50/randomized_cards_no_downsampling'
-    base_logdir = f'./randomized_folds_with_downsamplingv1_0_25NL_all_players/logdir'
-    base_ckptdir = f'./randomized_folds_with_downsamplingv1_0_25NL_all_players/ckpt_dir'
+    # abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50/randomized_cards_no_downsampling'
+    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50/actions_selected_players__do_not_generate_fold_labels'
+    base_logdir = f'./no_folds_selected_players/logdir'
+    base_ckptdir = f'./no_folds_selected_players/ckpt_dir'
     # train_eval(abs_path,
     #            params=params,
     #            log_interval=log_interval,
     #            eval_interval=eval_interval)
-    start = time.time()
-    p = multiprocessing.Pool()
-    t0 = time.time()
+    # start = time.time()
+    # p = multiprocessing.Pool()
+    # t0 = time.time()
     train_eval_fn = partial(train_eval, 
                             abs_input_dir=abs_path, 
                             log_interval=log_interval, 
@@ -207,4 +208,4 @@ if __name__ == "__main__":
     #     print(x + f'. Took {time.time() - t0} seconds')
     # print(f'Finished job after {time.time() - start} seconds.')
 
-    p.close()
+    # p.close()

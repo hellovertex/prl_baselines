@@ -194,7 +194,7 @@ def main(out_dir, from_gdrive_id, unzipped_dir):
 
     # todo consider making extra function for this repeated snippet
     debug = False
-    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
+    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_336"
     filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
     params_0 = {'from_selected_players': False,
                 'drop_folds': False,
@@ -206,7 +206,8 @@ def main(out_dir, from_gdrive_id, unzipped_dir):
                 'drop_folds': True,
                 'randomize_fold_cards': False  # this will be ignored when `drop_folds=true`
                 }
-    x = 10000
+    # x = 10000  # for unzipped
+    x = 12  # for 336 player data
     chunks = []
     current_chunk = []
     i = 0

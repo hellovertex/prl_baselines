@@ -35,22 +35,19 @@ DEFAULT_PREPROCESSED_DATA_PATH = str(DATA_DIR) + '/03_preprocessed'
               type=bool,  # absolute path
               help="If True, each label will be downsampled to the number of all ins, "
                    "so that training data is equally distributed. ")
-def main(blind_sizes, path_to_csv_files, output_dir, use_downsampling):
+def main(out_dir, path_to_csv_files, output_dir, use_downsampling):
     # player_folders = glob.glob(
     #     "/home/hellovertex/Documents/github.com/prl_baselines/data/02_vectorized/0.25-0.50" "/**/*.csv", recursive=True)
     # for path_to_csv_files in player_folders[1:]:
     # out_dir = "2NL"
+
     sampling_fractions = [1 for _ in range(len(ActionSpace))]
     percentage_of = DatasetLabelBalanceFactor__PercentageOf.MAX_RAISE_LABELS
-
-    """Want two predefined sets of balanced label frequencies.
-    make folder naming accordingly. pipe input dir and append labelling strategy name
-    
-    """
+    path_to_csv_files = "/home/hellovertex/Documents/github.com/prl_baselines/data/02_vectorized/0.25-0.50/actions_selected_players__do_not_generate_fold_labels"
     if not path_to_csv_files:
-        path_to_csv_files = DEFAULT_VECTORIZED_DATA_PATH + f'/{blind_sizes}'
+        path_to_csv_files = DEFAULT_VECTORIZED_DATA_PATH + f'/{out_dir}'
     if not output_dir:
-        output_dir = DEFAULT_PREPROCESSED_DATA_PATH + f'/{blind_sizes}'
+        output_dir = DEFAULT_PREPROCESSED_DATA_PATH + f'/{out_dir}'
     subdir = Path(path_to_csv_files).stem
     output_dir += f'/{subdir}'
     callbacks = [partial(to_csv, output_dir=output_dir)]
