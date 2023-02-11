@@ -32,9 +32,11 @@ class EmptyPokerEpisode:
 @dataclass
 class Player:
     name: str
-    seat_num: int
+    seat_num_one_indexed: int
     stack: int
     position: Optional[Positions6Max] = None
+    is_showdown_player: Optional[bool] = None
+    money_won_this_round: Optional[int] = None
 
 
 @dataclass
@@ -46,8 +48,8 @@ class Action:
 
 @dataclass
 class PokerEpisode:
-    players: List[Player]
-    blinds: Dict[str, int]  # player_name -> amount
+    players: Dict[str, Player]
+    blinds: Dict[str, Dict[str, int]]  # sb/bb -> player -> amount
     actions: Dict[str, List[Action]]
 
 
@@ -141,28 +143,30 @@ class ParseHsmithyTextToPokerEpisode:
         blinds = {}
         table = hand_str.split("*** HOLE CARDS ***")[0]
         lines = table.split('\n')
+        self.currency_symbol = '$' if '$' in hand_str else '£'
+        if '£' not in hand_str and '$' not in hand_str:
+            self.currency_symbol = '€'
         for line in lines:
             if "Table \'" in line:
                 continue
             if 'Seat' in line:
                 seat, player = line.split(':')
                 seat_num = seat[-1]
-                pname, stack = player.split('(')
-                pname: str = pname[1:-1]
-                stack = stack[1:]
-                stack = float(stack.split(' ')[0])
+                pname = player.split(f'({self.currency_symbol}')[0].strip()
+                stack = player.split(f'({self.currency_symbol}')[1].split(' in')[0]
+                stack = float(stack)
                 player = Player(name=pname,
-                                seat_num=seat_num,
+                                seat_num_one_indexed=seat_num,
                                 stack=round(stack * 100))
                 players[pname] = player
             elif 'posts small blind' in line:
                 sb_name: str = line.split(":")[0]
-                sb_amt = round(float(line.split("$")[1]) * 100)
+                sb_amt = round(float(line.split(self.currency_symbol)[-1]) * 100)
                 players[sb_name].position = Positions6Max.SB
                 blinds['sb'] = {sb_name: sb_amt}
             elif 'posts big blind' in line:
                 bb_name: str = line.split(":")[0]
-                bb_amt = round(float(line.split("$")[1]) * 100)
+                bb_amt = round(float(line.split(self.currency_symbol)[-1]) * 100)
                 players[bb_name].position = Positions6Max.BB
                 blinds['bb'] = {bb_name: bb_amt}
         num_players = len(players)
@@ -175,13 +179,19 @@ class ParseHsmithyTextToPokerEpisode:
         elif 'checks' in action:
             return Action(who=pname, what=ActionSpace.CHECK_CALL, how_much=-1)
         elif 'calls' in action:
-            amt = round(float(action.split('$')[1]) * 100)
+            a = action.split(self.currency_symbol)[1]
+            a = a.split(' and')[0]
+            amt = round(float(a) * 100)
             return Action(who=pname, what=ActionSpace.CHECK_CALL, how_much=amt)
         elif 'bets' in action:
-            amt = round(float(action.split('$')[1]) * 100)
+            a = action.split(self.currency_symbol)[1]
+            a = a.split(' and')[0]
+            amt = round(float(a) * 100)
             return Action(who=pname, what=ActionSpace.RAISE_MIN_OR_3BB, how_much=amt)
         elif 'raises' in action:
-            amt = round(float(action.split('to ')[1].split('$')[1]) * 100)
+            a = action.split('to ')[1].split(self.currency_symbol)[1]
+            a = a.split(' and')[0]
+            amt = round(float(a) * 100)
             return Action(who=pname, what=ActionSpace.RAISE_MIN_OR_3BB, how_much=amt)
         else:
             raise ValueError(f"Unknown action in {line}.")
@@ -193,6 +203,8 @@ class ParseHsmithyTextToPokerEpisode:
             if not line:
                 continue
             if not ':' in line:
+                continue
+            if 'said' in line:
                 continue
             action = self.get_action(line)
             actions.append(action)
@@ -219,8 +231,21 @@ class ParseHsmithyTextToPokerEpisode:
         info = self.rounds(hand_str)
         actions = self.get_actions(info)
         board_cards = None
+        showdown_players = []
+        winners = []
 
-        return PokerEpisode()
+        for line in info['summary']:
+            if 'Board' in line:
+                # Board [9d Th 3h 7d 6h]
+                board_cards = line.split('Board ')[1]
+            if 'showed' in line:
+                pname = line.split(':')[1].split('(')[0].strip(' ')
+                cards = line.split('showed ')[1].split(' and')
+                a = 1
+
+        return PokerEpisode(players=players,
+                            blinds=blinds,
+                            actions=actions)
 
     def parse_file(self, f: str,
                    out: str,
