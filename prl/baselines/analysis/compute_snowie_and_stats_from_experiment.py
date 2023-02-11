@@ -24,9 +24,9 @@ def run_experiment(experiment,
         # hero_names=["StakePlayerImitator_Seat_1"]
         hero_names=[pname]
     )
-    for pstat in stats:
-        if pstat.pname == pname:
-            pstat.to_disk(fpath=f'{path_out}/{pname}.json')
+    # for pstat in stats:
+    #     if pstat.pname == pname:
+    #         pstat.to_disk(fpath=f'{path_out}/{pname}.json')
 
 
 def main(max_episodes,
@@ -47,7 +47,7 @@ def main(max_episodes,
                             flatten_input=False,
                             num_players=num_players,
                             model_hidden_dims=hidden_dims)]  # dont make self play agents
-    agents += [RandomAgent() for _ in range(num_players-1)]  # make random opponents instead
+    agents += [RandomAgent() for _ in range(num_players - 1)]  # make random opponents instead
 
     # agent_names = [f'{pname}_{i}' for i in range(num_players)]
     experiment = make_experiment(max_episodes=max_episodes,

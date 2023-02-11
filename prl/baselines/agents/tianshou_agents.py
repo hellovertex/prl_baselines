@@ -185,6 +185,7 @@ class BaselineAgent(BasePolicy):
             obs = torch.Tensor(np.array([obs])).to(self.device)
         self.logits = self._model(obs)
         self.prediction = torch.argmax(self.logits, dim=1)
+        # todo set threshold to fold
         # action = self._compute_action(obs)
         return self.prediction.item()
 
