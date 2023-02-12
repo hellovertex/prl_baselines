@@ -18,7 +18,7 @@ from prl.baselines.supervised_learning.data_acquisition.core.encoder import Posi
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode as PokerEpisodeV1, PlayerStack, \
     PlayerWithCards, PlayerWinningsCollected, Blind
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Action as ActionV1
-
+from prl.baselines.supervised_learning.v2.new_txt_to_vector_encoder import Encoder
 
 # all the following functionality should be possible with only minimal parameterization (input_dir, output_dir, ...)
 # 1. parse .txt files given list of players (only games containing players, or all if list is None)
@@ -412,7 +412,7 @@ if __name__ == "__main__":
     filenames = glob.glob(unzipped_dir + "/**/*.txt", recursive=True)
     parser = ParseHsmithyTextToPokerEpisode()
     converter = ConverterV2toV1()
-    encoder = None
+    encoder = Encoder()
     max_files_in_memory_at_once = 1
     n_files = len(filenames)
     it = 0
@@ -426,7 +426,22 @@ if __name__ == "__main__":
             episodes = parser.parse_file(filename, out_dir, None, True)
             # convert episodes to PokerEpisodeV1
             episodesV1 = [converter.convert_episode(ep) for ep in episodes]
+            episodes = None  # help gc
             # run rl_encoder
+            for ep in episodesV1:
+                """The new behaviour of the episode-encoder should be to
+                 encode even non-showdown episodes. A set of selected players
+                 is now mandatory. We choose the best 100 players.
+                 We always use their actions as-they-are. This implies
+                 we use all their games including non-showdown games.
+                 When there is no showdown, we dont know their cards,
+                 so we give them random cards and only use the observations
+                 until they fold and end the game there."""
+                encoder.encode_episode(ep,
+                                       drop_folds=False,
+                                       randomize_fold_cards=True,
+                                       selected_players=True,
+                                       verbose=True)
             a = 1
             # write to .npz
         it += 1
