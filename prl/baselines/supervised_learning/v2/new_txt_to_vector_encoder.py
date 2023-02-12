@@ -276,6 +276,9 @@ class EncoderV2:
 
         for pname, pinfo in episode.players.items():
             if pinfo.cards:
+                # In: '[Qs Qd]'
+                # Out: [[10, 1], [10, 2]]
+                pass
                 a = 1
         return []
 
