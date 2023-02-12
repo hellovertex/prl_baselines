@@ -281,7 +281,6 @@ class EncoderV2:
                        selected_players: List[str],
                        verbose: bool) -> Tuple[
         Observations, Actions_Taken]:
-        t0 = time.time()
         """Runs environment with steps from PokerEpisode.
         Returns observations and corresponding actions of players that made it to showdown."""
         # todo: for each selected player
@@ -307,7 +306,6 @@ class EncoderV2:
         self.env.overwrite_args(args)
         # will be used for naming feature index in training data vector
         self._feature_names = list(self.env.obs_idx_dict.keys())
-        print(f'Setup Took {time.time() - t0} seconds')
         self.env.env.SMALL_BLIND = sb
         self.env.env.BIG_BLIND = bb
         self.env.env.ANTE = 0.0

@@ -405,7 +405,7 @@ if __name__ == "__main__":
                            blinds=(25, 50),
                            multiply_by=1, )
     encoder = EncoderV2(env)
-    max_files_in_memory_at_once = 1
+    max_files_in_memory_at_once = 10
     n_files = len(filenames)
     it = 0
 
@@ -416,15 +416,13 @@ if __name__ == "__main__":
             print(f'BREAK AT it={it}')
             break
         training_data, labels = None, None
+        t0 = time.time()
         for filename in filenames[start:end]:
-            t0 = time.time()
             episodesV2 = parser.parse_file(filename, out_dir, None, True)
-            print(f'Parsing took {time.time() - t0} seconds')
             # convert episodes to PokerEpisodeV1
             # episodesV1 = [converter.convert_episode(ep) for ep in episodes]
             # episodes = None  # help gc
             # run rl_encoder
-            t0 = time.time()
             for ep in episodesV2:
                 observations, actions = encoder.encode_episode(ep,
                                                                drop_folds=False,
@@ -458,8 +456,8 @@ if __name__ == "__main__":
                         labels = np.concatenate((labels, actions), axis=0)
                     except Exception as e:
                         print(e)
-            print(f'Encoding took {time.time() - t0} seconds')
-        if training_data:
+        print(f'Encoding {max_files_in_memory_at_once} files took {time.time() - t0} seconds.')
+        if training_data is not None:
             columns = None
             header = False
             # file_path = os.path.abspath(f'./data_{it}.csv.bz2')
