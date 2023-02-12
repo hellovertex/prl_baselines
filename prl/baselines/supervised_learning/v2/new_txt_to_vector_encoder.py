@@ -1,10 +1,12 @@
 import random
+import time
 from typing import List, Tuple, Optional
 
 import numpy as np
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as fts, AugmentObservationWrapper
 from prl.environment.Wrappers.base import ActionSpace
 from prl.environment.Wrappers.utils import init_wrapped_env
+from prl.environment.steinberger.PokerRL import NoLimitHoldem
 from prl.environment.steinberger.PokerRL.game.Poker import Poker
 
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
@@ -21,7 +23,8 @@ class EncoderV2:
     Observations = Optional[List[List]]
     Actions_Taken = Optional[List[Tuple[int, int]]]
 
-    def __init__(self, verbose=False):
+    def __init__(self, env, verbose=False):
+        self.env = env
         # self.no_folds = no_folds
         self.verbose = verbose
         self.env_wrapper_cls = AugmentObservationWrapper
@@ -151,7 +154,7 @@ class EncoderV2:
                 raise self._EnvironmentDidNotTerminateInTimeError
 
             action_formatted = self.build_action(action)
-            action_label = self._wrapped_env.discretize(action_formatted)
+            action_label = self.env.discretize(action_formatted)
             next_to_act = action.who
             for player in players:
                 if player.name == next_to_act:
@@ -173,7 +176,7 @@ class EncoderV2:
             it += 1
 
         if not observations:
-            assert  len(remaining_selected_players) == 1
+            assert len(remaining_selected_players) == 1
             pname = remaining_selected_players[0]
             assert episode.players[pname].position == Positions6Max.BB
             # big blind returned to player because every body folded so he/she didnt get to act
@@ -278,6 +281,7 @@ class EncoderV2:
                        selected_players: List[str],
                        verbose: bool) -> Tuple[
         Observations, Actions_Taken]:
+        t0 = time.time()
         """Runs environment with steps from PokerEpisode.
         Returns observations and corresponding actions of players that made it to showdown."""
         # todo: for each selected player
@@ -291,17 +295,22 @@ class EncoderV2:
         players = self.get_players_starting_with_button(episode)
         stacks = [player.stack for player in players]
         sb, bb = episode.blinds['sb'], episode.blinds['bb']
-        self._wrapped_env = init_wrapped_env(self.env_wrapper_cls,
-                                             stacks,
-                                             blinds=(sb, bb),
-                                             multiply_by=1,  # already multiplied in self.make_table()
-                                             )
+        # self._wrapped_env = init_wrapped_env(self.env_wrapper_cls,
+        #                                      stacks,
+        #                                      blinds=(sb, bb),
+        #                                      multiply_by=1,  # already multiplied in self.make_table()
+        #                                      )
+        args = NoLimitHoldem.ARGS_CLS(n_seats=len(stacks),
+                                      scale_rewards=False,
+                                      use_simplified_headsup_obs=False,
+                                      starting_stack_sizes_list=stacks)
+        self.env.overwrite_args(args)
         # will be used for naming feature index in training data vector
-        self._feature_names = list(self._wrapped_env.obs_idx_dict.keys())
-
-        self._wrapped_env.env.SMALL_BLIND = sb
-        self._wrapped_env.env.BIG_BLIND = bb
-        self._wrapped_env.env.ANTE = 0.0
+        self._feature_names = list(self.env.obs_idx_dict.keys())
+        print(f'Setup Took {time.time() - t0} seconds')
+        self.env.env.SMALL_BLIND = sb
+        self.env.env.BIG_BLIND = bb
+        self.env.env.ANTE = 0.0
         deck = np.full(shape=(13 * 4, 2), fill_value=Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
         board = make_board_cards(episode.board)
         if board:
@@ -316,7 +325,6 @@ class EncoderV2:
                            'board': initial_board,
                            'hand': player_hands}
         self.occupied_cards = self.get_occupied_cards()
-        self.env = self._wrapped_env
 
         for s in stacks:
             if s == self.env.env.SMALL_BLIND or s == self.env.env.BIG_BLIND:
@@ -324,11 +332,15 @@ class EncoderV2:
                 return None, None
 
         # Collect observations and actions, observations are possibly augmented
+
         try:
-            return self._simulate_environment(episode,
-                                              players,
-                                              episode.actions['as_sequence'],
-                                              selected_players=selected_players)
+            # t0 = time.time()
+            res = self._simulate_environment(episode,
+                                             players,
+                                             episode.actions['as_sequence'],
+                                             selected_players=selected_players)
+            # print(f'Simulation took {time.time() - t0} seconds')
+            return res
         except self._EnvironmentEdgeCaseEncounteredError:
             return None, None
         except self._EnvironmentDidNotTerminateInTimeError:

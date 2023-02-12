@@ -9,12 +9,15 @@ I need a data pipeline that is not unnecessarily complex
 import glob
 import os
 import re
+import time
 from pathlib import Path
 from typing import Optional, List, Tuple, Dict
 
 import numpy as np
 import pandas as pd
+from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.base import ActionSpace
+from prl.environment.Wrappers.utils import init_wrapped_env
 
 from prl.baselines.evaluation.core.experiment import DEFAULT_DATE
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
@@ -397,7 +400,11 @@ if __name__ == "__main__":
     filenames = glob.glob(unzipped_dir + "/**/*.txt", recursive=True)
     parser = ParseHsmithyTextToPokerEpisode()
     converter = ConverterV2toV1()
-    encoder = EncoderV2()
+    env = init_wrapped_env(AugmentObservationWrapper,
+                           [5000 for _ in range(6)],
+                           blinds=(25, 50),
+                           multiply_by=1, )
+    encoder = EncoderV2(env)
     max_files_in_memory_at_once = 1
     n_files = len(filenames)
     it = 0
@@ -410,33 +417,36 @@ if __name__ == "__main__":
             break
         training_data, labels = None, None
         for filename in filenames[start:end]:
+            t0 = time.time()
             episodesV2 = parser.parse_file(filename, out_dir, None, True)
+            print(f'Parsing took {time.time() - t0} seconds')
             # convert episodes to PokerEpisodeV1
             # episodesV1 = [converter.convert_episode(ep) for ep in episodes]
             # episodes = None  # help gc
             # run rl_encoder
+            t0 = time.time()
             for ep in episodesV2:
                 observations, actions = encoder.encode_episode(ep,
-                                                  drop_folds=False,
-                                                  randomize_fold_cards=True,
-                                                  selected_players=['ishuha',
-                                                                    'Sakhacop',
-                                                                    'nastja336',
-                                                                    'Lucastitos',
-                                                                    'I LOVE RUS34',
-                                                                    'SerAlGog',
-                                                                    'Ma1n1',
-                                                                    'zMukeha',
-                                                                    'SoLongRain',
-                                                                    'LuckyJO777',
-                                                                    'Nepkin1',
-                                                                    'blistein',
-                                                                    'ArcticBearDK',
-                                                                    'Creator_haze',
-                                                                    'ilaviiitech',
-                                                                    'm0bba',
-                                                                    'KDV707'],
-                                                  verbose=True)
+                                                               drop_folds=False,
+                                                               randomize_fold_cards=True,
+                                                               selected_players=['ishuha',
+                                                                                 'Sakhacop',
+                                                                                 'nastja336',
+                                                                                 'Lucastitos',
+                                                                                 'I LOVE RUS34',
+                                                                                 'SerAlGog',
+                                                                                 'Ma1n1',
+                                                                                 'zMukeha',
+                                                                                 'SoLongRain',
+                                                                                 'LuckyJO777',
+                                                                                 'Nepkin1',
+                                                                                 'blistein',
+                                                                                 'ArcticBearDK',
+                                                                                 'Creator_haze',
+                                                                                 'ilaviiitech',
+                                                                                 'm0bba',
+                                                                                 'KDV707'],
+                                                               verbose=True)
                 if not observations:
                     continue
                 if training_data is None:
@@ -448,6 +458,7 @@ if __name__ == "__main__":
                         labels = np.concatenate((labels, actions), axis=0)
                     except Exception as e:
                         print(e)
+            print(f'Encoding took {time.time() - t0} seconds')
         if training_data:
             columns = None
             header = False
