@@ -2,16 +2,19 @@ from typing import List, Tuple, Optional
 
 import numpy as np
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as fts, AugmentObservationWrapper
+from prl.environment.Wrappers.base import ActionSpace
 from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL.game.Poker import Poker
 
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import PlayerInfo, Positions6Max
-from prl.baselines.supervised_learning.data_acquisition.core.parser import Action, Blind, \
+from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, \
     PlayerWithCards
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import card_tokens, card, make_board_cards
-from prl.baselines.supervised_learning.v2.poker_model import PokerEpisodeV2, Player
+from prl.baselines.supervised_learning.v2.poker_model import PokerEpisodeV2, Player, Action
 
 MULTIPLY_BY = 100  # because env expects Integers, we convert $2,58 to $258
+INVISIBLE_CARD = [Poker.CARD_NOT_DEALT_TOKEN_1D, Poker.CARD_NOT_DEALT_TOKEN_1D]
+DEFAULT_HAND = [INVISIBLE_CARD, INVISIBLE_CARD]
 
 
 class EncoderV2:
@@ -68,7 +71,7 @@ class EncoderV2:
         >>> int(8.62 * 100)
         861
         """
-        return action.action_type.value, round(float(action.raise_amount) * MULTIPLY_BY)
+        return action.what, action.how_much
 
     def make_blinds(self, blinds: List[Blind]):
         """Under Construction."""
@@ -78,40 +81,6 @@ class EncoderV2:
         bb = blinds[1]
         assert bb.type == 'big blind'
         return sb.amount, bb.amount
-
-    def make_showdown_hands(self, table: Tuple[PlayerInfo], showdown: List[PlayerWithCards]):
-        """Under Construction. """
-        # initialize default hands
-        default_card = [Poker.CARD_NOT_DEALT_TOKEN_1D, Poker.CARD_NOT_DEALT_TOKEN_1D]  # rank, suit
-        player_hands = [[default_card, default_card] for _ in range(len(table))]
-
-        # overwrite known hands
-        for seat in table:
-            for final_player in showdown:
-                if seat.player_name == final_player.name:
-                    # '[6h Ts]' to ['6h', 'Ts']
-                    showdown_cards = card_tokens(final_player.cards)
-                    # ['6h', 'Ts'] to [[5,3], [5,0]]
-                    hand = [card(token) for token in showdown_cards]
-                    # overwrite [[-127,127],[-127,-127]] with [[5,3], [5,0]]
-                    player_hands[int(seat.position_index)] = hand
-        return player_hands
-
-    def _build_cards_state_dict(self, episode: PokerEpisodeV2):
-        """Under Construction."""
-        n_players = len(episode.players)
-        # board_cards = make_board_cards(episode.board_cards)
-        # --- set deck ---
-        # cards are drawn without ghost cards, so we simply replace the first 5 cards of the deck
-        # with the board cards that we have parsed
-        deck = np.empty(shape=(13 * 4, 2), dtype=np.int8)
-        # deck[:len(board_cards)] = board_cards
-        # make hands: np.ndarray(shape=(n_players, 2, 2))
-        # player_hands = self.make_showdown_hands(table, episode.showdown_hands)
-        initial_board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
-        return {'deck': {'deck_remaining': deck},  # np.ndarray(shape=(52-n_cards*num_players, 2))
-                'board': initial_board,  # np.ndarray(shape=(n_cards, 2))
-                'hand': np.zeros((n_players, 2, 2))}
 
     def _update_card(self):
         c = np.zeros(17)
@@ -151,55 +120,47 @@ class EncoderV2:
         return obs
 
     def _simulate_environment(self,
-                              env,
-                              episode: PokerEpisodeV2,
-                              cards_state_dict,
-                              starting_stack_sizes_list,
+                              episode,
+                              players: List[Player],
+                              action_list: List[Action],
                               selected_players=None):
         """Runs poker environment from episode and returns observations and actions emitted for selected players.
         If no players selectd, then all showdown players actions and observations will be returned."""
         # if episode.hand_id == 216163387520 or episode.hand_id == 214211025466:
-        for s in starting_stack_sizes_list:
-            if s == env.env.SMALL_BLIND or s == env.env.BIG_BLIND:
-                # skip edge case of player all in by calling big blind
-                raise self._EnvironmentEdgeCaseEncounteredError("Edge case 1 encountered. See docstring for details.")
-        state_dict = {'deck_state_dict': cards_state_dict}
-        if episode.hand_id == 220485600493:
-            print('break at this line for debug')
-            a = 1
-        obs, _, done, _ = env.reset(config=state_dict)
+
+        state_dict = {'deck_state_dict': self.state_dict}
+        obs, _, done, _ = self.env.reset(config=state_dict)
+        # todo add tianshou env and assert np.array_equal(obs, obs_tianshou)
         assert obs[-1] in [0, 1, 2, 3, 4, 5], f"obs[-1] = {obs[-1]}. " \
                                               f"get_current_obs should have caught this already. check the wrapper impl"
         # --- Step Environment with action --- #
         observations = []
         actions = []
-        showdown_players: List[str] = [player.name for player in episode.showdown_hands]
-        # if player reached showdown we can see his cards
-        # filtered_players = showdown_players if not selected_players else [p for p in showdown_players if
-        #                                                                           p in selected_players]
-        filtered_players = None
-        if not selected_players:
-            filtered_players = showdown_players
-        else:
-            for p in showdown_players:
-                if p in selected_players:
-                    filtered_players = showdown_players
-        assert filtered_players is not None, "filtered players must be equal to showdown players"
         it = 0
         debug_action_list = []
+        # if not episode.has_showdown:
+        #     # need to set random hero cards for selected players
+        #     for player in players:
+        #         if player.name in selected_players:
+        #
         while not done:
             try:
-                action = episode.actions_total['as_sequence'][it]
+                action = action_list[it]
             except IndexError:
                 raise self._EnvironmentDidNotTerminateInTimeError
 
             action_formatted = self.build_action(action)
             action_label = self._wrapped_env.discretize(action_formatted)
-            next_to_act = env.current_player.seat_id
+            next_to_act = action.who
             # if self.verbose:
             #     pretty_print(next_to_act, obs, action_label)
-            for player in episode.players:
-                pass
+            for player in players:
+                if player.name == action.who:
+                    if player.name in selected_players:
+                        if action_label == ActionSpace.FOLD:
+                            pass
+
+
                 # If player is showdown player
                 # if player.name == action.who and player.name in selected_players:
                 # if player.position_index == next_to_act and player.player_name in filtered_players:
@@ -222,7 +183,7 @@ class EncoderV2:
                 #             observations.append(obs)
             debug_action_list.append(action_formatted)
 
-            obs, _, done, _ = env.step(action_formatted)
+            obs, _, done, _ = self.env.step(action_formatted)
             it += 1
 
         if not observations:
@@ -260,7 +221,7 @@ class EncoderV2:
                 break
             has_moved[action.who] = True
             players_sorted.append(episode.players[action.who])
-        if len(players_sorted) == len(episode.players) -1:
+        if len(players_sorted) == len(episode.players) - 1:
             # big blind collected uncalled bet, so he/she did not perform any action
             for pname, pinfo in episode.players.items():
                 if pinfo.position == Positions6Max.BB:
@@ -268,19 +229,21 @@ class EncoderV2:
         assert len(players_sorted) == len(episode.players)
         # [3,4,0,1,2] ->
         if num_players > 3:
-            players_sorted = np.roll(players_sorted, -(num_players-3))
+            players_sorted = np.roll(players_sorted, -(num_players - 3))
         assert players_sorted[0].seat_num_one_indexed == episode.btn_seat_num_one_indexed
         return players_sorted
 
-    def make_player_hands(self, episode):
-
-        for pname, pinfo in episode.players.items():
+    def make_player_hands(self, players: List[Player]):
+        hands = []
+        for pinfo in players:
             if pinfo.cards:
-                # In: '[Qs Qd]'
-                # Out: [[10, 1], [10, 2]]
-                pass
-                a = 1
-        return []
+                # In: '[Qs Qd]' Out: [[10,2],[10,3]]
+                cards = card_tokens(pinfo.cards)
+                hand = [[card(token) for token in cards]]
+                hands.append(hand)
+            else:
+                hands.append(DEFAULT_HAND)
+        return hands
 
     def encode_episode(self,
                        episode: PokerEpisodeV2,
@@ -313,22 +276,31 @@ class EncoderV2:
         self._wrapped_env.env.SMALL_BLIND = sb
         self._wrapped_env.env.BIG_BLIND = bb
         self._wrapped_env.env.ANTE = 0.0
-        cards_state_dict = self._build_cards_state_dict(episode)
-        state_dict = {}
+        deck = np.empty(shape=(13 * 4, 2), dtype=np.int8)
         board = make_board_cards(episode.board)
-        player_hands = self.make_player_hands(episode)
-        self.state_dict = {}
-        # self.occupied_cards = self.get_occupied_cards()
-        # # Collect observations and actions, observations are possibly augmented
-        # try:
-        #     return self._simulate_environment(env=self._wrapped_env,
-        #                                       episode=episode,
-        #                                       cards_state_dict=cards_state_dict,
-        #                                       starting_stack_sizes_list=stacks,
-        #                                       selected_players=selected_players)
-        # except self._EnvironmentEdgeCaseEncounteredError:
-        #     return None, None
-        # except self._EnvironmentDidNotTerminateInTimeError:
-        #     return None, None
+        deck[:len(board)] = board
+        player_hands = self.make_player_hands(players)
+        initial_board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
+        self.state_dict = {'deck': {'deck_remaining': deck},
+                           'board': initial_board,
+                           'hand': player_hands}
+        self.occupied_cards = self.get_occupied_cards()
+        self.env = self._wrapped_env
+
+        for s in stacks:
+            if s == self.env.env.SMALL_BLIND or s == self.env.env.BIG_BLIND:
+                # skip edge case of player all in by calling big blind
+                return None, None
+
+        # Collect observations and actions, observations are possibly augmented
+        try:
+            return self._simulate_environment(episode,
+                                              players,
+                                              episode.actions['as_sequence'],
+                                              selected_players=selected_players)
+        except self._EnvironmentEdgeCaseEncounteredError:
+            return None, None
+        except self._EnvironmentDidNotTerminateInTimeError:
+            return None, None
 # in: .txt files
 # out: .csv files? maybe npz or easier-on-memory formats preferred?
