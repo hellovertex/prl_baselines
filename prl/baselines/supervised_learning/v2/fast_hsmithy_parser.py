@@ -16,7 +16,7 @@ from prl.environment.Wrappers.base import ActionSpace
 from prl.baselines.evaluation.core.experiment import DEFAULT_DATE
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode as PokerEpisodeV1, PlayerStack, \
-    PlayerWithCards
+    PlayerWithCards, PlayerWinningsCollected, Blind
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Action as ActionV1
 
 
@@ -350,25 +350,45 @@ class ConverterV2toV1:
                                                   player.cards))
         return showdown_hands
 
+    def get_money_collected(self, episode) -> List[PlayerWinningsCollected]:
+        money_collected = []
+        for player in episode.winners:
+            money_collected.append(PlayerWinningsCollected(player.name,
+                                                           player.money_won_this_round))
+        return money_collected
+
+    def get_blinds(self, episode) -> List[Blind]:
+        sb = episode.blinds['sb']
+        bb = episode.blinds['bb']
+        blinds = []
+        for pname, amount in sb.items():
+            blinds.append(Blind(pname, 'small blind', amount))
+        for pname, amount in bb.items():
+            blinds.append(Blind(pname, 'big blind', amount))
+        return blinds
+
     def convert_episode(self, episode: PokerEpisode) -> PokerEpisodeV1:
         player_stacks = self.get_pstacks(episode)
+        blinds = self.get_blinds(episode)
         actions_total = self.get_actions_total(episode)
         winners = self.get_winners(episode)
         showdown_hands = self.get_showdown_hands(episode)
+        money_collected = self.get_money_collected(episode)
         return PokerEpisodeV1(
             date=DEFAULT_DATE,
             hand_id=episode.hand_id,
             variant='NoLimitHoldEm',
             currency_symbol=episode.currency_symbol,
             num_players=len(episode.players),
-            blinds=episode.blinds,  # todo: '$1' vs int(1) in encoder
+            blinds=blinds,  # todo: '$1' vs int(1) in encoder
             ante='$0.00',
             player_stacks=player_stacks,  # # todo: '$1' vs int(1) in encoder
             btn_idx=episode.btn_seat_num_one_indexed,  # todo this shouldnt be needed
             board_cards=episode.board,
             actions_total=actions_total,
             winners=winners,  # todo: maybe be empty list [], check implications
-            showdown_hands=showdown_hands  # todo: maybe be empty list [], check implications
+            showdown_hands=showdown_hands,  # todo: maybe be empty list [], check implications
+            money_collected=money_collected
         )
 
 
