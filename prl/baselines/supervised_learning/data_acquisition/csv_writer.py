@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 import pandas as pd
 
 from core.writer import Writer
@@ -34,7 +35,12 @@ class CSVWriter(Writer):
                      index=labels,  # The index (row labels) of the DataFrame.
                      columns=columns)
         # float to int if applicable
-        df = df.apply(lambda x: x.apply(lambda y: int(y) if int(y) == y else y))
-        df.to_csv(
-            file_path, index=True, header=header, index_label='label', mode='a', float_format='%.5f')
+        df = df.apply(lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
+        df.to_csv(file_path+'.bz2',
+                  index=True,
+                  header=header,
+                  index_label='label',
+                  mode='a',
+                  float_format='%.5f',
+                  compression='bz2')
         return file_dir, file_path

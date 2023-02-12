@@ -7,9 +7,13 @@ I want a parser that can handle incomplete episodes. I.e. if no showdown happene
 I need a data pipeline that is not unnecessarily complex
 """
 import glob
+import os
 import re
+from pathlib import Path
 from typing import Optional, List, Tuple, Dict
 
+import numpy as np
+import pandas as pd
 from prl.environment.Wrappers.base import ActionSpace
 
 from prl.baselines.evaluation.core.experiment import DEFAULT_DATE
@@ -395,6 +399,7 @@ if __name__ == "__main__":
         if not filenames[start:end]:
             print(f'BREAK AT it={it}')
             break
+        training_data, labels = None, None
         for filename in filenames[start:end]:
             episodesV2 = parser.parse_file(filename, out_dir, None, True)
             # convert episodes to PokerEpisodeV1
@@ -410,7 +415,7 @@ if __name__ == "__main__":
                  When there is no showdown, we dont know their cards,
                  so we give them random cards and only use the observations
                  until they fold and end the game there."""
-                obs, act = encoder.encode_episode(ep,
+                observations, actions = encoder.encode_episode(ep,
                                                   drop_folds=False,
                                                   randomize_fold_cards=True,
                                                   selected_players=['ishuha',
@@ -431,7 +436,37 @@ if __name__ == "__main__":
                                                                     'm0bba',
                                                                     'KDV707'],
                                                   verbose=True)
-                print(obs)
+                if not observations:
+                    continue
+                if training_data is None:
+                    training_data = observations
+                    labels = actions
+                else:
+                    try:
+                        training_data = np.concatenate((training_data, observations), axis=0)
+                        labels = np.concatenate((labels, actions), axis=0)
+                    except Exception as e:
+                        print(e)
             a = 1
             # write to .npz
+
+        columns = None
+        header = False
+        file_path = os.path.abspath(f'./data_{it}.csv.bz2')
+        if not os.path.exists(Path(file_path).parent):
+            os.makedirs(os.path.realpath(Path(file_path).parent), exist_ok=True)
+            columns = encoder.feature_names
+            header = True
+        df = pd.DataFrame(data=training_data,
+                          index=labels,  # The index (row labels) of the DataFrame.
+                          columns=columns)
+        # float to int if applicable
+        df = df.apply(lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
+        df.to_csv(file_path,
+                  index=True,
+                  header=header,
+                  index_label='label',
+                  mode='a',
+                  float_format='%.5f',
+                  compression='bz2')
         it += 1
