@@ -461,9 +461,10 @@ if __name__ == "__main__":
             columns = None
             header = False
             # file_path = os.path.abspath(f'./data_{it}.csv.bz2')
-            file_path = os.path.abspath(f'./data_{it}.csv')
+            file_path = os.path.abspath(f'./data_{it}.csv.bz2')
             if not os.path.exists(Path(file_path).parent):
                 os.makedirs(os.path.realpath(Path(file_path).parent), exist_ok=True)
+            if not os.path.exists(file_path):
                 columns = encoder.feature_names
                 header = True
             df = pd.DataFrame(data=training_data,
@@ -477,6 +478,6 @@ if __name__ == "__main__":
                       index_label='label',
                       mode='a',
                       float_format='%.5f',
-                      # compression='bz2'
+                      compression='bz2'
                       )
             it += 1
