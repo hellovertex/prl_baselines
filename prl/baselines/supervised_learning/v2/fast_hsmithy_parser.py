@@ -8,63 +8,22 @@ I need a data pipeline that is not unnecessarily complex
 """
 import glob
 import re
-from dataclasses import dataclass
-from typing import Optional, List, Tuple, Dict, Union
+from typing import Optional, List, Tuple, Dict
 
 from prl.environment.Wrappers.base import ActionSpace
 
 from prl.baselines.evaluation.core.experiment import DEFAULT_DATE
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
+from prl.baselines.supervised_learning.data_acquisition.core.parser import Action as ActionV1
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode as PokerEpisodeV1, PlayerStack, \
     PlayerWithCards, PlayerWinningsCollected, Blind
-from prl.baselines.supervised_learning.data_acquisition.core.parser import Action as ActionV1
-from prl.baselines.supervised_learning.v2.new_txt_to_vector_encoder import Encoder
+from prl.baselines.supervised_learning.v2.new_txt_to_vector_encoder import EncoderV2
+from prl.baselines.supervised_learning.v2.poker_model import Player, Action, PokerEpisodeV2
+
 
 # all the following functionality should be possible with only minimal parameterization (input_dir, output_dir, ...)
 # 1. parse .txt files given list of players (only games containing players, or all if list is None)
 # 2.
-
-class UnparsableFileException(ValueError):
-    """This is raised when the parser can not finish parsing a .txt file."""
-
-
-class EmptyPokerEpisode:
-    """Placeholder for an empty PokerEpisode"""
-    pass
-
-
-@dataclass
-class Player:
-    name: str
-    seat_num_one_indexed: int
-    stack: int
-    position: Optional[Positions6Max] = None
-    cards: Optional[str] = None
-    is_showdown_player: Optional[bool] = None
-    money_won_this_round: Optional[int] = None
-
-
-@dataclass
-class Action:
-    who: str
-    what: Union[Tuple, ActionSpace]
-    how_much: int
-    stage: Optional[str] = None  # 'preflop' 'flop' 'turn' 'river'
-    info: Optional[Dict] = None
-
-
-@dataclass
-class PokerEpisode:
-    hand_id: int
-    currency_symbol: str
-    players: Dict[str, Player]
-    blinds: Dict[str, Dict[str, int]]  # sb/bb -> player -> amount
-    board: Optional[str]
-    actions: Dict[str, List[Action]]
-    has_showdown: Optional[bool]
-    showdown_players: Optional[List[Player]]
-    winners: Optional[List[Player]]
-    btn_seat_num_one_indexed: Optional[int]
 
 
 class ParseHsmithyTextToPokerEpisode:
@@ -129,25 +88,25 @@ class ParseHsmithyTextToPokerEpisode:
 
         # Assertions
         # PREFLOP
-        assert not self.flop_sep in hole_cards
-        assert not self.turn_sep in hole_cards
-        assert not self.river_sep in hole_cards
-        assert not self.summary_sep in hole_cards
+        assert self.flop_sep not in hole_cards
+        assert self.turn_sep not in hole_cards
+        assert self.river_sep not in hole_cards
+        assert self.summary_sep not in hole_cards
         # FLOP
-        assert not self.preflop_sep in flop
-        assert not self.turn_sep in flop
-        assert not self.river_sep in flop
-        assert not self.summary_sep in flop
+        assert self.preflop_sep not in flop
+        assert self.turn_sep not in flop
+        assert self.river_sep not in flop
+        assert self.summary_sep not in flop
         # TURN
-        assert not self.preflop_sep in turn
-        assert not self.flop_sep in turn
-        assert not self.river_sep in turn
-        assert not self.summary_sep in turn
+        assert self.preflop_sep not in turn
+        assert self.flop_sep not in turn
+        assert self.river_sep not in turn
+        assert self.summary_sep not in turn
         # RIVER
-        assert not self.preflop_sep in river
-        assert not self.flop_sep in river
-        assert not self.turn_sep in river
-        assert not self.summary_sep in river
+        assert self.preflop_sep not in river
+        assert self.flop_sep not in river
+        assert self.turn_sep not in river
+        assert self.summary_sep not in river
 
         return {'preflop': hole_cards,
                 'flop': flop,
@@ -155,7 +114,7 @@ class ParseHsmithyTextToPokerEpisode:
                 'river': river,
                 'summary': summary}
 
-    def get_players_and_blinds(self, hand_str) -> Tuple[Dict[str, Player], Dict[str, Dict[str, int]]]:
+    def get_players_and_blinds(self, hand_str) -> Tuple[Dict[str, Player], Dict[str, int]]:
         players = {}  # don't make this ordered, better to rely on names
         blinds = {}
         table = hand_str.split("*** HOLE CARDS ***")[0]
@@ -166,7 +125,7 @@ class ParseHsmithyTextToPokerEpisode:
                 continue
             if 'Seat' in line:
                 seat, player = line.split(': ')
-                seat_num = seat[-1]
+                seat_num = int(seat[-1])
                 pname = player.split(f'({self.currency_symbol}')[0].strip()
                 stack = player.split(f'({self.currency_symbol}')[1].split(' in')[0]
                 stack = float(stack)
@@ -178,12 +137,12 @@ class ParseHsmithyTextToPokerEpisode:
                 sb_name: str = line.split(": ")[0]
                 sb_amt = round(float(line.split(self.currency_symbol)[-1]) * 100)
                 players[sb_name].position = Positions6Max.SB
-                blinds['sb'] = {sb_name: sb_amt}
+                blinds['sb'] = sb_amt  # {sb_name: sb_amt}
             elif 'posts big blind' in line:
                 bb_name: str = line.split(": ")[0]
                 bb_amt = round(float(line.split(self.currency_symbol)[-1]) * 100)
                 players[bb_name].position = Positions6Max.BB
-                blinds['bb'] = {bb_name: bb_amt}
+                blinds['bb'] = bb_amt  # {bb_name: bb_amt}
         num_players = len(players)
         return players, blinds
 
@@ -253,6 +212,8 @@ class ParseHsmithyTextToPokerEpisode:
                 'as_sequence': as_sequence}
 
     def parse_hand(self, hand_str):
+        # if '208961659809' in hand_str:
+        #     a = 1
         try:
             players, blinds = self.get_players_and_blinds(hand_str)
             info = self.rounds(hand_str)
@@ -284,21 +245,21 @@ class ParseHsmithyTextToPokerEpisode:
             btn_seat_num = int(hand_str.split('is the button')[0].strip()[-1])
         except Exception:
             return []
-        return PokerEpisode(hand_id=int(hand_str.split(':')[0]),
-                            currency_symbol=self.currency_symbol,
-                            players=players,
-                            blinds=blinds,
-                            actions=actions,
-                            board=board_cards,
-                            has_showdown=has_showdown,
-                            showdown_players=showdown_players,
-                            winners=winners,
-                            btn_seat_num_one_indexed=btn_seat_num)
+        return PokerEpisodeV2(hand_id=int(hand_str.split(':')[0]),
+                              currency_symbol=self.currency_symbol,
+                              players=players,
+                              blinds=blinds,
+                              actions=actions,
+                              board=board_cards,
+                              has_showdown=has_showdown,
+                              showdown_players=showdown_players,
+                              winners=winners,
+                              btn_seat_num_one_indexed=btn_seat_num)
 
     def parse_file(self, f: str,
                    out: str,
                    filtered_players: Optional[Tuple[str]],
-                   only_showdowns: bool) -> List[PokerEpisode]:
+                   only_showdowns: bool) -> List[PokerEpisodeV2]:
         """
         :param f: Absolute path to .txt file containing human-readable hhsmithy-export.
         :param out: Absolute path to .txt file containing
@@ -313,6 +274,7 @@ class ParseHsmithyTextToPokerEpisode:
         with open(f, 'r', encoding='utf-8') as f:  # pylint: disable=invalid-name,unspecified-encoding
             hand_database = f.read()
             hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
+
             for hand in hands_played:
                 parsed_hand = self.parse_hand(hand)
                 if parsed_hand:
@@ -380,7 +342,7 @@ class ConverterV2toV1:
             blinds.append(Blind(pname, 'big blind', amount))
         return blinds
 
-    def convert_episode(self, episode: PokerEpisode) -> PokerEpisodeV1:
+    def convert_episode(self, episode: PokerEpisodeV2) -> PokerEpisodeV1:
         player_stacks = self.get_pstacks(episode)
         blinds = self.get_blinds(episode)
         actions_total = self.get_actions_total(episode)
@@ -412,7 +374,7 @@ if __name__ == "__main__":
     filenames = glob.glob(unzipped_dir + "/**/*.txt", recursive=True)
     parser = ParseHsmithyTextToPokerEpisode()
     converter = ConverterV2toV1()
-    encoder = Encoder()
+    encoder = EncoderV2()
     max_files_in_memory_at_once = 1
     n_files = len(filenames)
     it = 0
@@ -423,12 +385,12 @@ if __name__ == "__main__":
             print(f'BREAK AT it={it}')
             break
         for filename in filenames[start:end]:
-            episodes = parser.parse_file(filename, out_dir, None, True)
+            episodesV2 = parser.parse_file(filename, out_dir, None, True)
             # convert episodes to PokerEpisodeV1
-            episodesV1 = [converter.convert_episode(ep) for ep in episodes]
-            episodes = None  # help gc
+            # episodesV1 = [converter.convert_episode(ep) for ep in episodes]
+            # episodes = None  # help gc
             # run rl_encoder
-            for ep in episodesV1:
+            for ep in episodesV2:
                 """The new behaviour of the episode-encoder should be to
                  encode even non-showdown episodes. A set of selected players
                  is now mandatory. We choose the best 100 players.
