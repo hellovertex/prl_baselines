@@ -138,11 +138,12 @@ class EncoderV2:
         actions = []
         it = 0
         debug_action_list = []
-        # if not episode.has_showdown:
-        #     # need to set random hero cards for selected players
-        #     for player in players:
-        #         if player.name in selected_players:
-        #
+        remaining_selected_players = []
+
+        for player in players:
+            if player.name in selected_players:
+                remaining_selected_players.append(player.name)
+
         while not done:
             try:
                 action = action_list[it]
@@ -152,37 +153,17 @@ class EncoderV2:
             action_formatted = self.build_action(action)
             action_label = self._wrapped_env.discretize(action_formatted)
             next_to_act = action.who
-            # if self.verbose:
-            #     pretty_print(next_to_act, obs, action_label)
             for player in players:
-                if player.name == action.who:
+                if player.name == next_to_act:
                     if player.name in selected_players:
+                        observations.append(obs)
+                        actions.append(action_label)
                         if action_label == ActionSpace.FOLD:
-                            pass
+                            remaining_selected_players.remove(player.name)
 
-
-                # If player is showdown player
-                # if player.name == action.who and player.name in selected_players:
-                # if player.position_index == next_to_act and player.player_name in filtered_players:
-                #     # take (obs, action) from selected player or winner if selected players is None
-                #     target_players = selected_players if selected_players else [winner.name for winner in
-                #                                                                 episode.winners]
-                #     if player.name in target_players:
-                #         actions.append(action_label)
-                #         observations.append(obs)
-                #     # Maybe select opponents (obs, action) where we set action=FOLD
-                #     # Note that opponent may be the winner if selected players is not None,
-                #     # but we assume that selected players have the better strategy even
-                #     # if they lose to variance here, so we drop the winners action in this case
-                #     else:
-                #         if not self.drop_folds:
-                #             action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
-                #             if self.randomize_fold_cards:
-                #                 obs = self.overwrite_hand_cards_with_random_cards(obs)
-                #             actions.append(action_label)
-                #             observations.append(obs)
             debug_action_list.append(action_formatted)
-
+            if not remaining_selected_players:
+                return observations, actions
             obs, _, done, _ = self.env.step(action_formatted)
             it += 1
 
@@ -233,8 +214,35 @@ class EncoderV2:
         assert players_sorted[0].seat_num_one_indexed == episode.btn_seat_num_one_indexed
         return players_sorted
 
-    def make_player_hands(self, players: List[Player]):
+    def remove_cards(self, deck, removed_cards):
+        deck = np.array(deck)
+        removed_cards = np.array(removed_cards)
+        mask = np.isin(deck, removed_cards, invert=True).all(axis=1)
+        return deck[mask]
+
+    def replace(self, cards, to_overwrite, replace_with):
+        cards = np.array(cards)
+        to_overwrite = np.array(to_overwrite)
+        replace_with = np.array(replace_with)
+        mask = np.isin(cards, to_overwrite, axis=1).all(axis=1)
+        cards[mask] = replace_with
+        return cards.tolist()
+
+    def make_player_hands(self, players: List[Player], board: List):
         hands = []
+
+        occupied_cards = board
+        for pinfo in players:
+            if pinfo.cards:
+                # In: '[Qs Qd]' Out: [[10,2],[10,3]]
+                cards = card_tokens(pinfo.cards)
+                hand = [[card(token) for token in cards]]
+                # hands.append(hand)
+                occupied_cards.append(hand[0])
+                occupied_cards.append(hand[1])
+
+        deck = np.array([[rank, suit] for rank in range(13) for suit in range(4)])
+        deck = self.remove_cards(deck, occupied_cards)
         for pinfo in players:
             if pinfo.cards:
                 # In: '[Qs Qd]' Out: [[10,2],[10,3]]
@@ -242,7 +250,9 @@ class EncoderV2:
                 hand = [[card(token) for token in cards]]
                 hands.append(hand)
             else:
-                hands.append(DEFAULT_HAND)
+                # overwrite default hands with random cards that are not board or player cards
+                random_hand = np.random.choice(deck, size=2, replace=False)
+                hands.append(random_hand)
         return hands
 
     def encode_episode(self,
@@ -279,7 +289,7 @@ class EncoderV2:
         deck = np.empty(shape=(13 * 4, 2), dtype=np.int8)
         board = make_board_cards(episode.board)
         deck[:len(board)] = board
-        player_hands = self.make_player_hands(players)
+        player_hands = self.make_player_hands(players, board)
         initial_board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
         self.state_dict = {'deck': {'deck_remaining': deck},
                            'board': initial_board,
