@@ -212,8 +212,8 @@ class ParseHsmithyTextToPokerEpisode:
                 'as_sequence': as_sequence}
 
     def parse_hand(self, hand_str):
-        if not '208958141851' in hand_str:
-            return []
+        # if not '208958141851' in hand_str:
+        #     return []
         # try:
         players, blinds = self.get_players_and_blinds(hand_str)
         info = self.rounds(hand_str)
@@ -412,7 +412,23 @@ if __name__ == "__main__":
                 obs, act = encoder.encode_episode(ep,
                                                   drop_folds=False,
                                                   randomize_fold_cards=True,
-                                                  selected_players=True,
+                                                  selected_players=['ishuha',
+                                                                    'Sakhacop',
+                                                                    'nastja336',
+                                                                    'Lucastitos',
+                                                                    'I LOVE RUS34',
+                                                                    'SerAlGog',
+                                                                    'Ma1n1',
+                                                                    'zMukeha',
+                                                                    'SoLongRain',
+                                                                    'LuckyJO777',
+                                                                    'Nepkin1',
+                                                                    'blistein',
+                                                                    'ArcticBearDK',
+                                                                    'Creator_haze',
+                                                                    'ilaviiitech',
+                                                                    'm0bba',
+                                                                    'KDV707'],
                                                   verbose=True)
                 print(obs)
             a = 1

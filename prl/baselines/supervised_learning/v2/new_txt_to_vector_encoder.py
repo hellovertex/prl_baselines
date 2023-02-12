@@ -1,3 +1,4 @@
+import random
 from typing import List, Tuple, Optional
 
 import numpy as np
@@ -158,7 +159,7 @@ class EncoderV2:
                     if player.name in selected_players:
                         observations.append(obs)
                         actions.append(action_label)
-                        #todo: run assertions that obs and action match
+                        # todo: run assertions that obs and action match
                         # what was in the original episode
                         # aka use pretty print utils to get human readable
                         # cards and stacks from obs vector and assert they match
@@ -189,11 +190,12 @@ class EncoderV2:
         board = self.state_dict['deck']['deck_remaining'][
                 :5]  # before reset so all cards are in the deck in the order theyre drawn
         for hand in hands:
-            if hand[0] != [-127, -127]:
+            if not np.array_equal(hand[0], INVISIBLE_CARD):
                 bit_arr.append(self.cards2dtolist(hand[0]))
                 bit_arr.append(self.cards2dtolist(hand[1]))
         for card in board:
-            bit_arr.append(self.cards2dtolist(card))
+            if not np.array_equal(card, INVISIBLE_CARD):
+                bit_arr.append(self.cards2dtolist(card))
         return bit_arr
 
     def get_players_starting_with_button(self, episode: PokerEpisodeV2) -> List[Player]:
@@ -220,10 +222,12 @@ class EncoderV2:
         return players_sorted
 
     def remove_cards(self, deck, removed_cards):
-        deck = np.array(deck)
-        removed_cards = np.array(removed_cards)
-        mask = np.isin(deck, removed_cards, invert=True).all(axis=1)
-        return deck[mask]
+        deck = deck.tolist()
+        new_deck = []
+        for c in deck:
+            if not c in removed_cards:
+                new_deck.append(c)
+        return new_deck
 
     def replace(self, cards, to_overwrite, replace_with):
         cards = np.array(cards)
@@ -241,7 +245,7 @@ class EncoderV2:
             if pinfo.cards:
                 # In: '[Qs Qd]' Out: [[10,2],[10,3]]
                 cards = card_tokens(pinfo.cards)
-                hand = [[card(token) for token in cards]]
+                hand = [card(token) for token in cards]
                 # hands.append(hand)
                 occupied_cards.append(hand[0])
                 occupied_cards.append(hand[1])
@@ -252,20 +256,25 @@ class EncoderV2:
             if pinfo.cards:
                 # In: '[Qs Qd]' Out: [[10,2],[10,3]]
                 cards = card_tokens(pinfo.cards)
-                hand = [[card(token) for token in cards]]
+                hand = [card(token) for token in cards]
                 hands.append(hand)
             else:
                 # overwrite default hands with random cards that are not board or player cards
-                random_hand = np.random.choice(deck, size=2, replace=False)
+                idx0 = random.randint(0, len(deck)-1)
+                c0 = deck.pop(idx0)
+                random_hand = [c0]
+                idx1 = random.randint(0, len(deck)-1)
+                c1 = deck.pop(idx1)
+                random_hand.append(c1)
                 hands.append(random_hand)
         return hands
 
     def encode_episode(self,
                        episode: PokerEpisodeV2,
-                       drop_folds,
-                       randomize_fold_cards,
-                       selected_players,
-                       verbose) -> Tuple[
+                       drop_folds: bool,
+                       randomize_fold_cards: bool,
+                       selected_players: List[str],
+                       verbose: bool) -> Tuple[
         Observations, Actions_Taken]:
         """Runs environment with steps from PokerEpisode.
         Returns observations and corresponding actions of players that made it to showdown."""
@@ -291,9 +300,14 @@ class EncoderV2:
         self._wrapped_env.env.SMALL_BLIND = sb
         self._wrapped_env.env.BIG_BLIND = bb
         self._wrapped_env.env.ANTE = 0.0
-        deck = np.empty(shape=(13 * 4, 2), dtype=np.int8)
+        deck = np.full(shape=(13 * 4, 2), fill_value=Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
         board = make_board_cards(episode.board)
-        deck[:len(board)] = board
+        if board:
+            deck[:len(board)] = board
+        else:
+            assert not episode.actions['actions_flop']
+            assert not episode.actions['actions_turn']
+            assert not episode.actions['actions_river']
         player_hands = self.make_player_hands(players, board)
         initial_board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
         self.state_dict = {'deck': {'deck_remaining': deck},
