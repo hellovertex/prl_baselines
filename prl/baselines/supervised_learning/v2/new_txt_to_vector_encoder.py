@@ -9,6 +9,7 @@ from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL import NoLimitHoldem
 from prl.environment.steinberger.PokerRL.game.Poker import Poker
 
+from prl.baselines.evaluation.utils import get_player_cards, get_board_cards, get_round
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import card_tokens, card, make_board_cards
@@ -161,11 +162,18 @@ class EncoderV2:
                     if player.name in remaining_selected_players:
                         observations.append(obs)
                         actions.append(action_label)
-                        # todo: run assertions that obs and action match
-                        # what was in the original episode
-                        # aka use pretty print utils to get human readable
-                        # cards and stacks from obs vector and assert they match
-                        # with the episode values
+                        cards = get_player_cards(obs)[0]
+                        board = get_board_cards(obs)
+                        boardcards = ""
+                        for card in board:
+                            boardcards += card
+                        round = get_round(obs).lower()
+                        assert action.stage == round
+                        for card in boardcards:
+                            assert card in episode.board
+                        if player.cards:
+                            assert cards.replace(',','') == player.cards
+
                         if action_label == ActionSpace.FOLD:
                             remaining_selected_players.remove(player.name)
 

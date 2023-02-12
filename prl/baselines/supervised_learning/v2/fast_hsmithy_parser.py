@@ -273,10 +273,7 @@ class ParseHsmithyTextToPokerEpisode:
                               winners=winners,
                               btn_seat_num_one_indexed=btn_seat_num)
 
-    def parse_file(self, f: str,
-                   out: str,
-                   filtered_players: Optional[Tuple[str]],
-                   only_showdowns: bool) -> List[PokerEpisodeV2]:
+    def parse_file(self, f: str) -> List[PokerEpisodeV2]:
         """
         :param f: Absolute path to .txt file containing human-readable hhsmithy-export.
         :param out: Absolute path to .txt file containing
@@ -418,7 +415,7 @@ if __name__ == "__main__":
         training_data, labels = None, None
         t0 = time.time()
         for filename in filenames[start:end]:
-            episodesV2 = parser.parse_file(filename, out_dir, None, True)
+            episodesV2 = parser.parse_file(filename)
             # convert episodes to PokerEpisodeV1
             # episodesV1 = [converter.convert_episode(ep) for ep in episodes]
             # episodes = None  # help gc

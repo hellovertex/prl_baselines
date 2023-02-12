@@ -140,7 +140,8 @@ def get_board_cards(obs):
         c0 = bits[(i - 1) * CI:i * CI]
         card = _card_bits_to_2d(c0)
         cards.append(card)
-    return cards
+    board = [cards2str([b]) if b != CARD_NOT_VISIBLE_2D else "" for b in cards]
+    return board
 
 
 def pretty_print(player_id, obs, action):
@@ -152,7 +153,7 @@ def pretty_print(player_id, obs, action):
              f'action {"CHECK_FOLD" if acted == "FOLD" else acted} ' \
              f'with cards {cards[0]} ' \
              f'in {round}. Board cards are' \
-             f'{[cards2str([b]) if b != CARD_NOT_VISIBLE_2D else "" for b in board]}'
+             f'{board}'
     print(result)
     return result
 
