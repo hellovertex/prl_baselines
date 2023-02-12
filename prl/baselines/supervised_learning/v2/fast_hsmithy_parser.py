@@ -212,39 +212,49 @@ class ParseHsmithyTextToPokerEpisode:
                 'as_sequence': as_sequence}
 
     def parse_hand(self, hand_str):
-        # if '208961659809' in hand_str:
-        #     a = 1
-        try:
-            players, blinds = self.get_players_and_blinds(hand_str)
-            info = self.rounds(hand_str)
-            actions = self.get_actions(info)
-            board_cards = ''
-            showdown_players = []
-            winners = []
-            has_showdown = False
-            for line in info['summary']:
-                if 'Board' in line:
-                    # Board [9d Th 3h 7d 6h]
-                    board_cards = line.split('Board ')[1]
-                if 'showed' in line:
-                    has_showdown = True
-                    pname = line.split(':')[1].split('(')[0].strip()
-                    cards = line.split('showed ')[1].split(' and')[0]
-                    players[pname].cards = cards
-                    players[pname].is_showdown_player = True
-                    if 'won' in line:
-                        amt = line.split(f'({self.currency_symbol}')[0].split(')')[0]
-                        amt = round(float(amt) * 1000)
-                        players[pname].money_won_this_round = amt
-
-            for pname, player in players.items():
-                if player.is_showdown_player:
-                    showdown_players.append(player)
-                    if player.money_won_this_round:
-                        winners.append(player)
-            btn_seat_num = int(hand_str.split('is the button')[0].strip()[-1])
-        except Exception:
+        if not '208958141851' in hand_str:
             return []
+        # try:
+        players, blinds = self.get_players_and_blinds(hand_str)
+        info = self.rounds(hand_str)
+        actions = self.get_actions(info)
+        board_cards = ''
+        showdown_players = []
+        winners = []
+        has_showdown = False
+        for line in info['summary'].split('\n'):
+            if 'Board' in line:
+                # Board [9d Th 3h 7d 6h]
+                board_cards = line.split('Board ')[1]
+            if 'showed' in line:
+                has_showdown = True
+                pname, cards = line.split(': ')[1].split('showed [')
+                pname = pname.strip()
+                if pname.endswith('(button)'):
+                    pname = pname[:-8]
+                pname = pname.strip()
+                if pname.endswith('(small blind)'):
+                    pname = pname[:-13]
+                if pname.endswith('(big blind)'):
+                    pname = pname[:-11]
+                pname = pname.strip()
+                cards = '[' + cards[:6]
+                players[pname].cards = cards
+                players[pname].is_showdown_player = True
+                if 'won' in line:
+                    amt = line.split(f'({self.currency_symbol}')[1].split(')')[0]
+                    amt = round(float(amt) * 100)
+                    players[pname].money_won_this_round = amt
+
+        for pname, player in players.items():
+            if player.is_showdown_player:
+                showdown_players.append(player)
+                if player.money_won_this_round:
+                    winners.append(player)
+        btn_seat_num = int(hand_str.split('is the button')[0].strip()[-1])
+        # except Exception as e:
+        #     print(e)
+        #     return []
         return PokerEpisodeV2(hand_id=int(hand_str.split(':')[0]),
                               currency_symbol=self.currency_symbol,
                               players=players,
