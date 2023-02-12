@@ -120,7 +120,10 @@ class ParseHsmithyTextToPokerEpisode:
         else:
             turn = self.strip_next_round(self.summary_sep, turn)
         # 4. strip river cards
-        river = self.strip_next_round(self.showdown_sep, river)
+        if self.showdown_sep in river:
+            river = self.strip_next_round(self.showdown_sep, river)
+        else:
+            river = self.strip_next_round(self.summary_sep, river)
         summary \
             = self.split_at_round(self.summary_sep, current_episode)
 
@@ -157,14 +160,12 @@ class ParseHsmithyTextToPokerEpisode:
         blinds = {}
         table = hand_str.split("*** HOLE CARDS ***")[0]
         lines = table.split('\n')
-        self.currency_symbol = '$' if '$' in hand_str else '£'
-        if '£' not in hand_str and '$' not in hand_str:
-            self.currency_symbol = '€'
+        self.currency_symbol = lines[0].split('No Limit (')[1][0]
         for line in lines:
             if "Table \'" in line:
                 continue
             if 'Seat' in line:
-                seat, player = line.split(':')
+                seat, player = line.split(': ')
                 seat_num = seat[-1]
                 pname = player.split(f'({self.currency_symbol}')[0].strip()
                 stack = player.split(f'({self.currency_symbol}')[1].split(' in')[0]
@@ -174,12 +175,12 @@ class ParseHsmithyTextToPokerEpisode:
                                 stack=round(stack * 100))
                 players[pname] = player
             elif 'posts small blind' in line:
-                sb_name: str = line.split(":")[0]
+                sb_name: str = line.split(": ")[0]
                 sb_amt = round(float(line.split(self.currency_symbol)[-1]) * 100)
                 players[sb_name].position = Positions6Max.SB
                 blinds['sb'] = {sb_name: sb_amt}
             elif 'posts big blind' in line:
-                bb_name: str = line.split(":")[0]
+                bb_name: str = line.split(": ")[0]
                 bb_amt = round(float(line.split(self.currency_symbol)[-1]) * 100)
                 players[bb_name].position = Positions6Max.BB
                 blinds['bb'] = {bb_name: bb_amt}
@@ -187,7 +188,7 @@ class ParseHsmithyTextToPokerEpisode:
         return players, blinds
 
     def get_action(self, line):
-        pname, action = line.split(':')
+        pname, action = line.split(': ')
         if 'folds' in action:
             return Action(who=pname, what=ActionSpace.FOLD, how_much=-1)
         elif 'checks' in action:
@@ -220,7 +221,15 @@ class ParseHsmithyTextToPokerEpisode:
                 continue
             if 'said' in line:
                 continue
-            if "show hand" in line:
+            if "show hand" in line or 'shows' in line:
+                continue
+            if 'Uncalled' in line:
+                continue
+            if 'collected' in line:
+                continue
+            if 'leaves' in line:
+                continue
+            if 'joins' in line:
                 continue
             action = self.get_action(line)
             action.stage = stage
@@ -244,34 +253,37 @@ class ParseHsmithyTextToPokerEpisode:
                 'as_sequence': as_sequence}
 
     def parse_hand(self, hand_str):
-        players, blinds = self.get_players_and_blinds(hand_str)
-        info = self.rounds(hand_str)
-        actions = self.get_actions(info)
-        board_cards = ''
-        showdown_players = []
-        winners = []
-        has_showdown = False
-        for line in info['summary']:
-            if 'Board' in line:
-                # Board [9d Th 3h 7d 6h]
-                board_cards = line.split('Board ')[1]
-            if 'showed' in line:
-                has_showdown = True
-                pname = line.split(':')[1].split('(')[0].strip()
-                cards = line.split('showed ')[1].split(' and')[0]
-                players[pname].cards = cards
-                players[pname].is_showdown_player = True
-                if 'won' in line:
-                    amt = line.split(f'({self.currency_symbol}')[0].split(')')[0]
-                    amt = round(float(amt) * 1000)
-                    players[pname].money_won_this_round = amt
+        try:
+            players, blinds = self.get_players_and_blinds(hand_str)
+            info = self.rounds(hand_str)
+            actions = self.get_actions(info)
+            board_cards = ''
+            showdown_players = []
+            winners = []
+            has_showdown = False
+            for line in info['summary']:
+                if 'Board' in line:
+                    # Board [9d Th 3h 7d 6h]
+                    board_cards = line.split('Board ')[1]
+                if 'showed' in line:
+                    has_showdown = True
+                    pname = line.split(':')[1].split('(')[0].strip()
+                    cards = line.split('showed ')[1].split(' and')[0]
+                    players[pname].cards = cards
+                    players[pname].is_showdown_player = True
+                    if 'won' in line:
+                        amt = line.split(f'({self.currency_symbol}')[0].split(')')[0]
+                        amt = round(float(amt) * 1000)
+                        players[pname].money_won_this_round = amt
 
-        for pname, player in players.items():
-            if player.is_showdown_player:
-                showdown_players.append(player)
-                if player.money_won_this_round:
-                    winners.append(player)
-        btn_seat_num = int(hand_str.split('is the button')[0].strip()[-1])
+            for pname, player in players.items():
+                if player.is_showdown_player:
+                    showdown_players.append(player)
+                    if player.money_won_this_round:
+                        winners.append(player)
+            btn_seat_num = int(hand_str.split('is the button')[0].strip()[-1])
+        except Exception:
+            return []
         return PokerEpisode(hand_id=int(hand_str.split(':')[0]),
                             currency_symbol=self.currency_symbol,
                             players=players,
@@ -302,12 +314,13 @@ class ParseHsmithyTextToPokerEpisode:
             hand_database = f.read()
             hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
             for hand in hands_played:
-                episodes.append(self.parse_hand(hand))
+                parsed_hand = self.parse_hand(hand)
+                if parsed_hand:
+                    episodes.append(parsed_hand)
         return episodes
 
 
 class ConverterV2toV1:
-    pass
 
     def get_pstacks(self, episode) -> List[PlayerStack]:
         player_stacks = []
@@ -327,7 +340,7 @@ class ConverterV2toV1:
                          'river': [],
                          'as_sequence': []}
         for stage in ['preflop', 'flop', 'turn', 'river']:
-            for act in episode.actions[stage]:
+            for act in episode.actions[f'actions_{stage}']:
                 actv1 = ActionV1(stage=stage,
                                  player_name=act.who,
                                  action_type=act.what,
@@ -388,7 +401,7 @@ class ConverterV2toV1:
             actions_total=actions_total,
             winners=winners,  # todo: maybe be empty list [], check implications
             showdown_hands=showdown_hands,  # todo: maybe be empty list [], check implications
-            money_collected=money_collected
+            money_collected=money_collected  # todo int vs str
         )
 
 
@@ -398,10 +411,22 @@ if __name__ == "__main__":
     out_dir = "example.txt"
     filenames = glob.glob(unzipped_dir + "/**/*.txt", recursive=True)
     parser = ParseHsmithyTextToPokerEpisode()
-    converter = None
+    converter = ConverterV2toV1()
     encoder = None
-    for filename in filenames:
-        episodes = parser.parse_file(filename, out_dir, None, True)
-        # convert episodes to PokerEpisodeV1
-        # run rl_encoder
-        # write to .npz
+    max_files_in_memory_at_once = 1
+    n_files = len(filenames)
+    it = 0
+    while True:
+        start = it * max_files_in_memory_at_once
+        end = min((it + 1) * max_files_in_memory_at_once, n_files)
+        if not filenames[start:end]:
+            print(f'BREAK AT it={it}')
+            break
+        for filename in filenames[start:end]:
+            episodes = parser.parse_file(filename, out_dir, None, True)
+            # convert episodes to PokerEpisodeV1
+            episodesV1 = [converter.convert_episode(ep) for ep in episodes]
+            # run rl_encoder
+            a = 1
+            # write to .npz
+        it += 1
