@@ -15,8 +15,10 @@ from prl.environment.Wrappers.base import ActionSpace
 
 from prl.baselines.evaluation.core.experiment import DEFAULT_DATE
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
-from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode as PokerEpisodeV1, PlayerStack
+from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode as PokerEpisodeV1, PlayerStack, \
+    PlayerWithCards
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Action as ActionV1
+
 
 # all the following functionality should be possible with only minimal parameterization (input_dir, output_dir, ...)
 # 1. parse .txt files given list of players (only games containing players, or all if list is None)
@@ -46,8 +48,8 @@ class Player:
 class Action:
     who: str
     what: Union[Tuple, ActionSpace]
-    how_much: Optional[int]
-    stage: str  # 'preflop' 'flop' 'turn' 'river'
+    how_much: int
+    stage: Optional[str] = None  # 'preflop' 'flop' 'turn' 'river'
     info: Optional[Dict] = None
 
 
@@ -319,12 +321,40 @@ class ConverterV2toV1:
         return player_stacks
 
     def get_actions_total(self, episode) -> Dict[str, List[ActionV1]]:
-        actionsv2 = episode.actions
+        actions_total = {'preflop': [],
+                         'flop': [],
+                         'turn': [],
+                         'river': [],
+                         'as_sequence': []}
+        for stage in ['preflop', 'flop', 'turn', 'river']:
+            for act in episode.actions[stage]:
+                actv1 = ActionV1(stage=stage,
+                                 player_name=act.who,
+                                 action_type=act.what,
+                                 raise_amount=act.how_much)
+                actions_total[stage].append(actv1)
+                actions_total['as_sequence'].append(actv1)
+        return actions_total
 
+    def get_winners(self, episode) -> List[PlayerWithCards]:
+        winners = []
+        for player in episode.winners:
+            winners.append(PlayerWithCards(player.name,
+                                           player.cards))
+        return winners
+
+    def get_showdown_hands(self, episode) -> List[PlayerWithCards]:
+        showdown_hands = []
+        for player in episode.showdown_players:
+            showdown_hands.append(PlayerWithCards(player.name,
+                                                  player.cards))
+        return showdown_hands
 
     def convert_episode(self, episode: PokerEpisode) -> PokerEpisodeV1:
         player_stacks = self.get_pstacks(episode)
         actions_total = self.get_actions_total(episode)
+        winners = self.get_winners(episode)
+        showdown_hands = self.get_showdown_hands(episode)
         return PokerEpisodeV1(
             date=DEFAULT_DATE,
             hand_id=episode.hand_id,
@@ -337,6 +367,8 @@ class ConverterV2toV1:
             btn_idx=episode.btn_seat_num_one_indexed,  # todo this shouldnt be needed
             board_cards=episode.board,
             actions_total=actions_total,
+            winners=winners,  # todo: maybe be empty list [], check implications
+            showdown_hands=showdown_hands  # todo: maybe be empty list [], check implications
         )
 
 
