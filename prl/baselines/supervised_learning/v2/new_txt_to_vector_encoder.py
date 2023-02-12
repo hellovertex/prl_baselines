@@ -158,6 +158,11 @@ class EncoderV2:
                     if player.name in selected_players:
                         observations.append(obs)
                         actions.append(action_label)
+                        #todo: run assertions that obs and action match
+                        # what was in the original episode
+                        # aka use pretty print utils to get human readable
+                        # cards and stacks from obs vector and assert they match
+                        # with the episode values
                         if action_label == ActionSpace.FOLD:
                             remaining_selected_players.remove(player.name)
 

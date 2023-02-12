@@ -409,11 +409,12 @@ if __name__ == "__main__":
                  When there is no showdown, we dont know their cards,
                  so we give them random cards and only use the observations
                  until they fold and end the game there."""
-                encoder.encode_episode(ep,
-                                       drop_folds=False,
-                                       randomize_fold_cards=True,
-                                       selected_players=True,
-                                       verbose=True)
+                obs, act = encoder.encode_episode(ep,
+                                                  drop_folds=False,
+                                                  randomize_fold_cards=True,
+                                                  selected_players=True,
+                                                  verbose=True)
+                print(obs)
             a = 1
             # write to .npz
         it += 1
