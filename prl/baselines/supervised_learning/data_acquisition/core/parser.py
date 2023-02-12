@@ -1,5 +1,5 @@
 """Module to parse .txt databases that contain Poker episodes crawled from Pokerstars."""
-from typing import NamedTuple, Iterable, List, Dict, Optional
+from typing import NamedTuple, Iterable, List, Dict, Optional, Union
 import enum
 
 
@@ -16,7 +16,7 @@ class PlayerStack(NamedTuple):
     """
     seat_display_name: str
     player_name: str
-    stack: str
+    stack: Union[str, int]
 
 
 class Blind(NamedTuple):

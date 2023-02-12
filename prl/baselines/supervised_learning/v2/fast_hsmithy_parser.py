@@ -13,8 +13,10 @@ from typing import Optional, List, Tuple, Dict, Union
 
 from prl.environment.Wrappers.base import ActionSpace
 
+from prl.baselines.evaluation.core.experiment import DEFAULT_DATE
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
-
+from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode as PokerEpisodeV1, PlayerStack
+from prl.baselines.supervised_learning.data_acquisition.core.parser import Action as ActionV1
 
 # all the following functionality should be possible with only minimal parameterization (input_dir, output_dir, ...)
 # 1. parse .txt files given list of players (only games containing players, or all if list is None)
@@ -45,10 +47,14 @@ class Action:
     who: str
     what: Union[Tuple, ActionSpace]
     how_much: Optional[int]
+    stage: str  # 'preflop' 'flop' 'turn' 'river'
+    info: Optional[Dict] = None
 
 
 @dataclass
 class PokerEpisode:
+    hand_id: int
+    currency_symbol: str
     players: Dict[str, Player]
     blinds: Dict[str, Dict[str, int]]  # sb/bb -> player -> amount
     board: Optional[str]
@@ -56,6 +62,7 @@ class PokerEpisode:
     has_showdown: Optional[bool]
     showdown_players: Optional[List[Player]]
     winners: Optional[List[Player]]
+    btn_seat_num_one_indexed: Optional[int]
 
 
 class ParseHsmithyTextToPokerEpisode:
@@ -201,7 +208,7 @@ class ParseHsmithyTextToPokerEpisode:
         else:
             raise ValueError(f"Unknown action in {line}.")
 
-    def _get_actions(self, lines):
+    def _get_actions(self, lines, stage):
         lines = lines.split('\n')
         actions = []
         for line in lines:
@@ -211,15 +218,18 @@ class ParseHsmithyTextToPokerEpisode:
                 continue
             if 'said' in line:
                 continue
+            if "show hand" in line:
+                continue
             action = self.get_action(line)
+            action.stage = stage
             actions.append(action)
         return actions
 
     def get_actions(self, info):
-        actions_preflop = self._get_actions(info['preflop'])
-        actions_flop = self._get_actions(info['flop'])
-        actions_turn = self._get_actions(info['turn'])
-        actions_river = self._get_actions(info['river'])
+        actions_preflop = self._get_actions(info['preflop'], 'preflop')
+        actions_flop = self._get_actions(info['flop'], 'flop')
+        actions_turn = self._get_actions(info['turn'], 'turn')
+        actions_river = self._get_actions(info['river'], 'river')
         as_sequence = []
 
         for actions in [actions_preflop, actions_flop, actions_turn, actions_river]:
@@ -259,13 +269,17 @@ class ParseHsmithyTextToPokerEpisode:
                 showdown_players.append(player)
                 if player.money_won_this_round:
                     winners.append(player)
-        return PokerEpisode(players=players,
+        btn_seat_num = int(hand_str.split('is the button')[0].strip()[-1])
+        return PokerEpisode(hand_id=int(hand_str.split(':')[0]),
+                            currency_symbol=self.currency_symbol,
+                            players=players,
                             blinds=blinds,
                             actions=actions,
                             board=board_cards,
                             has_showdown=has_showdown,
                             showdown_players=showdown_players,
-                            winners=winners)
+                            winners=winners,
+                            btn_seat_num_one_indexed=btn_seat_num)
 
     def parse_file(self, f: str,
                    out: str,
@@ -290,11 +304,52 @@ class ParseHsmithyTextToPokerEpisode:
         return episodes
 
 
+class ConverterV2toV1:
+    pass
+
+    def get_pstacks(self, episode) -> List[PlayerStack]:
+        player_stacks = []
+        for pname, pinfo in episode.players.items():
+            stack = PlayerStack(
+                seat_display_name=f'Seat {pinfo.seat_num_one_indexed}',
+                player_name=pname,
+                stack=pinfo.stack
+            )
+            player_stacks.append(stack)
+        return player_stacks
+
+    def get_actions_total(self, episode) -> Dict[str, List[ActionV1]]:
+        actionsv2 = episode.actions
+
+
+    def convert_episode(self, episode: PokerEpisode) -> PokerEpisodeV1:
+        player_stacks = self.get_pstacks(episode)
+        actions_total = self.get_actions_total(episode)
+        return PokerEpisodeV1(
+            date=DEFAULT_DATE,
+            hand_id=episode.hand_id,
+            variant='NoLimitHoldEm',
+            currency_symbol=episode.currency_symbol,
+            num_players=len(episode.players),
+            blinds=episode.blinds,  # todo: '$1' vs int(1) in encoder
+            ante='$0.00',
+            player_stacks=player_stacks,  # # todo: '$1' vs int(1) in encoder
+            btn_idx=episode.btn_seat_num_one_indexed,  # todo this shouldnt be needed
+            board_cards=episode.board,
+            actions_total=actions_total,
+        )
+
+
 if __name__ == "__main__":
-    unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_test"
+    unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     out_dir = "example.txt"
     filenames = glob.glob(unzipped_dir + "/**/*.txt", recursive=True)
     parser = ParseHsmithyTextToPokerEpisode()
+    converter = None
+    encoder = None
     for filename in filenames:
-        parser.parse_file(filename, out_dir, None, True)
+        episodes = parser.parse_file(filename, out_dir, None, True)
+        # convert episodes to PokerEpisodeV1
+        # run rl_encoder
+        # write to .npz
