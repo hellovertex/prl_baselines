@@ -7,9 +7,8 @@ from prl.environment.Wrappers.base import ActionSpace
 from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL.game.Poker import Poker
 
-from prl.baselines.supervised_learning.data_acquisition.core.encoder import PlayerInfo, Positions6Max
-from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, \
-    PlayerWithCards
+from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
+from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import card_tokens, card, make_board_cards
 from prl.baselines.supervised_learning.v2.poker_model import PokerEpisodeV2, Player, Action
 
@@ -156,7 +155,7 @@ class EncoderV2:
             next_to_act = action.who
             for player in players:
                 if player.name == next_to_act:
-                    if player.name in selected_players:
+                    if player.name in remaining_selected_players:
                         observations.append(obs)
                         actions.append(action_label)
                         # todo: run assertions that obs and action match
@@ -174,8 +173,10 @@ class EncoderV2:
             it += 1
 
         if not observations:
-            print(actions)
-            raise RuntimeError("Seems we need more debugging")
+            assert remaining_selected_players[0].position == Positions6Max.BB
+            assert  len(remaining_selected_players) == 1
+            # big blind returned to player because every body folded so he/she didnt get to act
+            return [], []
         return observations, actions
 
     def cards2dtolist(self, cards2d):
@@ -260,10 +261,10 @@ class EncoderV2:
                 hands.append(hand)
             else:
                 # overwrite default hands with random cards that are not board or player cards
-                idx0 = random.randint(0, len(deck)-1)
+                idx0 = random.randint(0, len(deck) - 1)
                 c0 = deck.pop(idx0)
                 random_hand = [c0]
-                idx1 = random.randint(0, len(deck)-1)
+                idx1 = random.randint(0, len(deck) - 1)
                 c1 = deck.pop(idx1)
                 random_hand.append(c1)
                 hands.append(random_hand)

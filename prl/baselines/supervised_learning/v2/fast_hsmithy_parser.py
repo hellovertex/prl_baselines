@@ -388,6 +388,7 @@ if __name__ == "__main__":
     max_files_in_memory_at_once = 1
     n_files = len(filenames)
     it = 0
+
     while True:
         start = it * max_files_in_memory_at_once
         end = min((it + 1) * max_files_in_memory_at_once, n_files)
