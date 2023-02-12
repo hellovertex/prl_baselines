@@ -382,6 +382,15 @@ class ConverterV2toV1:
 
 
 if __name__ == "__main__":
+    """The new behaviour of the episode-encoder should be to
+                     encode even non-showdown episodes. A set of selected players
+                     is now mandatory. We choose the best 100 players.
+                     We always use their actions as-they-are. This implies
+                     we use all their games including non-showdown games.
+                     When there is no showdown, we dont know their cards,
+                     so we give them random cards and only use the observations
+                     until they fold and end the game there."""
+
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_test"
     unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     out_dir = "example.txt"
@@ -407,14 +416,6 @@ if __name__ == "__main__":
             # episodes = None  # help gc
             # run rl_encoder
             for ep in episodesV2:
-                """The new behaviour of the episode-encoder should be to
-                 encode even non-showdown episodes. A set of selected players
-                 is now mandatory. We choose the best 100 players.
-                 We always use their actions as-they-are. This implies
-                 we use all their games including non-showdown games.
-                 When there is no showdown, we dont know their cards,
-                 so we give them random cards and only use the observations
-                 until they fold and end the game there."""
                 observations, actions = encoder.encode_episode(ep,
                                                   drop_folds=False,
                                                   randomize_fold_cards=True,
@@ -447,26 +448,26 @@ if __name__ == "__main__":
                         labels = np.concatenate((labels, actions), axis=0)
                     except Exception as e:
                         print(e)
-            a = 1
-            # write to .npz
-
-        columns = None
-        header = False
-        file_path = os.path.abspath(f'./data_{it}.csv.bz2')
-        if not os.path.exists(Path(file_path).parent):
-            os.makedirs(os.path.realpath(Path(file_path).parent), exist_ok=True)
-            columns = encoder.feature_names
-            header = True
-        df = pd.DataFrame(data=training_data,
-                          index=labels,  # The index (row labels) of the DataFrame.
-                          columns=columns)
-        # float to int if applicable
-        df = df.apply(lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
-        df.to_csv(file_path,
-                  index=True,
-                  header=header,
-                  index_label='label',
-                  mode='a',
-                  float_format='%.5f',
-                  compression='bz2')
-        it += 1
+        if training_data:
+            columns = None
+            header = False
+            # file_path = os.path.abspath(f'./data_{it}.csv.bz2')
+            file_path = os.path.abspath(f'./data_{it}.csv')
+            if not os.path.exists(Path(file_path).parent):
+                os.makedirs(os.path.realpath(Path(file_path).parent), exist_ok=True)
+                columns = encoder.feature_names
+                header = True
+            df = pd.DataFrame(data=training_data,
+                              index=labels,  # The index (row labels) of the DataFrame.
+                              columns=columns)
+            # float to int if applicable
+            df = df.apply(lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
+            df.to_csv(file_path,
+                      index=True,
+                      header=header,
+                      index_label='label',
+                      mode='a',
+                      float_format='%.5f',
+                      # compression='bz2'
+                      )
+            it += 1

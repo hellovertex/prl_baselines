@@ -173,8 +173,9 @@ class EncoderV2:
             it += 1
 
         if not observations:
-            assert remaining_selected_players[0].position == Positions6Max.BB
             assert  len(remaining_selected_players) == 1
+            pname = remaining_selected_players[0]
+            assert episode.players[pname].position == Positions6Max.BB
             # big blind returned to player because every body folded so he/she didnt get to act
             return [], []
         return observations, actions
