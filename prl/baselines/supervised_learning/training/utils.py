@@ -80,4 +80,19 @@ def get_in_mem_datasets(input_dir, seed=1):
     gen = torch.Generator().manual_seed(seed)
     train, test, val = random_split(dataset, [train_len, test_len, val_len], generator=gen)
 
-    return train, test
+    return train, test, dataset.label_counts
+
+if __name__ == "__main__":
+    """
+    import torch
+    import numpy as np
+    freqs = [1099793,423499,202316,67931,50268,35760,14835,7885]
+    
+    weights = np.array(freqs) / sum(freqs)
+    weights = 1 / weights
+    weights = torch.tensor(weights, dtype=torch.float32)
+    weights = weights / max(weights)
+    print(weights)
+    """
+    data_dir = "/home/sascha/Documents/github.com/prl_baselines/data/dataset"
+    train, test = get_in_mem_datasets(data_dir)

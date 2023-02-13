@@ -25,21 +25,25 @@ class InMemoryDataset(Dataset):
         if not path_to_csv_files:
             path_to_csv_files = str(DATA_DIR) + '/03_preprocessed' + f'/{blind_sizes}'
 
-        files = glob.glob(path_to_csv_files + "/**/*.csv", recursive=True)
-        df = pd.concat((pd.read_csv(f,
-                                    sep=',',
-                                    dtype='float32',
-                                    encoding='cp1252') for f in files), ignore_index=True)
+        files = glob.glob(path_to_csv_files + "/**/*.csv.bz2", recursive=True)
+        df = pd.read_csv(files[0],
+                         sep=',',
+                         dtype='float32',
+                         encoding='cp1252', compression='bz2')
+        df = df.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
+        for file in files[1:]:
+            tmp = pd.read_csv(file,
+                              sep=',',
+                              dtype='float32',
+                              encoding='cp1252', compression='bz2')
+            tmp = tmp.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
+            df = pd.concat([df, tmp], ignore_index=True)
 
-        # convert strings to floats
-        fn_to_numeric = partial(pd.to_numeric, errors="coerce")
-        df = df.apply(fn_to_numeric).dropna()
-        # --- monkey patch start ---
-        df = self.downsample_fold_and_upsample_raises(df)
-        # --- monkey patch end ---
         y = df['label']
         x = df.drop(['label'], axis=1)
-        print(f"Starting training with dataset label quantities: {y.value_counts()}")
+        print(f'Starting training with dataset label quantities: {y.value_counts()}')
+        print(f'Dataframe size: {df.memory_usage(index=True, deep=True).sum()} bytes.')
+        self.label_counts = df['label'].value_counts().to_list()
         self.x = torch.tensor(x.values, dtype=torch.float32)
         self.y = torch.tensor(y.values, dtype=torch.int64)
 

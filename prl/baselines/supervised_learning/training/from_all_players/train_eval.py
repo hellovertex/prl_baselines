@@ -20,7 +20,13 @@ def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir,
     and in memory dataset will be created with all csv files found in abs_input_dir and its subfolders.
     """
     BATCH_SIZE = params['batch_size']
-    traindataset, testdataset = get_in_mem_datasets(abs_input_dir, BATCH_SIZE)
+    traindataset, testdataset, label_counts = get_in_mem_datasets(abs_input_dir, BATCH_SIZE)
+    # label weights to account for dataset imbalance
+    weights = np.array(label_counts) / sum(label_counts)
+    weights = 1 / weights
+    weights = torch.tensor(weights, dtype=torch.float32)
+    weights = weights / max(weights)
+
     train_dataloader = DataLoader(traindataset, batch_size=BATCH_SIZE, shuffle=True)
     test_dataloader = DataLoader(testdataset, batch_size=BATCH_SIZE, shuffle=True)
     traindata, testdata = iter(train_dataloader), iter(test_dataloader)
@@ -33,7 +39,9 @@ def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir,
             model = get_model(traindata, hidden_dims=hdims, device=device)
             logdir = base_logdir + f'_{hdims}_{lr}'
             ckptdir = base_ckptdir + f'_{hdims}_{lr}'
-            optim = torch.optim.Adam(model.parameters(), lr=lr)
+            optim = torch.optim.Adam(model.parameters(),
+                                     lr=lr,
+                                     weights=weights)
             state_dict = init_state(ckptdir, model, optim)
             start_n_iter = state_dict["start_n_iter"]
             start_epoch = state_dict["start_epoch"]
