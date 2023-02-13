@@ -31,21 +31,25 @@ class InMemoryDataset(Dataset):
                          dtype='float32',
                          encoding='cp1252', compression='bz2')
         df = df.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
-        for file in files[1:]:
+        n_files = len(files[1:])
+        for i, file in enumerate(files[1:]):
             tmp = pd.read_csv(file,
                               sep=',',
                               dtype='float32',
                               encoding='cp1252', compression='bz2')
             tmp = tmp.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
             df = pd.concat([df, tmp], ignore_index=True)
+            print(f'Loaded file {i}/{n_files}...')
 
-        y = df['label']
-        x = df.drop(['label'], axis=1)
-        print(f'Starting training with dataset label quantities: {y.value_counts()}')
-        print(f'Dataframe size: {df.memory_usage(index=True, deep=True).sum()} bytes.')
         self.label_counts = df['label'].value_counts().to_list()
-        self.x = torch.tensor(x.values, dtype=torch.float32)
-        self.y = torch.tensor(y.values, dtype=torch.int64)
+        self.y = torch.tensor(df['label'].values, dtype=torch.int64)
+        # x = df.drop(['label'], axis=1)
+        df.drop(['label'], axis=1, inplace=True)
+
+        print(f'Dataframe size: {df.memory_usage(index=True, deep=True).sum()} bytes.')
+        print(f'Starting training with dataset label quantities: {self.label_counts}')
+        self.x = torch.tensor(df.values, dtype=torch.float32)
+        a = 1
 
     def extract_subset(self, df: pd.DataFrame,
                        label: ActionSpace,
@@ -165,3 +169,34 @@ class OutOfMemoryDataset(IterableDataset):
 
     def __len__(self):
         return self._len
+
+import bz2
+import csv
+import random
+
+
+class OutOfMemoryDatasetV2(Dataset):
+    def __init__(self, path_to_csv_files, chunk_size=0.25):
+
+        self.file_paths = glob.glob(path_to_csv_files + "/**/*.csv.bz2", recursive=True)
+        self.chunk_size = chunk_size
+        self.data = []
+
+    def __len__(self):
+        return int(len(self.file_paths) * self.chunk_size)
+
+    def __getitem__(self, index):
+        if self.data:
+            return self.data[index]
+
+        # Read a specified number of files (chunk_size) into memory
+        file_indices = range(len(self.file_paths))
+        chunk = random.sample(file_indices, int(len(file_indices) * self.chunk_size))
+        self.data = []
+        for file_index in chunk:
+            file_path = self.file_paths[file_index]
+            with bz2.open(file_path, 'rt') as f:
+                reader = csv.reader(f)
+                self.data.extend(list(reader))
+
+        return self.data[index]

@@ -1,13 +1,15 @@
+import glob
 import logging
 
 import numpy as np
+import pandas as pd
 import torch
 from prl.environment.Wrappers.base import ActionSpace
 from tianshou.utils.net.common import MLP
 from torch import nn
 from torch.utils.data import random_split
 
-from prl.baselines.supervised_learning.training.dataset import InMemoryDataset
+from prl.baselines.supervised_learning.training.dataset import InMemoryDataset, OutOfMemoryDatasetV2
 
 
 def init_state(ckpt_dir, model, optim, resume: bool = True):
@@ -66,10 +68,24 @@ def get_model(traindata, hidden_dims, device):
     if use_cuda:
         net = net.cuda()
     return net
+def get_label_counts(input_dir):
+    files = glob.glob(input_dir + "/**/*.csv.bz2", recursive=True)
+    label_counts = {0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0}
+    n_files = len(files)
+    for i, file in enumerate(files):
+        print(f'Loading file {i}/{n_files} once to compute total number of labels for weights...')
+        tmp = pd.read_csv(file,
+                          sep=',',
+                          dtype='float32',
+                          encoding='cp1252', compression='bz2')
+        tmp = tmp.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
+        for label, count in tmp['label'].value_counts().to_dict().items():
+            label_counts[label] += count
+    print(f'Starting training with dataset label quantities: {label_counts}')
+    return label_counts.values()
 
-
-def get_in_mem_datasets(input_dir, seed=1):
-    dataset = InMemoryDataset(input_dir)
+def get_datasets(input_dir, seed=1):
+    dataset = OutOfMemoryDatasetV2(input_dir)
     total_len = len(dataset)
     train_len = int(total_len * 0.89)
     test_len = int(total_len * 0.1)
@@ -80,7 +96,7 @@ def get_in_mem_datasets(input_dir, seed=1):
     gen = torch.Generator().manual_seed(seed)
     train, test, val = random_split(dataset, [train_len, test_len, val_len], generator=gen)
 
-    return train, test, dataset.label_counts
+    return train, test, get_label_counts(input_dir)
 
 if __name__ == "__main__":
     """

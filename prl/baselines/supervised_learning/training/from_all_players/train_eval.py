@@ -11,8 +11,9 @@ from tensorboardX import SummaryWriter
 from torch import nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+from sklearn.metrics import f1_score
 
-from prl.baselines.supervised_learning.training.utils import init_state, get_in_mem_datasets, get_model
+from prl.baselines.supervised_learning.training.utils import init_state, get_datasets, get_model
 
 
 def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir, base_logdir):
@@ -20,7 +21,7 @@ def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir,
     and in memory dataset will be created with all csv files found in abs_input_dir and its subfolders.
     """
     BATCH_SIZE = params['batch_size']
-    traindataset, testdataset, label_counts = get_in_mem_datasets(abs_input_dir, BATCH_SIZE)
+    traindataset, testdataset, label_counts = get_datasets(abs_input_dir, BATCH_SIZE)
     # label weights to account for dataset imbalance
     weights = np.array(label_counts) / sum(label_counts)
     weights = 1 / weights
@@ -32,6 +33,7 @@ def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir,
     traindata, testdata = iter(train_dataloader), iter(test_dataloader)
     use_cuda = torch.cuda.is_available()
     device = "cuda" if use_cuda else "cpu"
+    weights.to(device)
     epochs = params['max_epoch']
     max_env_steps = params['max_env_steps']
     for hdims in params['hdims']:
@@ -40,8 +42,7 @@ def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir,
             logdir = base_logdir + f'_{hdims}_{lr}'
             ckptdir = base_ckptdir + f'_{hdims}_{lr}'
             optim = torch.optim.Adam(model.parameters(),
-                                     lr=lr,
-                                     weights=weights)
+                                     lr=lr)
             state_dict = init_state(ckptdir, model, optim)
             start_n_iter = state_dict["start_n_iter"]
             start_epoch = state_dict["start_epoch"]
@@ -74,17 +75,19 @@ def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir,
                     optim.zero_grad()
                     output = model(x)
                     pred = torch.argmax(output, dim=1)  # get the index of the max log-probability
-                    loss = F.cross_entropy(output, y)
+                    loss = F.cross_entropy(output, y, weight=weights.to(device))
                     loss.backward()
                     optim.step()
                     total_loss += loss.data.item()  # add batch loss
                     # udpate tensorboardX
                     correct += pred.eq(y.data).cpu().sum().item()
                     i_train += 1
+                    f1 = f1_score(y.data.cpu(), pred.cpu(), average='weighted')
                     # log once (i==0) every epoch (j % log_interval)
                     if j % log_interval == 0 and i == 0:
                         n_batch = i_train * BATCH_SIZE  # how many samples across all batches seen so far
                         writer.add_scalar(tag='Training Loss', scalar_value=total_loss / i_train, global_step=n_iter)
+                        writer.add_scalar(tag='Training F1 score', scalar_value=f1, global_step=n_iter)
                         writer.add_scalar(tag='Training Accuracy', scalar_value=100.0 * correct / n_batch,
                                           global_step=n_iter)
                         print(f"\nTrain set: "
@@ -119,6 +122,7 @@ def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir,
                                 # sum up batch loss
                                 test_loss += F.cross_entropy(output, y, reduction="sum").data.item()
                                 pred = torch.argmax(output, dim=1)
+                                f1 = f1_score(y.data.cpu(), pred.cpu(), average='weighted')
                                 test_correct += pred.eq(y.data).cpu().sum().item()
 
                         test_loss /= len(testdataset)
@@ -145,6 +149,7 @@ def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir,
 
                         # write metrics to tensorboard
                         writer.add_scalar(tag='Test Loss', scalar_value=test_loss, global_step=n_iter)
+                        writer.add_scalar(tag='Test F1 score', scalar_value=f1, global_step=n_iter)
                         writer.add_scalar(tag='Test Accuracy', scalar_value=test_accuracy, global_step=n_iter)
 
                         # write layer histograms to tensorboard
@@ -195,9 +200,15 @@ if __name__ == "__main__":
     # abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/2NL/2NL'
     # abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50'
     # abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50/randomized_cards_no_downsampling'
-    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50/actions_selected_players__do_not_generate_fold_labels'
-    base_logdir = f'./no_folds_selected_players/logdir'
-    base_ckptdir = f'./no_folds_selected_players/ckpt_dir'
+    # abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50/actions_selected_players__do_not_generate_fold_labels'
+    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset_debug'
+    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset_150'
+    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset2'
+    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset_75'
+    # base_logdir = f'./no_folds_selected_players/logdir'
+    base_logdir = f'./all_games_and_folds_rand_cards_selected_players/logdir'
+    # base_ckptdir = f'./no_folds_selected_players/ckpt_dir'
+    base_ckptdir = f'./all_games_and_folds_rand_cards_selected_players/ckpt_dir'
     # train_eval(abs_path,
     #            params=params,
     #            log_interval=log_interval,

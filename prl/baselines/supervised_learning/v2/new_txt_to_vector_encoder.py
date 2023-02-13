@@ -168,9 +168,9 @@ class EncoderV2:
                         for card in board:
                             boardcards += card
                         round = get_round(obs).lower()
-                        assert action.stage == round
+                        assert action.stage == round, f'Failed with {action} and {round} for hand id {episode.hand_id}'
                         for card in boardcards:
-                            assert card in episode.board
+                            assert card in episode.board, f'Failed with {card} and {episode.board}'
                         if player.cards:
                             assert cards.replace(',','') == player.cards
 
@@ -227,11 +227,11 @@ class EncoderV2:
             for pname, pinfo in episode.players.items():
                 if pinfo.position == Positions6Max.BB:
                     players_sorted.append(pinfo)
-        assert len(players_sorted) == len(episode.players)
+        assert len(players_sorted) == len(episode.players), f'Failed for episode {episode.hand_id}'
         # [3,4,0,1,2] ->
         if num_players > 3:
             players_sorted = np.roll(players_sorted, -(num_players - 3))
-        assert players_sorted[0].seat_num_one_indexed == episode.btn_seat_num_one_indexed
+        assert players_sorted[0].seat_num_one_indexed == episode.btn_seat_num_one_indexed, f'Failed for episode {episode.hand_id}'
         return players_sorted
 
     def remove_cards(self, deck, removed_cards):
@@ -350,6 +350,9 @@ class EncoderV2:
         except self._EnvironmentEdgeCaseEncounteredError:
             return None, None
         except self._EnvironmentDidNotTerminateInTimeError:
+            return None, None
+        except AssertionError as e:
+            print(e)
             return None, None
 # in: .txt files
 # out: .csv files? maybe npz or easier-on-memory formats preferred?
