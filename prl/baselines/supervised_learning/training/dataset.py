@@ -28,14 +28,15 @@ class InMemoryDataset(Dataset):
         files = glob.glob(path_to_csv_files + "/**/*.csv.bz2", recursive=True)
         df = pd.read_csv(files[0],
                          sep=',',
-                         dtype='float32',
+                         #dtype='float32',
+                         dtype='float16',
                          encoding='cp1252', compression='bz2')
         df = df.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
         n_files = len(files[1:])
         for i, file in enumerate(files[1:]):
             tmp = pd.read_csv(file,
                               sep=',',
-                              dtype='float32',
+                              dtype='float16',
                               encoding='cp1252', compression='bz2')
             tmp = tmp.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
             df = pd.concat([df, tmp], ignore_index=True)
@@ -48,7 +49,8 @@ class InMemoryDataset(Dataset):
 
         print(f'Dataframe size: {df.memory_usage(index=True, deep=True).sum()} bytes.')
         print(f'Starting training with dataset label quantities: {self.label_counts}')
-        self.x = torch.tensor(df.values, dtype=torch.float32)
+        self.x = torch.tensor(df.values, dtype=torch.float16)
+        df = None
         a = 1
 
     def extract_subset(self, df: pd.DataFrame,

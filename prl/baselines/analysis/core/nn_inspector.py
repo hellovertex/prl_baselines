@@ -1,4 +1,4 @@
-from typing import List, Tuple, Dict, Optional
+from typing import List, Tuple, Dict, Optional, Union, Any
 
 import torch
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as fts
@@ -330,32 +330,6 @@ class Inspector:
                     #     action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
 
                     # Update neural network stats
-                    if pred == action_label:
-                        # self.true[action_label] += torch.softmax(self.baseline.logits.cpu(), dim=1)
-                        if self.logits_when_correct[action_label] is None:
-                            # noinspection PyTypeChecker
-                            self.logits_when_correct[action_label] = torch.softmax(self.baseline.logits.cpu(),
-                                                                                   dim=1).reshape(1, 1, 8)
-                        else:
-                            # noinspection PyTypeChecker
-                            self.logits_when_correct[action_label] = torch.row_stack(
-                                [self.logits_when_correct[action_label],
-                                 torch.softmax(self.baseline.logits.cpu(), dim=1).reshape(1, 1, 8)])
-                        self.label_counts_true[action_label][pred] += 1
-                        # self.true[action_label] /= self.label_counts_true[action_label]
-                    else:
-                        if self.logits_when_wrong[action_label] is None:
-                            # noinspection PyTypeChecker
-                            self.logits_when_wrong[action_label] = torch.softmax(self.baseline.logits.cpu(),
-                                                                                 dim=1).reshape(1, 1, 8)
-                        else:
-                            # noinspection PyTypeChecker
-                            self.logits_when_wrong[action_label] = torch.row_stack(
-                                [self.logits_when_wrong[action_label],
-                                 torch.softmax(self.baseline.logits.cpu(), dim=1).reshape(1, 1, 8)])
-
-                        self.label_counts_false[action_label][pred] += 1
-                        # self.wrong[action_label] /= self.label_counts_wrong[action_label]
 
             debug_action_list.append(action_formatted)
             obs, _, done, _ = env.step(action_formatted)
@@ -388,8 +362,8 @@ class Inspector:
         for card in board:
             bit_arr.append(self.cards2dtolist(card))
         return bit_arr
-    def inspect_episode(self, episode: PokerEpisode, pname: str, selected_players=None) -> Tuple[
-        Observations, Actions_Taken]:
+    def inspect_episode(self, episode: PokerEpisode, pname: str, selected_players=None) -> Union[
+        tuple[None, None], tuple[list[Any], list[ActionSpace]]]:
         """Runs environment with steps from PokerEpisode.
         Returns observations and corresponding actions of players that made it to showdown."""
 

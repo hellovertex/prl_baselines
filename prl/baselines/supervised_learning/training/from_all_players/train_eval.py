@@ -109,7 +109,7 @@ def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir,
                     start_time = time.time()
 
                     # evaluate once (i==0) every epoch (j % eval_interval)
-                    if j % eval_interval == 0 and i == 0:
+                    if j     % eval_interval == 0 and i == 0:
                         model.eval()
                         test_loss = 0
                         test_correct = 0
@@ -144,6 +144,15 @@ def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir,
                                         'best_accuracy': best_accuracy}, ckptdir + '/ckpt.pt')  # net
                             # save model for inference
                             torch.save(model, ckptdir + '/model.pt')
+                        else:
+                            torch.save({'epoch': epoch,
+                                        'net': model.state_dict(),
+                                        'n_iter': j,  # j * batch_size * len(dataloader) == env_steps
+                                        'optim': optim.state_dict(),
+                                        'loss': loss,
+                                        'best_accuracy': best_accuracy}, ckptdir + '/ckpt_tmp.pt')  # net
+                            # save model for inference
+                            torch.save(model, ckptdir + '/model_tmp.pt')
                         # return model to training mode
                         model.train()
 
@@ -181,7 +190,7 @@ if __name__ == "__main__":
 
     # export TRAIN_EVAL_SOURCE_DIR=/home/.../Documents/github.com/prl_baselines/data/02_vectorized/0.25-0.50/...
     # filenames = glob.glob(os.environ["TRAIN_EVAL_SOURCE_DIR"]+"/**/*.txt",recursive=True)
-    log_interval = eval_interval = 5  # epochs (i.e BATCH_SIZE * train_steps) environment steps
+    log_interval = eval_interval = 2  # epochs (i.e BATCH_SIZE * train_steps) environment steps
     # params0 = {'hdims': [[256, 256]],  # [256, 256], [512, 512]], -- not better
     #            'lrs': [1e-6],  # we ruled out 1e-5 and 1e-7 by hand, 1e-6 is the best we found after multiple trainings
     #            # 'max_epoch': 5_000_000,
@@ -189,7 +198,7 @@ if __name__ == "__main__":
     #            'max_env_steps': 5_000_000,
     #            'batch_size': 512,
     #            }
-    params1 = {'hdims': [[512]],  # [256, 256], [512, 512]], -- not better
+    params1 = {'hdims': [[512], [512, 512]],  # [256, 256], [512, 512]], -- not better
                'lrs': [1e-6],  # we ruled out 1e-5 and 1e-7 by hand, 1e-6 is the best we found after multiple trainings
                # 'max_epoch': 5_000_000,
                'max_epoch': 100_000_000,
@@ -201,10 +210,10 @@ if __name__ == "__main__":
     # abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50'
     # abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50/randomized_cards_no_downsampling'
     # abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50/actions_selected_players__do_not_generate_fold_labels'
+    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset_75'
     abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset_debug'
     abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset_150'
-    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset2'
-    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset_75'
+    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset2_min'
     # base_logdir = f'./no_folds_selected_players/logdir'
     base_logdir = f'./all_games_and_folds_rand_cards_selected_players/logdir'
     # base_ckptdir = f'./no_folds_selected_players/ckpt_dir'
