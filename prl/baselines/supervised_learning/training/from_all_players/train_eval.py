@@ -11,9 +11,12 @@ from tensorboardX import SummaryWriter
 from torch import nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from sklearn.metrics import f1_score
-
+from sklearn.metrics import f1_score, classification_report
+import pprint
 from prl.baselines.supervised_learning.training.utils import init_state, get_datasets, get_model
+
+target_names = ['Fold', 'Check Call', 'Raise 3 BB', 'Raise 6 BB', 'Raise 10 BB', 'Raise 20 BB', 'Raise 50 BB',
+                'Raise All in']
 
 
 def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir, base_logdir):
@@ -109,7 +112,7 @@ def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir,
                     start_time = time.time()
 
                     # evaluate once (i==0) every epoch (j % eval_interval)
-                    if j     % eval_interval == 0 and i == 0:
+                    if j % eval_interval == 0 and i == 0:
                         model.eval()
                         test_loss = 0
                         test_correct = 0
@@ -123,6 +126,14 @@ def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir,
                                 test_loss += F.cross_entropy(output, y, reduction="sum").data.item()
                                 pred = torch.argmax(output, dim=1)
                                 f1 = f1_score(y.data.cpu(), pred.cpu(), average='weighted')
+                                f1_0 = f1_score(y.data.cpu(), pred.cpu(), labels=[0], average='macro')
+                                f1_1 = f1_score(y.data.cpu(), pred.cpu(), labels=[1], average='macro')
+                                f1_2 = f1_score(y.data.cpu(), pred.cpu(), labels=[2], average='macro')
+                                f1_3 = f1_score(y.data.cpu(), pred.cpu(), labels=[3], average='macro')
+                                f1_4 = f1_score(y.data.cpu(), pred.cpu(), labels=[4], average='macro')
+                                f1_5 = f1_score(y.data.cpu(), pred.cpu(), labels=[5], average='macro')
+                                f1_6 = f1_score(y.data.cpu(), pred.cpu(), labels=[6], average='macro')
+                                f1_7 = f1_score(y.data.cpu(), pred.cpu(), labels=[7], average='macro')
                                 test_correct += pred.eq(y.data).cpu().sum().item()
 
                         test_loss /= len(testdataset)
@@ -158,9 +169,24 @@ def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir,
 
                         # write metrics to tensorboard
                         writer.add_scalar(tag='Test Loss', scalar_value=test_loss, global_step=n_iter)
-                        writer.add_scalar(tag='Test F1 score', scalar_value=f1, global_step=n_iter)
+                        writer.add_scalar(tag='Test F1/average', scalar_value=f1, global_step=n_iter)
+                        writer.add_scalar(tag='Test F1 score/FOLD', scalar_value=f1_0, global_step=n_iter)
+                        writer.add_scalar(tag='Test F1 score/CHECK/CALL', scalar_value=f1_1, global_step=n_iter)
+                        writer.add_scalar(tag='Test F1 score/Min Raise', scalar_value=f1_2, global_step=n_iter)
+                        writer.add_scalar(tag='Test F1 score/Raise 6 BB', scalar_value=f1_3, global_step=n_iter)
+                        writer.add_scalar(tag='Test F1 score/Raise 10 BB', scalar_value=f1_4, global_step=n_iter)
+                        writer.add_scalar(tag='Test F1 score/Raise 20 BB', scalar_value=f1_5, global_step=n_iter)
+                        writer.add_scalar(tag='Test F1 score/Raise 50 BB', scalar_value=f1_6, global_step=n_iter)
+                        writer.add_scalar(tag='Test F1 score/Raise ALL IN', scalar_value=f1_7, global_step=n_iter)
                         writer.add_scalar(tag='Test Accuracy', scalar_value=test_accuracy, global_step=n_iter)
 
+                        report = classification_report(y.cpu().numpy(), pred.cpu().numpy(), target_names=target_names,
+                                                       output_dict=True)
+
+                        for name, values in report.items():
+                            if name in target_names:
+                                writer.add_scalar(f'accuracy/{name}', values['precision'], global_step=n_iter)
+                        pprint.pprint(report)
                         # write layer histograms to tensorboard
                         k = 1
                         for layer in model.children():
@@ -190,7 +216,7 @@ if __name__ == "__main__":
 
     # export TRAIN_EVAL_SOURCE_DIR=/home/.../Documents/github.com/prl_baselines/data/02_vectorized/0.25-0.50/...
     # filenames = glob.glob(os.environ["TRAIN_EVAL_SOURCE_DIR"]+"/**/*.txt",recursive=True)
-    log_interval = eval_interval = 2  # epochs (i.e BATCH_SIZE * train_steps) environment steps
+    log_interval = eval_interval = 2      # epochs (i.e BATCH_SIZE * train_steps) environment steps
     # params0 = {'hdims': [[256, 256]],  # [256, 256], [512, 512]], -- not better
     #            'lrs': [1e-6],  # we ruled out 1e-5 and 1e-7 by hand, 1e-6 is the best we found after multiple trainings
     #            # 'max_epoch': 5_000_000,
@@ -210,14 +236,17 @@ if __name__ == "__main__":
     # abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50'
     # abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50/randomized_cards_no_downsampling'
     # abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50/actions_selected_players__do_not_generate_fold_labels'
-    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset_75'
+    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/ishusha.csv.bz2'
     abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset_debug'
     abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset_150'
     abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset2_min'
+    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset_75'
     # base_logdir = f'./no_folds_selected_players/logdir'
-    base_logdir = f'./all_games_and_folds_rand_cards_selected_players/logdir'
+    base_logdir = f'./ishuha/logdir'
+    base_logdir = f'./v2/logdir'
     # base_ckptdir = f'./no_folds_selected_players/ckpt_dir'
-    base_ckptdir = f'./all_games_and_folds_rand_cards_selected_players/ckpt_dir'
+    base_ckptdir = f'./ishuha/ckpt_dir'
+    base_ckptdir = f'./v2/ckpt_dir'
     # train_eval(abs_path,
     #            params=params,
     #            log_interval=log_interval,
@@ -225,9 +254,9 @@ if __name__ == "__main__":
     # start = time.time()
     # p = multiprocessing.Pool()
     # t0 = time.time()
-    train_eval_fn = partial(train_eval, 
-                            abs_input_dir=abs_path, 
-                            log_interval=log_interval, 
+    train_eval_fn = partial(train_eval,
+                            abs_input_dir=abs_path,
+                            log_interval=log_interval,
                             eval_interval=eval_interval,
                             base_ckptdir=base_ckptdir,
                             base_logdir=base_logdir)

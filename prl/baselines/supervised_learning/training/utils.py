@@ -101,7 +101,7 @@ def get_datasets(input_dir, seed=1):
     gen = torch.Generator().manual_seed(seed)
     train, test = random_split(dataset, [train_len, test_len], generator=gen)
 
-    return train, test, get_label_counts(input_dir)  # dataset.label_counts  #
+    return train, test, dataset.label_counts  # get_label_counts(input_dir)  # dataset.label_counts  #
 
 
 if __name__ == "__main__":

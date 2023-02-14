@@ -349,7 +349,7 @@ def start():
                      path_out=path_out,
                      max_files=max_files)
     if debug:
-        run_fn(filenames[0])
+        run_fn(filenames[2])
     else:
         start = time.time()
         p = multiprocessing.Pool()

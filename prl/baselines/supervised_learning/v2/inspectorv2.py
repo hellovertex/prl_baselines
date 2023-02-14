@@ -188,20 +188,25 @@ class InspectorV2:
                     [self.logits_when_wrong[action_label],
                      torch.softmax(self.baseline.logits.cpu(), dim=1).reshape(1, 1, 8)])
 
-            self.label_counts_false[action_label][pred] += 1
+            #self.label_counts_false[action_label][pred] += 1
+            self.label_counts_false[action_label][action_label] += 1
             # self.wrong[action_label] /= self.label_counts_wrong[action_label]
-        if pred == 0 and action_label == 0:
-            self.summary_predictions[0][0] += 1
-        else:
-            self.summary_predictions[0][1] += 1
-        if pred == 1 and action_label == 1:
-            self.summary_predictions[1][0] += 1
-        else:
-            self.summary_predictions[1][1] += 1
-        if pred >= 2 and action_label >= 2:
-            self.summary_predictions[2][0] += 1
-        else:
-            self.summary_predictions[2][1] += 1
+
+        if pred == 0:
+            if action_label == 0:
+                self.summary_predictions[0][0] += 1
+            else:
+                self.summary_predictions[0][1] += 1
+        if pred == 1:
+            if action_label == 1:
+                self.summary_predictions[1][0] += 1
+            else:
+                self.summary_predictions[1][1] += 1
+        if pred >= 2:
+            if action_label >= 2:
+                self.summary_predictions[2][0] += 1
+            else:
+                self.summary_predictions[2][1] += 1
 
     def _simulate_environment(self,
                               episode,
