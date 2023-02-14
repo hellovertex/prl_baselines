@@ -21,10 +21,14 @@ from matplotlib import pyplot as plt
 from matplotlib.colors import ListedColormap
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.base import ActionSpace
+from prl.environment.Wrappers.utils import init_wrapped_env
 
 from prl.baselines.agents.tianshou_agents import BaselineAgent, MajorityBaseline
 from prl.baselines.analysis.core.nn_inspector import Inspector
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
+from prl.baselines.supervised_learning.v2.config import top_20
+from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import ParseHsmithyTextToPokerEpisode
+from prl.baselines.supervised_learning.v2.inspectorv2 import InspectorV2
 
 rows = ["Fold",
         "Check/Call",
@@ -47,7 +51,8 @@ def plot_heatmap(input_dict: Dict[ActionSpace, torch.Tensor],
         else:
             detached[action] = probas
     df = pd.DataFrame(detached, index=rows).T  # do we need , index=idx, columns=cols?
-    action_freqs = torch.sum(torch.row_stack(action_freqs), dim=0)
+    # todo: fix this
+    action_freqs = torch.sum(torch.row_stack(action_freqs), dim=1)
     # plot the heatmap with annotations
     flatui = ["#9b59b6", "#3498db", "#95a5a6", "#e74c3c", "#34495e", "#2ecc71"]
     my_cmap = ListedColormap(sns.color_palette(flatui).as_hex())
@@ -175,7 +180,8 @@ def compute(label_logits, label_counts) \
 
 def collect(filename,
             model_ckpt_abs_path):
-    parser = HSmithyParser()
+    # parser = HSmithyParser()
+    parser = ParseHsmithyTextToPokerEpisode()
 
     if type(model_ckpt_abs_path) == str or type(model_ckpt_abs_path) == Path:
         pname = Path(model_ckpt_abs_path).parent.stem
@@ -191,16 +197,25 @@ def collect(filename,
                                     model_hidden_dims=hidden_dims,
                                     device="cpu",  # "cuda" if torch.cuda.is_available() else "cpu",
                                     flatten_input=False)
-    inspector = Inspector(baseline=baseline, env_wrapper_cls=AugmentObservationWrapper)
+    # inspector = Inspector(baseline=baseline, env_wrapper_cls=AugmentObservationWrapper)
+    env = init_wrapped_env(AugmentObservationWrapper,
+                           [5000 for _ in range(6)],
+                           blinds=(25, 50),
+                           multiply_by=1, )
+    inspector = InspectorV2(env=env, baseline=baseline)
     # for filename in filenames[:max_files]:
     t0 = time.time()
     parsed_hands = list(parser.parse_file(filename))
     print(f'Parsing file {filename} took {time.time() - t0} seconds.')
     num_parsed_hands = len(parsed_hands)
     print(f'num_parsed_hands = {num_parsed_hands}')
-    for ihand, hand in enumerate(parsed_hands[:3000]):
+    for ihand, hand in enumerate(parsed_hands[:2000]):
         print(f'Inspecting model on hand {ihand} / {num_parsed_hands}')
-        inspector.inspect_episode(hand, pname=pname)
+        inspector.inspect_episode(hand,
+                                  drop_folds=False,
+                                  randomize_fold_cards=True,
+                                  selected_players=top_20,
+                                  verbose=True)
     return inspector
 
 
@@ -295,7 +310,7 @@ def run(filename,
     # flush_to_disk(df_correct_percentile_50, inspector.label_counts_true, path_out_csv + '/percentile_50_correct.csv')
     # flush_to_disk(df_correct_percentile_75, inspector.label_counts_true, path_out_csv + '/percentile_75_correct.csv')
     # flush_to_disk(df_correct_percentile_90, inspector.label_counts_true, path_out_csv + '/percentile_90_correct.csv')
-
+    print(f'Summary for file {filename}: \nPredictions (Correct, Wrong) per label: {inspector.summary_predictions}')
     # plots logits against true labels and saves csv with result to disk
     return f"Succes. Wrote file to {path_out + '/' + Path(filename).stem}"
 
@@ -317,10 +332,12 @@ def start():
     # model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/randomized_folds_with_downsamplingv1_0_25NL_all_players/ckpt_dir_[512]_1e-06/ckpt.pt"
     model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/data/no_folds_selected_players_70%/ckpt_dir_[512]_1e-06/ckpt.pt"
     model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/no_folds_selected_players/ckpt_dir_[512]_1e-06/ckpt.pt"
+    model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/all_games_and_folds_rand_cards_selected_players/ckpt_dir_[512]_1e-06/ckpt.pt"
     # ctd
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data"
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     # unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/2.5NL/unzipped"
+    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_test"
     unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_5"
     path_out = './results/selected_players_only_fold_random_cards'
     max_files = 1000
@@ -332,7 +349,7 @@ def start():
                      path_out=path_out,
                      max_files=max_files)
     if debug:
-        run_fn(filenames[0])
+        run_fn(filenames[2])
     else:
         start = time.time()
         p = multiprocessing.Pool()

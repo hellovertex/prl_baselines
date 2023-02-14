@@ -210,11 +210,11 @@ class BaselineAgent(BasePolicy):
         #     # print('pseudo harmonic mapping')
         #     pass
         self._prediction = torch.argmax(self.logits)
-        if self.threshold <= torch.max(self.probas).detach().cpu().item():
-            pretty_print(99, obs, self._prediction.detach().cpu().item())
-            print(f'Previous action has been performed with probas {self.probas}')
-        if self.threshold > torch.max(self.probas).detach().cpu().item():
-            return ActionSpace.FOLD
+        # if self.threshold <= torch.max(self.probas).detach().cpu().item():
+        pretty_print(99, obs, self._prediction.detach().cpu().item())
+        print(f'Previous action {self._prediction} has been performed with probas {self.probas}')
+        # if self.threshold > torch.max(self.probas).detach().cpu().item():
+        #     return ActionSpace.FOLD
         return self._prediction.item()
 
     def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:

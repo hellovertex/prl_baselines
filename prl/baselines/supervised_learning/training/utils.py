@@ -1,5 +1,6 @@
 import glob
 import logging
+import math
 
 import numpy as np
 import pandas as pd
@@ -51,11 +52,11 @@ def get_model(traindata, hidden_dims, device):
     output_dim = len(classes)
     input_dim = None
     # waste the first batch to dynamically get the input dimension
-    for x, y in traindata:
-        input_dim = x.shape[1]
-        break
+    # for x, y in traindata:
+    #     input_dim = x.shape[1]
+    #     break
 
-    net = MLP(input_dim=input_dim,
+    net = MLP(input_dim=564,
               output_dim=output_dim,
               hidden_sizes=hidden_dims,
               norm_layer=None,
@@ -68,9 +69,11 @@ def get_model(traindata, hidden_dims, device):
     if use_cuda:
         net = net.cuda()
     return net
+
+
 def get_label_counts(input_dir):
     files = glob.glob(input_dir + "/**/*.csv.bz2", recursive=True)
-    label_counts = {0:0,1:0,2:0,3:0,4:0,5:0,6:0,7:0}
+    label_counts = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0}
     n_files = len(files)
     for i, file in enumerate(files):
         print(f'Loading file {i}/{n_files} once to compute total number of labels for weights...')
@@ -82,21 +85,24 @@ def get_label_counts(input_dir):
         for label, count in tmp['label'].value_counts().to_dict().items():
             label_counts[label] += count
     print(f'Starting training with dataset label quantities: {label_counts}')
-    return label_counts.values()
+    return list(label_counts.values())
+
 
 def get_datasets(input_dir, seed=1):
-    dataset = OutOfMemoryDatasetV2(input_dir)
+    # dataset = OutOfMemoryDatasetV2(input_dir, chunk_size=1)
+    dataset = InMemoryDataset(input_dir)
     total_len = len(dataset)
-    train_len = int(total_len * 0.89)
-    test_len = int(total_len * 0.1)
-    val_len = int(total_len * 0.01)
+    train_len = math.ceil(len(dataset) * 0.8)
+    test_len = total_len - train_len
+    # val_len = int(total_len * 0.01)
     # add residuals to val_len to add up to total_len
-    val_len += total_len - (int(train_len) + int(test_len) + int(val_len))
+    # val_len += total_len - (int(train_len) + int(test_len) + int(val_len))
     # set seed
     gen = torch.Generator().manual_seed(seed)
-    train, test, val = random_split(dataset, [train_len, test_len, val_len], generator=gen)
+    train, test = random_split(dataset, [train_len, test_len], generator=gen)
 
-    return train, test, get_label_counts(input_dir)
+    return train, test, dataset.label_counts  # get_label_counts(input_dir)  # dataset.label_counts  #
+
 
 if __name__ == "__main__":
     """
