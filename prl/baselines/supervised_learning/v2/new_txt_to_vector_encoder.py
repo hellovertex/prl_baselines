@@ -159,7 +159,9 @@ class EncoderV2:
             next_to_act = action.who
             for player in players:
                 if player.name == next_to_act:
-                    if player.name in remaining_selected_players:
+                    # cond = player.is_showdown_player if self.drop_folds else True
+                    cond = player in episode.winners if self.drop_folds else True
+                    if player.name in remaining_selected_players and cond:
                         observations.append(obs)
                         actions.append(action_label)
                         cards = get_player_cards(obs)[0]
@@ -272,6 +274,7 @@ class EncoderV2:
                 hand = [card(token) for token in cards]
                 hands.append(hand)
             else:
+                # todo: implement this conditional: if self.randomize_fold_cards:
                 # overwrite default hands with random cards that are not board or player cards
                 idx0 = random.randint(0, len(deck) - 1)
                 c0 = deck.pop(idx0)
@@ -285,9 +288,11 @@ class EncoderV2:
     def encode_episode(self,
                        episode: PokerEpisodeV2,
                        drop_folds: bool,
+                       only_winners: False,
                        randomize_fold_cards: bool,
                        selected_players: List[str],
-                       verbose: bool) -> Tuple[
+                       limit_num_players: int = None,
+                       verbose: bool=False) -> Tuple[
         Observations, Actions_Taken]:
         """Runs environment with steps from PokerEpisode.
         Returns observations and corresponding actions of players that made it to showdown."""
@@ -299,7 +304,20 @@ class EncoderV2:
         self.drop_folds = drop_folds
         self.randomize_fold_cards = randomize_fold_cards
         self._currency_symbol = episode.currency_symbol
+        if drop_folds:
+            skip_hand = True
+            target_players = episode.winners if only_winners else episode.showdown_players
+            for p in target_players:
+                if p.name in selected_players:
+                    if p.cards:
+                        skip_hand = False
+            if skip_hand:
+                return None, None
+
         players = self.get_players_starting_with_button(episode)
+        if limit_num_players:
+            if len(players) < limit_num_players:
+                return None,None
         stacks = [player.stack for player in players]
         sb, bb = episode.blinds['sb'], episode.blinds['bb']
         # self._wrapped_env = init_wrapped_env(self.env_wrapper_cls,

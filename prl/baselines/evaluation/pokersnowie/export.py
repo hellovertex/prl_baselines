@@ -149,7 +149,7 @@ class PokerExperimentToPokerSnowie(PokerSnowieExporteur):
                           hero_names: Optional[List[str]] = None,
                           verbose=False):
         # execute Experiment to generate list of poker episodes
-        poker_episodes = self._runner.run(experiment, verbose=verbose)
+        poker_episodes = self._runner.run(experiment, verbose=verbose, hero_names=hero_names)
         snowie_episodes = []
         # parse list of poker episodes to snowie-formatted string
         for ep in poker_episodes:

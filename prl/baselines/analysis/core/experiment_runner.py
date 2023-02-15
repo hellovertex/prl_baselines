@@ -215,7 +215,8 @@ class PokerExperimentRunner(ExperimentRunner):
         if bb_acted and quantity_equals_bb and is_check_call:
             if stage == 'preflop':
                 raise_amount = 0
-        self.total_actions_dict[what] += 1
+        if self.hero_names and self.player_names[who] in self.hero_names:
+            self.total_actions_dict[what] += 1
         return Action(stage=stage,
                       player_name=f'{self.player_names[agent_idx]}',
                       action_type=ACTION_TYPES[a[0]],
@@ -410,7 +411,7 @@ class PokerExperimentRunner(ExperimentRunner):
               f'{np.mean(self._times_taken_to_step_env) * 1000} ms')
         return poker_episodes
 
-    def run(self, experiment: PokerExperiment, verbose=False) -> List[PokerEpisode]:
+    def run(self, experiment: PokerExperiment, verbose=False, hero_names=None) -> List[PokerEpisode]:
         # for testing,
         # it should be possible to
         # 1) provide hands and boards
@@ -419,6 +420,7 @@ class PokerExperimentRunner(ExperimentRunner):
         self.stats = None
         self.test_env = experiment.options['test_env']
         self.verbose = verbose
+        self.hero_names = hero_names
         self.num_players = experiment.num_players
         self.total_actions_dict = {ActionType.FOLD.value: 0,
                                    ActionType.CHECK_CALL.value: 0,

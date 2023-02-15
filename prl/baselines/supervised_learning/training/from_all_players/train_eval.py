@@ -25,6 +25,7 @@ def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir,
     """
     BATCH_SIZE = params['batch_size']
     traindataset, testdataset, label_counts = get_datasets(abs_input_dir, BATCH_SIZE)
+    print('Starting training')
     # label weights to account for dataset imbalance
     weights = np.array(label_counts) / sum(label_counts)
     weights = 1 / weights
@@ -185,7 +186,10 @@ def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir,
 
                         for name, values in report.items():
                             if name in target_names:
-                                writer.add_scalar(f'accuracy/{name}', values['precision'], global_step=n_iter)
+                                writer.add_scalar(f'precision/{name}', values['precision'], global_step=n_iter)
+                        for name, values in report.items():
+                            if name in target_names:
+                                writer.add_scalar(f'recall/{name}', values['recall'], global_step=n_iter)
                         pprint.pprint(report)
                         # write layer histograms to tensorboard
                         k = 1
@@ -241,12 +245,12 @@ if __name__ == "__main__":
     abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset_150'
     abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset2_min'
     abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset_75'
+    abs_path = '/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/dataset2_no_folds_really_no_folds_not700kfromtop20'
     # base_logdir = f'./no_folds_selected_players/logdir'
-    base_logdir = f'./ishuha/logdir'
-    base_logdir = f'./v2/logdir'
+    # base_logdir = f'./ishuha/logdir'
+    base_logdir = f'./top20_no_folds_really_nottop20/logdir'
     # base_ckptdir = f'./no_folds_selected_players/ckpt_dir'
-    base_ckptdir = f'./ishuha/ckpt_dir'
-    base_ckptdir = f'./v2/ckpt_dir'
+    base_ckptdir = f'./top20_no_folds_really_nottop20/ckpt_dir'
     # train_eval(abs_path,
     #            params=params,
     #            log_interval=log_interval,

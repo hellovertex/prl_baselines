@@ -184,10 +184,27 @@ class BaselineAgent(BasePolicy):
         if not type(obs) == torch.Tensor:
             obs = torch.Tensor(np.array([obs])).to(self.device)
         self.logits = self._model(obs)
-        self.prediction = torch.argmax(self.logits, dim=1)
-        # todo set threshold to fold
-        # action = self._compute_action(obs)
-        return self.prediction.item()
+        self.probas = torch.softmax(self.logits, dim=1)
+        self.probas = self.probas[:, 1:]
+        pred = torch.argmax(self.probas).item()
+        proba = torch.max(self.probas)
+        threshold_all_in = .18
+        threshold_50bb = .18
+        threshold_20bb = .16
+        threshold_10bb = .14
+        threshold_6bb = .15
+        threshold_3bb = .16
+        threshold_call = .17
+        thresholds = [.17, .16, .15, .14, .16, .18, .18]
+        if pred == 0:
+            return pred
+        if proba < thresholds[pred]:
+            self._prediction = 0
+            return ActionSpace.FOLD
+        else:
+            self._prediction = pred
+            return pred
+
 
     def act(self, obs: np.ndarray, legal_moves: list, use_pseudo_harmonic_mapping=False):
         """
@@ -196,26 +213,52 @@ class BaselineAgent(BasePolicy):
 
         for why pseudo-harmonic-mapping is useful to prevent exploitability of a strategy.
         """
-        obs = obs[0]
-        self.threshold = .8
-        self.legal_moves = legal_moves
-        self.logits = self._model(torch.Tensor(torch.Tensor(np.array(obs))).to(self.device))
-        self.probas = torch.softmax(self.logits, dim=0)
-        # if this torch.topk(self.logits, 2) is less than 20%
-        # topk = torch.topk(self.logits, 2)
-        # diff = topk.values[0][0] - topk.values[0][1]
-        # thresh = torch.max(topk.values).item() * .2
-        # if diff < thresh:
-        #     # do pseudo-harmonic mapping
-        #     # print('pseudo harmonic mapping')
-        #     pass
-        self._prediction = torch.argmax(self.logits)
-        # if self.threshold <= torch.max(self.probas).detach().cpu().item():
-        pretty_print(99, obs, self._prediction.detach().cpu().item())
-        print(f'Previous action {self._prediction} has been performed with probas {self.probas}')
-        # if self.threshold > torch.max(self.probas).detach().cpu().item():
-        #     return ActionSpace.FOLD
-        return self._prediction.item()
+        self.next_legal_moves = legal_moves
+        if not type(obs) == torch.Tensor:
+            obs = torch.Tensor(np.array([obs])).to(self.device)
+        self.logits = self._model(obs)
+        self.probas = torch.softmax(self.logits, dim=2)
+        pred = torch.argmax(self.probas,dim=2).item()
+        proba = torch.max(self.probas, dim=2).values.item()
+        threshold_all_in = .18
+        threshold_50bb = .18
+        threshold_20bb = .16
+        threshold_10bb = .14
+        threshold_6bb = .15
+        threshold_3bb = .16
+        threshold_call = .17
+        thresholds = [.1, .17, .17, .1593, .1431, .1616, .1815, .1816]
+
+        if proba < thresholds[pred]:
+            if self.probas[0][0][0] > thresholds[0]:
+                self._prediction = 0
+                return 0
+            else:
+                self._prediction = 1
+                return 1
+        else:
+            self._prediction = pred
+            return pred
+        # obs = obs[0]
+        # self.threshold = .8
+        # self.legal_moves = legal_moves
+        # self.logits = self._model(torch.Tensor(torch.Tensor(np.array(obs))).to(self.device))
+        # self.probas = torch.softmax(self.logits, dim=0)
+        # # if this torch.topk(self.logits, 2) is less than 20%
+        # # topk = torch.topk(self.logits, 2)
+        # # diff = topk.values[0][0] - topk.values[0][1]
+        # # thresh = torch.max(topk.values).item() * .2
+        # # if diff < thresh:
+        # #     # do pseudo-harmonic mapping
+        # #     # print('pseudo harmonic mapping')
+        # #     pass
+        # self._prediction = torch.argmax(self.logits)
+        # # if self.threshold <= torch.max(self.probas).detach().cpu().item():
+        # pretty_print(99, obs, self._prediction.detach().cpu().item())
+        # print(f'Previous action {self._prediction} has been performed with probas {self.probas}')
+        # # if self.threshold > torch.max(self.probas).detach().cpu().item():
+        # #     return ActionSpace.FOLD
+        # return self._prediction.item()
 
     def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:
         nobs = len(batch.obs)

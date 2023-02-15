@@ -43,7 +43,7 @@ def main(max_episodes,
     pname = Path(ckpt_abs_fpath).parent.stem
     pname = 'AI_AGENT_v2'
     hidden_dims = [256] if '256' in pname else [512]
-    path_out = "./results"
+    path_out = "./results_final"
     agent_names = [f'{pname}', '2', '3', '4', '5', '6']
     # make self play agents
     agents = [BaselineAgent(ckpt_abs_fpath,  # MajorityBaseline

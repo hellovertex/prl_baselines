@@ -288,7 +288,7 @@ class ParseHsmithyTextToPokerEpisode:
                               winners=winners,
                               btn_seat_num_one_indexed=btn_seat_num)
 
-    def parse_file(self, f: str) -> List[PokerEpisodeV2]:
+    def parse_file(self, f: str, only_showdowns=False) -> List[PokerEpisodeV2]:
         """
         :param f: Absolute path to .txt file containing human-readable hhsmithy-export.
         :param out: Absolute path to .txt file containing
@@ -306,6 +306,8 @@ class ParseHsmithyTextToPokerEpisode:
                 hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
 
                 for hand in hands_played:
+                    if not '*** SHOW DOWN ***' in hand:
+                        continue
                     if "leaves the table" in hand:
                         continue
                     if "sits out" in hand:
@@ -472,9 +474,13 @@ if __name__ == "__main__":
                 for ep in episodesV2:
                     try:
                         observations, actions = encoder.encode_episode(ep,
-                                                                       drop_folds=False,
+                                                                       # drop_folds=False,
+                                                                       drop_folds=True,
+                                                                       only_winners=True,
+                                                                       limit_num_players=5,
                                                                        randomize_fold_cards=True,
-                                                                       selected_players=top_20,
+                                                                       selected_players=top_100,
+                                                                       #selected_players=['ishuha'],
                                                                        verbose=True)
                     except Exception as e:
                         print(e)
@@ -495,7 +501,7 @@ if __name__ == "__main__":
                 columns = None
                 header = False
                 # file_path = os.path.abspath(f'./data_{it}.csv.bz2')
-                file_path = os.path.abspath(f'./dataset2/data_{it}{suffix}.csv.bz2')
+                file_path = os.path.abspath(f'./top_100_only_wins_no_folds/data_{it}{suffix}.csv.bz2')
                 if not os.path.exists(Path(file_path).parent):
                     os.makedirs(os.path.realpath(Path(file_path).parent), exist_ok=True)
                 if not os.path.exists(file_path):
@@ -514,7 +520,7 @@ if __name__ == "__main__":
                           float_format='%.5f',
                           compression='bz2'
                           )
-                it += 1
+            it += 1
         return "Success."
 
     start = time.time()
