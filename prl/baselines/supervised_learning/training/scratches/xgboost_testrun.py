@@ -78,6 +78,9 @@ if __name__ == '__main__':
     param['max_depth'] = 6
     param['nthread'] = 4
     param['num_class'] = 8
+    param['eval_metric'] = ['auc', 'ams@0', 'mlogloss', 'merror']
+    # params to consider to make the model more conservative
+    # -- lambda: L2 reg weights, default=1 ;; alpha: L1 Reg weights, default = 0
 
     watchlist = [(xg_train, 'train'), (xg_test, 'test')]
     num_round = 5
