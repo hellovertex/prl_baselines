@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -21,7 +22,7 @@ class TensorBoardCallback(xgb.callback.TrainingCallback):
             )
 
     def after_iteration(
-        self, model, epoch: int, evals_log: xgb.callback.TrainingCallback.EvalsLog
+            self, model, epoch: int, evals_log: xgb.callback.TrainingCallback.EvalsLog
     ) -> bool:
         if not evals_log:
             return False
@@ -36,6 +37,17 @@ class TensorBoardCallback(xgb.callback.TrainingCallback):
 
         return False
 
+
+from sklearn.metrics import classification_report
+
+
+def precision(predt: np.ndarray, dtrain: xgb.DMatrix) -> Tuple[str, float]:
+    a = 1
+    return 1
+
+def recall(predt: np.ndarray, dtrain: xgb.DMatrix) -> Tuple[str, float]:
+    a = 1
+    return 1
 
 if __name__ == '__main__':
     filename = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/scratches/top_100_only_wins_no_folds_per_round/Round_preflop/data.csv.bz2"
@@ -64,9 +76,9 @@ if __name__ == '__main__':
     ytrain = xtrain.pop('label.1')
 
     # make Dmats
-    #mat_train = xgb.DMatrix(xg_train, label=ytrain)
+    # mat_train = xgb.DMatrix(xg_train, label=ytrain)
     xg_train = xgb.DMatrix(xtrain, label=ytrain)
-    #mat_test = xgb.DMatrix(xg_test, label=ytest)
+    # mat_test = xgb.DMatrix(xg_test, label=ytest)
     xg_test = xgb.DMatrix(xtest, label=ytest)
 
     # setup parameters for xgboost
@@ -79,16 +91,19 @@ if __name__ == '__main__':
     param['nthread'] = 4
     param['num_class'] = 8
     param['eval_metric'] = ['auc', 'ams@0', 'mlogloss', 'merror']
+    param['custom_metric'] = [precision, recall]
     # params to consider to make the model more conservative
     # -- lambda: L2 reg weights, default=1 ;; alpha: L1 Reg weights, default = 0
 
     watchlist = [(xg_train, 'train'), (xg_test, 'test')]
     num_round = 5
     callbacks = [TensorBoardCallback()]
-    bst = xgb.train(param,
-                    xg_train,
-                    num_round,
-                    watchlist,
+    eval_results = {}
+    bst = xgb.train(params=param,
+                    dtrain=xg_train,
+                    num_boost_round=num_round,
+                    evals=watchlist,
+                    evals_result=eval_results,  # stores evaluation of metrics for `evals`
+                    # custom_metric=[precision, recall],  # set maximize=True to maximize custom metric
                     callbacks=[TensorBoardCallback(experiment='exp_1', data_name='test')])
     a = 1
-
