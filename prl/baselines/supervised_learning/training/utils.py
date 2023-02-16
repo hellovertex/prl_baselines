@@ -38,7 +38,7 @@ def init_state(ckpt_dir, model, optim, resume: bool = True):
     # return start_n_iter, start_epoch, best_accuracy
 
 
-def get_model(traindata, hidden_dims, device):
+def get_model(traindata, hidden_dims, device, merge_labels567=False):
     # network
     classes = [ActionSpace.FOLD,
                ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED in CHECK_CALL
@@ -48,7 +48,15 @@ def get_model(traindata, hidden_dims, device):
                ActionSpace.RAISE_20_BB,
                ActionSpace.RAISE_50_BB,
                ActionSpace.RAISE_ALL_IN]
-
+    if merge_labels567:
+        classes = [ActionSpace.FOLD,
+                   ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED in CHECK_CALL
+                   ActionSpace.RAISE_MIN_OR_3BB,
+                   ActionSpace.RAISE_6_BB,
+                   ActionSpace.RAISE_10_BB,
+                   ActionSpace.RAISE_20_BB]
+                   # ActionSpace.RAISE_50_BB,
+                   # ActionSpace.RAISE_ALL_IN]
     output_dim = len(classes)
     input_dim = None
     # waste the first batch to dynamically get the input dimension
@@ -56,7 +64,8 @@ def get_model(traindata, hidden_dims, device):
     #     input_dim = x.shape[1]
     #     break
 
-    net = MLP(input_dim=564,
+    # net = MLP(input_dim=564,
+    net = MLP(input_dim=569,
               output_dim=output_dim,
               hidden_sizes=hidden_dims,
               norm_layer=None,
@@ -90,7 +99,7 @@ def get_label_counts(input_dir):
 
 def get_datasets(input_dir, seed=1):
     # dataset = OutOfMemoryDatasetV2(input_dir, chunk_size=1)
-    dataset = InMemoryDataset(input_dir)
+    dataset = InMemoryDataset(input_dir, merge_labels_567=True)
     total_len = len(dataset)
     train_len = math.ceil(len(dataset) * 0.8)
     test_len = total_len - train_len

@@ -21,7 +21,7 @@ def row_count(input):
 
 
 class InMemoryDataset(Dataset):
-    def __init__(self, path_to_csv_files=None, blind_sizes="0.25-0.50"):
+    def __init__(self, path_to_csv_files=None, blind_sizes="0.25-0.50", merge_labels_567=False):
         if not path_to_csv_files:
             path_to_csv_files = str(DATA_DIR) + '/03_preprocessed' + f'/{blind_sizes}'
 
@@ -46,10 +46,23 @@ class InMemoryDataset(Dataset):
             df = pd.concat([df, tmp], ignore_index=True)
             print(f'Loaded file {i}/{n_files}...')
         df = df.sample(frac=1)
-        self.label_counts = df['label'].value_counts().to_list()
-        self.y = torch.tensor(df['label'].values, dtype=torch.int64)
-        # x = df.drop(['label'], axis=1)
-        df.drop(['label'], axis=1, inplace=True)
+        if merge_labels_567:
+            df['label.1'].replace(6,5,inplace=True)
+            df['label.1'].replace(7,5,inplace=True)
+        if 'Unnamed: 0' in df.columns:
+            df.drop('Unnamed: 0', axis=1, inplace=True)
+        try:
+            self.label_counts = df['label'].value_counts().to_list()
+            self.y = torch.tensor(df['label'].values, dtype=torch.int64)
+            # x = df.drop(['label'], axis=1)
+            df.drop(['label'], axis=1, inplace=True)
+        except KeyError as e:
+            print(e)
+            self.label_counts = df['label.1'].value_counts().to_list()
+            self.y = torch.tensor(df['label.1'].values, dtype=torch.int64)
+            # x = df.drop(['label'], axis=1)
+            df.drop(['label.1'], axis=1, inplace=True)
+
 
         print(f'Dataframe size: {df.memory_usage(index=True, deep=True).sum()} bytes.')
         print(f'Starting training with dataset label quantities: {self.label_counts}')

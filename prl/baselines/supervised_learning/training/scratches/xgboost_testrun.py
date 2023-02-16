@@ -51,15 +51,17 @@ def recall(predt: np.ndarray, dtrain: xgb.DMatrix) -> Tuple[str, float]:
 
 if __name__ == '__main__':
     filename = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/scratches/top_100_only_wins_no_folds_per_round/Round_preflop/data.csv.bz2"
-    df = pd.read_csv(filename,
+    tmp = pd.read_csv(filename,
                      # df = pd.read_csv(path_to_csv_files,
                      sep=',',
                      dtype='float32',
-                     chunksize=1000,
+                     #chunksize=1000,
                      # dtype='float16',
                      encoding='cp1252',
                      compression='bz2')
-    tmp = next(df).apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
+    #tmp = next(df).apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
+    tmp = tmp.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
+    tmp = tmp.sample(frac=1)
     # remove duplicate label column
     tmp.pop('label')
 
@@ -67,7 +69,8 @@ if __name__ == '__main__':
     one_hot_btn = pd.get_dummies(tmp['btn_idx'], prefix='btn_idx')
     tmp = pd.concat([tmp, one_hot_btn], axis=1)
     tmp.drop('btn_idx', axis=1, inplace=True)
-
+    tmp.to_csv('/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/preflop_all_players/data.csv.bz2',
+               compression='bz2')
     # make train test split
     xtest = tmp.sample(frac=0.2, axis=0)
     xtrain = tmp.drop(index=xtest.index)
@@ -96,7 +99,7 @@ if __name__ == '__main__':
     # -- lambda: L2 reg weights, default=1 ;; alpha: L1 Reg weights, default = 0
 
     watchlist = [(xg_train, 'train'), (xg_test, 'test')]
-    num_round = 5
+    num_round = 5000
     callbacks = [TensorBoardCallback()]
     eval_results = {}
     bst = xgb.train(params=param,
