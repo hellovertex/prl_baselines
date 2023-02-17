@@ -145,7 +145,8 @@ class EncoderV2:
         remaining_selected_players = []
 
         for player in players:
-            if player.name in selected_players:
+            cond = player in episode.winners if self.only_winners else True
+            if player.name in selected_players and cond:
                 remaining_selected_players.append(player.name)
 
         while not done:
@@ -178,6 +179,9 @@ class EncoderV2:
 
                         if action_label == ActionSpace.FOLD:
                             remaining_selected_players.remove(player.name)
+                    elif player.name in episode.showdown_players and not self.drop_folds:
+                        observations.append(obs)
+                        actions.append(ActionSpace.FOLD.value)
 
             debug_action_list.append(action_formatted)
             if not remaining_selected_players:
@@ -304,6 +308,7 @@ class EncoderV2:
         self.drop_folds = drop_folds
         self.randomize_fold_cards = randomize_fold_cards
         self._currency_symbol = episode.currency_symbol
+        self.only_winners = only_winners
         if drop_folds:
             skip_hand = True
             target_players = episode.winners if only_winners else episode.showdown_players
