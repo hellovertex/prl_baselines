@@ -406,6 +406,168 @@ class ConverterV2toV1:
         )
 
 
+def run_on_chunks(chunks):
+    filenames = chunks
+    parser = ParseHsmithyTextToPokerEpisode()
+    env = init_wrapped_env(AugmentObservationWrapper,
+                           [5000 for _ in range(6)],
+                           blinds=(25, 50),
+                           multiply_by=1, )
+    encoder = EncoderV2(env)
+    it = 0
+    suffix = filenames[-1]
+    filenames = filenames[:-1]
+
+    while True:
+        start = it * max_files_in_memory_at_once
+        end = min((it + 1) * max_files_in_memory_at_once, n_files)
+        if not filenames[start:end]:
+            print(f'BREAK AT it={it}')
+            break
+        t0 = time.time()
+        for player_name in top_100:
+            training_data, labels = None, None
+            for i, filename in enumerate(filenames[start:end]):
+                print(f'Encoding file {i} / {n_files}')
+                episodesV2 = parser.parse_file(filename)
+                # convert episodes to PokerEpisodeV1
+                # episodesV1 = [converter.convert_episode(ep) for ep in episodes]
+                # episodes = None  # help gc
+                # run rl_encoder
+
+                for ep in episodesV2:
+                    try:
+                        observations, actions = encoder.encode_episode(ep,
+                                                                       # drop_folds=False,
+                                                                       drop_folds=True,
+                                                                       only_winners=True,
+                                                                       limit_num_players=5,
+                                                                       randomize_fold_cards=True,
+                                                                       selected_players=top_100,
+                                                                       # selected_players=['ishuha'],
+                                                                       verbose=True)
+                    except Exception as e:
+                        print(e)
+                        continue
+                    if not observations:
+                        continue
+                    if training_data is None:
+                        training_data = observations
+                        labels = actions
+                    else:
+                        try:
+                            training_data = np.concatenate((training_data, observations), axis=0)
+                            labels = np.concatenate((labels, actions), axis=0)
+                        except Exception as e:
+                            print(e)
+            print(f'Encoding {max_files_in_memory_at_once} files took {time.time() - t0} seconds.')
+            if training_data is not None:
+                columns = None
+                header = False
+                # file_path = os.path.abspath(f'./data_{it}.csv.bz2')
+                # file_path = os.path.abspath(f'./top_100_only_wins_no_folds/data_{it}{suffix}.csv.bz2')
+                file_path = os.path.abspath(
+                    f'./top_100_only_wins_no_folds_per_player/{player_name}/data_{it}{suffix}.csv.bz2')
+                if not os.path.exists(Path(file_path).parent):
+                    os.makedirs(os.path.realpath(Path(file_path).parent), exist_ok=True)
+                if not os.path.exists(file_path):
+                    columns = encoder.feature_names
+                    header = True
+                df = pd.DataFrame(data=training_data,
+                                  index=labels,  # The index (row labels) of the DataFrame.
+                                  columns=columns)
+                # float to int if applicable
+                df = df.apply(lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
+                df.to_csv(file_path,
+                          index=True,
+                          header=header,
+                          index_label='label',
+                          mode='a',
+                          float_format='%.5f',
+                          compression='bz2'
+                          )
+        it += 1
+    return "Success."
+
+
+def run_on_file(filename):
+    parser = ParseHsmithyTextToPokerEpisode()
+    env = init_wrapped_env(AugmentObservationWrapper,
+                           [5000 for _ in range(6)],
+                           blinds=(25, 50),
+                           multiply_by=1, )
+    encoder = EncoderV2(env)
+    it = 0
+    while True:
+        start = it * max_files_in_memory_at_once
+        end = min((it + 1) * max_files_in_memory_at_once, n_files)
+        if not filenames[start:end]:
+            print(f'BREAK AT it={it}')
+            break
+        t0 = time.time()
+        for player_name in top_100:
+            training_data, labels = None, None
+            episodesV2 = parser.parse_file(filename)
+            # convert episodes to PokerEpisodeV1
+            # episodesV1 = [converter.convert_episode(ep) for ep in episodes]
+            # episodes = None  # help gc
+            # run rl_encoder
+
+            for ep in episodesV2:
+                try:
+                    observations, actions = encoder.encode_episode(ep,
+                                                                   # drop_folds=False,
+                                                                   drop_folds=True,
+                                                                   only_winners=True,
+                                                                   limit_num_players=5,
+                                                                   randomize_fold_cards=True,
+                                                                   selected_players=top_100,
+                                                                   # selected_players=['ishuha'],
+                                                                   verbose=True)
+                except Exception as e:
+                    print(e)
+                    continue
+                if not observations:
+                    continue
+                if training_data is None:
+                    training_data = observations
+                    labels = actions
+                else:
+                    try:
+                        training_data = np.concatenate((training_data, observations), axis=0)
+                        labels = np.concatenate((labels, actions), axis=0)
+                    except Exception as e:
+                        print(e)
+            print(f'Encoding {max_files_in_memory_at_once} files took {time.time() - t0} seconds.')
+            if training_data is not None:
+                columns = None
+                header = False
+                # file_path = os.path.abspath(f'./data_{it}.csv.bz2')
+                # file_path = os.path.abspath(f'./top_100_only_wins_no_folds/data_{it}{suffix}.csv.bz2')
+                file_path = os.path.abspath(
+                    f'./top_100_only_wins_no_folds_per_player/{player_name}/data_{it}{suffix}.csv.bz2')
+                if not os.path.exists(Path(file_path).parent):
+                    os.makedirs(os.path.realpath(Path(file_path).parent), exist_ok=True)
+                if not os.path.exists(file_path):
+                    columns = encoder.feature_names
+                    header = True
+                df = pd.DataFrame(data=training_data,
+                                  index=labels,  # The index (row labels) of the DataFrame.
+                                  columns=columns)
+                # float to int if applicable
+                df = df.apply(lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
+                df.to_csv(file_path,
+                          index=True,
+                          header=header,
+                          index_label='label',
+                          mode='a',
+                          float_format='%.5f',
+                          compression='bz2'
+                          )
+        it += 1
+    return "Success."
+
+
 if __name__ == "__main__":
     """The new behaviour of the episode-encoder should be to
                      encode even non-showdown episodes. A set of selected players
@@ -446,6 +608,8 @@ if __name__ == "__main__":
     for i, chunk in enumerate(chunks):
         chunk.append(f'{i}')
     """ MP END """
+
+
     def run(filenames):
         parser = ParseHsmithyTextToPokerEpisode()
         env = init_wrapped_env(AugmentObservationWrapper,
@@ -483,7 +647,7 @@ if __name__ == "__main__":
                                                                            limit_num_players=5,
                                                                            randomize_fold_cards=True,
                                                                            selected_players=top_100,
-                                                                           #selected_players=['ishuha'],
+                                                                           # selected_players=['ishuha'],
                                                                            verbose=True)
                         except Exception as e:
                             print(e)
@@ -504,8 +668,9 @@ if __name__ == "__main__":
                     columns = None
                     header = False
                     # file_path = os.path.abspath(f'./data_{it}.csv.bz2')
-                    #file_path = os.path.abspath(f'./top_100_only_wins_no_folds/data_{it}{suffix}.csv.bz2')
-                    file_path = os.path.abspath(f'./top_100_only_wins_no_folds_per_player/{player_name}/data_{it}{suffix}.csv.bz2')
+                    # file_path = os.path.abspath(f'./top_100_only_wins_no_folds/data_{it}{suffix}.csv.bz2')
+                    file_path = os.path.abspath(
+                        f'./top_100_only_wins_no_folds_per_player/{player_name}/data_{it}{suffix}.csv.bz2')
                     if not os.path.exists(Path(file_path).parent):
                         os.makedirs(os.path.realpath(Path(file_path).parent), exist_ok=True)
                     if not os.path.exists(file_path):
@@ -526,6 +691,7 @@ if __name__ == "__main__":
                               )
             it += 1
         return "Success."
+
 
     start = time.time()
     # p = multiprocessing.Pool(20)
