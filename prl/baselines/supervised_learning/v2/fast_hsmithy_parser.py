@@ -510,12 +510,15 @@ def run_on_file(filename,
                            blinds=(25, 50),
                            multiply_by=1, )
     encoder = EncoderV2(env)
+    selected_players = [Path(filename).stem]
     if debug:
         selected_players = selected_players[:5]
     for player_name in selected_players:
             training_data, labels = None, None
             episodesV2 = parser.parse_file(filename)
-            for ep in episodesV2:
+            n_episodes = len(episodesV2)
+            for i, ep in enumerate(episodesV2):
+                print(f'Encoding episode no. {i}/{n_episodes}')
                 try:
                     observations, actions = encoder.encode_episode(ep,
                                                                    # drop_folds=False,
@@ -546,7 +549,7 @@ def run_on_file(filename,
                 # file_path = os.path.abspath(f'./data_{it}.csv.bz2')
                 # file_path = os.path.abspath(f'./top_100_only_wins_no_folds/data_{it}{suffix}.csv.bz2')
                 file_path = os.path.abspath(
-                    f'./{out_dir}/{player_name}/data.csv.bz2')
+                    f'{out_dir}/{player_name}/data.csv.bz2')
                 if not os.path.exists(Path(file_path).parent):
                     os.makedirs(os.path.realpath(Path(file_path).parent), exist_ok=True)
                 if not os.path.exists(file_path):
@@ -598,8 +601,8 @@ def make_dataset(unzipped_dir,
                      drop_folds=drop_folds,
                      only_winners=only_winners,
                      randomize_fold_cards=randomize_fold_cards,
-                     verbose=True,
-                     more_than_num_players=5,
+                     verbose=verbose,
+                     more_than_num_players=more_than_num_players,
                      debug=debug)
     for x in p.imap_unordered(run_fn, filenames):
         print(x + f'. Took {time.time() - start} seconds')
@@ -617,8 +620,8 @@ if __name__ == "__main__":
                      When there is no showdown, we dont know their cards,
                      so we give them random cards and only use the observations
                      until they fold and end the game there."""
-    unzipped_dir_to_S20 = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_17"
-    out_dir = "./results"
+    unzipped_dir_to_S20 = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_10"
+    out_dir = "./results/top20/with_folds"
     debug = False
     # make dataset DF2(20)
     make_dataset(unzipped_dir=unzipped_dir_to_S20,
