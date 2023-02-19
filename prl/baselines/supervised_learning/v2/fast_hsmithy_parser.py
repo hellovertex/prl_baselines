@@ -171,12 +171,12 @@ class ParseHsmithyTextToPokerEpisode:
             a = action.split(self.currency_symbol)[1]
             a = a.split(' and')[0]
             amt = round(float(a) * 100)
-            return Action(who=pname, what=ActionSpace.RAISE_MIN_OR_3BB, how_much=amt)
+            return Action(who=pname, what=ActionSpace.RAISE_MIN_OR_THIRD_OF_POT, how_much=amt)
         elif 'raises' in action:
             a = action.split('to ')[1].split(self.currency_symbol)[1]
             a = a.split(' and')[0]
             amt = round(float(a) * 100)
-            return Action(who=pname, what=ActionSpace.RAISE_MIN_OR_3BB, how_much=amt)
+            return Action(who=pname, what=ActionSpace.RAISE_MIN_OR_THIRD_OF_POT, how_much=amt)
         else:
             raise ValueError(f"Unknown action in {line}.")
 
@@ -479,6 +479,10 @@ def run_on_chunks(chunks):
                                   columns=columns)
                 # float to int if applicable
                 df = df.apply(lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
+                # one hot encode button
+                one_hot_btn = pd.get_dummies(df['btn_idx'], prefix='btn_idx')
+                df = pd.concat([df, one_hot_btn], axis=1)
+                df.drop('btn_idx', axis=1, inplace=True)
                 df.to_csv(file_path,
                           index=True,
                           header=header,
@@ -553,6 +557,12 @@ def run_on_file(filename,
                                   columns=columns)
                 # float to int if applicable
                 df = df.apply(lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
+
+                # one hot encode button
+                one_hot_btn = pd.get_dummies(df['btn_idx'], prefix='btn_idx')
+                df = pd.concat([df, one_hot_btn], axis=1)
+                df.drop('btn_idx', axis=1, inplace=True)
+
                 df.to_csv(file_path,
                           index=True,
                           header=header,
@@ -607,44 +617,55 @@ if __name__ == "__main__":
                      When there is no showdown, we dont know their cards,
                      so we give them random cards and only use the observations
                      until they fold and end the game there."""
-
-    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_test"
-    unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
-    unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
-    out_dir = "example.txt"
-    filenames = glob.glob(unzipped_dir + "/**/*.txt", recursive=True)
-    # parser = ParseHsmithyTextToPokerEpisode()
-    # converter = ConverterV2toV1()
-    # env = init_wrapped_env(AugmentObservationWrapper,
-    #                        [5000 for _ in range(6)],
-    #                        blinds=(25, 50),
-    #                        multiply_by=1, )
-    # encoder = EncoderV2(env)
-    max_files_in_memory_at_once = 1000
-    n_files = len(filenames)
-
-    """ MULTIPROCESSING START """
-    x = 10000
-    chunks = []
-    current_chunk = []
-    i = 0
-    for file in filenames:
-        current_chunk.append(file)
-        if (i + 1) % x == 0:
-            chunks.append(current_chunk)
-            current_chunk = []
-        i += 1
-    # trick to avoid multiprocessing writes to same file
-    for i, chunk in enumerate(chunks):
-        chunk.append(f'{i}')
-    """ MP END """
-
-    start = time.time()
-    # p = multiprocessing.Pool(20)
-    p = multiprocessing.Pool()
-    # run f0
-    for x in p.imap_unordered(run_on_chunks, chunks):
-        print(x + f'. Took {time.time() - start} seconds')
-    print(f'Finished job after {time.time() - start} seconds.')
-
-    p.close()
+    unzipped_dir_to_S20 = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_17"
+    out_dir = "./results"
+    debug = False
+    # make dataset DF2(20)
+    make_dataset(unzipped_dir=unzipped_dir_to_S20,
+                 out_dir=out_dir,
+                 selected_players=top_20,
+                 drop_folds=False,
+                 only_winners=False,
+                 randomize_fold_cards=True,
+                 verbose=True,
+                 debug=debug)
+    # unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_test"
+    # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
+    # unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
+    # out_dir = "example.txt"
+    # filenames = glob.glob(unzipped_dir + "/**/*.txt", recursive=True)
+    # # parser = ParseHsmithyTextToPokerEpisode()
+    # # converter = ConverterV2toV1()
+    # # env = init_wrapped_env(AugmentObservationWrapper,
+    # #                        [5000 for _ in range(6)],
+    # #                        blinds=(25, 50),
+    # #                        multiply_by=1, )
+    # # encoder = EncoderV2(env)
+    # max_files_in_memory_at_once = 1000
+    # n_files = len(filenames)
+    #
+    # """ MULTIPROCESSING START """
+    # x = 10000
+    # chunks = []
+    # current_chunk = []
+    # i = 0
+    # for file in filenames:
+    #     current_chunk.append(file)
+    #     if (i + 1) % x == 0:
+    #         chunks.append(current_chunk)
+    #         current_chunk = []
+    #     i += 1
+    # # trick to avoid multiprocessing writes to same file
+    # for i, chunk in enumerate(chunks):
+    #     chunk.append(f'{i}')
+    # """ MP END """
+    #
+    # start = time.time()
+    # # p = multiprocessing.Pool(20)
+    # p = multiprocessing.Pool()
+    # # run f0
+    # for x in p.imap_unordered(run_on_chunks, chunks):
+    #     print(x + f'. Took {time.time() - start} seconds')
+    # print(f'Finished job after {time.time() - start} seconds.')
+    #
+    # p.close()
