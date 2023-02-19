@@ -51,6 +51,8 @@ def recall(predt: np.ndarray, dtrain: xgb.DMatrix) -> Tuple[str, float]:
 
 if __name__ == '__main__':
     filename = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/scratches/top_100_only_wins_no_folds_per_round/Round_preflop/data.csv.bz2"
+    filename = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/scratches/top_100_only_wins_no_folds_per_round/Round_flop/data.csv.bz2"
+    filename = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/scratches/top_100_only_wins_no_folds_per_round/Round_river/data.csv.bz2"
     tmp = pd.read_csv(filename,
                      # df = pd.read_csv(path_to_csv_files,
                      sep=',',
@@ -69,7 +71,7 @@ if __name__ == '__main__':
     one_hot_btn = pd.get_dummies(tmp['btn_idx'], prefix='btn_idx')
     tmp = pd.concat([tmp, one_hot_btn], axis=1)
     tmp.drop('btn_idx', axis=1, inplace=True)
-    tmp.to_csv('/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/preflop_all_players/data.csv.bz2',
+    tmp.to_csv('/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/river_all_players/data.csv.bz2',
                compression='bz2')
     # make train test split
     xtest = tmp.sample(frac=0.2, axis=0)

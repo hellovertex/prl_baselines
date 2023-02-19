@@ -140,7 +140,7 @@ class BaselineAgent(BasePolicy):
     """ Tianshou Agent -- used with tianshou training"""
 
     def load_model(self, ckpt_path, flatten_input):
-        input_dim = 564
+        input_dim = 569
         classes = [ActionSpace.FOLD,
                    ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED in CHECK_CALL
                    ActionSpace.RAISE_MIN_OR_3BB,
@@ -151,7 +151,8 @@ class BaselineAgent(BasePolicy):
                    ActionSpace.RAISE_ALL_IN]
         output_dim = len(classes)
         self._model = MLP(input_dim,
-                          output_dim,
+                          #output_dim,
+                          6,
                           list(self.hidden_dims),
                           flatten_input=flatten_input).to(self.device)
         ckpt = torch.load(ckpt_path,
@@ -186,7 +187,7 @@ class BaselineAgent(BasePolicy):
         self.logits = self._model(obs)
         self.probas = torch.softmax(self.logits, dim=1)
         self.probas = self.probas[:, 1:]
-        pred = torch.argmax(self.probas).item()
+        pred = torch.argmax(self.probas).item() + 1
         proba = torch.max(self.probas)
         threshold_all_in = .18
         threshold_50bb = .18

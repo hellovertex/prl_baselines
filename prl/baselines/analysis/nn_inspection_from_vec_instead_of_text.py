@@ -50,6 +50,12 @@ def plot_heatmap(input_dict: Dict[ActionSpace, torch.Tensor],
             detached[action] = probas.detach().numpy()[0]
         else:
             detached[action] = probas
+    rows = ["Fold",
+        "Check/Call",
+        "Raise3BB",
+        "Raise6BB",
+        "Raise10BB",
+        "Raise20BB"]
     df = pd.DataFrame(detached, index=rows).T  # do we need , index=idx, columns=cols?
     # todo: fix this
     action_freqs = torch.sum(torch.row_stack(action_freqs), dim=1)
@@ -75,8 +81,16 @@ def plot_heatmap(input_dict: Dict[ActionSpace, torch.Tensor],
     ax2.set_ylabel("Number of actions")
     ax2.set_title("Number of actions taken")
     df['Sum'] = action_freqs
-    df.columns = [f'Predicted {ActionSpace(i)}' for i in range(len(ActionSpace))] + ['Sum']
-    df.index = rows
+    #df.columns = [f'Predicted {ActionSpace(i)}' for i in range(len(ActionSpace))] + ['Sum']
+    df.columns = [f'Predicted {ActionSpace(i)}' for i in range(6)] + ['Sum']
+    df.index = ["Fold",
+        "Check/Call",
+        "Raise3BB",
+        "Raise6BB",
+        "Raise10BB",
+        "Raise20BB",
+        "Raise50BB",
+        "RaiseALLIN"]
     # adjust the subplots to occupy equal space
     fig.tight_layout()
     # fpath = os.path.join(os.getcwd(), 'result')
@@ -145,7 +159,8 @@ def compute(label_logits, label_counts) \
         maxs[label.value] = torch.max(probas, dim=0)
         # percentiles
         num_samples = probas.shape[0]
-        p = probas.reshape(num_samples, len(ActionSpace))
+        #p = probas.reshape(num_samples, len(ActionSpace))
+        p = probas.reshape(num_samples, 6)
         p = p.sort(dim=0)[0]
         # x % of the data falls below the VALUE of the x-percentile so
         # percentile_50[ActionSpace.FOLD][ActionSpace.MIN_RAISE] = .8
@@ -225,24 +240,24 @@ class InspectorV2Vectorized:
             if self.logits_when_correct[action_label] is None:
                 # noinspection PyTypeChecker
                 self.logits_when_correct[action_label] = torch.softmax(self.baseline.logits.cpu(),
-                                                                       dim=1).reshape(1, 1, 8)
+                                                                       dim=1).reshape(1, 1, 6)
             else:
                 # noinspection PyTypeChecker
                 self.logits_when_correct[action_label] = torch.row_stack(
                     [self.logits_when_correct[action_label],
-                     torch.softmax(self.baseline.logits.cpu(), dim=1).reshape(1, 1, 8)])
+                     torch.softmax(self.baseline.logits.cpu(), dim=1).reshape(1, 1, 6)])
             self.label_counts_true[action_label][pred] += 1
             # self.true[action_label] /= self.label_counts_true[action_label]
         else:
             if self.logits_when_wrong[action_label] is None:
                 # noinspection PyTypeChecker
                 self.logits_when_wrong[action_label] = torch.softmax(self.baseline.logits.cpu(),
-                                                                     dim=1).reshape(1, 1, 8)
+                                                                     dim=1).reshape(1, 1, 6)
             else:
                 # noinspection PyTypeChecker
                 self.logits_when_wrong[action_label] = torch.row_stack(
                     [self.logits_when_wrong[action_label],
-                     torch.softmax(self.baseline.logits.cpu(), dim=1).reshape(1, 1, 8)])
+                     torch.softmax(self.baseline.logits.cpu(), dim=1).reshape(1, 1, 6)])
 
             # self.label_counts_false[action_label][pred] += 1
             self.label_counts_false[action_label][action_label] += 1
@@ -270,9 +285,22 @@ class InspectorV2Vectorized:
             pred = self.baseline.compute_action(obs, None)
             self.update_net_stats(pred, action)
 
-    def inspect_from_file(self, filename, verbose=False):
-        observations = []
-        actions = []
+    def inspect_from_file(self, filename, verbose=False, max_samples=1000):
+        df = pd.read_csv(filename,
+                         # df = pd.read_csv(path_to_csv_files,
+                         sep=',',
+                         dtype='float32',
+                         # dtype='float16',
+                         chunksize=max_samples,
+                         encoding='cp1252',
+                         compression='bz2')
+        df = next(df).apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
+        if 'Unnamed: 0' in df.columns:
+            df.drop('Unnamed: 0', axis=1, inplace=True)
+        df['label.1'].replace(6, 5, inplace=True)
+        df['label.1'].replace(7, 5, inplace=True)
+        actions = df.pop('label.1').to_list()
+        observations = df.to_numpy()
         self._run(observations, actions)
 
 
@@ -394,10 +422,10 @@ def run(filename,
 
 
 def start():
-    model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/training/from_all_players/with_folds_2NL_all_players/ckpt_dir_[512]_1e-06/ckpt.pt"
+    model_ckpt_abs_path = "/home/hellovertex/Documents/github.com/prl_baselines/data/ckpt.pt"
     debug = True
-    csv_dir = ""
-    path_out = './results/selected_players_only_fold_random_cards'
+    csv_dir = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/preflop_all_players/data.csv.bz2"
+    path_out = './results/top100_preflop_no_fold'
     run(filename=csv_dir,
         model_ckpt_abs_path=model_ckpt_abs_path,
         path_out=path_out)

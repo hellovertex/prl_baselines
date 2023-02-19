@@ -233,6 +233,7 @@ class InspectorV2:
         remaining_selected_players = []
 
         for player in players:
+            # todo: cond only_winners
             if player.name in selected_players:
                 remaining_selected_players.append(player.name)
 

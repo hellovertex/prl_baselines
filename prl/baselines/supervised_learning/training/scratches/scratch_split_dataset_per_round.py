@@ -8,8 +8,9 @@ from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns 
 
 def main():
     path_to_csv_files = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/top_100_only_wins_no_folds"
+    path_to_csv_files = "/home/hellovertex/Documents/github.com/prl_baselines/prl/baselines/supervised_learning/v2/top_100_only_wins_no_folds_per_player/ishuha"
     files = glob.glob(path_to_csv_files + "/**/*.csv.bz2", recursive=True)
-
+    player_name = 'ishuha'
     df = pd.read_csv(files[0],
                      # df = pd.read_csv(path_to_csv_files,
                      sep=',',
@@ -28,11 +29,12 @@ def main():
         tmp = tmp.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
         df = pd.concat([df, tmp], ignore_index=True)
         print(f'Loaded file {i}/{n_files}...')
-    for round in [cols.Round_preflop, cols.Round_flop, cols.Round_turn, cols.Round_river]:
-        file_path = f'./top_100_only_wins_no_folds_per_round/{round.name}/data.csv.bz2'
+    #for round in [cols.Round_preflop, cols.Round_flop, cols.Round_turn, cols.Round_river]:
+    for round in [cols.Round_flop, cols.Round_turn, cols.Round_river]:
+        file_path = f'./top_100_only_wins_no_folds_per_round_per_player/{round.name}/{player_name}/data.csv.bz2'
         if not os.path.exists(Path(file_path).parent):
             os.makedirs(os.path.realpath(Path(file_path).parent), exist_ok=True)
-        tmp = df[df[cols.Round_preflop.name.lower()] == 1]
+        tmp = df[df[round.name.lower()] == 1]
         tmp.to_csv(file_path,
                    index=True,
                    header=True,
