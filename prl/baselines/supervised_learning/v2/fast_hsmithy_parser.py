@@ -621,17 +621,28 @@ if __name__ == "__main__":
                      so we give them random cards and only use the observations
                      until they fold and end the game there."""
     unzipped_dir_to_S20 = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_10"
-    out_dir = "./results/top20/with_folds"
+    out_dir = "./results/top20/no_folds"
     debug = False
-    # make dataset DF2(20)
+    # # make dataset DF2(20)
+    # make_dataset(unzipped_dir=unzipped_dir_to_S20,
+    #              out_dir=out_dir,
+    #              selected_players=top_20,
+    #              drop_folds=False,
+    #              only_winners=False,
+    #              randomize_fold_cards=True,
+    #              verbose=True,
+    #              debug=debug)
+
+    # make dataset DNF1(20)
     make_dataset(unzipped_dir=unzipped_dir_to_S20,
                  out_dir=out_dir,
                  selected_players=top_20,
-                 drop_folds=False,
-                 only_winners=False,
+                 drop_folds=True,
+                 only_winners=True,
                  randomize_fold_cards=True,
                  verbose=True,
                  debug=debug)
+
     # unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_test"
     # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
     # unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
