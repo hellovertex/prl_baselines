@@ -1,3 +1,4 @@
+import logging
 import multiprocessing
 import os
 import time
@@ -20,7 +21,7 @@ from prl.baselines.supervised_learning.training.dichotomizer.all_rounds.predict_
 from prl.baselines.supervised_learning.training.dichotomizer.all_rounds.predict_fold.for_individual_player.model import \
     get_model_predict_fold_binary
 
-target_names = ['Fold', 'Check Call', 'Raise 3 BB', 'Raise 6 BB', 'Raise 10 BB', 'Raise 20 BB', 'Raise 50 BB',
+target_names = ['Fold', 'Check Call', 'Raise Third Pot', 'Raise Two Thirds Pot', 'Raise Pot', 'Raise 2x Pot', 'Raise 2x Pot',
                 'Raise All in']
 
 
@@ -64,6 +65,7 @@ def train_eval(abs_input_dir,
     use_cuda = torch.cuda.is_available()
     device = "cuda" if use_cuda else "cpu"
     print('Starting training')
+    weights = None
     if use_weights:
         # label weights to account for dataset imbalance
         weights = np.array(label_counts) / sum(label_counts)
@@ -117,10 +119,7 @@ def train_eval(abs_input_dir,
                     optim.zero_grad()
                     output = model(x)
                     pred = torch.argmax(output, dim=1)  # get the index of the max log-probability
-                    if use_weights:
-                        loss = F.cross_entropy(output, y, weight=weights.to(device))
-                    else:
-                        loss = F.cross_entropy(output, y)
+                    loss = F.cross_entropy(output, y, weight=weights)
                     loss.backward()
                     optim.step()
                     total_loss += loss.data.item()  # add batch loss
@@ -214,11 +213,11 @@ def train_eval(abs_input_dir,
                         writer.add_scalar(tag='Test F1/average', scalar_value=f1, global_step=n_iter)
                         writer.add_scalar(tag='Test F1 score/FOLD', scalar_value=f1_0, global_step=n_iter)
                         writer.add_scalar(tag='Test F1 score/CHECK/CALL', scalar_value=f1_1, global_step=n_iter)
-                        writer.add_scalar(tag='Test F1 score/Min Raise', scalar_value=f1_2, global_step=n_iter)
-                        writer.add_scalar(tag='Test F1 score/Raise 6 BB', scalar_value=f1_3, global_step=n_iter)
-                        writer.add_scalar(tag='Test F1 score/Raise 10 BB', scalar_value=f1_4, global_step=n_iter)
-                        writer.add_scalar(tag='Test F1 score/Raise 20 BB', scalar_value=f1_5, global_step=n_iter)
-                        writer.add_scalar(tag='Test F1 score/Raise 50 BB', scalar_value=f1_6, global_step=n_iter)
+                        writer.add_scalar(tag='Test F1 score/Raise Third Pot', scalar_value=f1_2, global_step=n_iter)
+                        writer.add_scalar(tag='Test F1 score/Raise Two Thirds Pot', scalar_value=f1_3, global_step=n_iter)
+                        writer.add_scalar(tag='Test F1 score/Raise Pot', scalar_value=f1_4, global_step=n_iter)
+                        writer.add_scalar(tag='Test F1 score/Raise 2x Pot', scalar_value=f1_5, global_step=n_iter)
+                        writer.add_scalar(tag='Test F1 score/Raise 3x Pot', scalar_value=f1_6, global_step=n_iter)
                         writer.add_scalar(tag='Test F1 score/Raise ALL IN', scalar_value=f1_7, global_step=n_iter)
                         writer.add_scalar(tag='Test Accuracy', scalar_value=test_accuracy, global_step=n_iter)
 
