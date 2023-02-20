@@ -12,17 +12,11 @@ from torch.utils.data import Dataset
 from torch.utils.data import random_split
 
 from prl.baselines.supervised_learning.config import DATA_DIR
-from prl.baselines.supervised_learning.training.dataset import InMemoryDataset
 
 
 class InMemoryDataset(Dataset):
-    def __init__(self, path_to_csv_files=None, blind_sizes="0.25-0.50", merge_labels_567=True):
-        if not path_to_csv_files:
-            path_to_csv_files = str(DATA_DIR) + '/03_preprocessed' + f'/{blind_sizes}'
-
-        files = glob.glob(path_to_csv_files + "/**/*.csv.bz2", recursive=True)
-
-        df = pd.read_csv(files[0],
+    def __init__(self, path_to_csv_file=None, blind_sizes="0.25-0.50", merge_labels_567=True):
+        df = pd.read_csv(path_to_csv_file,
                          # df = pd.read_csv(path_to_csv_files,
                          sep=',',
                          dtype='float32',
@@ -30,16 +24,6 @@ class InMemoryDataset(Dataset):
                          encoding='cp1252',
                          compression='bz2')
         df = df.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
-        n_files = len(files[1:])
-        for i, file in enumerate(files[1:]):
-            tmp = pd.read_csv(file,
-                              sep=',',
-                              # dtype='float16',
-                              dtype='float32',
-                              encoding='cp1252', compression='bz2')
-            tmp = tmp.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
-            df = pd.concat([df, tmp], ignore_index=True)
-            print(f'Loaded file {i}/{n_files}...')
         df = df.sample(frac=1)
         if merge_labels_567:
             df['label.1'].replace(6, 5, inplace=True)
@@ -87,11 +71,11 @@ class InMemoryDataset(Dataset):
     def downsample_fold_and_upsample_raises(self, df):
         n_fold = len(df[df['label'] == ActionSpace.FOLD])
         n_check_call = len(df[df['label'] == ActionSpace.CHECK_CALL])
-        n_min_raise = len(df[df['label'] == ActionSpace.RAISE_MIN_OR_3BB])
-        n_raise_6bb = len(df[df['label'] == ActionSpace.RAISE_6_BB])
-        n_raise_10bb = len(df[df['label'] == ActionSpace.RAISE_10_BB])
-        n_raise_20bb = len(df[df['label'] == ActionSpace.RAISE_20_BB])
-        n_raise_50bb = len(df[df['label'] == ActionSpace.RAISE_50_BB])
+        n_min_raise = len(df[df['label'] == ActionSpace.RAISE_MIN_OR_THIRD_OF_POT])
+        n_raise_6bb = len(df[df['label'] == ActionSpace.RAISE_TWO_THIRDS_OF_POT])
+        n_raise_10bb = len(df[df['label'] == ActionSpace.RAISE_POT])
+        n_raise_20bb = len(df[df['label'] == ActionSpace.RAISE_2x_POT])
+        n_raise_50bb = len(df[df['label'] == ActionSpace.RAISE_3x_POT])
         n_allin = len(df[df['label'] == ActionSpace.RAISE_ALL_IN])
         n_upsamples = max([n_min_raise,
                            n_raise_6bb,
@@ -105,15 +89,15 @@ class InMemoryDataset(Dataset):
         # n_upsample = round(n_raises / 6)  # so we have balanced FOLD, CHECK, RAISE where raises are 1/6 each
         df_fold_downsampled = downsample_fn(df, label=ActionSpace.FOLD, n_available=n_fold)
         df_checkcall_downsampled = downsample_fn(df, label=ActionSpace.CHECK_CALL, n_available=n_check_call)
-        df_raise_min_downsampled = self.upsample(df, label=ActionSpace.RAISE_MIN_OR_3BB,
+        df_raise_min_downsampled = self.upsample(df, label=ActionSpace.RAISE_MIN_OR_THIRD_OF_POT,
                                                  n_samples=n_upsamples)
-        df_raise_6bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_6_BB,
+        df_raise_6bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_TWO_THIRDS_OF_POT,
                                                  n_samples=n_upsamples)
-        df_raise_10bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_10_BB,
+        df_raise_10bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_POT,
                                                   n_samples=n_upsamples)
-        df_raise_20bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_20_BB,
+        df_raise_20bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_2x_POT,
                                                   n_samples=n_upsamples)
-        df_raise_50bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_50_BB,
+        df_raise_50bb_downsampled = self.upsample(df, label=ActionSpace.RAISE_3x_POT,
                                                   n_samples=n_upsamples)
         df_allin_downsampled = self.upsample(df, label=ActionSpace.RAISE_ALL_IN, n_samples=n_upsamples)
 

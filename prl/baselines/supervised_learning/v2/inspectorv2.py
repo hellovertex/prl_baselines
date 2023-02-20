@@ -1,12 +1,14 @@
 import random
-import time
-from typing import List, Tuple, Optional
+from typing import List
+from typing import Tuple, Optional
 
 import numpy as np
+import pandas as pd
 import torch
-from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as fts, AugmentObservationWrapper
+import torch.cuda
+from prl.environment.Wrappers.augment import AugmentObservationWrapper
+from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as fts
 from prl.environment.Wrappers.base import ActionSpace
-from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL import NoLimitHoldem
 from prl.environment.steinberger.PokerRL.game.Poker import Poker
 
@@ -37,41 +39,41 @@ class InspectorV2:
         self.baseline = baseline  # inspection is computed against baseline
         self.logits_when_correct = {ActionSpace.FOLD: None,
                                     ActionSpace.CHECK_CALL: None,
-                                    ActionSpace.RAISE_MIN_OR_3BB: None,
-                                    ActionSpace.RAISE_6_BB: None,
-                                    ActionSpace.RAISE_10_BB: None,
-                                    ActionSpace.RAISE_20_BB: None,
-                                    ActionSpace.RAISE_50_BB: None,
+                                    ActionSpace.RAISE_MIN_OR_THIRD_OF_POT: None,
+                                    ActionSpace.RAISE_TWO_THIRDS_OF_POT: None,
+                                    ActionSpace.RAISE_POT: None,
+                                    ActionSpace.RAISE_2x_POT: None,
+                                    ActionSpace.RAISE_3x_POT: None,
                                     ActionSpace.RAISE_ALL_IN: None,
                                     }  # for every wrong prediction: get all logits
         # self.true = {}  # for every true prediction: count prediction for each label
         self.label_counts_true = {ActionSpace.FOLD: torch.zeros(len(ActionSpace)),
                                   ActionSpace.CHECK_CALL: torch.zeros(len(ActionSpace)),
-                                  ActionSpace.RAISE_MIN_OR_3BB: torch.zeros(len(ActionSpace)),
-                                  ActionSpace.RAISE_6_BB: torch.zeros(len(ActionSpace)),
-                                  ActionSpace.RAISE_10_BB: torch.zeros(len(ActionSpace)),
-                                  ActionSpace.RAISE_20_BB: torch.zeros(len(ActionSpace)),
-                                  ActionSpace.RAISE_50_BB: torch.zeros(len(ActionSpace)),
+                                  ActionSpace.RAISE_MIN_OR_THIRD_OF_POT: torch.zeros(len(ActionSpace)),
+                                  ActionSpace.RAISE_TWO_THIRDS_OF_POT: torch.zeros(len(ActionSpace)),
+                                  ActionSpace.RAISE_POT: torch.zeros(len(ActionSpace)),
+                                  ActionSpace.RAISE_2x_POT: torch.zeros(len(ActionSpace)),
+                                  ActionSpace.RAISE_3x_POT: torch.zeros(len(ActionSpace)),
                                   ActionSpace.RAISE_ALL_IN: torch.zeros(len(ActionSpace))}
         self.logits_when_wrong = {ActionSpace.FOLD: None,
                                   ActionSpace.CHECK_CALL: None,
-                                  ActionSpace.RAISE_MIN_OR_3BB: None,
-                                  ActionSpace.RAISE_6_BB: None,
-                                  ActionSpace.RAISE_10_BB: None,
-                                  ActionSpace.RAISE_20_BB: None,
-                                  ActionSpace.RAISE_50_BB: None,
+                                  ActionSpace.RAISE_MIN_OR_THIRD_OF_POT: None,
+                                  ActionSpace.RAISE_TWO_THIRDS_OF_POT: None,
+                                  ActionSpace.RAISE_POT: None,
+                                  ActionSpace.RAISE_2x_POT: None,
+                                  ActionSpace.RAISE_3x_POT: None,
                                   ActionSpace.RAISE_ALL_IN: None,
                                   }  # for every wrong prediction: get all logits
         # self.true = {}  # for every false prediction: count predictions for each label
         self.label_counts_false = {ActionSpace.FOLD: torch.zeros(len(ActionSpace)),
                                    ActionSpace.CHECK_CALL: torch.zeros(len(ActionSpace)),
-                                   ActionSpace.RAISE_MIN_OR_3BB: torch.zeros(len(ActionSpace)),
-                                   ActionSpace.RAISE_6_BB: torch.zeros(len(ActionSpace)),
-                                   ActionSpace.RAISE_10_BB: torch.zeros(len(ActionSpace)),
-                                   ActionSpace.RAISE_20_BB: torch.zeros(len(ActionSpace)),
-                                   ActionSpace.RAISE_50_BB: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.RAISE_MIN_OR_THIRD_OF_POT: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.RAISE_TWO_THIRDS_OF_POT: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.RAISE_POT: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.RAISE_2x_POT: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.RAISE_3x_POT: torch.zeros(len(ActionSpace)),
                                    ActionSpace.RAISE_ALL_IN: torch.zeros(len(ActionSpace))}
-        self.summary_predictions = {0:[0,0], 1:[0,0], 2:[0,0]}
+        self.summary_predictions = {0: [0, 0], 1: [0, 0], 2: [0, 0]}
 
     class _EnvironmentEdgeCaseEncounteredError(ValueError):
         """This error is thrown in rare cases where the PokerEnv written by Erich Steinberger,
@@ -188,7 +190,7 @@ class InspectorV2:
                     [self.logits_when_wrong[action_label],
                      torch.softmax(self.baseline.logits.cpu(), dim=1).reshape(1, 1, 8)])
 
-            #self.label_counts_false[action_label][pred] += 1
+            # self.label_counts_false[action_label][pred] += 1
             self.label_counts_false[action_label][action_label] += 1
             # self.wrong[action_label] /= self.label_counts_wrong[action_label]
 
@@ -455,6 +457,117 @@ class InspectorV2:
         except AssertionError as e:
             print(e)
             return None, None
+
+
+class InspectorV2Vectorized:
+    def __init__(self, baseline):
+        self.baseline = baseline  # inspection is computed against baseline
+        self.logits_when_correct = {ActionSpace.FOLD: None,
+                                    ActionSpace.CHECK_CALL: None,
+                                    ActionSpace.RAISE_MIN_OR_THIRD_OF_POT: None,
+                                    ActionSpace.RAISE_TWO_THIRDS_OF_POT: None,
+                                    ActionSpace.RAISE_POT: None,
+                                    ActionSpace.RAISE_2x_POT: None,
+                                    ActionSpace.RAISE_3x_POT: None,
+                                    ActionSpace.RAISE_ALL_IN: None,
+                                    }  # for every wrong prediction: get all logits
+        # self.true = {}  # for every true prediction: count prediction for each label
+        self.label_counts_true = {ActionSpace.FOLD: torch.zeros(len(ActionSpace)),
+                                  ActionSpace.CHECK_CALL: torch.zeros(len(ActionSpace)),
+                                  ActionSpace.RAISE_MIN_OR_THIRD_OF_POT: torch.zeros(len(ActionSpace)),
+                                  ActionSpace.RAISE_TWO_THIRDS_OF_POT: torch.zeros(len(ActionSpace)),
+                                  ActionSpace.RAISE_POT: torch.zeros(len(ActionSpace)),
+                                  ActionSpace.RAISE_2x_POT: torch.zeros(len(ActionSpace)),
+                                  ActionSpace.RAISE_3x_POT: torch.zeros(len(ActionSpace)),
+                                  ActionSpace.RAISE_ALL_IN: torch.zeros(len(ActionSpace))}
+        self.logits_when_wrong = {ActionSpace.FOLD: None,
+                                  ActionSpace.CHECK_CALL: None,
+                                  ActionSpace.RAISE_MIN_OR_THIRD_OF_POT: None,
+                                  ActionSpace.RAISE_TWO_THIRDS_OF_POT: None,
+                                  ActionSpace.RAISE_POT: None,
+                                  ActionSpace.RAISE_2x_POT: None,
+                                  ActionSpace.RAISE_3x_POT: None,
+                                  ActionSpace.RAISE_ALL_IN: None,
+                                  }  # for every wrong prediction: get all logits
+        # self.true = {}  # for every false prediction: count predictions for each label
+        self.label_counts_false = {ActionSpace.FOLD: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.CHECK_CALL: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.RAISE_MIN_OR_THIRD_OF_POT: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.RAISE_TWO_THIRDS_OF_POT: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.RAISE_POT: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.RAISE_2x_POT: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.RAISE_3x_POT: torch.zeros(len(ActionSpace)),
+                                   ActionSpace.RAISE_ALL_IN: torch.zeros(len(ActionSpace))}
+        self.summary_predictions = {0: [0, 0], 1: [0, 0], 2: [0, 0]}
+
+    def update_net_stats(self, pred, action_label):
+        if pred == action_label:
+            # self.true[action_label] += torch.softmax(self.baseline.logits.cpu(), dim=1)
+            if self.logits_when_correct[action_label] is None:
+                # noinspection PyTypeChecker
+                self.logits_when_correct[action_label] = torch.softmax(self.baseline.logits.cpu(),
+                                                                       dim=1).reshape(1, 1, 6)
+            else:
+                # noinspection PyTypeChecker
+                self.logits_when_correct[action_label] = torch.row_stack(
+                    [self.logits_when_correct[action_label],
+                     torch.softmax(self.baseline.logits.cpu(), dim=1).reshape(1, 1, 6)])
+            self.label_counts_true[action_label][pred] += 1
+            # self.true[action_label] /= self.label_counts_true[action_label]
+        else:
+            if self.logits_when_wrong[action_label] is None:
+                # noinspection PyTypeChecker
+                self.logits_when_wrong[action_label] = torch.softmax(self.baseline.logits.cpu(),
+                                                                     dim=1).reshape(1, 1, 6)
+            else:
+                # noinspection PyTypeChecker
+                self.logits_when_wrong[action_label] = torch.row_stack(
+                    [self.logits_when_wrong[action_label],
+                     torch.softmax(self.baseline.logits.cpu(), dim=1).reshape(1, 1, 6)])
+
+            # self.label_counts_false[action_label][pred] += 1
+            self.label_counts_false[action_label][action_label] += 1
+            # self.wrong[action_label] /= self.label_counts_wrong[action_label]
+
+        if pred == 0:
+            if action_label == 0:
+                self.summary_predictions[0][0] += 1
+            else:
+                self.summary_predictions[0][1] += 1
+        if pred == 1:
+            if action_label == 1:
+                self.summary_predictions[1][0] += 1
+            else:
+                self.summary_predictions[1][1] += 1
+        if pred >= 2:
+            if action_label >= 2:
+                self.summary_predictions[2][0] += 1
+            else:
+                self.summary_predictions[2][1] += 1
+
+    def _run(self, observations, actions):
+
+        for action, obs in list(zip(actions, observations)):
+            pred = self.baseline.compute_action(obs, None)
+            self.update_net_stats(pred, action)
+
+    def inspect_from_file(self, filename, verbose=False, max_samples=1000):
+        df = pd.read_csv(filename,
+                         # df = pd.read_csv(path_to_csv_files,
+                         sep=',',
+                         dtype='float32',
+                         # dtype='float16',
+                         chunksize=max_samples,
+                         encoding='cp1252',
+                         compression='bz2')
+        df = next(df).apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
+        if 'Unnamed: 0' in df.columns:
+            df.drop('Unnamed: 0', axis=1, inplace=True)
+        df['label.1'].replace(6, 5, inplace=True)
+        df['label.1'].replace(7, 5, inplace=True)
+        actions = df.pop('label.1').to_list()
+        observations = df.to_numpy()
+        self._run(observations, actions)
 
 # in: .txt files
 # out: .csv files? maybe npz or easier-on-memory formats preferred?
