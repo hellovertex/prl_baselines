@@ -19,7 +19,12 @@ target_names = ['Fold', 'Check Call', 'Raise 3 BB', 'Raise 6 BB', 'Raise 10 BB',
                 'Raise All in']
 
 
-def train_eval(params, abs_input_dir, log_interval, eval_interval, base_ckptdir, base_logdir):
+def train_eval(params,
+               abs_input_dir,
+               log_interval,
+               eval_interval,
+               base_ckptdir,
+               base_logdir):
     """abs_intput_dir can be single file or directory that is globbed recursively. in both cases
     and in memory dataset will be created with all csv files found in abs_input_dir and its subfolders.
     """

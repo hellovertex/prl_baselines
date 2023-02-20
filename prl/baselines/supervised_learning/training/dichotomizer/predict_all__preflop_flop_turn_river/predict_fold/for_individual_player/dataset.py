@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import glob
+import math
 from functools import partial
 
 import pandas as pd
@@ -8,8 +9,10 @@ import torch
 from prl.environment.Wrappers.base import ActionSpace
 from sklearn.utils import resample
 from torch.utils.data import Dataset
+from torch.utils.data import random_split
 
 from prl.baselines.supervised_learning.config import DATA_DIR
+from prl.baselines.supervised_learning.training.dataset import InMemoryDataset
 
 
 class InMemoryDataset(Dataset):
@@ -128,3 +131,19 @@ class InMemoryDataset(Dataset):
 
     def __getitem__(self, idx):
         return self.x[idx], self.y[idx]
+
+
+def get_datasets(input_dir, seed=1):
+    # dataset = OutOfMemoryDatasetV2(input_dir, chunk_size=1)
+    dataset = InMemoryDataset(input_dir, merge_labels_567=True)
+    total_len = len(dataset)
+    train_len = math.ceil(len(dataset) * 0.8)
+    test_len = total_len - train_len
+    # val_len = int(total_len * 0.01)
+    # add residuals to val_len to add up to total_len
+    # val_len += total_len - (int(train_len) + int(test_len) + int(val_len))
+    # set seed
+    gen = torch.Generator().manual_seed(seed)
+    train, test = random_split(dataset, [train_len, test_len], generator=gen)
+
+    return train, test, dataset.label_counts  # get_label_counts(input_dir)  # dataset.label_counts  #
