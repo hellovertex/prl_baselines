@@ -15,9 +15,9 @@ from tqdm import tqdm
 from sklearn.metrics import f1_score, classification_report
 import pprint
 
-from prl.baselines.supervised_learning.training.dichotomizer.predict_all__preflop_flop_turn_river.predict_fold.for_individual_player.dataset import \
+from prl.baselines.supervised_learning.training.dichotomizer.all_rounds.predict_fold.for_individual_player.dataset import \
     get_datasets
-from prl.baselines.supervised_learning.training.dichotomizer.predict_all__preflop_flop_turn_river.predict_fold.for_individual_player.model import \
+from prl.baselines.supervised_learning.training.dichotomizer.all_rounds.predict_fold.for_individual_player.model import \
     get_model_predict_fold_binary
 
 target_names = ['Fold', 'Check Call', 'Raise 3 BB', 'Raise 6 BB', 'Raise 10 BB', 'Raise 20 BB', 'Raise 50 BB',
@@ -54,25 +54,28 @@ def train_eval(abs_input_dir,
                log_interval,
                eval_interval,
                base_ckptdir,
-               base_logdir):
+               base_logdir,
+               use_weights=False):
     """abs_intput_dir can be single file or directory that is globbed recursively. in both cases
     and in memory dataset will be created with all csv files found in abs_input_dir and its subfolders.
     """
     BATCH_SIZE = params['batch_size']
     traindataset, testdataset, label_counts = get_datasets(abs_input_dir, BATCH_SIZE)
+    use_cuda = torch.cuda.is_available()
+    device = "cuda" if use_cuda else "cpu"
     print('Starting training')
-    # label weights to account for dataset imbalance
-    weights = np.array(label_counts) / sum(label_counts)
-    weights = 1 / weights
-    weights = torch.tensor(weights, dtype=torch.float32)
-    weights = weights / max(weights)
+    if use_weights:
+        # label weights to account for dataset imbalance
+        weights = np.array(label_counts) / sum(label_counts)
+        weights = 1 / weights
+        weights = torch.tensor(weights, dtype=torch.float32)
+        weights = weights / max(weights)
+        weights.to(device)
 
     train_dataloader = DataLoader(traindataset, batch_size=BATCH_SIZE, shuffle=True)
     test_dataloader = DataLoader(testdataset, batch_size=BATCH_SIZE, shuffle=True)
     traindata, testdata = iter(train_dataloader), iter(test_dataloader)
-    use_cuda = torch.cuda.is_available()
-    device = "cuda" if use_cuda else "cpu"
-    weights.to(device)
+
     epochs = params['max_epoch']
     max_env_steps = params['max_env_steps']
     for hdims in params['hdims']:
@@ -114,7 +117,10 @@ def train_eval(abs_input_dir,
                     optim.zero_grad()
                     output = model(x)
                     pred = torch.argmax(output, dim=1)  # get the index of the max log-probability
-                    loss = F.cross_entropy(output, y, weight=weights.to(device))
+                    if use_weights:
+                        loss = F.cross_entropy(output, y, weight=weights.to(device))
+                    else:
+                        loss = F.cross_entropy(output, y)
                     loss.backward()
                     optim.step()
                     total_loss += loss.data.item()  # add batch loss
