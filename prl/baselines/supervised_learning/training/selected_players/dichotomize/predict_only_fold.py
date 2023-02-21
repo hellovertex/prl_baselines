@@ -64,7 +64,7 @@ def train_eval(abs_input_dir,
     """abs_intput_dir can be single file or directory that is globbed recursively. in both cases
     and in memory dataset will be created with all csv files found in abs_input_dir and its subfolders.
     """
-    target_names = [dichotomize.name, 'Other']
+    target_names = ['Other', dichotomize.name]
     BATCH_SIZE = params['batch_size']
     epochs = params['max_epoch']
     max_env_steps = params['max_env_steps']
@@ -257,13 +257,13 @@ if __name__ == "__main__":
                'rounds': ['preflop', 'flop', 'turn', 'river', 'all'],
                # 'max_epoch': 5_000_000,
                'max_epoch': 100_000_000,
-               'max_env_steps': 1_000_000,
+               'max_env_steps': 5_000_000,
                'batch_size': 512}
     # preprocess_flat_data_dir
     abs_path_to_player_data = "/home/hellovertex/Documents/github.com/prl_baselines/data/02_vectorized/top20/with_folds"
     player_dirs = [x[0] for x in os.walk(abs_path_to_player_data)][1:]
     # rounds = 'all'  # use rounds = 'preflop', rounds = 'flop', rounds='turn', rounds='river'
-    debug = True
+    debug = False
     stem = Path(abs_path_to_player_data).stem
     parent = Path(abs_path_to_player_data).parent.stem
     base_ckptdir = f'./{parent}/only_folds/ckpt_dir'
