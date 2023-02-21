@@ -22,7 +22,7 @@ def train_eval(abs_input_dir, params, log_interval, eval_interval):
     BATCH_SIZE = params['batch_size']
     traindataset, testdataset = get_in_mem_datasets(abs_input_dir, BATCH_SIZE)
     train_dataloader = DataLoader(traindataset, batch_size=BATCH_SIZE, shuffle=True)
-    test_dataloader = DataLoader(testdataset, batch_size    =BATCH_SIZE, shuffle=True)
+    test_dataloader = DataLoader(testdataset, batch_size=BATCH_SIZE, shuffle=True)
     traindata, testdata = iter(train_dataloader), iter(test_dataloader)
     use_cuda = torch.cuda.is_available()
     device = "cuda" if use_cuda else "cpu"
@@ -205,7 +205,6 @@ if __name__ == "__main__":
             for x in p.imap_unordered(train_eval_fn, dirs):
                 print(x + f'. Took {time.time() - t0} seconds')
             print(f'Finished job after {time.time() - start} seconds.')
-
         p.close()
 
 

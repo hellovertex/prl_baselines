@@ -1,3 +1,8 @@
+# parameterize the round for which actions should be predicted
+# possible values are [all_rounds, preflop, flop, turn, river]
+# hard code the data that is being loaded at start from top20/with_folds
+
+
 import logging
 import multiprocessing
 import os
@@ -16,12 +21,16 @@ from tqdm import tqdm
 from sklearn.metrics import f1_score, classification_report
 import pprint
 
-from prl.baselines.supervised_learning.training.dichotomizer.all_rounds.predict_fold.for_individual_player.dataset import \
-    get_datasets
-from prl.baselines.supervised_learning.training.dichotomizer.all_rounds.predict_fold.for_individual_player.model import \
-    get_model_predict_fold_binary
+from prl.baselines.supervised_learning.training.selected_players.dataset import get_datasets
+from prl.baselines.supervised_learning.training.utils import get_model
 
-target_names = ['Fold', 'Check Call', 'Raise Third Pot', 'Raise Two Thirds Pot', 'Raise Pot', 'Raise 2x Pot', 'Raise 2x Pot',
+target_names = ['Fold',
+                'Check Call',
+                'Raise Third Pot',
+                'Raise Two Thirds Pot',
+                'Raise Pot',
+                'Raise 2x Pot',
+                'Raise 3x Pot',
                 'Raise All in']
 
 
@@ -82,7 +91,7 @@ def train_eval(abs_input_dir,
     max_env_steps = params['max_env_steps']
     for hdims in params['hdims']:
         for lr in params['lrs']:
-            model = get_model_predict_fold_binary(traindata, hidden_dims=hdims, device=device)
+            model = get_model(traindata, hidden_dims=hdims, device=device)
             logdir = base_logdir + f'_{hdims}_{lr}'
             ckptdir = base_ckptdir + f'_{hdims}_{lr}'
             optim = torch.optim.Adam(model.parameters(),
@@ -214,7 +223,8 @@ def train_eval(abs_input_dir,
                         writer.add_scalar(tag='Test F1 score/FOLD', scalar_value=f1_0, global_step=n_iter)
                         writer.add_scalar(tag='Test F1 score/CHECK/CALL', scalar_value=f1_1, global_step=n_iter)
                         writer.add_scalar(tag='Test F1 score/Raise Third Pot', scalar_value=f1_2, global_step=n_iter)
-                        writer.add_scalar(tag='Test F1 score/Raise Two Thirds Pot', scalar_value=f1_3, global_step=n_iter)
+                        writer.add_scalar(tag='Test F1 score/Raise Two Thirds Pot', scalar_value=f1_3,
+                                          global_step=n_iter)
                         writer.add_scalar(tag='Test F1 score/Raise Pot', scalar_value=f1_4, global_step=n_iter)
                         writer.add_scalar(tag='Test F1 score/Raise 2x Pot', scalar_value=f1_5, global_step=n_iter)
                         writer.add_scalar(tag='Test F1 score/Raise 3x Pot', scalar_value=f1_6, global_step=n_iter)
@@ -259,20 +269,21 @@ if __name__ == "__main__":
     torch.cuda.manual_seed(1)
 
     log_interval = eval_interval = 2
-    params1 = {'hdims': [[512, 8], [256, 256, 8]],  # [256, 256], [512, 512]], -- not better
+    params1 = {'hdims': [[512], [256, 256]],  # [256, 256], [512, 512]], -- not better
                'lrs': [1e-6],  # we ruled out 1e-5 and 1e-7 by hand, 1e-6 is the best we found after multiple trainings
                # 'max_epoch': 5_000_000,
                'max_epoch': 100_000_000,
                'max_env_steps': 3_000_000,
                'batch_size': 256}
     # preprocess_flat_data_dir
-    abs_path_to_player_data = "/home/hellovertex/Documents/github.com/prl_baselines/data/03_preprocessed/0.25-0.50/randomized_cards_no_downsampling"
-    player_dirs = [x[0] for x in
-                   os.walk(abs_path_to_player_data)][1:]
+    abs_path_to_player_data = "/home/hellovertex/Documents/github.com/prl_baselines/data/02_vectorized/top20/with_folds"
+    player_dirs = [x[0] for x in os.walk(abs_path_to_player_data)][1:]
+    rounds = 'all'  # use rounds = 'preflop', rounds = 'flop', rounds='turn', rounds='river'
     debug = True
     stem = Path(abs_path_to_player_data).stem
-    base_logdir = f'./{stem}/logdir'
-    base_ckptdir = f'./{stem}/ckpt_dir'
+    parent = Path(abs_path_to_player_data).parent
+    base_logdir = f'./{parent}/{stem}/{rounds}/logdir'
+    base_ckptdir = f'./{parent}/{stem}/{rounds}/ckpt_dir'
     train_eval_fn = partial(train_eval,
                             # abs_input_dir=abs_path,
                             params=params1,

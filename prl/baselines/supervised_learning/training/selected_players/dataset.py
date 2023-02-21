@@ -15,8 +15,10 @@ from prl.baselines.supervised_learning.config import DATA_DIR
 
 
 class InMemoryDataset(Dataset):
-    def __init__(self, path_to_csv_file=None, blind_sizes="0.25-0.50", merge_labels_567=True):
-        df = pd.read_csv(path_to_csv_file,
+    def __init__(self, path_to_csv_files=None, blind_sizes="0.25-0.50", merge_labels_567=True):
+        files = glob.glob(path_to_csv_files + "/**/*.csv.bz2", recursive=True)
+        assert len(files) == 1
+        df = pd.read_csv(files[0],
                          # df = pd.read_csv(path_to_csv_files,
                          sep=',',
                          dtype='float32',
@@ -117,9 +119,9 @@ class InMemoryDataset(Dataset):
         return self.x[idx], self.y[idx]
 
 
-def get_datasets(input_dir, seed=1):
+def get_datasets(input_dir, seed=1, merge_labels_567=False):
     # dataset = OutOfMemoryDatasetV2(input_dir, chunk_size=1)
-    dataset = InMemoryDataset(input_dir, merge_labels_567=True)
+    dataset = InMemoryDataset(input_dir, merge_labels_567=merge_labels_567)
     total_len = len(dataset)
     train_len = math.ceil(len(dataset) * 0.8)
     test_len = total_len - train_len
