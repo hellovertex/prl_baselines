@@ -292,10 +292,10 @@ if __name__ == "__main__":
     log_interval = eval_interval = 5
     params1 = {'hdims': [[512]],  # [256, 256], [512, 512]], -- not better
                'lrs': [1e-6],  # we ruled out 1e-5 and 1e-7 by hand, 1e-6 is the best we found after multiple trainings
-               'rounds': ['preflop', 'flop', 'turn', 'river', 'all'],
+               'rounds': ['flop', 'turn', 'river', 'all', 'preflop'],
                # 'max_epoch': 5_000_000,
                'max_epoch': 100_000_000,
-               'max_env_steps': 3_000_000,
+               'max_env_steps': 1_000_000,
                'batch_size': 512}
     # preprocess_flat_data_dir
     abs_path_to_player_data = "/home/hellovertex/Documents/github.com/prl_baselines/data/02_vectorized/top20/with_folds"
@@ -304,8 +304,8 @@ if __name__ == "__main__":
     debug = False
     stem = Path(abs_path_to_player_data).stem
     parent = Path(abs_path_to_player_data).parent.stem
-    base_ckptdir = f'./{parent}_including_folds/{stem}/ckpt_dir'
-    base_logdir = f'./{parent}_including_folds/{stem}/logdir'
+    base_ckptdir = f'./{parent}/including_folds/{stem}/ckpt_dir'
+    base_logdir = f'./{parent}/including_folds/{stem}/logdir'
     train_eval_fn = partial(train_eval,
                             # abs_input_dir=abs_path,
                             params=params1,

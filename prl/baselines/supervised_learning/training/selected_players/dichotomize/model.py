@@ -39,7 +39,7 @@ class MDL(MLP):
         return self.sigmoid(x)
 
 
-def get_model_predict_fold_binary(traindata, hidden_dims, device, merge_labels567=False):
+def get_model_predict_fold_binary(hidden_dims, device, merge_labels567=False):
     # network
 
     net = MDL(input_dim=569,

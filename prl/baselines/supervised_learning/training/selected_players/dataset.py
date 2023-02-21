@@ -3,6 +3,7 @@ from __future__ import annotations
 import glob
 import math
 from functools import partial
+from typing import Union
 
 import pandas as pd
 import torch
@@ -20,6 +21,7 @@ class InMemoryDataset(Dataset):
     def __init__(self,
                  path_to_csv_files=None,
                  rounds=None,
+                 dichotomize=None,
                  blind_sizes="0.25-0.50",
                  merge_labels_567=True):
         files = glob.glob(path_to_csv_files + "/**/*.csv.bz2", recursive=True)
@@ -46,22 +48,43 @@ class InMemoryDataset(Dataset):
             else:
                 raise ValueError(f'Round was {rounds}, '
                                  f'but only valid values are "preflop, flop, turn, river, all"')
-        if merge_labels_567:
-            df['label.1'].replace(6, 5, inplace=True)
-            df['label.1'].replace(7, 5, inplace=True)
+        label_key = 'label' if 'label' in df.columns else 'label.1'
         if 'Unnamed: 0' in df.columns:
             df.drop('Unnamed: 0', axis=1, inplace=True)
-        label_key = 'label' if 'label' in df.columns else 'label.1'
-        label_dict = df[label_key].value_counts().to_dict()
-        label_counts = []
-        for i in [0, 1, 2, 3, 4, 5, 6, 7]:
-            if i in label_dict:
-                label_counts.append(label_dict[i])
+
+        if dichotomize is not None:
+            # replace non-target labels with 0 and target label with 1
+            assert dichotomize in list(range(len(ActionSpace)))
+            # replace all negatives with 99
+            for i in range(len(ActionSpace)):
+                if i != dichotomize:
+                    df[label_key].replace(i, 99, inplace=True)
+            # replace all positives with 1
+            df[label_key].replace(int(dichotomize), 1, inplace=True)
+            # replace all negatives with 0
+            df[label_key].replace(99, 0, inplace=True)
+            label_counts = df[label_key].value_counts().to_dict()
+            if label_counts[0] > label_counts[1]:
+                df = self.upsample(df, label=1, n_samples=label_counts[0])
             else:
-                label_counts.append(0)
-        # self.label_counts = df['label'].value_counts().to_list()
-        self.label_counts = label_counts
-        self.y = torch.tensor(df[label_key].values, dtype=torch.int64)
+                df = self.upsample(df, label=0, n_samples=label_counts[1])
+            self.label_counts = df[label_key].value_counts().to_list()
+            self.y = torch.tensor(df[label_key].values, dtype=torch.int64)
+        else:
+            if merge_labels_567:
+                df[label_key].replace(6, 5, inplace=True)
+                df[label_key].replace(7, 5, inplace=True)
+
+            label_dict = df[label_key].value_counts().to_dict()
+            label_counts = []
+            for i in [0, 1, 2, 3, 4, 5, 6, 7]:
+                if i in label_dict:
+                    label_counts.append(label_dict[i])
+                else:
+                    label_counts.append(0)
+            # self.label_counts = df['label'].value_counts().to_list()
+            self.label_counts = label_counts
+            self.y = torch.tensor(df[label_key].values, dtype=torch.int64)
         # x = df.drop(['label'], axis=1)
         df.drop([label_key], axis=1, inplace=True)
 
@@ -72,7 +95,7 @@ class InMemoryDataset(Dataset):
         a = 1
 
     def extract_subset(self, df: pd.DataFrame,
-                       label: ActionSpace,
+                       label: Union[ActionSpace, int],
                        n_samples: int,
                        n_available: int) -> pd.DataFrame:
         return resample(df[df['label'] == label],
@@ -81,7 +104,7 @@ class InMemoryDataset(Dataset):
                         random_state=1)
 
     def upsample(self, df: pd.DataFrame,
-                 label: ActionSpace,
+                 label: Union[ActionSpace, int],
                  n_samples: int) -> pd.DataFrame:
         df_base = df[df['label'] == label]
         samples = resample(df[df['label'] == label],
@@ -89,7 +112,7 @@ class InMemoryDataset(Dataset):
                            n_samples=max(n_samples - len(df_base), 0),
                            random_state=1)
 
-        return pd.concat([df_base, samples])
+        return pd.concat([df, samples])
 
     def downsample_fold_and_upsample_raises(self, df):
         n_fold = len(df[df['label'] == ActionSpace.FOLD])
@@ -140,9 +163,12 @@ class InMemoryDataset(Dataset):
         return self.x[idx], self.y[idx]
 
 
-def get_datasets(input_dir, rounds, seed=1, merge_labels_567=False):
+def get_datasets(input_dir, rounds, seed=1, dichotomize=None, merge_labels_567=False):
     # dataset = OutOfMemoryDatasetV2(input_dir, chunk_size=1)
-    dataset = InMemoryDataset(input_dir, rounds, merge_labels_567=merge_labels_567)
+    dataset = InMemoryDataset(input_dir,
+                              rounds,
+                              dichotomize=dichotomize,
+                              merge_labels_567=merge_labels_567)
     total_len = len(dataset)
     train_len = math.ceil(len(dataset) * 0.8)
     test_len = total_len - train_len
