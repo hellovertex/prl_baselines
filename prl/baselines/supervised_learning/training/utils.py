@@ -89,27 +89,7 @@ def get_model_predict_fold_binary(traindata, hidden_dims, device, merge_labels56
     return net
 
 
-def get_model(traindata, hidden_dims, device, merge_labels567=False):
-    # network
-    classes = [ActionSpace.FOLD,
-               ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED in CHECK_CALL
-               ActionSpace.RAISE_MIN_OR_THIRD_OF_POT,
-               ActionSpace.RAISE_TWO_THIRDS_OF_POT,
-               ActionSpace.RAISE_POT,
-               ActionSpace.RAISE_2x_POT,
-               ActionSpace.RAISE_3x_POT,
-               ActionSpace.RAISE_ALL_IN]
-    if merge_labels567:
-        classes = [ActionSpace.FOLD,
-                   ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED in CHECK_CALL
-                   ActionSpace.RAISE_MIN_OR_THIRD_OF_POT,
-                   ActionSpace.RAISE_TWO_THIRDS_OF_POT,
-                   ActionSpace.RAISE_POT,
-                   ActionSpace.RAISE_2x_POT
-                   ]
-        # ActionSpace.RAISE_50_BB,
-        # ActionSpace.RAISE_ALL_IN]
-    output_dim = len(classes)
+def get_model(traindata, output_dim, hidden_dims, device, merge_labels567=False):
     input_dim = None
     # waste the first batch to dynamically get the input dimension
     # for x, y in traindata:

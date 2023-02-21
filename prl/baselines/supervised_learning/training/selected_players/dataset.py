@@ -13,9 +13,15 @@ from torch.utils.data import random_split
 
 from prl.baselines.supervised_learning.config import DATA_DIR
 
+ROUNDS = ['round_preflop', 'round_flop', 'round_turn', 'round_river']
+
 
 class InMemoryDataset(Dataset):
-    def __init__(self, path_to_csv_files=None, blind_sizes="0.25-0.50", merge_labels_567=True):
+    def __init__(self,
+                 path_to_csv_files=None,
+                 rounds=None,
+                 blind_sizes="0.25-0.50",
+                 merge_labels_567=True):
         files = glob.glob(path_to_csv_files + "/**/*.csv.bz2", recursive=True)
         assert len(files) == 1
         df = pd.read_csv(files[0],
@@ -27,22 +33,37 @@ class InMemoryDataset(Dataset):
                          compression='bz2')
         df = df.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
         df = df.sample(frac=1)
+        # todo: if rounds != 'all', sample for round only
+        if rounds != 'all':
+            if rounds == 'preflop':
+                df = df[df['round_preflop'] == 1]
+            elif rounds == 'flop':
+                df = df[df['round_flop'] == 1]
+            elif rounds == 'turn':
+                df = df[df['round_turn'] == 1]
+            elif rounds == 'river':
+                df = df[df['round_river'] == 1]
+            else:
+                raise ValueError(f'Round was {rounds}, '
+                                 f'but only valid values are "preflop, flop, turn, river, all"')
         if merge_labels_567:
             df['label.1'].replace(6, 5, inplace=True)
             df['label.1'].replace(7, 5, inplace=True)
         if 'Unnamed: 0' in df.columns:
             df.drop('Unnamed: 0', axis=1, inplace=True)
-        try:
-            self.label_counts = df['label'].value_counts().to_list()
-            self.y = torch.tensor(df['label'].values, dtype=torch.int64)
-            # x = df.drop(['label'], axis=1)
-            df.drop(['label'], axis=1, inplace=True)
-        except KeyError as e:
-            print(e)
-            self.label_counts = df['label.1'].value_counts().to_list()
-            self.y = torch.tensor(df['label.1'].values, dtype=torch.int64)
-            # x = df.drop(['label'], axis=1)
-            df.drop(['label.1'], axis=1, inplace=True)
+        label_key = 'label' if 'label' in df.columns else 'label.1'
+        label_dict = df[label_key].value_counts().to_dict()
+        label_counts = []
+        for i in [0, 1, 2, 3, 4, 5, 6, 7]:
+            if i in label_dict:
+                label_counts.append(label_dict[i])
+            else:
+                label_counts.append(0)
+        # self.label_counts = df['label'].value_counts().to_list()
+        self.label_counts = label_counts
+        self.y = torch.tensor(df[label_key].values, dtype=torch.int64)
+        # x = df.drop(['label'], axis=1)
+        df.drop([label_key], axis=1, inplace=True)
 
         print(f'Dataframe size: {df.memory_usage(index=True, deep=True).sum()} bytes.')
         print(f'Starting training with dataset label quantities: {self.label_counts}')
@@ -119,9 +140,9 @@ class InMemoryDataset(Dataset):
         return self.x[idx], self.y[idx]
 
 
-def get_datasets(input_dir, seed=1, merge_labels_567=False):
+def get_datasets(input_dir, rounds, seed=1, merge_labels_567=False):
     # dataset = OutOfMemoryDatasetV2(input_dir, chunk_size=1)
-    dataset = InMemoryDataset(input_dir, merge_labels_567=merge_labels_567)
+    dataset = InMemoryDataset(input_dir, rounds, merge_labels_567=merge_labels_567)
     total_len = len(dataset)
     train_len = math.ceil(len(dataset) * 0.8)
     test_len = total_len - train_len
