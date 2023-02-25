@@ -5,8 +5,10 @@ seaborn
 click
 gdown
 scikit-learn
-numpy==1.22.0
+numpy
 pandas
 pydantic
 gin-config
 pettingzoo==1.22.3
+tianshou
+git+https://github.com/DLR-RM/stable-baselines3@feat/gymnasium-support

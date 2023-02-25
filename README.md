@@ -8,12 +8,13 @@ Purpose of this repository:
 3. [ ] todo: Compute PokerStats (Vpip, 3bet, cbet, etc) and compute evaluation metrics
 4. [ ] todo: Create Monte-Carlo based Reference baseline that has no Neural Network component
 ##  Installation
+TODO: replace with reference to `prl_docs/README.md`
 1. `git clone --recurse-submodules https://github.com/hellovertex/prl_environment.git`
 2. `git clone --recurse-submodules https://github.com/hellovertex/prl_baselines.git`
 
 ### Inside virtual env run
 Install Poker RL-environment as namespace package
-
+1. `pip install imitation --no-deps` # avoid conflicting gym==0.21 dependency  
 2. `cd prl_environment`
 3. `git submodule update --recursive --remote` (and `--init` if you did not clone using `--recurse-submodules`)
 4. `pip install -e .`  `# use -e optionally for development`
