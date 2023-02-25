@@ -19,7 +19,7 @@ agents = [agent_call for i in range(n_players)]
 board = '[6h Ts Td 9c Jc]'
 player_hands = ['[6s 6d]', '[9s 9d]', '[Jd Js]', '[Th Tc]']
 env_reset_config = get_reset_config(player_hands, board)
-participants = make_participants(agents, starting_stack_size)
+participants = make_participants(agents, agent_names, starting_stack_size)
 experiment = make_default_experiment(env,
                                      participants,
                                      max_episodes=3,

@@ -219,10 +219,10 @@ class WrappedEnv(BaseWrapper):
 
 
 def make_default_tianshou_env(num_players=2,
-                              mc_model_ckpt_path=None,
                               agents=None,
                               stack_sizes=None,
-                              blinds: List[int] = None):
+                              blinds: List[int] = None,
+                              mc_model_ckpt_path=None):
     starting_stack = 5000
     if blinds is None:
         blinds = [25, 50]

@@ -14,7 +14,7 @@ from tianshou.policy import RainbowPolicy, MultiAgentPolicyManager
 from tianshou.trainer import OffpolicyTrainer
 from tianshou.utils import TensorboardLogger
 from torch.utils.tensorboard import SummaryWriter
-
+from tianshou.policy.random import RandomPolicy
 from prl.baselines.agents.tianshou_agents import MajorityBaseline
 from prl.baselines.agents.tianshou_policies import get_rainbow_config
 from prl.baselines.examples.examples_tianshou_env import make_vectorized_prl_env, make_vectorized_pettingzoo_env
