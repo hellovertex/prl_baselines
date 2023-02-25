@@ -9,4 +9,4 @@ numpy==1.22.0
 pandas
 pydantic
 gin-config
-pettingzoo=1.22.3
+pettingzoo==1.22.3
