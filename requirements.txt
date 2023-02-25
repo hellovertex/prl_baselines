@@ -8,7 +8,5 @@ scikit-learn
 numpy==1.22.0
 pandas
 pydantic
-tianshou
-ray[rllib]
 gin-config
 pettingzoo=1.22.3
