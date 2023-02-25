@@ -8,6 +8,7 @@ Purpose of this repository:
 3. [ ] todo: Compute PokerStats (Vpip, 3bet, cbet, etc) and compute evaluation metrics
 4. [ ] todo: Create Monte-Carlo based Reference baseline that has no Neural Network component
 ##  Installation
+
 TODO: replace with reference to `prl_docs/README.md`
 1. `git clone --recurse-submodules https://github.com/hellovertex/prl_environment.git`
 2. `git clone --recurse-submodules https://github.com/hellovertex/prl_baselines.git`
@@ -37,6 +38,63 @@ in case make fails: `sudo apt install libpython3.10-dev`
 
 
 ## Usage
+```bash
+/
+└── data
+    ├── 00_tmp
+    │   └── bulk_hands.zip  # from www.hhsmithy.com
+    ├── 01_datasets_raw
+    │   ├── all_players
+    │   │   ├── NL50
+    │   │   │   ├── file00000.txt
+    │   │   │   └── ...
+    │   │   └── NL5000
+    │   │       └── ...
+    │   └── selected_players
+    │       ├── NL50
+    │       │   ├── PlayerRank001
+    │       │   │   ├── file00000.txt
+    │       │   │   └── ...
+    │       │   └── PlayerRank002
+    │       │       ├── file00000.txt
+    │       │       └── ...
+    │       └── NL5000
+    │           └── ...
+    ├── 02_datasets_vectorized
+    │   ├── per_selected_player
+    │   │   ├── NL50
+    │   │   │   ├── use_folds_with_randomized_hand_DF2
+    │   │   │   │   └── PlayerRank001/
+    │   │   │   │       ├── data000.csv
+    │   │   │   │       └── ...
+    │   │   │   └── only_showdowns
+    │   │   │       ├── only_wins_DNF1
+    │   │   │       │   └── PlayerRank001/
+    │   │   │       │       ├── data000.csv
+    │   │   │       │       └── ...
+    │   │   │       └── all_showdowns_DNF2
+    │   │   │           └── PlayerRank001/
+    │   │   │               ├── data000.csv
+    │   │   │               └── ...
+    │   │   └── NL5000
+    │   │       └── ...
+    │   └── player_pool
+    │       ├── NL50
+    │       │   └── only_showdowns
+    │       │       ├── loser_actions_to_fold
+    │       │       │   ├── data000.csv
+    │       │       │   └── ...
+    │       │       └── fish_player_actions_to_fold
+    │       │           ├── data000.csv
+    │       │           └── ...
+    │       └── NL5000
+    │           └── ...
+    ├── 03_preprocessed
+    │    SAME AS IN 02_datasets_vectorized
+    └── 04_eval
+         SAME AS IN 02_datasets_vectorized
+```
+
 ### Supervised Learning of Poker Baseline Agent from Game Logs for our RL training
 - [ ] todo: update following description
 
