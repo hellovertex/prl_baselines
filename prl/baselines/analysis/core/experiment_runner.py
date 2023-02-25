@@ -418,7 +418,9 @@ class PokerExperimentRunner(ExperimentRunner):
         # 2) provide action sequence
         #
         self.stats = None
-        self.test_env = experiment.options['test_env']
+        if isinstance(experiment.options, dict):
+            if 'test_env' in experiment.options:
+                self.test_env = experiment.options['test_env']
         self.verbose = verbose
         self.hero_names = hero_names
         self.num_players = experiment.num_players
