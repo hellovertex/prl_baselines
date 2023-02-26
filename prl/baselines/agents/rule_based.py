@@ -60,19 +60,23 @@ class RuleBasedAgent:
         hand = (max_r, min_r) if s0 == s1 else (min_r, max_r)
         positions = list(self.positions)
         btn_idx = np.where(obs[cols.Btn_idx_is_0:cols.Btn_idx_is_5 + 1] == 1)[0]
+        # fuer jeden Spieler die letzten beiden raises one hot encoded
         raises = self.get_raises_preflop(obs)
+        # map diese aktionen auf die position
         # pos_idx = (i + btn_idx) % self.num_players
         a = 1
-        # n_raises > 1 ?
-        # fuer jeden Spieler die letzten beiden aktionen
-
-        # map diese aktionen auf die position
-        # case no previous raise:
-        # bet/fold
+        # case no previous raise
+        if raises['total'] == 0:
+            # bet/fold
+            pass
         # case one previous raise:
-        # call/ xor 3b/ALLIN  xor 3b/FOLD (semi-bluff)
+        if raises['total'] == 1:
+            # call/ xor 3b/ALLIN  xor 3b/FOLD (semi-bluff)
+            pass
         # case 3bet:
-        # 4b/ALLIN or Call but we dont semi-bluff
+        if raises['total'] > 1:
+            # 4b/ALLIN or Call but we dont semi-bluff
+            pass
 
         if obs[cols.Round_preflop]:
             # act according to preflop equity chart
