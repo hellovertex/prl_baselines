@@ -1,6 +1,8 @@
 # preflop equities
 # flop pot odds
 # assume ranges (consider making them stochastic) for post flop MC analysis
+import random
+
 import numpy as np
 from prl.environment.Wrappers.aoh import Positions6Max as pos
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols
@@ -189,8 +191,12 @@ class RuleBasedAgent:
         self.positions = positions[num_players]
         self.open_calling_range_MP = ranges['55-QQ'] + ranges['AK'] + ranges['AQs']
         self.open_calling_range_CO = ranges['55-QQ'] + ranges['AK'] + ranges['AQ'] + ranges['KQs']
-        self.open_calling_range_BTN = ranges['44-QQ'] + + ranges['AK'] + ranges['AQ'] + ranges['KQs']
+        self.open_calling_range_BTN = ranges['44-QQ'] + + ranges['AK'] + ranges['AQ'] + ranges['KQs'] + ranges['AJs']
         self.open_calling_range_BTN_VS_CO = ranges['22-JJ'] + ranges['ATs+'] + ranges['AQo'] + ranges['KQs']
+        self.semi_bluff_probability = .3
+        self.common_semi_bluff_range_preflop = ranges['56s'] + ranges['67s'] + ranges['78s'] + ranges['89s'] + ranges[
+            'T9s']
+
     def get_raises_preflop(self, obs):
         r00 = obs[cols.Preflop_player_0_action_0_what_2]
         r01 = obs[cols.Preflop_player_0_action_1_what_2]
@@ -205,7 +211,7 @@ class RuleBasedAgent:
         r50 = obs[cols.Preflop_player_5_action_0_what_2]
         r51 = obs[cols.Preflop_player_5_action_1_what_2]
         who_raised = []
-        if r00+r01>0:
+        if r00 + r01 > 0:
             who_raised.append(0)
         if r10 + r11 > 0:
             who_raised.append(1)
@@ -272,24 +278,51 @@ class RuleBasedAgent:
         # given raises (relative to observer) determine who open-raised
         assert len(raises['who_raised']) == 1
         raise_idx = raises['who_raised'][0]
-        open_raiser_position = self.positions[(raise_idx-btn_idx) % self.num_players]
-        calling_range = ranges['AK'] + ranges['AQ']
+        open_raiser_position = self.positions[(raise_idx - btn_idx) % self.num_players]
+
+        # Open Raisor was UTG
         if hero_position == pos.MP:
             assert open_raiser_position == pos.UTG
-            if hand in ranges['55-QQ'] or hand in ranges['AQs']:
+            if hand in self.open_calling_range_MP:
                 return 1, -1
             elif hand in ranges['KK+']:
                 return ActionSpace.RAISE_POT
+
+        # Open Raisor was UTG or Middle Position
         elif hero_position == pos.CO:
             assert open_raiser_position == pos.UTG or open_raiser_position == pos.MP
-            if hand in ranges['55-QQ'] or hand in ranges['AK'] or hand in ranges['AQs'] or hand in ranges['KQs']:
+            if hand in self.open_calling_range_CO:
                 return 1, -1
             elif hand in ranges['KK+']:
                 return ActionSpace.RAISE_POT
+
+        # Open Raisor was before BUTTON
         elif hero_position == pos.BTN:
-            pass
+            assert open_raiser_position in [pos.UTG, pos.MP, pos.CO]
+            # BTN VS CO
+            if open_raiser_position == pos.CO:
+                if hand in self.open_calling_range_BTN_VS_CO:
+                    return ActionSpace.CHECK_CALL
+                elif hand in ranges['QQ+'] or hand in ranges['AK']:
+                    return ActionSpace.RAISE_POT
+                elif hand in self.common_semi_bluff_range_preflop or hand in ranges['A2s-A5s']:
+                    if random.random() < self.semi_bluff_probability:
+                        return ActionSpace.RAISE_POT
+                return ActionSpace.FOLD
+            # BTN VS UTG OR MP
+            else:
+                if hand in self.open_calling_range_BTN:
+                    return ActionSpace.CHECK_CALL
+                elif hand in ranges['KK+']:
+                    return ActionSpace.RAISE_POT
+                elif hand in self.common_semi_bluff_range_preflop:
+                    if random.random() < self.semi_bluff_probability:
+                        return ActionSpace.RAISE_POT
+                return ActionSpace.FOLD
+        # Open Raisor was before SB
         elif hero_position == pos.SB:
             pass
+        # Open Raisor was before BB
         elif hero_position == pos.BB:
             pass
         else:
