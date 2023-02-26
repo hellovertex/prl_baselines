@@ -319,12 +319,50 @@ class RuleBasedAgent:
                     if random.random() < self.semi_bluff_probability:
                         return ActionSpace.RAISE_POT
                 return ActionSpace.FOLD
+
         # Open Raisor was before SB
         elif hero_position == pos.SB:
-            pass
+            assert open_raiser_position in [pos.UTG, pos.MP, pos.CO, pos.BTN]
+            if open_raiser_position in [pos.UTG, pos.MP]:
+                if hand in ranges['22-QQ'] or hand in ranges['AK'] or hand in ranges['AQ']:
+                    return ActionSpace.CHECK_CALL
+                elif hand in ranges['KK+']:
+                    return ActionSpace.RAISE_POT
+                elif hand in ranges['78s'] or hand in ranges['89s'] or hand in ranges['T9s']:
+                    if random.random() < self.semi_bluff_probability:
+                        return ActionSpace.RAISE_POT
+                return ActionSpace.FOLD
+            # CUTOFF OPENRAISED
+            elif open_raiser_position == pos.CO:
+                if hand in ranges['22-JJ'] or hand in ranges['AQ'] or hand in ranges['AJ'] or hand in ranges[
+                    'ATs'] or hand in ranges['KQs'] or hand in ranges['KJs'] or hand in ranges['QJs'] or hand in ranges[
+                    'JTs']:
+                    return ActionSpace.CHECK_CALL
+                elif hand in ranges['QQ+'] or hand in ranges['AK']:
+                    return ActionSpace.RAISE_POT
+                elif hand in self.common_semi_bluff_range_preflop or hand in ranges['A2s-A5s']:
+                    if random.random() < self.semi_bluff_probability:
+                        return ActionSpace.RAISE_POT
+                return ActionSpace.FOLD
+            elif open_raiser_position == pos.BTN:
+                if hand in ranges['22-JJ'] or hand in ranges['AQ'] or hand in ranges['AJ'] or hand in ranges[
+                    'AT'] or hand in ranges['KQ'] or hand in ranges['A9s'] or hand in ranges['KJs'] or hand in ranges[
+                    'QJs'] or hand in ranges[
+                    'JTs'] or hand in ranges['KTs']:
+                    return ActionSpace.CHECK_CALL
+                elif hand in ranges['QQ+'] or hand in ranges['AK']:
+                    return ActionSpace.RAISE_POT
+                elif hand in self.common_semi_bluff_range_preflop or hand in ranges['A2s-A8s'] or hand in ranges[
+                    '68s'] or hand in ranges['79s']:
+                    if random.random() < self.semi_bluff_probability:
+                        return ActionSpace.RAISE_POT
+                return ActionSpace.FOLD
+
+
         # Open Raisor was before BB
         elif hero_position == pos.BB:
-            pass
+            assert open_raiser_position in [pos.UTG, pos.MP, pos.CO, pos.BTN, pos.SB]
+
         else:
             raise ValueError(f"Hero Position must be in [MP, CO, BTN, SB, BB] but was {hero_position}")
 
