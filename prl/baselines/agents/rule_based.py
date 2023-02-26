@@ -276,10 +276,15 @@ class RuleBasedAgent:
         else:
             raise ValueError(f"Invalid position of current player: {hero_position}")
 
-    def get_preflop_3bet_or_call_or_fold(self, obs, hand, hero_position, raises, btn_idx):
+    def get_preflop_3bet_or_call_or_fold(self, hand, hero_position, raises, btn_idx):
         # given raises (relative to observer) determine who open-raised
-        assert len(raises['who_raised']) == 1
-        raise_idx = raises['who_raised'][0]
+        # the following line is kept for reference but the assertion is wrong
+        # in fact there can be multiple raises before hero gets first chance to raise
+        # assert len(raises['who_raised']) == 1
+
+        # raise_idx = raises['who_raised'][0]
+        raise_idx = min(raises['who_raised'])
+        assert raise_idx > 0, "Hero must not have raised already here."
         open_raiser_position = self.positions[(raise_idx - btn_idx) % self.num_players]
 
         # Open Raisor was UTG
@@ -374,8 +379,17 @@ class RuleBasedAgent:
 
             # VS BTN
             elif open_raiser_position == pos.BTN:
-                # todo vs BU
-                pass
+                if hand in ranges['22-JJ'] or hand in ranges[
+                    'AT-AQ'] or hand in ranges['A9s'] or hand in ranges[
+                    'KT+'] or hand in ranges['QT+'] or hand in ranges['JTs']:
+                    return ActionSpace.CHECK_CALL
+                elif hand in ranges['QQ+'] or hand in ranges['AK']:
+                    return ActionSpace.RAISE_POT
+                elif hand in ranges['A2s-A8s'] or hand in self.common_semi_bluff_range_preflop or hand in ranges[
+                    '68s'] or hand in ranges['79s']:
+                    if random.random() < self.semi_bluff_probability:
+                        return ActionSpace.RAISE_POT
+                return ActionSpace.FOLD
 
             # VS SB
             if hand in open_raising_ranges[pos.CO]:
@@ -387,6 +401,7 @@ class RuleBasedAgent:
                 if random.random() < self.semi_bluff_probability:
                     return ActionSpace.RAISE_POT
             return ActionSpace.FOLD
+
         else:
             raise ValueError(f"Hero Position must be in [MP, CO, BTN, SB, BB] but was {hero_position}")
 
@@ -415,18 +430,29 @@ class RuleBasedAgent:
                 return self.get_preflop_openraise_or_fold(obs,
                                                           hand,
                                                           hero_position)
-            # case one previous raise:
+            # case one previous raise --> it was not hero who raised:
             if raises['total'] == 1:
                 # call/ xor 3b/ALLIN  xor 3b/FOLD (semi-bluff)
-                return self.get_preflop_3bet_or_call_or_fold(obs,
-                                                             hand,
+                return self.get_preflop_3bet_or_call_or_fold(hand,
                                                              hero_position,
                                                              raises,
                                                              btn_idx)
-            # case 3bet:
+            # case 3bet --> Hero raised previously:
             if raises['total'] > 1:
-                # 4b/ALLIN or Call but we dont semi-bluff
-                pass
+                # hero has not raised yet --> vs 1 Raiser
+                if 0 not in raises['who_raised']:
+                    return self.get_preflop_3bet_or_call_or_fold(hand,
+                                                                 hero_position,
+                                                                 raises,
+                                                                 btn_idx)
+                # hero has raised previously --> vs3bet
+                else:
+                    # 4b/ALLIN or Call but we dont semi-bluff
+                    self.get_preflop_4bet_or_call_or_fold(obs,
+                                                          hand,
+                                                          hero_position,
+                                                          raises)
+
         elif obs[cols.Round_flop]:
             pass
         elif obs[cols.Round_turn]:
