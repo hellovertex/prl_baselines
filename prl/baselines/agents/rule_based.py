@@ -187,7 +187,10 @@ class RuleBasedAgent:
                      5: (pos.BTN, pos.SB, pos.BB, pos.MP, pos.CO),
                      6: (pos.BTN, pos.SB, pos.BB, pos.UTG, pos.MP, pos.CO)}
         self.positions = positions[num_players]
-
+        self.open_calling_range_MP = ranges['55-QQ'] + ranges['AK'] + ranges['AQs']
+        self.open_calling_range_CO = ranges['55-QQ'] + ranges['AK'] + ranges['AQ'] + ranges['KQs']
+        self.open_calling_range_BTN = ranges['44-QQ'] + + ranges['AK'] + ranges['AQ'] + ranges['KQs']
+        self.open_calling_range_BTN_VS_CO = ranges['22-JJ'] + ranges['ATs+'] + ranges['AQo'] + ranges['KQs']
     def get_raises_preflop(self, obs):
         r00 = obs[cols.Preflop_player_0_action_0_what_2]
         r01 = obs[cols.Preflop_player_0_action_1_what_2]
@@ -201,6 +204,20 @@ class RuleBasedAgent:
         r41 = obs[cols.Preflop_player_4_action_1_what_2]
         r50 = obs[cols.Preflop_player_5_action_0_what_2]
         r51 = obs[cols.Preflop_player_5_action_1_what_2]
+        who_raised = []
+        if r00+r01>0:
+            who_raised.append(0)
+        if r10 + r11 > 0:
+            who_raised.append(1)
+        if r20 + r21 > 0:
+            who_raised.append(2)
+        if r30 + r31 > 0:
+            who_raised.append(3)
+        if r40 + r41 > 0:
+            who_raised.append(4)
+        if r50 + r51 > 0:
+            who_raised.append(5)
+
         return {
             0: [r00, r01],
             1: [r10, r11],
@@ -208,7 +225,8 @@ class RuleBasedAgent:
             3: [r30, r31],
             4: [r40, r41],
             5: [r50, r51],
-            'total': r00 + r01 + r10 + r11 + r20 + r21 + r30 + r31 + r40 + r41 + r50 + r51
+            'total': r00 + r01 + r10 + r11 + r20 + r21 + r30 + r31 + r40 + r41 + r50 + r51,
+            'who_raised': who_raised
         }
 
     def get_preflop_openraise_or_fold(self,
@@ -250,12 +268,24 @@ class RuleBasedAgent:
         else:
             raise ValueError(f"Invalid position of current player: {hero_position}")
 
-    def get_preflop_3bet_or_call_or_fold(self, obs, hand, hero_position, raises):
-        # if raiser was UTG
+    def get_preflop_3bet_or_call_or_fold(self, obs, hand, hero_position, raises, btn_idx):
+        # given raises (relative to observer) determine who open-raised
+        assert len(raises['who_raised']) == 1
+        raise_idx = raises['who_raised'][0]
+        open_raiser_position = self.positions[(raise_idx-btn_idx) % self.num_players]
+        calling_range = ranges['AK'] + ranges['AQ']
         if hero_position == pos.MP:
-            pass
+            assert open_raiser_position == pos.UTG
+            if hand in ranges['55-QQ'] or hand in ranges['AQs']:
+                return 1, -1
+            elif hand in ranges['KK+']:
+                return ActionSpace.RAISE_POT
         elif hero_position == pos.CO:
-            pass
+            assert open_raiser_position == pos.UTG or open_raiser_position == pos.MP
+            if hand in ranges['55-QQ'] or hand in ranges['AK'] or hand in ranges['AQs'] or hand in ranges['KQs']:
+                return 1, -1
+            elif hand in ranges['KK+']:
+                return ActionSpace.RAISE_POT
         elif hero_position == pos.BTN:
             pass
         elif hero_position == pos.SB:
@@ -296,7 +326,8 @@ class RuleBasedAgent:
                 return self.get_preflop_3bet_or_call_or_fold(obs,
                                                              hand,
                                                              hero_position,
-                                                             raises)
+                                                             raises,
+                                                             btn_idx)
             # case 3bet:
             if raises['total'] > 1:
                 # 4b/ALLIN or Call but we dont semi-bluff
