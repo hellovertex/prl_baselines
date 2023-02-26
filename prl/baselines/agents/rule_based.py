@@ -193,6 +193,8 @@ class RuleBasedAgent:
         self.open_calling_range_CO = ranges['55-QQ'] + ranges['AK'] + ranges['AQ'] + ranges['KQs']
         self.open_calling_range_BTN = ranges['44-QQ'] + + ranges['AK'] + ranges['AQ'] + ranges['KQs'] + ranges['AJs']
         self.open_calling_range_BTN_VS_CO = ranges['22-JJ'] + ranges['ATs+'] + ranges['AQo'] + ranges['KQs']
+        self.open_calling_range_SB_BB = ranges['22-JJ'] + ranges['AQ'] + ranges['AJ'] + ranges['ATs'] + ranges['KQs'] + \
+                                        ranges['KJs'] + ranges['QJs'] + ranges['JTs']
         self.semi_bluff_probability = .3
         self.common_semi_bluff_range_preflop = ranges['56s'] + ranges['67s'] + ranges['78s'] + ranges['89s'] + ranges[
             'T9s']
@@ -332,11 +334,10 @@ class RuleBasedAgent:
                     if random.random() < self.semi_bluff_probability:
                         return ActionSpace.RAISE_POT
                 return ActionSpace.FOLD
+
             # CUTOFF OPENRAISED
             elif open_raiser_position == pos.CO:
-                if hand in ranges['22-JJ'] or hand in ranges['AQ'] or hand in ranges['AJ'] or hand in ranges[
-                    'ATs'] or hand in ranges['KQs'] or hand in ranges['KJs'] or hand in ranges['QJs'] or hand in ranges[
-                    'JTs']:
+                if hand in self.open_calling_range_SB_BB:
                     return ActionSpace.CHECK_CALL
                 elif hand in ranges['QQ+'] or hand in ranges['AK']:
                     return ActionSpace.RAISE_POT
@@ -345,10 +346,8 @@ class RuleBasedAgent:
                         return ActionSpace.RAISE_POT
                 return ActionSpace.FOLD
             elif open_raiser_position == pos.BTN:
-                if hand in ranges['22-JJ'] or hand in ranges['AQ'] or hand in ranges['AJ'] or hand in ranges[
-                    'AT'] or hand in ranges['KQ'] or hand in ranges['A9s'] or hand in ranges['KJs'] or hand in ranges[
-                    'QJs'] or hand in ranges[
-                    'JTs'] or hand in ranges['KTs']:
+                if hand in self.open_calling_range_SB_BB or hand in ranges['AT'] or hand in ranges['A9s'] or hand in \
+                        ranges['KQ'] or hand in ranges['KTs']:
                     return ActionSpace.CHECK_CALL
                 elif hand in ranges['QQ+'] or hand in ranges['AK']:
                     return ActionSpace.RAISE_POT
@@ -358,11 +357,36 @@ class RuleBasedAgent:
                         return ActionSpace.RAISE_POT
                 return ActionSpace.FOLD
 
-
         # Open Raisor was before BB
         elif hero_position == pos.BB:
             assert open_raiser_position in [pos.UTG, pos.MP, pos.CO, pos.BTN, pos.SB]
 
+            # VS UTG, MP, CO
+            if open_raiser_position in [pos.UTG, pos.MP, pos.CO]:
+                if hand in self.open_calling_range_SB_BB:
+                    return ActionSpace.CHECK_CALL
+                elif hand in ranges['QQ+']:
+                    return ActionSpace.RAISE_POT
+                elif hand in ranges['A2s-A9s'] or hand in ranges['AK'] or hand in self.common_semi_bluff_range_preflop:
+                    if random.random() < self.semi_bluff_probability:
+                        return ActionSpace.RAISE_POT
+                return ActionSpace.FOLD
+
+            # VS BTN
+            elif open_raiser_position == pos.BTN:
+                # todo vs BU
+                pass
+
+            # VS SB
+            if hand in open_raising_ranges[pos.CO]:
+                return ActionSpace.CHECK_CALL
+            elif hand in ranges['JJ+'] or hand in ranges['AK'] or hand in ranges['AQs']:
+                return ActionSpace.RAISE_POT
+            elif hand in ranges['K5s-K8s'] or hand in ranges['Q5s-Q7s'] or hand in ranges['J5s-J7s'] or hand in ranges[
+                'T6s'] or hand in ranges['T7s'] or hand in ranges['95s-96s']:
+                if random.random() < self.semi_bluff_probability:
+                    return ActionSpace.RAISE_POT
+            return ActionSpace.FOLD
         else:
             raise ValueError(f"Hero Position must be in [MP, CO, BTN, SB, BB] but was {hero_position}")
 
