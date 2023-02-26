@@ -2,7 +2,7 @@
 # flop pot odds
 # assume ranges (consider making them stochastic) for post flop MC analysis
 import numpy as np
-from prl.environment.Wrappers.aoh import Positions6Max
+from prl.environment.Wrappers.aoh import Positions6Max as pos
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols
 
 from prl.baselines.evaluation.utils import get_reset_config, pretty_print
@@ -12,6 +12,7 @@ from prl.environment.Wrappers.vectorizer import Vectorizer
 hand0 = []
 
 ranges = {
+    # see www.bestpokercoaching.com/6max-preflop-chart
     'KK+': [(11, 11), (12, 12)],
     'QQ+': [(10, 10), (11, 11), (12, 12)],
     'JJ+': [(9, 9), (10, 10), (11, 11), (12, 12)],
@@ -20,7 +21,6 @@ ranges = {
     'TT': (8, 8),
     '99': (7, 7),
     'AK': [(12, 11), (11, 12)],
-    'AQ': [(12, 10), (10, 12)],
     'AQs': (12, 10),
     'AQo': (10, 12),
     'AJ': [(12, 9), (9, 12)],
@@ -52,22 +52,134 @@ ranges = {
     'T9s': (8, 7),
     'T7s': (8, 5),
     'T6s': (8, 4),
+    '95s-96s': [(7, 3), (7, 4)],
     'A2s-A5s': [(12, 0), (12, 1), (12, 2), (12, 3)],
     'A2s-A8s': [(12, 0), (12, 1), (12, 2), (12, 3), (12, 4), (12, 5), (12, 6)],
     'A2s-A9s': [(12, 0), (12, 1), (12, 2), (12, 3), (12, 4), (12, 5), (12, 6), (12, 7)],
     'K5-K8s': [(11, 3), (11, 4), (11, 5), (11, 6)],
     'Q5s-Q7s': [(10, 3), (10, 4), (10, 5)],
     'J5s-J7s': [(9, 3), (9, 4), (9, 5)],
+    '44-AA': [(2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10), (11, 11), (12, 12)],
+    '98s': (7, 6),
+    'J9s': (9, 7),
+    'JTs+': [(9, 8), (10, 8), (11, 8), (12, 8)],
+    'QJs+': [(10, 9), (11, 9), (12, 9)],
+    'KQs+': [(11, 10), (12, 10)],
+    'AQ': [(12, 10), (10, 12)],
+    'T8s-K8s': [(11, 6), (10, 6), (9, 6), (8, 6)],
+    'Q9s-K9s': [(11, 7), (10, 7)],
+    'JTo-KTo': [(8, 9), (8, 10), (8, 11)],
+    'QJo-KJo': [(9, 10), (9, 11)],
+    'A8o-A9o': [(12, 6), (12, 7)],
+
 }
+ranges['98s+'] = [ranges['JTs+'] + [()]]
+open_raising_ranges = {}
+open_raising_ranges[pos.UTG] = {[
+    ranges['44-AA'] +
+    ranges['98s'] +
+    ranges['J9s'] +
+    ranges['T9s'] +
+    ranges['JTs+'] +
+    ranges['QJs+'] +
+    ranges['KQs+'] +
+    ranges['AQ']
+]}
+
+open_raising_ranges[pos.MP] = open_raising_ranges[pos.UTG] + [(12, 0), (12, 1), (12, 2), (12, 3), (12, 4), (12, 5),
+                                                              (12, 6), (12, 7), (0, 0), (1, 1), (5, 4), (6, 5)]
+open_raising_ranges[pos.CO] = open_raising_ranges[pos.MP] + \
+                              ranges['T8s-K8s'] + \
+                              ranges['Q9s-K9s'] + \
+                              ranges['JTo-KTo'] + \
+                              ranges['QJo-KJo'] + \
+                              ranges['A8o-A9o'] + \
+                              [(4, 3), (5, 3), (6, 4), (7, 5)]  # 65s, 75s, 86s, 97s
+open_raising_ranges[pos.BTN] = open_raising_ranges[pos.CO] + \
+                               [(1, 0),
+                                (2, 0),
+                                (3, 0),
+                                (4, 0),
+                                (5, 0),
+                                (6, 0),
+                                (7, 0),
+                                (8, 0),
+                                (9, 0),
+                                (10, 0),
+                                (11, 0)] + [(2, 1),
+                                            (3, 1),
+                                            (4, 1),
+                                            (5, 1),
+                                            (6, 1),
+                                            (7, 1),
+                                            (8, 1),
+                                            (9, 1),
+                                            (10, 1),
+                                            (11, 1)] + \
+                               [(3, 2),
+                                (4, 2),
+                                (5, 2),
+                                (6, 2),
+                                (7, 2),
+                                (8, 2),
+                                (9, 2),
+                                (10, 2),
+                                (11, 2)] + \
+                               [(6, 3),
+                                (7, 3),
+                                (8, 3),
+                                (9, 3),
+                                (10, 3),
+                                (11, 3)] + \
+                               [(7, 4),
+                                (8, 4),
+                                (9, 4),
+                                (10, 4),
+                                (11, 4)] + \
+                               [(8, 5),
+                                (9, 5),
+                                (10, 5),
+                                (11, 5)] + \
+                               [(7, 8),  # T9o-K9o
+                                (7, 9),
+                                (7, 10),
+                                (7, 11)] + \
+                               [(6, 7),  # 98o-K8o
+                                (6, 8),
+                                (6, 9),
+                                (6, 10),
+                                (6, 11)] + \
+                               [(5, 6),  # 87o-A7o
+                                (5, 7),
+                                (5, 8),
+                                (5, 9),
+                                (5, 10),
+                                (5, 11),
+                                (5, 12)] + \
+                               [(4, 5),  # 76o-A6o
+                                (4, 6),
+                                (4, 7),
+                                (4, 8),  # drop J6o
+                                (4, 10),
+                                (4, 11),
+                                (4, 12)] + [
+                                   (3, 4), (3, 5), (3, 11), (3, 12),
+                                   (0, 12), (1, 12), (2, 12)
+                               ]
 
 
+# pos.UTG: [],
+#     pos.MP: [],
+#     pos.CO: [],
+#     pos.BTN: [],
+#     pos.SB: [],
+#     pos.BB: []
 class RuleBasedAgent:
     def __init__(self, num_players):
         # assume that number of players does not change during the game
         # this assumption is valid, because we refill each player stack
         # after each round, such that the number of players never decreases
         self.num_players = num_players
-        pos = Positions6Max
         positions = {2: (pos.BTN, pos.BB),
                      3: (pos.BTN, pos.SB, pos.BB),
                      4: (pos.BTN, pos.SB, pos.BB, pos.CO),
@@ -98,6 +210,29 @@ class RuleBasedAgent:
             'total': r00 + r01 + r10 + r11 + r20 + r21 + r30 + r31 + r40 + r41 + r50 + r51
         }
 
+    def get_preflop_openraise_or_fold(self, hand, hero_position, raises):
+        # bet/fold
+        if hero_position == pos.UTG:
+            pass
+        elif hero_position == pos.MP:
+            pass
+        elif hero_position == pos.CO:
+            pass
+        elif hero_position == pos.BTN:
+            pass
+        elif hero_position == pos.SB:
+            pass
+        elif hero_position == pos.BB:
+            pass
+        else:
+            raise ValueError(f"Invalid position of current player: {hero_position}")
+
+    def get_preflop_3bet_or_call_or_fold(self, hand, hero_position, raises):
+        pass
+
+    def get_preflop_4bet_or_call_or_fold(self, hand, hero_position, raises):
+        pass
+
     def act(self, obs: np.ndarray, legal_moves):
         print('YEAY')
         c0 = obs[cols.First_player_card_0_rank_0:cols.First_player_card_0_suit_3 + 1]
@@ -114,10 +249,14 @@ class RuleBasedAgent:
         # map diese aktionen auf die position
         # pos_idx = (i + btn_idx) % self.num_players
         a = 1
+        hero_position = self.positions[-btn_idx % self.num_players]
+
         # case no previous raise
         if raises['total'] == 0:
-            # bet/fold
-            pass
+            return self.get_preflop_openraise_or_fold(hand,
+                                                      hero_position,
+                                                      raises)
+
         # case one previous raise:
         if raises['total'] == 1:
             # call/ xor 3b/ALLIN  xor 3b/FOLD (semi-bluff)
