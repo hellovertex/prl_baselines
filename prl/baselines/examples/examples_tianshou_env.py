@@ -52,7 +52,7 @@ class TianshouEnvWrapper(AECEnv):
                 ckpt_path=mc_ckpt_path, num_players=self.num_players)
         self._last_player_id = -1
 
-        obs_space = Box(low=0.0, high=6.0, shape=(564,), dtype=np.float64)
+        obs_space = Box(low=0.0, high=6.0, shape=(569,), dtype=np.float64)
 
         # if 'mask_legal_moves' in env_config:
         #     if env_config['mask_legal_moves']:

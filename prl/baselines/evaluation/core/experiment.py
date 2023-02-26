@@ -5,13 +5,11 @@ from typing import TypeVar, List, Optional, Union, Dict, Callable, Tuple, Any, T
 import tianshou.policy
 from prl.environment.Wrappers.base import EnvWrapperBase
 from prl.environment.steinberger.PokerRL import NoLimitHoldem
-from ray.rllib import Policy
 from tianshou.env import SubprocVectorEnv, PettingZooEnv
 
 from prl.baselines.agents.core.base_agent import Agent, RllibAgent
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Action
 
-POLICY = TypeVar('POLICY', bound=Policy)
 AGENT = TypeVar('AGENT', bound=Agent)
 ENV_WRAPPER = TypeVar('ENV_WRAPPER', bound=EnvWrapperBase)
 
