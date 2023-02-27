@@ -36,8 +36,8 @@ class TianshouEnvWrapper(AECEnv):
     def __init__(self,
                  env,
                  agents: List[str],
-                 reward_type: RewardType,
-                 mc_ckpt_path: Optional[str]):
+                 mc_ckpt_path: Optional[str],
+                 reward_type: RewardType = RewardType.ABSOLUTE,):
         super().__init__()
         self.name = "env"
         self.reward_type = reward_type

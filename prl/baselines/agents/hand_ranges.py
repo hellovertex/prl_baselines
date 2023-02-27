@@ -79,21 +79,19 @@ ranges = {
     '65o-75o': [(3, 4), (3, 5)],
     'K5o-A5o': [(3, 11), (3, 12)],
     'A2o-A4o': [(0, 12), (1, 12), (2, 12)],
-    'KTs': [(11,8)]
+    'KTs': [(11, 8)]
 }
 # ranges['98s+'] = [ranges['JTs+'] + [()]]
-open_raising_ranges = {pos.UTG: [
-    ranges['44-AA'] +
-    ranges['98s'] +
-    ranges['J9s'] +
-    ranges['T9s'] +
-    ranges['JTs-ATs'] +
-    ranges['QJs-AJs'] +
-    ranges['KQ'] +
-    ranges['AQ'] +
-    ranges['AK'] +
-    ranges['ATo-AJo']
-]}
+open_raising_ranges = {pos.UTG: ranges['44-AA'] +
+                                ranges['98s'] +
+                                ranges['J9s'] +
+                                ranges['T9s'] +
+                                ranges['JTs-ATs'] +
+                                ranges['QJs-AJs'] +
+                                ranges['KQ'] +
+                                ranges['AQ'] +
+                                ranges['AK'] +
+                                ranges['ATo-AJo']}
 
 open_raising_ranges[pos.MP] = open_raising_ranges[pos.UTG] + \
                               ranges['22-33'] + \

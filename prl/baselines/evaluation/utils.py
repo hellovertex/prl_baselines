@@ -144,7 +144,10 @@ def get_board_cards(obs):
     return board
 
 
-def pretty_print(player_id, obs, action):
+def pretty_print(player_id, obs, action, env=None):
+    if isinstance(action, tuple):
+        assert env is not None
+        action = env.discretize(action)
     cards = get_player_cards(obs)
     board = get_board_cards(obs)
     round = get_round(obs)

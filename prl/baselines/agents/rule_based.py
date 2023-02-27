@@ -121,17 +121,17 @@ class RuleBasedAgent:
 
     def get_players_who_raised_twice_preflop(self, raises) -> List[int]:
         result = []
-        if sum(raises[0] > 1):
+        if sum(raises[0]) > 1:
             result.append(0)
-        if sum(raises[1] > 1):
+        if sum(raises[1]) > 1:
             result.append(1)
-        if sum(raises[2] > 1):
+        if sum(raises[2]) > 1:
             result.append(2)
-        if sum(raises[3] > 1):
+        if sum(raises[3]) > 1:
             result.append(3)
-        if sum(raises[4] > 1):
+        if sum(raises[4]) > 1:
             result.append(4)
-        if sum(raises[5] > 1):
+        if sum(raises[5]) > 1:
             result.append(5)
         return result
 
@@ -230,7 +230,6 @@ class RuleBasedAgent:
                     index_max = self.ordered_positions.index(position_max)
                     earliest = position_max if index_max < index_min else position_min
                     latest = position_max if index_max > index_min else position_min
-                    assert earliest != latest
                     # case 2a) all players that raised twice are BEFORE hero
                     # Example: UTG open-raises, HERO-CO 3bets, ..., UTG-4bets, HERO has to choose ALLIN / FOLD
                     if max(index_min, index_max) < hero_index:
@@ -238,7 +237,6 @@ class RuleBasedAgent:
                                                    defender=hero_position,
                                                    aggressor=earliest,
                                                    is_first_betting_round=False)
-
                     # case 2b) hero is sandwhiched by double raisors
                     # Example: UTG open raises Hero calls SB 3 bets
                     # continued:  UTG 4 bets Hero calls SB 5 bets UTG calls -- Hero has to act
@@ -301,7 +299,7 @@ if __name__ == '__main__':
             i = agent_names.index(agent_id)
             action = agents[i].act(obs, legal_moves)
             print(f'AGNET_ID = {agent_id}')
-            pretty_print(i, obs, action)
+            pretty_print(i, obs, action, env.env.env.env_wrapped)
             obs_dict, cum_reward, terminated, truncated, info = env.step(action)
             rews = cum_reward
             agent_id = obs_dict['agent_id']
