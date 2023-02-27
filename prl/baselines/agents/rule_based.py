@@ -8,17 +8,12 @@ from prl.environment.Wrappers.aoh import Positions6Max as pos
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols
 from prl.environment.Wrappers.base import ActionSpace
 
+from prl.baselines.agents.hand_ranges import open_raising_ranges, vs_1_raiser_3b_and_fold, vs_1_raiser_call, \
+    vs_1_raiser_3b_and_allin, vs_3bet_after_openraise_call, vs_3bet_after_openraise_4b_and_allin
 from prl.baselines.evaluation.utils import get_reset_config, pretty_print
 from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
-from prl.environment.Wrappers.vectorizer import Vectorizer
 
 
-# pos.UTG: [],
-#     pos.MP: [],
-#     pos.CO: [],
-#     pos.BTN: [],
-#     pos.SB: [],
-#     pos.BB: []
 class RuleBasedAgent:
     def __init__(self, num_players, normalization):
         # assume that number of players does not change during the game
@@ -38,20 +33,7 @@ class RuleBasedAgent:
                              6: (pos.UTG, pos.MP, pos.CO, pos.BTN, pos.SB, pos.BB)}
         self.positions = positions[num_players]
         self.ordered_positions = ordered_positions[num_players]
-        self.open_calling_range_MP = ranges['55-QQ'] + ranges['AK'] + ranges['AQs']
-        self.open_calling_range_CO = ranges['55-QQ'] + ranges['AK'] + ranges['AQ'] + ranges['KQs']
-        self.open_calling_range_BTN = ranges['44-QQ'] + + ranges['AK'] + ranges['AQ'] + ranges['KQs'] + ranges['AJs']
-        self.open_calling_range_BTN_VS_CO = ranges['22-JJ'] + ranges['ATs+'] + ranges['AQo'] + ranges['KQs']
-        self.open_calling_range_SB_BB = ranges['22-JJ'] + ranges['AQ'] + ranges['AJ'] + ranges['ATs'] + ranges['KQs'] + \
-                                        ranges['KJs'] + ranges['QJs'] + ranges['JTs']
         self.open_raising_sizes = (4, 3, 2.5, 2, 2, 4)
-        # do not change this probability,
-        # we need this for polarized 3b/Fold strategy vs 1 preflop Raiser
-        # the bot folds after being c-bet on a semi-bluff, so it is fine to have .95% as the range for semi-bluffs
-        # is very conservative
-        self.semi_bluff_probability = .95
-        self.common_semi_bluff_range_preflop = ranges['56s'] + ranges['67s'] + ranges['78s'] + ranges['89s'] + ranges[
-            'T9s']
         self.raise_action = 2
 
     def get_raises_preflop(self, obs):
@@ -102,134 +84,36 @@ class RuleBasedAgent:
             return self.raise_action, raise_amount
         return ActionSpace.FOLD
 
-    def vs_1_preflop_raiser(self, hand, hero_position, raises, btn_idx):
-        # given raises (relative to observer) determine who open-raised
-        # the following line is kept for reference but the assertion is wrong
-        # in fact there can be multiple raises before hero gets first chance to raise
-        # assert len(raises['who_raised']) == 1
-
-        # raise_idx = raises['who_raised'][0]
-        raise_idx = min(raises['who_raised'])
-        assert raise_idx > 0, "Hero must not have raised already here."
-        open_raiser_position = self.positions[(raise_idx - btn_idx) % self.num_players]
-
-        # Open Raisor was UTG
-        if hero_position == pos.MP:
-            assert open_raiser_position == pos.UTG
-            if hand in self.open_calling_range_MP:
-                return 1, -1
-            elif hand in ranges['KK+']:
+    def vs_1_raiser_pf(self, hand, defender, aggressor, is_first_betting_round):
+        if hand in vs_1_raiser_3b_and_fold[defender][aggressor]:
+            if is_first_betting_round:
                 return ActionSpace.RAISE_POT
-
-        # Open Raisor was UTG or Middle Position
-        elif hero_position == pos.CO:
-            assert open_raiser_position == pos.UTG or open_raiser_position == pos.MP
-            if hand in self.open_calling_range_CO:
-                return 1, -1
-            elif hand in ranges['KK+']:
-                return ActionSpace.RAISE_POT
-
-        # Open Raisor was before BUTTON
-        elif hero_position == pos.BTN:
-            assert open_raiser_position in [pos.UTG, pos.MP, pos.CO]
-            # BTN VS CO
-            if open_raiser_position == pos.CO:
-                if hand in self.open_calling_range_BTN_VS_CO:
-                    return ActionSpace.CHECK_CALL
-                elif hand in ranges['QQ+'] or hand in ranges['AK']:
-                    return ActionSpace.RAISE_POT
-                elif hand in self.common_semi_bluff_range_preflop or hand in ranges['A2s-A5s']:
-                    if random.random() < self.semi_bluff_probability:
-                        return ActionSpace.RAISE_POT
-                return ActionSpace.FOLD
-            # BTN VS UTG OR MP
             else:
-                if hand in self.open_calling_range_BTN:
-                    return ActionSpace.CHECK_CALL
-                elif hand in ranges['KK+']:
-                    return ActionSpace.RAISE_POT
-                elif hand in self.common_semi_bluff_range_preflop:
-                    if random.random() < self.semi_bluff_probability:
-                        return ActionSpace.RAISE_POT
                 return ActionSpace.FOLD
-
-        # Open Raisor was before SB
-        elif hero_position == pos.SB:
-            assert open_raiser_position in [pos.UTG, pos.MP, pos.CO, pos.BTN]
-            if open_raiser_position in [pos.UTG, pos.MP]:
-                if hand in ranges['22-QQ'] or hand in ranges['AK'] or hand in ranges['AQ']:
-                    return ActionSpace.CHECK_CALL
-                elif hand in ranges['KK+']:
-                    return ActionSpace.RAISE_POT
-                elif hand in ranges['78s'] or hand in ranges['89s'] or hand in ranges['T9s']:
-                    if random.random() < self.semi_bluff_probability:
-                        return ActionSpace.RAISE_POT
-                return ActionSpace.FOLD
-
-            # CUTOFF OPENRAISED
-            elif open_raiser_position == pos.CO:
-                if hand in self.open_calling_range_SB_BB:
-                    return ActionSpace.CHECK_CALL
-                elif hand in ranges['QQ+'] or hand in ranges['AK']:
-                    return ActionSpace.RAISE_POT
-                elif hand in self.common_semi_bluff_range_preflop or hand in ranges['A2s-A5s']:
-                    if random.random() < self.semi_bluff_probability:
-                        return ActionSpace.RAISE_POT
-                return ActionSpace.FOLD
-            elif open_raiser_position == pos.BTN:
-                if hand in self.open_calling_range_SB_BB or hand in ranges['AT'] or hand in ranges['A9s'] or hand in \
-                        ranges['KQ'] or hand in ranges['KTs']:
-                    return ActionSpace.CHECK_CALL
-                elif hand in ranges['QQ+'] or hand in ranges['AK']:
-                    return ActionSpace.RAISE_POT
-                elif hand in self.common_semi_bluff_range_preflop or hand in ranges['A2s-A8s'] or hand in ranges[
-                    '68s'] or hand in ranges['79s']:
-                    if random.random() < self.semi_bluff_probability:
-                        return ActionSpace.RAISE_POT
-                return ActionSpace.FOLD
-
-        # Open Raisor was before BB
-        elif hero_position == pos.BB:
-            assert open_raiser_position in [pos.UTG, pos.MP, pos.CO, pos.BTN, pos.SB]
-
-            # VS UTG, MP, CO
-            if open_raiser_position in [pos.UTG, pos.MP, pos.CO]:
-                if hand in self.open_calling_range_SB_BB:
-                    return ActionSpace.CHECK_CALL
-                elif hand in ranges['QQ+']:
-                    return ActionSpace.RAISE_POT
-                elif hand in ranges['A2s-A9s'] or hand in ranges['AK'] or hand in self.common_semi_bluff_range_preflop:
-                    if random.random() < self.semi_bluff_probability:
-                        return ActionSpace.RAISE_POT
-                return ActionSpace.FOLD
-
-            # VS BTN
-            elif open_raiser_position == pos.BTN:
-                if hand in ranges['22-JJ'] or hand in ranges[
-                    'AT-AQ'] or hand in ranges['A9s'] or hand in ranges[
-                    'KT+'] or hand in ranges['QT+'] or hand in ranges['JTs']:
-                    return ActionSpace.CHECK_CALL
-                elif hand in ranges['QQ+'] or hand in ranges['AK']:
-                    return ActionSpace.RAISE_POT
-                elif hand in ranges['A2s-A8s'] or hand in self.common_semi_bluff_range_preflop or hand in ranges[
-                    '68s'] or hand in ranges['79s']:
-                    if random.random() < self.semi_bluff_probability:
-                        return ActionSpace.RAISE_POT
-                return ActionSpace.FOLD
-
-            # VS SB
-            if hand in open_raising_ranges[pos.CO]:
-                return ActionSpace.CHECK_CALL
-            elif hand in ranges['JJ+'] or hand in ranges['AK'] or hand in ranges['AQs']:
+        elif hand in vs_1_raiser_3b_and_allin[defender][aggressor]:
+            if is_first_betting_round:
                 return ActionSpace.RAISE_POT
-            elif hand in ranges['K5s-K8s'] or hand in ranges['Q5s-Q7s'] or hand in ranges['J5s-J7s'] or hand in ranges[
-                'T6s'] or hand in ranges['T7s'] or hand in ranges['95s-96s']:
-                if random.random() < self.semi_bluff_probability:
-                    return ActionSpace.RAISE_POT
-            return ActionSpace.FOLD
+            else:
+                return ActionSpace.RAISE_ALL_IN
+        elif hand in vs_1_raiser_call[defender][aggressor]:
+            return ActionSpace.CHECK_CALL
+        return ActionSpace.FOLD
 
-        else:
-            raise ValueError(f"Hero Position must be in [MP, CO, BTN, SB, BB] but was {hero_position}")
+    def vs_3bet_after_openraise(self, hand, defender, aggressor, is_first_betting_round):
+        if hand in vs_3bet_after_openraise_call[defender][aggressor]:
+            return ActionSpace.CHECK_CALL
+        elif hand in vs_3bet_after_openraise_4b_and_allin[defender][aggressor]:
+            if is_first_betting_round:
+                return ActionSpace.RAISE_POT
+            else:
+                return ActionSpace.RAISE_ALL_IN
+        return ActionSpace.FOLD
+
+    def is_first_betting_round(self, raises):
+        if sum(raises[0]) > 1 or sum(raises[1]) > 1 or sum(raises[2]) > 1 or sum(raises[3]) > 1 or sum(
+                raises[4]) > 1 or sum(raises[5]) > 1:
+            return False
+        return True
 
     def act(self, obs: np.ndarray, legal_moves):
         print('YEAY')
@@ -241,14 +125,24 @@ class RuleBasedAgent:
         min_r = min(r0, r1)
         hand = (max_r, min_r) if s0 == s1 else (min_r, max_r)
         btn_idx = np.where(obs[cols.Btn_idx_is_0:cols.Btn_idx_is_5 + 1] == 1)[0]
-
         a = 1
-        hero_position = self.positions[-btn_idx % self.num_players]
-        i_th_to_act_hero = self.ordered_positions.index(hero_position)
-
+        # todo add some assertions as sanity checks
         if obs[cols.Round_preflop]:
             # last two raises one-hot encoded for each player
             raises = self.get_raises_preflop(obs)
+            raise_idx = min(raises['who_raised'])
+            is_first_betting_round = True
+            # if anybody raised twice,
+            aggressor1 = min(raises['who_raised'])
+            aggressor2 = max(raises['who_raised'])
+            hero_position = self.positions[-btn_idx % self.num_players]
+            aggressor1_position = self.positions[(aggressor1 - btn_idx) % self.num_players]
+            aggressor2_position = self.positions[(aggressor2 - btn_idx) % self.num_players]
+            hero_index = self.ordered_positions.index(hero_position)
+            agg1_index = self.ordered_positions.index(aggressor1_position)
+            agg2_index = self.ordered_positions.index(aggressor2_position)
+            is_first_betting_round = self.is_first_betting_round(raises)
+
             # case no previous raise
             if raises['total'] == 0:
                 return self.get_preflop_openraise_or_fold(obs,
@@ -257,12 +151,17 @@ class RuleBasedAgent:
             # case one previous raise --> it was not hero who raised:
             if raises['total'] == 1:
                 # call/ xor 3b/ALLIN  xor 3b/FOLD (semi-bluff)
-                return self.vs_1_preflop_raiser(hand,
-                                                hero_position,
-                                                raises,
-                                                btn_idx)
+                # defender = hero
+                assert hero_index < agg1_index
+                assert agg1_index == agg2_index
+                assert is_first_betting_round
+                return self.vs_1_raiser_pf(hand,
+                                           defender=hero_position,
+                                           aggressor=aggressor1_position,
+                                           is_first_betting_round=is_first_betting_round)
             # case 3bet --> Hero raised previously:
             if raises['total'] > 1:
+                # todo if not is_first_betting_round get peops who raised twice
                 # case 1) no-one raised twice: get earliest aggressor and latest aggressor
                 # 1a) hero open raised -- vs3bet after openraise -- hero == earliest aggressor
                 # --> vs latest aggressor
