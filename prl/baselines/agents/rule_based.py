@@ -144,17 +144,25 @@ class RuleBasedAgent:
         max_r = max(r0, r1)
         min_r = min(r0, r1)
         hand = (max_r, min_r) if s0 == s1 else (min_r, max_r)
-        btn_idx = np.where(obs[cols.Btn_idx_is_0:cols.Btn_idx_is_5 + 1] == 1)[0]
+        btn_idx = np.where(obs[cols.Btn_idx_is_0:cols.Btn_idx_is_5 + 1] == 1)[0][0]
         if obs[cols.Round_preflop]:
             # last two raises one-hot encoded for each player
             raises = self.get_raises_preflop(obs)
+            hero_position: pos = self.positions[-btn_idx % self.num_players]
 
+            # true if nobody raised twice
+            is_first_betting_round = self.is_first_betting_round(raises)
+
+            # case nobody raised previously
+            if raises['total'] == 0:
+                return self.get_preflop_openraise_or_fold(obs,
+                                                          hand,
+                                                          hero_position)
             # index relative to button
             aggressor1 = min(raises['who_raised'])
             aggressor2 = max(raises['who_raised'])
 
             # Positions6Max names
-            hero_position: pos = self.positions[-btn_idx % self.num_players]
             aggressor1_position: pos = self.positions[(aggressor1 - btn_idx) % self.num_players]
             aggressor2_position: pos = self.positions[(aggressor2 - btn_idx) % self.num_players]
 
@@ -165,25 +173,18 @@ class RuleBasedAgent:
             latest_aggressor: int = max(agg1_index, agg2_index)
             earliest_aggressor: int = min(agg1_index, agg2_index)
 
-            # true if nobody raised twice
-            is_first_betting_round = self.is_first_betting_round(raises)
-
-            # case nobody raised previously
-            if raises['total'] == 0:
-                return self.get_preflop_openraise_or_fold(obs,
-                                                          hand,
-                                                          hero_position)
             # case one previous raise --> it was not hero who raised:
             if raises['total'] == 1:
                 # call/ xor 3b/ALLIN  xor 3b/FOLD (semi-bluff)
                 # defender = hero
-                assert hero_index < agg1_index
+                assert hero_index > agg1_index
                 assert agg1_index == agg2_index
                 assert is_first_betting_round
                 return self.vs_1_raiser_pf(hand,
                                            defender=hero_position,
                                            aggressor=aggressor1_position,
                                            is_first_betting_round=is_first_betting_round)
+
             # case 3bet --> Hero raised previously:
             if raises['total'] > 1:
                 # is empty when nobody raised twice
@@ -285,7 +286,8 @@ if __name__ == '__main__':
     agents = [RuleBasedAgent(num_players, normalization) for _ in range(num_players)]
     #  todo init from state dict and feed NN observations
     board = '[Ks Kh Kd Kc 2s]'
-    player_hands = ['[Jh Jc]', '[4h 6s]', '[As 5s]']
+    # player_hands = ['[Jh Jc]', '[4h 6s]', '[As 5s]']
+    player_hands = ['[Ah Ac]', '[Kh Ks]', '[As Ad]']
     state_dict = get_reset_config(player_hands, board)
     assert len(agents) == num_players == len(stack_sizes)
     options = {'reset_config': state_dict}
