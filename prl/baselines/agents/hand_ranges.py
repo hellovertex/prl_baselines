@@ -158,7 +158,7 @@ vs_1_raiser_3b_and_allin[pos.BB] = {pos.UTG: ranges['QQ+'],
                                     pos.MP: ranges['QQ+'],
                                     pos.CO: ranges['QQ+'],
                                     pos.BTN: ranges['QQ+'] + ranges['AK'],
-                                    pos.SB: ranges['JJ+'] + ranges['AK'], ranges['AQs']}
+                                    pos.SB: ranges['JJ+'] + ranges['AK'] + ranges['AQs']}
 vs_1_raiser_3b_and_fold = {}
 vs_1_raiser_3b_and_fold[pos.MP] = {pos.UTG: []}
 vs_1_raiser_3b_and_fold[pos.CO] = {pos.UTG: [],
@@ -170,10 +170,60 @@ vs_1_raiser_3b_and_fold[pos.BTN] = {pos.UTG: ranges['56s'] +
                                              ranges['T9s']}
 vs_1_raiser_3b_and_fold[pos.BTN][pos.MP] = vs_1_raiser_3b_and_fold[pos.BTN][pos.UTG]
 vs_1_raiser_3b_and_fold[pos.BTN][pos.CO] = vs_1_raiser_3b_and_fold[pos.BTN][pos.MP] + ranges['A2s-A5s']
-vs_1_raiser_3b_and_fold[pos.SB]={pos.UTG: ranges['78s'] + ranges['89s'] + ranges['T9s'],
-                                 pos.MP: ranges['78s'] + ranges['89s'] + ranges['T9s'],
-                                 pos.CO: vs_1_raiser_3b_and_fold[pos.BTN][pos.CO],
-                                 pos.BTN: vs_1_raiser_3b_and_fold[pos.BTN][pos.UTG]
-                                          + ranges['A2s-A8s'] + ranges['68s'] + ranges['79s']}
-vs_1_raiser_3b_and_fold[pos.BB] = {}
+vs_1_raiser_3b_and_fold[pos.SB] = {pos.UTG: ranges['78s'] + ranges['89s'] + ranges['T9s'],
+                                   pos.MP: ranges['78s'] + ranges['89s'] + ranges['T9s'],
+                                   pos.CO: vs_1_raiser_3b_and_fold[pos.BTN][pos.CO],
+                                   pos.BTN: vs_1_raiser_3b_and_fold[pos.BTN][pos.UTG]
+                                            + ranges['A2s-A8s'] + ranges['68s'] + ranges['79s']}
+vs_1_raiser_3b_and_fold[pos.BB] = {pos.UTG: ranges['A2s-A9s'] +
+                                            ranges['AK'] +
+                                            vs_1_raiser_3b_and_fold[pos.BTN][pos.UTG]}
+vs_1_raiser_3b_and_fold[pos.BB][pos.MP] = vs_1_raiser_3b_and_fold[pos.BB][pos.UTG]
+vs_1_raiser_3b_and_fold[pos.BB][pos.CO] = vs_1_raiser_3b_and_fold[pos.BB][pos.MP]
+vs_1_raiser_3b_and_fold[pos.BB][pos.BTN] = vs_1_raiser_3b_and_fold[pos.SB][pos.BTN]
+vs_1_raiser_3b_and_fold[pos.BB][pos.SB] = ranges['K5s-K8s'] + \
+                                          ranges['Q5s-Q7s'] + \
+                                          ranges['J5s-J7s'] + \
+                                          ranges['T6s'] + ranges['T7s'] + ranges['95s-96s']
 
+vs_3bet_after_openraise_4b_and_allin = {}
+vs_3bet_after_openraise_4b_and_allin[pos.UTG] = {pos.MP: ranges['KK+'],
+                                                 pos.CO: ranges['KK+'],
+                                                 pos.BTN: ranges['QQ+'],
+                                                 pos.SB: ranges['KK+'],
+                                                 pos.BB: ranges['KK+']}
+vs_3bet_after_openraise_4b_and_allin[pos.MP] = {pos.CO: ranges['KK+'],
+                                                pos.BTN: ranges['QQ+'],
+                                                pos.SB: ranges['KK+'],
+                                                pos.BB: ranges['KK+']}
+
+vs_3bet_after_openraise_4b_and_allin[pos.CO] = {pos.BTN: ranges['QQ+'] + ranges['AK'],
+                                                pos.SB: ranges['QQ+'] + ranges['AK'],
+                                                pos.BB: ranges['QQ+'] + ranges['AK']}
+vs_3bet_after_openraise_4b_and_allin[pos.BTN] = {pos.SB: ranges['JJ+'] + ranges['AK'],
+                                                 pos.BB: ranges['JJ+'] + ranges['AK']}
+vs_3bet_after_openraise_4b_and_allin[pos.SB] = {pos.BB: ranges['JJ+'] + ranges['AK']}
+
+vs_3bet_after_openraise_call = {}
+vs_3bet_after_openraise_call[pos.UTG] = {pos.MP: ranges['QQ'] + ranges['AK'],
+                                         pos.CO: ranges['JJ'] + ranges['QQ'] + ranges['AK'],
+                                         pos.BTN: ranges['TT'] + ranges['JJ'] + ranges['AK'],
+                                         pos.SB: ranges['TT'] + ranges['JJ'] + ranges['QQ'] + ranges['AK'],
+                                         pos.BB: ranges['TT'] + ranges['JJ'] + ranges['QQ'] + ranges['AK']}
+vs_3bet_after_openraise_call[pos.MP] = {pos.CO: ranges['TT'] + ranges['JJ'] + ranges['QQ'] + ranges['AK'],
+                                        pos.BTN: ranges['99'] + ranges['TT'] + ranges['JJ'] + ranges['AK'],
+                                        pos.SB: ranges['99'] + ranges['TT'] + ranges['JJ'] + ranges['QQ'] + ranges[
+                                            'AK'],
+                                        pos.BB: ranges['99'] + ranges['TT'] + ranges['JJ'] + ranges['QQ'] + ranges[
+                                            'AK']}
+vs_3bet_after_openraise_call[pos.CO] = {pos.BTN: ranges['88-JJ'],
+                                        pos.SB: ranges['88-JJ'],
+                                        pos.BB: ranges['88-JJ']}
+vs_3bet_after_openraise_call[pos.BTN] = {
+    pos.SB: ranges['66-TT'] + ranges['AQ'] + ranges['AJ'] + ranges['ATs'] + ranges['KQ'] + ranges['QJs'] + ranges[
+        'JTs'],
+    pos.BB: ranges['66-TT'] + ranges['AQ'] + ranges['AJ'] + ranges['ATs'] + ranges['KQ'] + ranges['QJs'] + ranges[
+        'JTs']}
+vs_3bet_after_openraise_call[pos.SB] = {
+    pos.BB: ranges['66-TT'] + ranges['AQ'] + ranges['AJ'] + ranges['ATs'] + ranges['KQ'] + ranges['QJs'] + ranges[
+        'JTs']}
