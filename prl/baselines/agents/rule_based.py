@@ -145,27 +145,30 @@ class RuleBasedAgent:
         min_r = min(r0, r1)
         hand = (max_r, min_r) if s0 == s1 else (min_r, max_r)
         btn_idx = np.where(obs[cols.Btn_idx_is_0:cols.Btn_idx_is_5 + 1] == 1)[0]
-        a = 1
-        # todo add some assertions as sanity checks
         if obs[cols.Round_preflop]:
             # last two raises one-hot encoded for each player
             raises = self.get_raises_preflop(obs)
-            raise_idx = min(raises['who_raised'])
-            is_first_betting_round = True
-            # if anybody raised twice,
+
+            # index relative to button
             aggressor1 = min(raises['who_raised'])
             aggressor2 = max(raises['who_raised'])
-            hero_position = self.positions[-btn_idx % self.num_players]
-            aggressor1_position = self.positions[(aggressor1 - btn_idx) % self.num_players]
-            aggressor2_position = self.positions[(aggressor2 - btn_idx) % self.num_players]
-            hero_index = self.ordered_positions.index(hero_position)
-            agg1_index = self.ordered_positions.index(aggressor1_position)
-            agg2_index = self.ordered_positions.index(aggressor2_position)
-            latest_aggressor = max(agg1_index, agg2_index)
-            earliest_aggressor = min(agg1_index, agg2_index)
+
+            # Positions6Max names
+            hero_position: pos = self.positions[-btn_idx % self.num_players]
+            aggressor1_position: pos = self.positions[(aggressor1 - btn_idx) % self.num_players]
+            aggressor2_position: pos = self.positions[(aggressor2 - btn_idx) % self.num_players]
+
+            # turn order
+            hero_index: int = self.ordered_positions.index(hero_position)
+            agg1_index: int = self.ordered_positions.index(aggressor1_position)
+            agg2_index: int = self.ordered_positions.index(aggressor2_position)
+            latest_aggressor: int = max(agg1_index, agg2_index)
+            earliest_aggressor: int = min(agg1_index, agg2_index)
+
+            # true if nobody raised twice
             is_first_betting_round = self.is_first_betting_round(raises)
 
-            # case no previous raise
+            # case nobody raised previously
             if raises['total'] == 0:
                 return self.get_preflop_openraise_or_fold(obs,
                                                           hand,
@@ -195,18 +198,18 @@ class RuleBasedAgent:
                         if earliest_aggressor == hero_index:
                             aggressor = aggressor1_position if latest_aggressor == agg1_index else aggressor2_position
                             return self.vs_3bet_after_openraise(hand,
-                                                         defender=hero_position,
-                                                         aggressor=aggressor,
-                                                         is_first_betting_round=True)
+                                                                defender=hero_position,
+                                                                aggressor=aggressor,
+                                                                is_first_betting_round=True)
                         # 1b) if Hero is sandwhiched --> hero called before and now faces -- 3bet after Openraise
                         # Example: UTG open-raised -- Hero-CO calls -- SB 3Bets,...UTG CALLS --> Hero acts
                         elif earliest_aggressor < hero_index < latest_aggressor:
                             defender = aggressor1_position if earliest_aggressor == agg1_index else aggressor2_position
                             aggressor = aggressor1_position if latest_aggressor == agg1_index else aggressor2_position
                             return self.vs_3bet_after_openraise(hand,
-                                                         defender=defender,  # hero has to use ranges of defender
-                                                         aggressor=aggressor,
-                                                         is_first_betting_round=True)
+                                                                defender=defender,  # hero has to use ranges of defender
+                                                                aggressor=aggressor,
+                                                                is_first_betting_round=True)
                     else:
                         # 1c) if latest aggressor is before hero -- hero plays vs 1 Raiser (possibly 3bet pot already)
                         # Example UTG open raises MP 3bets HERO-CO has to act
@@ -254,11 +257,11 @@ class RuleBasedAgent:
         elif obs[cols.Round_flop]:
             # for postflop play, assume preflop ranges and run monte carlo sims on
             # adjusted ranges (reconstruct range from action)
-            pass
+            return ActionSpace.FOLD
         elif obs[cols.Round_turn]:
-            pass
+            return ActionSpace.FOLD
         elif obs[cols.Round_river]:
-            pass
+            return ActionSpace.FOLD
         else:
             raise ValueError("Observation does not contain round-bit. "
                              "It either is a terminal observation or not initialized")
