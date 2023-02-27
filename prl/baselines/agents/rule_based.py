@@ -406,6 +406,7 @@ class RuleBasedAgent:
             raise ValueError(f"Hero Position must be in [MP, CO, BTN, SB, BB] but was {hero_position}")
 
     def get_preflop_4bet_or_call_or_fold(self, obs, hand, hero_position, raises):
+        #
         pass
 
     def act(self, obs: np.ndarray, legal_moves):
@@ -445,15 +446,27 @@ class RuleBasedAgent:
                                                                  hero_position,
                                                                  raises,
                                                                  btn_idx)
-                # hero has raised previously --> vs3bet
+                # hero has raised previously --> vs3bet after Openraise or vs 4bet ALLIN shove
                 else:
-                    # 4b/ALLIN or Call but we dont semi-bluff
+                    # todo: figure out a way how to determine, whether hero
+                    #  raise was openraise or 3bet
+
+                    # if hero openraised and faced 3 bet
+                    # -- 4b/ALLIN or Call but we dont semi-bluff
+                    # (someone has already raised twice) possible after 4b leading to ALLIN as 5bet
+                    pass
+                    # if hero 3bet and got 4bet (someone has already raised twice)
+                    # -- ALLIN is only option
+                    pass
+
                     self.get_preflop_4bet_or_call_or_fold(obs,
                                                           hand,
                                                           hero_position,
                                                           raises)
 
         elif obs[cols.Round_flop]:
+            # for postflop play, assume preflop ranges and run monte carlo sims on
+            # adjusted ranges (reconstruct range from action)
             pass
         elif obs[cols.Round_turn]:
             pass
