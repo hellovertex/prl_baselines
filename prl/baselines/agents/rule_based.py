@@ -188,7 +188,13 @@ class RuleBasedAgent:
                      4: (pos.BTN, pos.SB, pos.BB, pos.CO),
                      5: (pos.BTN, pos.SB, pos.BB, pos.MP, pos.CO),
                      6: (pos.BTN, pos.SB, pos.BB, pos.UTG, pos.MP, pos.CO)}
+        ordered_positions = {2: (pos.BTN, pos.BB),
+                             3: (pos.BTN, pos.SB, pos.BB),
+                             4: (pos.CO, pos.BTN, pos.SB, pos.BB),
+                             5: (pos.MP, pos.CO, pos.BTN, pos.SB, pos.BB),
+                             6: (pos.UTG, pos.MP, pos.CO, pos.BTN, pos.SB, pos.BB)}
         self.positions = positions[num_players]
+        self.ordered_positions = ordered_positions[num_players]
         self.open_calling_range_MP = ranges['55-QQ'] + ranges['AK'] + ranges['AQs']
         self.open_calling_range_CO = ranges['55-QQ'] + ranges['AK'] + ranges['AQ'] + ranges['KQs']
         self.open_calling_range_BTN = ranges['44-QQ'] + + ranges['AK'] + ranges['AQ'] + ranges['KQs'] + ranges['AJs']
@@ -409,6 +415,16 @@ class RuleBasedAgent:
         #
         pass
 
+    def get_5bet_preflop_vs_1_raiser(self, obs, hand, hero_position, raises):
+        # todo: if hand in 3b/AI range: return 5 bet vs 1 Raiser
+        #  else FOLD (can assert hand in 3b/FOLD range)
+        #  Call this function when someone has two raises but hero only has one raise
+        pass
+
+    def get_5bet_preflop_vs_3bet_after_openraise(self, obs, hand, hero_position, raises):
+        # todo:
+        pass
+
     def act(self, obs: np.ndarray, legal_moves):
         print('YEAY')
         c0 = obs[cols.First_player_card_0_rank_0:cols.First_player_card_0_suit_3 + 1]
@@ -447,7 +463,11 @@ class RuleBasedAgent:
                                                                  raises,
                                                                  btn_idx)
                 # hero has raised previously --> vs3bet after Openraise or vs 4bet ALLIN shove
-                else:
+                else:  #
+                    # todo: hero raised already - implement cases left
+                    #  1. hero is openraiser and gets 3bet -- do we call xor 4bet?
+                    #  3. hero 3bet another openraiser and got 4bet -- do we fold or shove?
+                    #  4.
                     # todo: figure out a way how to determine, whether hero
                     #  raise was openraise or 3bet
 
