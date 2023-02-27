@@ -12,163 +12,6 @@ from prl.baselines.evaluation.utils import get_reset_config, pretty_print
 from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
 from prl.environment.Wrappers.vectorizer import Vectorizer
 
-hand0 = []
-
-ranges = {
-    # see www.bestpokercoaching.com/6max-preflop-chart
-    'KK+': [(11, 11), (12, 12)],
-    'QQ+': [(10, 10), (11, 11), (12, 12)],
-    'JJ+': [(9, 9), (10, 10), (11, 11), (12, 12)],
-    'QQ': [(10, 10)],
-    'JJ': [(9, 9)],
-    'TT': [(8, 8)],
-    '99': [(7, 7)],
-    'AK': [(12, 11), (11, 12)],
-    'AQs': [(12, 10)],
-    'AQo': [(10, 12)],
-    'AJ': [(12, 9), (9, 12)],
-    'AT': [(12, 8), (8, 12)],
-    'AJs': [(12, 9)],
-    'ATs': [(12, 8)],
-    'AT-AQ': [(12, 8), (12, 9), (12, 10), (8, 12), (9, 12), (10, 12)],
-    'A9s': [(12, 7)],
-    'ATs+': [(12, 8), (12, 9), (12, 10), (12, 11)],
-    'KQ': [(11, 10), (10, 11)],
-    'KQs': [(11, 10)],
-    'KJs': [(11, 9)],
-    'KT+': [(11, 8), (11, 9), (11, 10), (8, 11), (9, 11), (10, 11)],
-    'QT+': [(10, 8), (10, 9), (10, 11), (8, 10), (9, 10), (11, 10)],  # include KT+?
-    'QJs': [(10, 9)],
-    'JTs': [(9, 8)],
-    '88-JJ': [(6, 6), (7, 7), (8, 8), (9, 9)],
-    '66-TT': [(4, 4), (5, 5), (6, 6), (7, 7), (8, 8)],
-    '55-QQ': [(3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10)],
-    '44-QQ': [(2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10)],
-    '22-JJ': [(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9)],
-    '22-QQ': [(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10)],
-    '56s': [(4, 3)],
-    '67s': [(5, 4)],
-    '68s': [(6, 4)],
-    '78s': [(6, 5)],
-    '79s': [(7, 5)],
-    '89s': [(7, 6)],
-    'T9s': [(8, 7)],
-    'T7s': [(8, 5)],
-    'T6s': [(8, 4)],
-    '95s-96s': [(7, 3), (7, 4)],
-    'A2s-A5s': [(12, 0), (12, 1), (12, 2), (12, 3)],
-    'A2s-A8s': [(12, 0), (12, 1), (12, 2), (12, 3), (12, 4), (12, 5), (12, 6)],
-    'A2s-A9s': [(12, 0), (12, 1), (12, 2), (12, 3), (12, 4), (12, 5), (12, 6), (12, 7)],
-    'K5-K8s': [(11, 3), (11, 4), (11, 5), (11, 6)],
-    'Q5s-Q7s': [(10, 3), (10, 4), (10, 5)],
-    'J5s-J7s': [(9, 3), (9, 4), (9, 5)],
-    '44-AA': [(2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10), (11, 11), (12, 12)],
-    '98s': [(7, 6)],
-    'J9s': [(9, 7)],
-    'JTs+': [(9, 8), (10, 8), (11, 8), (12, 8)],
-    'QJs+': [(10, 9), (11, 9), (12, 9)],
-    'KQs+': [(11, 10), (12, 10)],
-    'AQ': [(12, 10), (10, 12)],
-    'T8s-K8s': [(11, 6), (10, 6), (9, 6), (8, 6)],
-    'Q9s-K9s': [(11, 7), (10, 7)],
-    'JTo-KTo': [(8, 9), (8, 10), (8, 11)],
-    'QJo-KJo': [(9, 10), (9, 11)],
-    'A8o-A9o': [(12, 6), (12, 7)],
-
-}
-# ranges['98s+'] = [ranges['JTs+'] + [()]]
-open_raising_ranges = {pos.UTG: [
-    ranges['44-AA'] +
-    ranges['98s'] +
-    ranges['J9s'] +
-    ranges['T9s'] +
-    ranges['JTs+'] +
-    ranges['QJs+'] +
-    ranges['KQs+'] +
-    ranges['AQ']
-]}
-
-open_raising_ranges[pos.MP] = open_raising_ranges[pos.UTG] + [(12, 0), (12, 1), (12, 2), (12, 3), (12, 4), (12, 5),
-                                                              (12, 6), (12, 7), (0, 0), (1, 1), (5, 4), (6, 5)]
-open_raising_ranges[pos.CO] = open_raising_ranges[pos.MP] + \
-                              ranges['T8s-K8s'] + \
-                              ranges['Q9s-K9s'] + \
-                              ranges['JTo-KTo'] + \
-                              ranges['QJo-KJo'] + \
-                              ranges['A8o-A9o'] + \
-                              [(4, 3), (5, 3), (6, 4), (7, 5)]  # 65s, 75s, 86s, 97s
-open_raising_ranges[pos.BTN] = open_raising_ranges[pos.CO] + \
-                               [(1, 0),
-                                (2, 0),
-                                (3, 0),
-                                (4, 0),
-                                (5, 0),
-                                (6, 0),
-                                (7, 0),
-                                (8, 0),
-                                (9, 0),
-                                (10, 0),
-                                (11, 0)] + [(2, 1),
-                                            (3, 1),
-                                            (4, 1),
-                                            (5, 1),
-                                            (6, 1),
-                                            (7, 1),
-                                            (8, 1),
-                                            (9, 1),
-                                            (10, 1),
-                                            (11, 1)] + \
-                               [(3, 2),
-                                (4, 2),
-                                (5, 2),
-                                (6, 2),
-                                (7, 2),
-                                (8, 2),
-                                (9, 2),
-                                (10, 2),
-                                (11, 2)] + \
-                               [(6, 3),
-                                (7, 3),
-                                (8, 3),
-                                (9, 3),
-                                (10, 3),
-                                (11, 3)] + \
-                               [(7, 4),
-                                (8, 4),
-                                (9, 4),
-                                (10, 4),
-                                (11, 4)] + \
-                               [(8, 5),
-                                (9, 5),
-                                (10, 5),
-                                (11, 5)] + \
-                               [(7, 8),  # T9o-K9o
-                                (7, 9),
-                                (7, 10),
-                                (7, 11)] + \
-                               [(6, 7),  # 98o-K8o
-                                (6, 8),
-                                (6, 9),
-                                (6, 10),
-                                (6, 11)] + \
-                               [(5, 6),  # 87o-A7o
-                                (5, 7),
-                                (5, 8),
-                                (5, 9),
-                                (5, 10),
-                                (5, 11),
-                                (5, 12)] + \
-                               [(4, 5),  # 76o-A6o
-                                (4, 6),
-                                (4, 7),
-                                (4, 8),  # drop J6o
-                                (4, 10),
-                                (4, 11),
-                                (4, 12)] + [
-                                   (3, 4), (3, 5), (3, 11), (3, 12),
-                                   (0, 12), (1, 12), (2, 12)
-                               ]
-
 
 # pos.UTG: [],
 #     pos.MP: [],
@@ -201,6 +44,7 @@ class RuleBasedAgent:
         self.open_calling_range_BTN_VS_CO = ranges['22-JJ'] + ranges['ATs+'] + ranges['AQo'] + ranges['KQs']
         self.open_calling_range_SB_BB = ranges['22-JJ'] + ranges['AQ'] + ranges['AJ'] + ranges['ATs'] + ranges['KQs'] + \
                                         ranges['KJs'] + ranges['QJs'] + ranges['JTs']
+        self.open_raising_sizes = (4, 3, 2.5, 2, 2, 4)
         # do not change this probability,
         # we need this for polarized 3b/Fold strategy vs 1 preflop Raiser
         # the bot folds after being c-bet on a semi-bluff, so it is fine to have .95% as the range for semi-bluffs
@@ -208,6 +52,7 @@ class RuleBasedAgent:
         self.semi_bluff_probability = .95
         self.common_semi_bluff_range_preflop = ranges['56s'] + ranges['67s'] + ranges['78s'] + ranges['89s'] + ranges[
             'T9s']
+        self.raise_action = 2
 
     def get_raises_preflop(self, obs):
         r00 = obs[cols.Preflop_player_0_action_0_what_2]
@@ -251,40 +96,11 @@ class RuleBasedAgent:
                                       obs,
                                       hand,
                                       hero_position):
-        # bet/fold
-        bb = obs[cols.Big_blind] * self.normalization
-        if hero_position == pos.UTG:
-            if hand in open_raising_ranges[pos.UTG]:
-                # raise 4bb
-                return 2, 4 * bb
-            return ActionSpace.FOLD
-        elif hero_position == pos.MP:
-            if hand in open_raising_ranges[pos.MP]:
-                # raise 3bb
-                return 2, 3 * bb
-            return ActionSpace.FOLD
-        elif hero_position == pos.CO:
-            if hand in open_raising_ranges[pos.CO]:
-                # raise 2.5 bb
-                return 2, 2.5 * bb
-            return ActionSpace.FOLD
-        elif hero_position == pos.BTN:
-            if hand in open_raising_ranges[pos.BTN]:
-                # raise 2bb
-                return 2, 2 * bb
-            return ActionSpace.FOLD
-        elif hero_position == pos.SB:
-            if hand in open_raising_ranges[pos.SB]:
-                # raise 2bb
-                return 2, 2 * bb
-            return ActionSpace.FOLD
-        elif hero_position == pos.BB:
-            if hand in open_raising_ranges[pos.BB]:
-                # raise 4bb
-                return 2, 4 * bb
-            return ActionSpace.FOLD
-        else:
-            raise ValueError(f"Invalid position of current player: {hero_position}")
+        if hand in open_raising_ranges[hero_position]:
+            bb = obs[cols.Big_blind] * self.normalization
+            raise_amount = self.open_raising_sizes[hero_position.value] * bb
+            return self.raise_action, raise_amount
+        return ActionSpace.FOLD
 
     def vs_1_preflop_raiser(self, hand, hero_position, raises, btn_idx):
         # given raises (relative to observer) determine who open-raised
@@ -415,7 +231,6 @@ class RuleBasedAgent:
         else:
             raise ValueError(f"Hero Position must be in [MP, CO, BTN, SB, BB] but was {hero_position}")
 
-
     def act(self, obs: np.ndarray, legal_moves):
         print('YEAY')
         c0 = obs[cols.First_player_card_0_rank_0:cols.First_player_card_0_suit_3 + 1]
@@ -443,9 +258,9 @@ class RuleBasedAgent:
             if raises['total'] == 1:
                 # call/ xor 3b/ALLIN  xor 3b/FOLD (semi-bluff)
                 return self.vs_1_preflop_raiser(hand,
-                                                             hero_position,
-                                                             raises,
-                                                             btn_idx)
+                                                hero_position,
+                                                raises,
+                                                btn_idx)
             # case 3bet --> Hero raised previously:
             if raises['total'] > 1:
                 # case 1) no-one raised twice: get earliest aggressor and latest aggressor
@@ -464,10 +279,9 @@ class RuleBasedAgent:
                 # Example: UTG open-raises, HERO-CO 3bets, ..., UTG-4bets, HERO has to choose ALLIN / FOLD
                 # todo: vs1Raiser(vs_earliest_double_raisor)
                 # case 3) all players that raised twice are AFTER HERO
-                # vs3bet_after_openraise(vs_latest_double_raisor)
+                # todo: vs3bet_after_openraise(vs_latest_double_raisor)
                 # case 4) hero is sandwhiched by double raisors
-                # vs3bet_after_openraise(earliest_vs_latest_double_raisors)
-                # todo: make it simple:  join 3) and 4) by vs3bet_after_openraise(
+                # todo: vs3bet_after_openraise(earliest_vs_latest_double_raisors)
                 pass
         elif obs[cols.Round_flop]:
             # for postflop play, assume preflop ranges and run monte carlo sims on
