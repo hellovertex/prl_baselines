@@ -201,7 +201,11 @@ class RuleBasedAgent:
         self.open_calling_range_BTN_VS_CO = ranges['22-JJ'] + ranges['ATs+'] + ranges['AQo'] + ranges['KQs']
         self.open_calling_range_SB_BB = ranges['22-JJ'] + ranges['AQ'] + ranges['AJ'] + ranges['ATs'] + ranges['KQs'] + \
                                         ranges['KJs'] + ranges['QJs'] + ranges['JTs']
-        self.semi_bluff_probability = .3
+        # do not change this probability,
+        # we need this for polarized 3b/Fold strategy vs 1 preflop Raiser
+        # the bot folds after being c-bet on a semi-bluff, so it is fine to have .95% as the range for semi-bluffs
+        # is very conservative
+        self.semi_bluff_probability = .95
         self.common_semi_bluff_range_preflop = ranges['56s'] + ranges['67s'] + ranges['78s'] + ranges['89s'] + ranges[
             'T9s']
 
@@ -438,6 +442,7 @@ class RuleBasedAgent:
 
         a = 1
         hero_position = self.positions[-btn_idx % self.num_players]
+        i_th_to_act_hero = self.ordered_positions.index(hero_position)
 
         if obs[cols.Round_preflop]:
             # last two raises one-hot encoded for each player
@@ -456,34 +461,22 @@ class RuleBasedAgent:
                                                              btn_idx)
             # case 3bet --> Hero raised previously:
             if raises['total'] > 1:
-                # hero has not raised yet --> vs 1 Raiser
-                if 0 not in raises['who_raised']:
-                    return self.get_preflop_3bet_or_call_or_fold(hand,
-                                                                 hero_position,
-                                                                 raises,
-                                                                 btn_idx)
-                # hero has raised previously --> vs3bet after Openraise or vs 4bet ALLIN shove
-                else:  #
-                    # todo: hero raised already - implement cases left
-                    #  1. hero is openraiser and gets 3bet -- do we call xor 4bet?
-                    #  3. hero 3bet another openraiser and got 4bet -- do we fold or shove?
-                    #  4.
-                    # todo: figure out a way how to determine, whether hero
-                    #  raise was openraise or 3bet
+                # case 1) no-one raised twice: get earliest aggressor and latest aggressor
+                # 1a) hero open raised -- vs3bet after openraise -- hero == earliest aggressor
+                # --> vs latest aggressor
+                # Example: HERO-SB open raises BB 3-bets todo: vs3bet_after_OR(vs_latest_aggressor)
+                # 1b) if Hero is sandwhiched --> hero called before and now faces -- 3bet after Openraise
+                # --> vs latest aggressor todo: vs3bet_after_OR(vs_latest_aggressor)
+                # Example: UTG open-raised -- Hero-CO calls -- SB 3Bets,...UTG CALLS
+                # 1c) if latest aggressor is before hero -- hero plays vs 1 Raiser
+                # Example UTG open raises MP 3bets HERO-CO has to act
+                # todo: vs1_raiser(vs_utg)
 
-                    # if hero openraised and faced 3 bet
-                    # -- 4b/ALLIN or Call but we dont semi-bluff
-                    # (someone has already raised twice) possible after 4b leading to ALLIN as 5bet
-                    pass
-                    # if hero 3bet and got 4bet (someone has already raised twice)
-                    # -- ALLIN is only option
-                    pass
+                # case 2) only one player raised twice
+                # utg raises, hero CO 3bets, ..., utg 4bets, hero ALLIN KK+ or fold 56s, 67s,
+                #
 
-                    self.get_preflop_4bet_or_call_or_fold(obs,
-                                                          hand,
-                                                          hero_position,
-                                                          raises)
-
+                pass
         elif obs[cols.Round_flop]:
             # for postflop play, assume preflop ranges and run monte carlo sims on
             # adjusted ranges (reconstruct range from action)
