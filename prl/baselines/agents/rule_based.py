@@ -2,6 +2,7 @@
 # flop pot odds
 # assume ranges (consider making them stochastic) for post flop MC analysis
 import random
+from typing import List
 
 import numpy as np
 from prl.environment.Wrappers.aoh import Positions6Max as pos
@@ -118,7 +119,7 @@ class RuleBasedAgent:
             return False
         return True
 
-    def get_players_who_raised_twice_preflop(self, raises):
+    def get_players_who_raised_twice_preflop(self, raises) -> List[int]:
         result = []
         if sum(raises[0] > 1):
             result.append(0)
@@ -193,7 +194,7 @@ class RuleBasedAgent:
                         # Example: HERO-SB open raises BB 3-bets
                         if earliest_aggressor == hero_index:
                             aggressor = aggressor1_position if latest_aggressor == agg1_index else aggressor2_position
-                            self.vs_3bet_after_openraise(hand,
+                            return self.vs_3bet_after_openraise(hand,
                                                          defender=hero_position,
                                                          aggressor=aggressor,
                                                          is_first_betting_round=True)
@@ -202,7 +203,7 @@ class RuleBasedAgent:
                         elif earliest_aggressor < hero_index < latest_aggressor:
                             defender = aggressor1_position if earliest_aggressor == agg1_index else aggressor2_position
                             aggressor = aggressor1_position if latest_aggressor == agg1_index else aggressor2_position
-                            self.vs_3bet_after_openraise(hand,
+                            return self.vs_3bet_after_openraise(hand,
                                                          defender=defender,  # hero has to use ranges of defender
                                                          aggressor=aggressor,
                                                          is_first_betting_round=True)
@@ -218,14 +219,38 @@ class RuleBasedAgent:
                                                    is_first_betting_round=True)
                 # case 2) at least one player raised twice
                 else:
+                    raisors = players_that_raised_twice
+                    position_min = self.positions[(min(raisors) - btn_idx) % self.num_players]
+                    index_min = self.ordered_positions.index(position_min)
+                    position_max = self.positions[(max(raisors) - btn_idx) % self.num_players]
+                    index_max = self.ordered_positions.index(position_max)
+                    earliest = position_max if index_max < index_min else position_min
+                    latest = position_max if index_max > index_min else position_min
+                    assert earliest != latest
                     # case 2a) all players that raised twice are BEFORE hero
                     # Example: UTG open-raises, HERO-CO 3bets, ..., UTG-4bets, HERO has to choose ALLIN / FOLD
-                    # todo: vs1Raiser(vs_earliest_double_raisor)
-                    # case 2b) all players that raised twice are AFTER HERO
-                    # todo: vs3bet_after_openraise(vs_latest_double_raisor)
-                    # case 2c) hero is sandwhiched by double raisors
-                    # todo: vs3bet_after_openraise(earliest_vs_latest_double_raisors)
-                    pass
+                    if max(index_min, index_max) < hero_index:
+                        return self.vs_1_raiser_pf(hand,
+                                                   defender=hero_position,
+                                                   aggressor=earliest,
+                                                   is_first_betting_round=False)
+
+                    # case 2b) hero is sandwhiched by double raisors
+                    # Example: UTG open raises Hero calls SB 3 bets
+                    # continued:  UTG 4 bets Hero calls SB 5 bets UTG calls -- Hero has to act
+                    elif min(index_min, index_max) < hero_index < max(index_min, index_max):
+                        return self.vs_3bet_after_openraise(hand,
+                                                            defender=earliest,  # hero must defend using UTG ranges
+                                                            aggressor=latest,
+                                                            is_first_betting_round=False)
+                    # case 2c) all players that raised twice are AFTER HERO
+                    # Example: HERO BTN limps SB Openraises BB 3bets
+                    # continued: Hero calls SB 4bets BB 5 bets
+                    else:
+                        return self.vs_3bet_after_openraise(hand,
+                                                            defender=earliest,  # hero must defend vs BB using SB ranges
+                                                            aggressor=latest,
+                                                            is_first_betting_round=False)
         elif obs[cols.Round_flop]:
             # for postflop play, assume preflop ranges and run monte carlo sims on
             # adjusted ranges (reconstruct range from action)
