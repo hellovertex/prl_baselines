@@ -255,6 +255,7 @@ class RuleBasedAgent:
                                                             is_first_betting_round=False)
         elif obs[cols.Round_flop]:
             # for postflop play, assume preflop ranges and run monte carlo sims on
+
             # adjusted ranges (reconstruct range from action)
             return ActionSpace.FOLD
         elif obs[cols.Round_turn]:
@@ -301,6 +302,7 @@ if __name__ == '__main__':
             print(f'AGNET_ID = {agent_id}')
             pretty_print(i, obs, action, env.env.env.env_wrapped)
             obs_dict, cum_reward, terminated, truncated, info = env.step(action)
+            print(info)
             rews = cum_reward
             agent_id = obs_dict['agent_id']
             print(f'AGENT_ID', agent_id)
