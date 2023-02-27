@@ -286,7 +286,7 @@ class RuleBasedAgent:
         else:
             raise ValueError(f"Invalid position of current player: {hero_position}")
 
-    def get_preflop_3bet_or_call_or_fold(self, hand, hero_position, raises, btn_idx):
+    def vs_1_preflop_raiser(self, hand, hero_position, raises, btn_idx):
         # given raises (relative to observer) determine who open-raised
         # the following line is kept for reference but the assertion is wrong
         # in fact there can be multiple raises before hero gets first chance to raise
@@ -415,19 +415,6 @@ class RuleBasedAgent:
         else:
             raise ValueError(f"Hero Position must be in [MP, CO, BTN, SB, BB] but was {hero_position}")
 
-    def get_preflop_4bet_or_call_or_fold(self, obs, hand, hero_position, raises):
-        #
-        pass
-
-    def get_5bet_preflop_vs_1_raiser(self, obs, hand, hero_position, raises):
-        # todo: if hand in 3b/AI range: return 5 bet vs 1 Raiser
-        #  else FOLD (can assert hand in 3b/FOLD range)
-        #  Call this function when someone has two raises but hero only has one raise
-        pass
-
-    def get_5bet_preflop_vs_3bet_after_openraise(self, obs, hand, hero_position, raises):
-        # todo:
-        pass
 
     def act(self, obs: np.ndarray, legal_moves):
         print('YEAY')
@@ -455,7 +442,7 @@ class RuleBasedAgent:
             # case one previous raise --> it was not hero who raised:
             if raises['total'] == 1:
                 # call/ xor 3b/ALLIN  xor 3b/FOLD (semi-bluff)
-                return self.get_preflop_3bet_or_call_or_fold(hand,
+                return self.vs_1_preflop_raiser(hand,
                                                              hero_position,
                                                              raises,
                                                              btn_idx)
@@ -466,16 +453,21 @@ class RuleBasedAgent:
                 # --> vs latest aggressor
                 # Example: HERO-SB open raises BB 3-bets todo: vs3bet_after_OR(vs_latest_aggressor)
                 # 1b) if Hero is sandwhiched --> hero called before and now faces -- 3bet after Openraise
-                # --> vs latest aggressor todo: vs3bet_after_OR(vs_latest_aggressor)
-                # Example: UTG open-raised -- Hero-CO calls -- SB 3Bets,...UTG CALLS
+                # --> vs latest aggressor todo: vs3bet_after_OR(earliest_vs_latest_aggressor)
+                # Example: UTG open-raised -- Hero-CO calls -- SB 3Bets,...UTG CALLS --> Hero acts
+                # but has to act accordingt to EP vs SB 3b
                 # 1c) if latest aggressor is before hero -- hero plays vs 1 Raiser
                 # Example UTG open raises MP 3bets HERO-CO has to act
                 # todo: vs1_raiser(vs_utg)
 
-                # case 2) only one player raised twice
-                # utg raises, hero CO 3bets, ..., utg 4bets, hero ALLIN KK+ or fold 56s, 67s,
-                #
-
+                # case 2) all players that raised twice are BEFORE hero
+                # Example: UTG open-raises, HERO-CO 3bets, ..., UTG-4bets, HERO has to choose ALLIN / FOLD
+                # todo: vs1Raiser(vs_earliest_double_raisor)
+                # case 3) all players that raised twice are AFTER HERO
+                # vs3bet_after_openraise(vs_latest_double_raisor)
+                # case 4) hero is sandwhiched by double raisors
+                # vs3bet_after_openraise(earliest_vs_latest_double_raisors)
+                # todo: make it simple:  join 3) and 4) by vs3bet_after_openraise(
                 pass
         elif obs[cols.Round_flop]:
             # for postflop play, assume preflop ranges and run monte carlo sims on
