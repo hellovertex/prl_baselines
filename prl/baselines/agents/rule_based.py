@@ -34,7 +34,8 @@ class RuleBasedAgent:
                              6: (pos.UTG, pos.MP, pos.CO, pos.BTN, pos.SB, pos.BB)}
         self.positions = positions[num_players]
         self.ordered_positions = ordered_positions[num_players]
-        self.open_raising_sizes = (4, 3, 2.5, 2, 2, 4)
+        # self.open_raising_sizes = (4, 3, 2.5, 2, 2, 4) relative to UTG
+        self.open_raising_sizes = (2, 2, 4, 4, 3, 2.5)  # relative to BTN
         self.raise_action = 2
 
     def get_raises_preflop(self, obs):
@@ -255,8 +256,21 @@ class RuleBasedAgent:
                                                             is_first_betting_round=False)
         elif obs[cols.Round_flop]:
             # for postflop play, assume preflop ranges and run monte carlo sims on
-
+            # use bet size of 1 pot
+            # strategy loses too many chips for weak value hands but does ok with strong value hands
+            # using bet size of 1/2 pot its the other way around, you dont win enough with strong hands
+            # similarly, if you always bet 1/2 pot you offer the opponent 3:1 pot odds --> needs 25% equity to call
+            # if you always bet 1 pot you 2:1 pot odds -> needs 33% equity to call
+            # do not use unbalanced bet size of 1/2 pot
+            # offer two bet sizes 1/2 pot and 1 pot depending
             # adjusted ranges (reconstruct range from action)
+            # todo: run monte carlo simulation:
+            #  pot size bet and all players call -- would we have better EV than simply checking/folding?
+            #  call and all players checkdown -- would we have better EV than simply folding?
+            # todo: train dichotomizer for flop., turn, river
+            # predict whether to FOLD, CHECK_CALL, OR RAISE
+            # always use pot size bet
+            # from pool
             return ActionSpace.FOLD
         elif obs[cols.Round_turn]:
             return ActionSpace.FOLD
