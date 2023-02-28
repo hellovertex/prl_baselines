@@ -1,7 +1,9 @@
 # specify parameters
 # available options:
 import enum
+from typing import List
 
+from dataclasses import dataclass
 from prl.environment.Wrappers.base import ActionSpaceMinimal as Action
 from prl.environment.steinberger.PokerRL import Poker
 
@@ -9,8 +11,7 @@ from prl.environment.steinberger.PokerRL import Poker
 class DataImbalanceCorrections(enum.IntEnum):
     """Dataset labels are likely imbalanced. For example the number of
     ALL_IN actions is smaller than the number of CHECK_CALL actions.
-    There are several ways to counter this when doing Machine learning
-    on the data:
+    There are several ways to counter this when doing Machine learning:
     """
     # Leave dataset as is -- provide the optimizer with a list of
     # weights that is proportional to label-frequency. This is the
@@ -38,6 +39,30 @@ class DataImbalanceCorrections(enum.IntEnum):
     resample_raises__to_max_num_raise = 3
 
 
+class Stage(enum.IntEnum):
+    PREFLOP = 0
+    FLOP = 1
+    TURN = 2
+    RIVER = 3
+
+
+@dataclass
+class DatasetOptions:
+    # raw -- .txt files
+    num_top_players: int
+    make_dataset_for_each_individual: bool
+    # vectorized -- .csv files
+    target_rounds: List[Stage]
+    actions_to_predict: List[Action]
+    # preprocessed -- .csv files
+    sub_sampling_techniques: List[DataImbalanceCorrections]
+
+
+@dataclass
+class TrainingOptions:
+    pass
+
+
 # dataset options
 # -- raw
 num_top_players = 17
@@ -52,10 +77,12 @@ sub_sampling_techniques = [DataImbalanceCorrections.dont_resample_but_use_label_
 # script should
 # look for dataset in designated folder
 # 1) txt databases
-# a) data is present -- continue
-# b) 01_raw: data is not present -- make dataset using `num_top_players` and `make_dataset_for_each_individual`
+# 1a) data is present -- continue
+# 1b) 01_raw: data is not present -- make dataset using `num_top_players` and `make_dataset_for_each_individual`
 # 2) vectorized databases
-# a) data is present -- continue
-# b) 02_vec: data is not present -- make dataset using `target_rounds` `actions_to_predict`
+# 2a) data is present -- continue
+# 2b) 02_vec: data is not present -- make dataset using `target_rounds` `actions_to_predict`
 # 3) preprocessed databases
-# a) data
+# 3a) data is present -- continue
+# 3b) 03_preprocessed: preprocess using sub_sampling_techniques
+# 4) train
