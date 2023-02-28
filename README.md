@@ -42,8 +42,8 @@ in case make fails: `sudo apt install libpython3.10-dev`
 /
 └── data
     ├── 00_tmp
-    │   └── bulk_hands.zip  # from www.hhsmithy.com
-    ├── 01_datasets_raw
+    │   └── bulk_hands.zip
+    ├── 01_raw
     │   ├── all_players
     │   │   ├── NL50
     │   │   │   ├── file00000.txt
@@ -60,39 +60,43 @@ in case make fails: `sudo apt install libpython3.10-dev`
     │       │       └── ...
     │       └── NL5000
     │           └── ...
-    ├── 02_datasets_vectorized
+    ├── 02_vectorized
     │   ├── per_selected_player
     │   │   ├── NL50
-    │   │   │   ├── use_folds_with_randomized_hand_DF2
+    │   │   │   ├── folds_from_top_players
     │   │   │   │   └── PlayerRank001/
     │   │   │   │       ├── data000.csv
     │   │   │   │       └── ...
-    │   │   │   └── only_showdowns
-    │   │   │       ├── only_wins_DNF1
-    │   │   │       │   └── PlayerRank001/
-    │   │   │       │       ├── data000.csv
-    │   │   │       │       └── ...
-    │   │   │       └── all_showdowns_DNF2
-    │   │   │           └── PlayerRank001/
-    │   │   │               ├── data000.csv
-    │   │   │               └── ...
+    │   │   │   ├── folds_from_fish_player
+    │   │   │   │       └── ...
+    │   │   │   ├── folds_from_showdown_loser
+    │   │   │   │       └── ...
+    │   │   │   ├── no_folds_only_wins_top_player
+    │   │   │   │       └── ...
+    │   │   │   └── no_folds_showdowns_top_player
+    │   │   │           └── ...
     │   │   └── NL5000
     │   │       └── ...
     │   └── player_pool
     │       ├── NL50
-    │       │   └── only_showdowns
-    │       │       ├── loser_actions_to_fold
-    │       │       │   ├── data000.csv
-    │       │       │   └── ...
-    │       │       └── fish_player_actions_to_fold
-    │       │           ├── data000.csv
+    │       │   ├── folds_from_top_players
+    │       │   │   └── PlayerRank001/
+    │       │   │       ├── data000.csv
+    │       │   │       └── ...
+    │       │   ├── folds_from_fish_player
+    │       │   │       └── ...
+    │       │   ├── folds_from_showdown_loser
+    │       │   │       └── ...
+    │       │   ├── no_folds_only_wins_top_player
+    │       │   │       └── ...
+    │       │   └── no_folds_showdowns_top_player
     │       │           └── ...
     │       └── NL5000
     │           └── ...
     ├── 03_preprocessed
-    │    SAME AS IN 02_datasets_vectorized
+    │   └── SAME AS IN `02_datasets_vectorized`
     └── 04_eval
-         SAME AS IN 02_datasets_vectorized
+        └── SAME AS IN `02_datasets_vectorized`
 ```
 
 ### Supervised Learning of Poker Baseline Agent from Game Logs for our RL training
