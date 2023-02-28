@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from prl.environment.Wrappers.base import ActionSpaceMinimal as Action
 from prl.environment.steinberger.PokerRL import Poker
 
-from prl.baselines.supervised_learning.v2.data.dataset_options import \
+from prl.baselines.supervised_learning.v2.datasets.dataset_options import \
     DatasetOptions, DataImbalanceCorrection, ActionGenOption
 
 from prl.baselines import DATA_DIR

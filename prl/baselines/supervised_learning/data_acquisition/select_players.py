@@ -12,9 +12,10 @@ from typing import Iterable, Dict, List
 import pandas as pd
 
 from prl.baselines.supervised_learning.config import DATA_DIR
-from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, PlayerStack, ActionType
-from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HSmithyParser
-
+from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, \
+    PlayerStack, ActionType
+from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import \
+    HSmithyParser
 
 # How many showdown hands must be available to generate a summary of the player
 # the more data available, the higher it should be, e.g. try between 100 and 1000
@@ -30,7 +31,8 @@ class PlayerStat:
 
 
 player_dict = {}  # player: games_played, games_won
-player_stats_dict: Dict[str, PlayerStat] = {}  # player: {n_hands_played, n_showdowns, n_won, total_earnings}
+player_stats_dict: Dict[
+    str, PlayerStat] = {}  # player: {n_hands_played, n_showdowns, n_won, total_earnings}
 BLIND_SIZES = "0.25-0.50"
 
 
@@ -53,15 +55,17 @@ def update_player_dict(episodes: Iterable[PokerEpisode]):
 
 def run(cbs=None):
     """Reads unzipped folder and updates dictionaries when proper callback fn is provided"""
-    filenames = glob.glob(str(DATA_DIR) + f'/01_raw/{BLIND_SIZES}/unzipped/' '/**/*.txt', recursive=True)
+    filenames = glob.glob(str(DATA_DIR) + f'/01_raw/{BLIND_SIZES}/unzipped/' '/**/*.txt',
+                          recursive=True)
     parser = HSmithyParser()
     # parse, encode, vectorize and write the training data from .txt to disk
     for i, filename in enumerate(filenames):
         try:
             parsed_hands = parser.parse_file(filename)
             if cbs:
-                [cb(episodes=parsed_hands) for cb in cbs]  # update_player_dict(parsed_hands)
-            if i%100==0:
+                [cb(episodes=parsed_hands) for cb in
+                 cbs]  # update_player_dict(parsed_hands)
+            if i % 100 == 0:
                 print(f'Reading {i}-th file...')
         except UnicodeDecodeError:
             print('---------------------------------------')
@@ -142,7 +146,7 @@ def update_stats_dict(top_players: List[str], episodes: Iterable[PokerEpisode]):
 
 
 def get_stats():
-    abs_path = str(DATA_DIR)+ '/01_raw'+f'/{blind_sizes}'+"/eda_players.txt"
+    abs_path = str(DATA_DIR) + '/01_raw' + f'/{blind_sizes}' + "/eda_players.txt"
     with open(abs_path, "r") as data:
         player_dict = ast.literal_eval(data.read())
         player_names = list(player_dict.keys())
@@ -164,6 +168,6 @@ if __name__ == "__main__":
     get_stats()
     print(player_stats_dict)
     serialized_dict = {}
-    for k,v in player_stats_dict.items():
+    for k, v in player_stats_dict.items():
         serialized_dict[k] = v.dict()
     write(serialized_dict, outfile=abs_path + "/eda_result.txt")
