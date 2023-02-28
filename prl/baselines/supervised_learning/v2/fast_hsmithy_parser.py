@@ -13,7 +13,7 @@ import re
 import time
 from functools import partial
 from pathlib import Path
-from typing import Optional, List, Tuple, Dict
+from typing import Optional, List, Tuple, Dict, Generator
 
 import numpy as np
 import pandas as pd
@@ -21,14 +21,18 @@ from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.base import ActionSpace
 from prl.environment.Wrappers.utils import init_wrapped_env
 
+from prl.baselines import DATA_DIR
 from prl.baselines.evaluation.core.experiment import DEFAULT_DATE
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
-from prl.baselines.supervised_learning.data_acquisition.core.parser import Action as ActionV1
-from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode as PokerEpisodeV1, PlayerStack, \
+from prl.baselines.supervised_learning.data_acquisition.core.parser import \
+    Action as ActionV1
+from prl.baselines.supervised_learning.data_acquisition.core.parser import \
+    PokerEpisode as PokerEpisodeV1, PlayerStack, \
     PlayerWithCards, PlayerWinningsCollected, Blind
 from prl.baselines.supervised_learning.v2.config import top_100, top_20
 from prl.baselines.supervised_learning.v2.new_txt_to_vector_encoder import EncoderV2
-from prl.baselines.supervised_learning.v2.poker_model import Player, Action, PokerEpisodeV2
+from prl.baselines.supervised_learning.v2.poker_model import Player, Action, \
+    PokerEpisodeV2
 
 
 # all the following functionality should be possible with only minimal parameterization (input_dir, output_dir, ...)
@@ -38,12 +42,14 @@ from prl.baselines.supervised_learning.v2.poker_model import Player, Action, Pok
 
 class ParseHsmithyTextToPokerEpisode:
     def __init__(self,
+                 nl='NL50',
                  preflop_sep="*** HOLE CARDS ***",
                  flop_sep="*** FLOP ***",
                  turn_sep="*** TURN ***",
                  river_sep="*** RIVER ***",
                  showdown_sep="*** SHOW DOWN ***",
                  summary_sep="*** SUMMARY ***"):
+        self.nl = nl
         self.preflop_sep = preflop_sep
         self.flop_sep = flop_sep
         self.turn_sep = turn_sep
@@ -124,7 +130,8 @@ class ParseHsmithyTextToPokerEpisode:
                 'river': river,
                 'summary': summary}
 
-    def get_players_and_blinds(self, hand_str) -> Tuple[Dict[str, Player], Dict[str, int]]:
+    def get_players_and_blinds(self, hand_str) -> Tuple[
+        Dict[str, Player], Dict[str, int]]:
         players = {}  # don't make this ordered, better to rely on names
         blinds = {}
         table = hand_str.split("*** HOLE CARDS ***")[0]
@@ -171,12 +178,14 @@ class ParseHsmithyTextToPokerEpisode:
             a = action.split(self.currency_symbol)[1]
             a = a.split(' and')[0]
             amt = round(float(a) * 100)
-            return Action(who=pname, what=ActionSpace.RAISE_MIN_OR_THIRD_OF_POT, how_much=amt)
+            return Action(who=pname, what=ActionSpace.RAISE_MIN_OR_THIRD_OF_POT,
+                          how_much=amt)
         elif 'raises' in action:
             a = action.split('to ')[1].split(self.currency_symbol)[1]
             a = a.split(' and')[0]
             amt = round(float(a) * 100)
-            return Action(who=pname, what=ActionSpace.RAISE_MIN_OR_THIRD_OF_POT, how_much=amt)
+            return Action(who=pname, what=ActionSpace.RAISE_MIN_OR_THIRD_OF_POT,
+                          how_much=amt)
         else:
             raise ValueError(f"Unknown action in {line}.")
 
@@ -302,12 +311,13 @@ class ParseHsmithyTextToPokerEpisode:
         # instead of using regex (which is slow) we must do it manually
         episodes = []
         try:
-            with open(f, 'r', encoding='utf-8') as f:  # pylint: disable=invalid-name,unspecified-encoding
+            with open(f, 'r',
+                      encoding='utf-8') as f:  # pylint: disable=invalid-name,unspecified-encoding
                 hand_database = f.read()
                 hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
 
                 for hand in hands_played:
-                    if not '*** SHOW DOWN ***' in hand:
+                    if not '*** SHOW DOWN ***' in hand and only_showdowns:
                         continue
                     if "leaves the table" in hand:
                         continue
@@ -320,6 +330,17 @@ class ParseHsmithyTextToPokerEpisode:
             print(e)
             return []
         return episodes
+
+    def parse_hand_histories(self) -> Generator[List[PokerEpisodeV2]]:
+        data_dir = os.path.join(DATA_DIR, *['01_raw', 'all_players', self.nl])
+        assert os.path.exists(data_dir), "Must download data and unzip to " \
+                                         "01_raw/all_players first"
+        for f in glob.glob(data_dir):
+            try:
+                episodes = self.parse_file(f)
+                yield episodes
+            except Exception:
+                pass
 
 
 class ConverterV2toV1:
@@ -402,7 +423,8 @@ class ConverterV2toV1:
             board_cards=episode.board,
             actions_total=actions_total,
             winners=winners,  # todo: maybe be empty list [], check implications
-            showdown_hands=showdown_hands,  # todo: maybe be empty list [], check implications
+            showdown_hands=showdown_hands,
+            # todo: maybe be empty list [], check implications
             money_collected=money_collected  # todo int vs str
         )
 
@@ -457,11 +479,13 @@ def run_on_chunks(chunks):
                         labels = actions
                     else:
                         try:
-                            training_data = np.concatenate((training_data, observations), axis=0)
+                            training_data = np.concatenate((training_data, observations),
+                                                           axis=0)
                             labels = np.concatenate((labels, actions), axis=0)
                         except Exception as e:
                             print(e)
-            print(f'Encoding {max_files_in_memory_at_once} files took {time.time() - t0} seconds.')
+            print(
+                f'Encoding {max_files_in_memory_at_once} files took {time.time() - t0} seconds.')
             if training_data is not None:
                 columns = None
                 header = False
@@ -475,10 +499,12 @@ def run_on_chunks(chunks):
                     columns = encoder.feature_names
                     header = True
                 df = pd.DataFrame(data=training_data,
-                                  index=labels,  # The index (row labels) of the DataFrame.
+                                  index=labels,
+                                  # The index (row labels) of the DataFrame.
                                   columns=columns)
                 # float to int if applicable
-                df = df.apply(lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
+                df = df.apply(
+                    lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
                 # one hot encode button
                 one_hot_btn = pd.get_dummies(df['btn_idx'], prefix='btn_idx')
                 df = pd.concat([df, one_hot_btn], axis=1)
@@ -514,66 +540,66 @@ def run_on_file(filename,
     if debug:
         selected_players = selected_players[:5]
     for player_name in selected_players:
-            training_data, labels = None, None
-            episodesV2 = parser.parse_file(filename)
-            n_episodes = len(episodesV2)
-            for i, ep in enumerate(episodesV2):
-                print(f'Encoding episode no. {i}/{n_episodes}')
+        training_data, labels = None, None
+        episodesV2 = parser.parse_file(filename)
+        n_episodes = len(episodesV2)
+        for i, ep in enumerate(episodesV2):
+            print(f'Encoding episode no. {i}/{n_episodes}')
+            try:
+                observations, actions = encoder.encode_episode(ep,
+                                                               # drop_folds=False,
+                                                               drop_folds=drop_folds,
+                                                               only_winners=only_winners,
+                                                               limit_num_players=more_than_num_players,
+                                                               randomize_fold_cards=randomize_fold_cards,
+                                                               selected_players=selected_players,
+                                                               # selected_players=['ishuha'],
+                                                               verbose=verbose)
+            except Exception as e:
+                print(e)
+                continue
+            if not observations:
+                continue
+            if training_data is None:
+                training_data = observations
+                labels = actions
+            else:
                 try:
-                    observations, actions = encoder.encode_episode(ep,
-                                                                   # drop_folds=False,
-                                                                   drop_folds=drop_folds,
-                                                                   only_winners=only_winners,
-                                                                   limit_num_players=more_than_num_players,
-                                                                   randomize_fold_cards=randomize_fold_cards,
-                                                                   selected_players=selected_players,
-                                                                   # selected_players=['ishuha'],
-                                                                   verbose=verbose)
+                    training_data = np.concatenate((training_data, observations), axis=0)
+                    labels = np.concatenate((labels, actions), axis=0)
                 except Exception as e:
                     print(e)
-                    continue
-                if not observations:
-                    continue
-                if training_data is None:
-                    training_data = observations
-                    labels = actions
-                else:
-                    try:
-                        training_data = np.concatenate((training_data, observations), axis=0)
-                        labels = np.concatenate((labels, actions), axis=0)
-                    except Exception as e:
-                        print(e)
-            if training_data is not None:
-                columns = None
-                header = False
-                # file_path = os.path.abspath(f'./data_{it}.csv.bz2')
-                # file_path = os.path.abspath(f'./top_100_only_wins_no_folds/data_{it}{suffix}.csv.bz2')
-                file_path = os.path.abspath(
-                    f'{out_dir}/{player_name}/data.csv.bz2')
-                if not os.path.exists(Path(file_path).parent):
-                    os.makedirs(os.path.realpath(Path(file_path).parent), exist_ok=True)
-                if not os.path.exists(file_path):
-                    columns = encoder.feature_names
-                    header = True
-                df = pd.DataFrame(data=training_data,
-                                  index=labels,  # The index (row labels) of the DataFrame.
-                                  columns=columns)
-                # float to int if applicable
-                df = df.apply(lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
+        if training_data is not None:
+            columns = None
+            header = False
+            # file_path = os.path.abspath(f'./data_{it}.csv.bz2')
+            # file_path = os.path.abspath(f'./top_100_only_wins_no_folds/data_{it}{suffix}.csv.bz2')
+            file_path = os.path.abspath(
+                f'{out_dir}/{player_name}/data.csv.bz2')
+            if not os.path.exists(Path(file_path).parent):
+                os.makedirs(os.path.realpath(Path(file_path).parent), exist_ok=True)
+            if not os.path.exists(file_path):
+                columns = encoder.feature_names
+                header = True
+            df = pd.DataFrame(data=training_data,
+                              index=labels,  # The index (row labels) of the DataFrame.
+                              columns=columns)
+            # float to int if applicable
+            df = df.apply(lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
 
-                # one hot encode button
-                one_hot_btn = pd.get_dummies(df['btn_idx'], prefix='btn_idx')
-                df = pd.concat([df, one_hot_btn], axis=1)
-                df.drop('btn_idx', axis=1, inplace=True)
+            # one hot encode button
+            one_hot_btn = pd.get_dummies(df['btn_idx'], prefix='btn_idx')
+            df = pd.concat([df, one_hot_btn], axis=1)
+            df.drop('btn_idx', axis=1, inplace=True)
 
-                df.to_csv(file_path,
-                          index=True,
-                          header=header,
-                          index_label='label',
-                          mode='a',
-                          float_format='%.5f',
-                          compression='bz2'
-                          )
+            df.to_csv(file_path,
+                      index=True,
+                      header=header,
+                      index_label='label',
+                      mode='a',
+                      float_format='%.5f',
+                      compression='bz2'
+                      )
     return "Success."
 
 

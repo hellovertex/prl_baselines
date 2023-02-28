@@ -3,6 +3,8 @@ import ast
 import glob
 import json
 import time
+from dataclasses import dataclass
+
 from pydantic import BaseModel
 from functools import partial
 from typing import Iterable, Dict, List
@@ -19,7 +21,8 @@ from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import HS
 MIN_SHOWDOWNS = 100
 
 
-class PlayerStat(BaseModel):
+@dataclass
+class PlayerStat:
     n_hands_played: int
     n_showdowns: int
     n_won: int
