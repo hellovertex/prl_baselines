@@ -18,12 +18,21 @@ class TrainingOptions:
 def make_dataset_from_scratch(dataset_options: DatasetOptions,
                               use_multiprocessing=False) -> bool:
     opt = dataset_options
-    # run main_raw()
+    # run main_raw(dataset_options)
 
     n_requested_top_players = opt.num_top_players
 
-    # run main_vectorized()
+    # run main_vectorized(dataset_options)
 
+    # run main_preprocess(dataset_options)
+    class Preprocessor:
+        @staticmethod
+        def run(dataset_options: DatasetOptions):
+            pass
+
+
+    preprocessor = Preprocessor()
+    preprocessor.run(dataset_options)
     return True
 
 
@@ -41,7 +50,10 @@ if __name__ == '__main__':
         action_generation_options=ActionGenOption
         .make_folds_from_top_players_with_randomized_hand
     )
+
     make_dataset_from_scratch(dataset_options)
+
+
 
 # end to end data generation via
 # make_dataset_from_scratch(dataset_options)  # todo parallelization_options
@@ -72,3 +84,7 @@ if __name__ == '__main__':
 # 1. assert all necessary training data is available
 # 2. Make InMemoryDataset using opt.sub_sampling_techniques
 # training(dataset_options, training_options)
+
+# todo: implement new Preprocessor(dataset_options) with dir_preprocessed + suffix
+# todo: implement new training methods
+# todo: implement MC on hand range

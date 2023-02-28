@@ -48,8 +48,9 @@ class DataImbalanceCorrection(enum.IntEnum):
 
 
 class ActionGenOption(enum.IntEnum):
-    """take (obs,action) tuples and drop the rest from
-    top_player as specified in `DatasetOptions.num_top_player`"""
+    """take (obs,action) tuples from
+    top_player and drop the rest
+    top player is specified in `DatasetOptions.num_top_player`"""
     # a) only if they were showdown winner
     no_folds_top_player_wins = 0
     # b) only if they participated in showdown

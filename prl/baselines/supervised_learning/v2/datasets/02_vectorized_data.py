@@ -1,0 +1,2 @@
+class VectorizedData:
+    pass

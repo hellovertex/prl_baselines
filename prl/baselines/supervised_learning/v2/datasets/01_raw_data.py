@@ -1,6 +1,6 @@
 import glob
 import os
-from typing import Dict
+from typing import Dict, Optional
 
 import click
 import gdown
@@ -39,6 +39,26 @@ def get_top_n_players(nl, num_top_players) -> Dict:
     return {}
 
 
+class RawData:
+    # todo how to move all 01_raw-data-related pieces here
+    #  including download_data, get_top_players, extract_top_players
+    def __init__(self, dataset_options: DatasetOptions):
+        self.opt = dataset_options
+
+    def generate(self,
+                 from_gdrive_id: Optional[str] = None):
+        if not self.opt.hand_history_has_been_downloaded_and_unzipped():
+            download_data(from_gdrive_id)
+        if not self.opt.exists_raw_data_for_all_selected_players():
+            # 1. need to get top n players make separate main at some point
+            # 1a) make list of n best players and write it to 00_tmp
+            top_players = get_top_n_players(
+                self.opt.nl, self.opt.num_top_players)
+            # 2 need to run hsmithy extractor (create HandHistoryExtractorV2 that runs on
+            # new directory structure
+            # todo: implement and test if successfull
+
+
 @click.command()
 @click.option("--num_top_players", default=10,
               type=int,
@@ -60,16 +80,10 @@ def get_top_n_players(nl, num_top_players) -> Dict:
                    "The runner will try to download the data from gdrive and proceed "
                    "with unzipping.")
 def main(num_top_players, nl, from_gdrive_id):
-    opt = DatasetOptions(num_top_players, nl)
-    if not opt.hand_history_has_been_downloaded_and_unzipped():
-        download_data(from_gdrive_id)
-    if not opt.exists_raw_data_for_all_selected_players():
-        # 1. need to get top n players make separate main at some point
-        # 1a) make list of n best players and write it to 00_tmp
-        top_players = get_top_n_players(opt.nl, opt.num_top_players)
-        # 2 need to run hsmithy extractor (create HandHistoryExtractorV2 that runs on
-        # new directory structure
-        # todo: implement and test if successfull
+    dataset_options = DatasetOptions(num_top_players, nl)
+    raw_data = RawData(dataset_options)
+    raw_data.generate(from_gdrive_id)
+
 
 if __name__ == '__main__':
     main()
