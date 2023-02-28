@@ -24,7 +24,6 @@ def make_dataset_from_scratch(dataset_options: DatasetOptions,
 
     # run main_vectorized()
 
-
     return True
 
 
@@ -34,9 +33,9 @@ if __name__ == '__main__':
         num_top_players=17,
         # -- vectorized
         make_dataset_for_each_individual=False,
-        target_rounds=[Poker.FLOP, Poker.TURN, Poker.RIVER],
         action_space=[Action.FOLD, Action.CHECK_CALL, Action.RAISE],
         # -- preprocessed
+        target_rounds=[Poker.FLOP, Poker.TURN, Poker.RIVER],
         sub_sampling_techniques=DataImbalanceCorrection
         .dont_resample_but_use_label_weights_in_optimizer,
         action_generation_options=ActionGenOption
@@ -58,12 +57,6 @@ if __name__ == '__main__':
 # if not, gdrive id and then unzip recursively to opt.get_raw_dir
 # check if 01_raw/selected_players/NL50 exist up to rank specified by num_top_players
 # if not make folders for each missing rank using hsmithy extractor
-#
-
-# old
-# 1a) data is present -- continue
-# 1b) 01_raw: data is not present -- make dataset using `num_top_players`
-# and `make_dataset_for_each_individual`
 
 
 # main_vectorized

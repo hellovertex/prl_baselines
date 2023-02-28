@@ -48,7 +48,7 @@ class DataImbalanceCorrection(enum.IntEnum):
 
 
 class ActionGenOption(enum.IntEnum):
-    """take (obs,action) tuples (and drop the rest) from
+    """take (obs,action) tuples and drop the rest from
     top_player as specified in `DatasetOptions.num_top_player`"""
     # a) only if they were showdown winner
     no_folds_top_player_wins = 0
@@ -96,7 +96,8 @@ class DatasetOptions:
     # meta
     nl: str = 'NL50'
 
-    def get_dir_raw_data(self):
+    @property
+    def dir_raw_data(self):
         raw_dir = os.path.join(DATA_DIR, '01_raw')
         subdir_00_player_or_pool = 'selected_players'
         subdir_01_nl = self.nl
@@ -106,16 +107,8 @@ class DatasetOptions:
             subdir_01_nl,
         ])
 
-    def exists_raw_data_for_all_selected_players(self):
-        if os.path.exists(self.get_dir_raw_data()):
-            dirs_top_players = [x[0] for x in os.walk(self.get_dir_raw_data())]
-            for i in range(self.num_top_players):
-                # if no folder with name PlayerRank00i/ exists, return False
-                if not f'PlayerRank{str(i).zfill(3)}' in dirs_top_players:
-                    return False
-        return True
-
-    def get_dir_vectorized_data(self):
+    @property
+    def dir_vectorized_data(self):
         assert self.make_dataset_for_each_individual is not None
         assert self.action_generation_options is not None
         vectorized_dir = os.path.join(DATA_DIR, '02_vectorized')
@@ -137,7 +130,8 @@ class DatasetOptions:
             subdir_03_top_n_players
         ])
 
-    def get_dir_preprocessed_data(self):
+    @property
+    def dir_preprocessed_data(self):
         assert self.make_dataset_for_each_individual is not None
         assert self.action_generation_options is not None
         preprocessed_dir = os.path.join(DATA_DIR, '03_preprocessed')
@@ -164,3 +158,12 @@ class DatasetOptions:
         if os.path.exists(dir_data_unzipped):
             return True
         return False
+
+    def exists_raw_data_for_all_selected_players(self):
+        if os.path.exists(self.dir_raw_data):
+            dirs_top_players = [x[0] for x in os.walk(self.dir_raw_data)]
+            for i in range(self.num_top_players):
+                # if no folder with name PlayerRank00i/ exists, return False
+                if not f'PlayerRank{str(i).zfill(3)}' in dirs_top_players:
+                    return False
+        return True
