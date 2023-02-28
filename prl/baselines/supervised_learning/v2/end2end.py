@@ -1,10 +1,11 @@
+import os
 from dataclasses import dataclass
 
 from prl.environment.Wrappers.base import ActionSpaceMinimal as Action
 from prl.environment.steinberger.PokerRL import Poker
 
 from prl.baselines.supervised_learning.v2.data.dataset_options import \
-    DatasetOptions, DataImbalanceCorrections, ActionGenOption
+    DatasetOptions, DataImbalanceCorrection, ActionGenOption
 
 from prl.baselines import DATA_DIR
 
@@ -14,33 +15,50 @@ class TrainingOptions:
     pass
 
 
-dataset_options = DatasetOptions(
-    # -- raw
-    num_top_players=17,
-    make_dataset_for_each_individual=False,
-    # -- vectorized
-    target_rounds=[Poker.FLOP, Poker.TURN, Poker.RIVER],
-    action_space=[Action.FOLD, Action.CHECK_CALL, Action.RAISE],
-    # -- preprocessed
-    sub_sampling_techniques=[
-        DataImbalanceCorrections.dont_resample_but_use_label_weights_in_optimizer,
-        DataImbalanceCorrections.resample_uniform_minimal],
-    action_generation_options=[
-        ActionGenOption.make_folds_from_top_players_with_randomized_hand]
-)
+def make_dataset_from_scratch(dataset_options: DatasetOptions,
+                              use_multiprocessing=False) -> bool:
+    opt = dataset_options
+    # run main_raw()
+
+    n_requested_top_players = opt.num_top_players
+
+    # run main_vectorized()
+
+
+    return True
+
+
+if __name__ == '__main__':
+    dataset_options = DatasetOptions(
+        # -- raw
+        num_top_players=17,
+        # -- vectorized
+        make_dataset_for_each_individual=False,
+        target_rounds=[Poker.FLOP, Poker.TURN, Poker.RIVER],
+        action_space=[Action.FOLD, Action.CHECK_CALL, Action.RAISE],
+        # -- preprocessed
+        sub_sampling_techniques=DataImbalanceCorrection
+        .dont_resample_but_use_label_weights_in_optimizer,
+        action_generation_options=ActionGenOption
+        .make_folds_from_top_players_with_randomized_hand
+    )
+    make_dataset_from_scratch(dataset_options)
 
 # end to end data generation via
 # make_dataset_from_scratch(dataset_options)  # todo parallelization_options
+
 # run main_raw
 # run main_vectorized
 # run main_preprocessed
 # el fin
 
+# todo: implement the stubs, consider creating branch
 # main_raw
 # check if 01_raw/all_players/NL50 exist
 # if not, gdrive id and then unzip recursively to opt.get_raw_dir
 # check if 01_raw/selected_players/NL50 exist up to rank specified by num_top_players
 # if not make folders for each missing rank using hsmithy extractor
+#
 
 # old
 # 1a) data is present -- continue
@@ -61,5 +79,3 @@ dataset_options = DatasetOptions(
 # 1. assert all necessary training data is available
 # 2. Make InMemoryDataset using opt.sub_sampling_techniques
 # training(dataset_options, training_options)
-
-
