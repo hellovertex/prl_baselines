@@ -80,17 +80,21 @@ in case make fails: `sudo apt install libpython3.10-dev`
     │   └── player_pool
     │       ├── NL50
     │       │   ├── folds_from_top_players
-    │       │   │   └── PlayerRank001/
+    │       │   │   └── Top20Players/
     │       │   │       ├── data000.csv
     │       │   │       └── ...
     │       │   ├── folds_from_fish_player
+    │       │   │   └── Top20Players/
     │       │   │       └── ...
     │       │   ├── folds_from_showdown_loser
+    │       │   |   └── Top20Players/
     │       │   │       └── ...
     │       │   ├── no_folds_only_wins_top_player
+    │       │   │   └── Top20Players/
     │       │   │       └── ...
     │       │   └── no_folds_showdowns_top_player
-    │       │           └── ...
+    │       │   |   └── Top20Players/
+    │       │   │       └── ...
     │       └── NL5000
     │           └── ...
     ├── 03_preprocessed
