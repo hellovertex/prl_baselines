@@ -19,7 +19,8 @@ class DataImbalanceCorrections(enum.IntEnum):
     dont_resample_but_use_label_weights_in_optimizer = 0
     # |FOLDS| = |CHECK_CALLS| = |RAISES|
     # usually means slightly downsampling FOLDS and CHECK_CALLS
-    # and slightly upsamling RAISES
+    # and slightly upsamling RAISES.
+    # NOTE: requires actions from `prl.environment.Wrappers.base.ActionSpaceMinimal`
     resample_uniform_minimal = 1
     # |FOLDS| = |CHECK_CALLS| = |RAISE_1| = ... = |RAISE_n|
     # usually means heavily downsampling FOLDS and CHECK_CALLS and
@@ -30,9 +31,11 @@ class DataImbalanceCorrections(enum.IntEnum):
     # |RAISE_1| = ... = |RAISE_n|
     # one of FOLD / CHECK_CALLS gets slightly resampled. The raise
     # actions get upsampled, such that their label-frequency is
-    # uniformly distributed.
+    # uniformly distributed. This results in approximate balance:
+    # |FOLDS| = |CHECK_CALLS| ~= sum({|RAISE_1|,...,|RAISE_n|})
+    # Recommended when label weights can not be used and having
+    # an ActionSpace with multiple BET sizes.
     resample_raises__to_max_num_raise = 3
-    resample_raises__to_max_num_label = 4
 
 
 # dataset options
@@ -43,7 +46,8 @@ make_dataset_for_each_individual = False
 target_rounds: [Poker.FLOP, Poker.TURN, Poker.RIVER]
 actions_to_predict = [Action.FOLD, Action.CHECK_CALL, Action.RAISE]
 # -- preprocessed
-sub_sampling_technique = 'equal'
+sub_sampling_techniques = [DataImbalanceCorrections.dont_resample_but_use_label_weights_in_optimizer,
+                           DataImbalanceCorrections.resample_uniform_minimal]
 
 # script should
 # look for dataset in designated folder
