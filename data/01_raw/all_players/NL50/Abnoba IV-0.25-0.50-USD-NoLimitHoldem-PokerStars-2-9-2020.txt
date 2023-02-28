@@ -1,0 +1,954 @@
+PokerStars Hand #208994213926:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:44:33 ET
+Table 'Abnoba IV' 6-max Seat #1 is the button
+Seat 1: SirMarned ($20 in chips)
+Seat 2: max21rus1988 ($50.25 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 5: Becks Baker ($50 in chips)
+max21rus1988: posts small blind $0.25
+Communist654: posts big blind $0.50
+é=mc²: sits out
+*** HOLE CARDS ***
+Becks Baker: raises $0.75 to $1.25
+SirMarned: calls $1.25
+max21rus1988: folds
+Communist654: folds
+*** FLOP *** [2s 2d 9h]
+weng_sheng789 joins the table at seat #6
+Becks Baker: bets $1.02
+SirMarned: calls $1.02
+*** TURN *** [2s 2d 9h] [9c]
+Becks Baker: checks
+SirMarned: checks
+*** RIVER *** [2s 2d 9h 9c] [Ac]
+Becks Baker: checks
+SirMarned: checks
+*** SHOW DOWN ***
+Becks Baker: shows [8d Kd] (two pair, Nines and Deuces)
+SirMarned: shows [Js Ad] (two pair, Aces and Nines)
+SirMarned collected $5.03 from pot
+*** SUMMARY ***
+Total pot $5.29 | Rake $0.26
+Board [2s 2d 9h 9c Ac]
+Seat 1: SirMarned (button) showed [Js Ad] and won ($5.03) with two pair, Aces and Nines
+Seat 2: max21rus1988 (small blind) folded before Flop
+Seat 3: Communist654 (big blind) folded before Flop
+Seat 5: Becks Baker showed [8d Kd] and lost with two pair, Nines and Deuces
+
+
+PokerStars Hand #208994226465:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:45:14 ET
+Table 'Abnoba IV' 6-max Seat #2 is the button
+Seat 1: SirMarned ($22.76 in chips)
+Seat 2: max21rus1988 ($50 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($50 in chips)
+Seat 5: Becks Baker ($50 in chips)
+Communist654: posts small blind $0.25
+é=mc²: posts big blind $0.50
+weng_sheng789: sits out
+*** HOLE CARDS ***
+Becks Baker: folds
+SirMarned: folds
+max21rus1988: folds
+Communist654: folds
+Uncalled bet ($0.25) returned to é=mc²
+é=mc² collected $0.50 from pot
+é=mc²: doesn't show hand
+*** SUMMARY ***
+Total pot $0.50 | Rake $0
+Seat 1: SirMarned folded before Flop (didn't bet)
+Seat 2: max21rus1988 (button) folded before Flop (didn't bet)
+Seat 3: Communist654 (small blind) folded before Flop
+Seat 4: é=mc² (big blind) collected ($0.50)
+Seat 5: Becks Baker folded before Flop (didn't bet)
+
+
+PokerStars Hand #208994240835:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:46:02 ET
+Table 'Abnoba IV' 6-max Seat #4 is the button
+Seat 1: SirMarned ($25.23 in chips)
+Seat 2: max21rus1988 ($50 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($50 in chips)
+Seat 5: Becks Baker ($50 in chips)
+Seat 6: weng_sheng789 ($50 in chips)
+Becks Baker: posts small blind $0.25
+weng_sheng789: posts big blind $0.50
+*** HOLE CARDS ***
+SirMarned: raises $0.50 to $1
+max21rus1988: folds
+Communist654: folds
+é=mc²: calls $1
+Becks Baker: folds
+weng_sheng789: folds
+*** FLOP *** [4h 8s 9s]
+SirMarned: bets $1.31
+é=mc²: folds
+Uncalled bet ($1.31) returned to SirMarned
+SirMarned collected $2.61 from pot
+SirMarned: doesn't show hand
+*** SUMMARY ***
+Total pot $2.75 | Rake $0.14
+Board [4h 8s 9s]
+Seat 1: SirMarned collected ($2.61)
+Seat 2: max21rus1988 folded before Flop (didn't bet)
+Seat 3: Communist654 folded before Flop (didn't bet)
+Seat 4: é=mc² (button) folded on the Flop
+Seat 5: Becks Baker (small blind) folded before Flop
+Seat 6: weng_sheng789 (big blind) folded before Flop
+
+
+PokerStars Hand #208994248569:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:46:27 ET
+Table 'Abnoba IV' 6-max Seat #5 is the button
+Seat 1: SirMarned ($26.84 in chips)
+Seat 2: max21rus1988 ($50 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($50 in chips)
+Seat 5: Becks Baker ($50 in chips)
+Seat 6: weng_sheng789 ($49.50 in chips)
+weng_sheng789: posts small blind $0.25
+SirMarned: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: folds
+Communist654: folds
+é=mc²: raises $1 to $1.50
+Becks Baker: folds
+weng_sheng789: folds
+SirMarned: folds
+Uncalled bet ($1) returned to é=mc²
+é=mc² collected $1.25 from pot
+é=mc²: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: SirMarned (big blind) folded before Flop
+Seat 2: max21rus1988 folded before Flop (didn't bet)
+Seat 3: Communist654 folded before Flop (didn't bet)
+Seat 4: é=mc² collected ($1.25)
+Seat 5: Becks Baker (button) folded before Flop (didn't bet)
+Seat 6: weng_sheng789 (small blind) folded before Flop
+
+
+PokerStars Hand #208994253796:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:46:44 ET
+Table 'Abnoba IV' 6-max Seat #6 is the button
+Seat 1: SirMarned ($26.34 in chips)
+Seat 2: max21rus1988 ($50 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($50.75 in chips)
+Seat 5: Becks Baker ($50 in chips)
+Seat 6: weng_sheng789 ($50 in chips)
+SirMarned: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+*** HOLE CARDS ***
+Communist654: folds
+é=mc²: folds
+Becks Baker: raises $0.75 to $1.25
+weng_sheng789: folds
+SirMarned: folds
+max21rus1988: folds
+Uncalled bet ($0.75) returned to Becks Baker
+Becks Baker collected $1.25 from pot
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: SirMarned (small blind) folded before Flop
+Seat 2: max21rus1988 (big blind) folded before Flop
+Seat 3: Communist654 folded before Flop (didn't bet)
+Seat 4: é=mc² folded before Flop (didn't bet)
+Seat 5: Becks Baker collected ($1.25)
+Seat 6: weng_sheng789 (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208994229208:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:45:23 ET
+Table 'Abnoba IV' 6-max Seat #3 is the button
+Seat 1: SirMarned ($22.76 in chips)
+Seat 2: max21rus1988 ($50 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($50.25 in chips)
+Seat 5: Becks Baker ($50 in chips)
+é=mc²: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+weng_sheng789: sits out
+*** HOLE CARDS ***
+SirMarned: calls $0.50
+max21rus1988: folds
+Communist654: folds
+é=mc²: folds
+Becks Baker: checks
+*** FLOP *** [Ts 5h 3c]
+Becks Baker: checks
+SirMarned: checks
+*** TURN *** [Ts 5h 3c] [Td]
+Becks Baker: bets $0.69
+SirMarned: raises $1.29 to $1.98
+Becks Baker: calls $1.29
+*** RIVER *** [Ts 5h 3c Td] [Ad]
+Becks Baker: checks
+SirMarned: checks
+*** SHOW DOWN ***
+Becks Baker: shows [Kh 5d] (two pair, Tens and Fives)
+SirMarned: shows [As 2h] (two pair, Aces and Tens)
+SirMarned collected $4.95 from pot
+*** SUMMARY ***
+Total pot $5.21 | Rake $0.26
+Board [Ts 5h 3c Td Ad]
+Seat 1: SirMarned showed [As 2h] and won ($4.95) with two pair, Aces and Tens
+Seat 2: max21rus1988 folded before Flop (didn't bet)
+Seat 3: Communist654 (button) folded before Flop (didn't bet)
+Seat 4: é=mc² (small blind) folded before Flop
+Seat 5: Becks Baker (big blind) showed [Kh 5d] and lost with two pair, Tens and Fives
+
+
+PokerStars Hand #208994259148:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:47:02 ET
+Table 'Abnoba IV' 6-max Seat #1 is the button
+Seat 1: SirMarned ($26.09 in chips)
+Seat 2: max21rus1988 ($50 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($50.75 in chips)
+Seat 5: Becks Baker ($50.75 in chips)
+Seat 6: weng_sheng789 ($50 in chips)
+max21rus1988: posts small blind $0.25
+Communist654: posts big blind $0.50
+*** HOLE CARDS ***
+é=mc²: folds
+Becks Baker: raises $0.75 to $1.25
+weng_sheng789: folds
+SirMarned: calls $1.25
+max21rus1988: folds
+Communist654: folds
+*** FLOP *** [3s Td Ts]
+Becks Baker: checks
+SirMarned: bets $1.55
+Becks Baker: folds
+Uncalled bet ($1.55) returned to SirMarned
+SirMarned collected $3.09 from pot
+SirMarned: doesn't show hand
+*** SUMMARY ***
+Total pot $3.25 | Rake $0.16
+Board [3s Td Ts]
+Seat 1: SirMarned (button) collected ($3.09)
+Seat 2: max21rus1988 (small blind) folded before Flop
+Seat 3: Communist654 (big blind) folded before Flop
+Seat 4: é=mc² folded before Flop (didn't bet)
+Seat 5: Becks Baker folded on the Flop
+Seat 6: weng_sheng789 folded before Flop (didn't bet)
+
+
+PokerStars Hand #208994280587:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:48:13 ET
+Table 'Abnoba IV' 6-max Seat #3 is the button
+Seat 1: SirMarned ($25.93 in chips)
+Seat 2: max21rus1988 ($52.51 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($50.25 in chips)
+Seat 5: Becks Baker ($50 in chips)
+Seat 6: weng_sheng789 ($50 in chips)
+é=mc²: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+weng_sheng789: folds
+SirMarned: folds
+max21rus1988: folds
+weng_sheng789 leaves the table
+Communist654: raises $0.75 to $1.25
+é=mc²: folds
+Becks Baker: folds
+Uncalled bet ($0.75) returned to Communist654
+Communist654 collected $1.25 from pot
+Communist654: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: SirMarned folded before Flop (didn't bet)
+Seat 2: max21rus1988 folded before Flop (didn't bet)
+Seat 3: Communist654 (button) collected ($1.25)
+Seat 4: é=mc² (small blind) folded before Flop
+Seat 5: Becks Baker (big blind) folded before Flop
+Seat 6: weng_sheng789 folded before Flop (didn't bet)
+
+
+PokerStars Hand #208994269898:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:47:37 ET
+Table 'Abnoba IV' 6-max Seat #2 is the button
+Seat 1: SirMarned ($27.93 in chips)
+Seat 2: max21rus1988 ($50 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($50.75 in chips)
+Seat 5: Becks Baker ($50 in chips)
+Seat 6: weng_sheng789 ($50 in chips)
+Communist654: posts small blind $0.25
+é=mc²: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: folds
+weng_sheng789: folds
+SirMarned: calls $0.50
+max21rus1988: raises $1.50 to $2
+Communist654: folds
+é=mc²: folds
+SirMarned: calls $1.50
+*** FLOP *** [7s Kh Td]
+SirMarned: checks
+max21rus1988: bets $2.98
+SirMarned: folds
+Uncalled bet ($2.98) returned to max21rus1988
+max21rus1988 collected $4.51 from pot
+max21rus1988: doesn't show hand
+*** SUMMARY ***
+Total pot $4.75 | Rake $0.24
+Board [7s Kh Td]
+Seat 1: SirMarned folded on the Flop
+Seat 2: max21rus1988 (button) collected ($4.51)
+Seat 3: Communist654 (small blind) folded before Flop
+Seat 4: é=mc² (big blind) folded before Flop
+Seat 5: Becks Baker folded before Flop (didn't bet)
+Seat 6: weng_sheng789 folded before Flop (didn't bet)
+
+
+PokerStars Hand #208994304797:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:49:21 ET
+Table 'Abnoba IV' 6-max Seat #5 is the button
+Seat 1: SirMarned ($24.68 in chips)
+Seat 3: Communist654 ($50.75 in chips)
+Seat 4: é=mc² ($51.36 in chips)
+Seat 5: Becks Baker ($50 in chips)
+SirMarned: posts small blind $0.25
+max21rus1988: is sitting out
+Communist654: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988 leaves the table
+ZonTTT joins the table at seat #2
+é=mc²: folds
+ZonTTT leaves the table
+Becks Baker: raises $0.75 to $1.25
+Meskalita joins the table at seat #2
+SirMarned: calls $1
+Communist654: calls $0.75
+*** FLOP *** [2h Kc 2c]
+Meskalita leaves the table
+SirMarned: bets $1.78
+Communist654: folds
+Becks Baker: folds
+Uncalled bet ($1.78) returned to SirMarned
+SirMarned collected $3.56 from pot
+SirMarned: doesn't show hand
+*** SUMMARY ***
+Total pot $3.75 | Rake $0.19
+Board [2h Kc 2c]
+Seat 1: SirMarned (small blind) collected ($3.56)
+Seat 3: Communist654 (big blind) folded on the Flop
+Seat 4: é=mc² folded before Flop (didn't bet)
+Seat 5: Becks Baker (button) folded on the Flop
+
+
+PokerStars Hand #208994313475:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:49:50 ET
+Table 'Abnoba IV' 6-max Seat #1 is the button
+Seat 1: SirMarned ($26.99 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($51.36 in chips)
+Seat 5: Becks Baker ($50 in chips)
+Communist654: posts small blind $0.25
+é=mc²: posts big blind $0.50
+exidonsk: sits out
+*** HOLE CARDS ***
+Becks Baker: raises $0.75 to $1.25
+SirMarned: folds
+Communist654: folds
+é=mc²: folds
+Uncalled bet ($0.75) returned to Becks Baker
+Becks Baker collected $1.25 from pot
+Driezer1 joins the table at seat #2
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: SirMarned (button) folded before Flop (didn't bet)
+Seat 3: Communist654 (small blind) folded before Flop
+Seat 4: é=mc² (big blind) folded before Flop
+Seat 5: Becks Baker collected ($1.25)
+
+
+PokerStars Hand #208994291291:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:48:48 ET
+Table 'Abnoba IV' 6-max Seat #4 is the button
+Seat 1: SirMarned ($25.93 in chips)
+Seat 2: max21rus1988 ($52.51 in chips)
+Seat 3: Communist654 ($50.75 in chips)
+Seat 4: é=mc² ($50 in chips)
+Seat 5: Becks Baker ($50 in chips)
+Becks Baker: posts small blind $0.25
+SirMarned: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: folds
+Communist654: folds
+é=mc²: raises $0.75 to $1.25
+Becks Baker: folds
+exidonsk joins the table at seat #6
+SirMarned: calls $0.75
+*** FLOP *** [Qc 6s 7h]
+SirMarned: checks
+é=mc²: bets $2.06
+SirMarned: folds
+Uncalled bet ($2.06) returned to é=mc²
+é=mc² collected $2.61 from pot
+é=mc²: doesn't show hand
+*** SUMMARY ***
+Total pot $2.75 | Rake $0.14
+Board [Qc 6s 7h]
+Seat 1: SirMarned (big blind) folded on the Flop
+Seat 2: max21rus1988 folded before Flop (didn't bet)
+Seat 3: Communist654 folded before Flop (didn't bet)
+Seat 4: é=mc² (button) collected ($2.61)
+Seat 5: Becks Baker (small blind) folded before Flop
+
+
+PokerStars Hand #208994317042:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:50:02 ET
+Table 'Abnoba IV' 6-max Seat #3 is the button
+Seat 1: SirMarned ($26.99 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($50.86 in chips)
+Seat 5: Becks Baker ($50.75 in chips)
+é=mc²: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+exidonsk: sits out
+Driezer1: sits out
+*** HOLE CARDS ***
+SirMarned: calls $0.50
+Communist654: folds
+é=mc²: folds
+Becks Baker: raises $2 to $2.50
+SirMarned: calls $2
+*** FLOP *** [3c 8h Kh]
+Becks Baker: checks
+SirMarned: bets $2.50
+Becks Baker: calls $2.50
+*** TURN *** [3c 8h Kh] [Tc]
+Becks Baker: checks
+SirMarned: checks
+*** RIVER *** [3c 8h Kh Tc] [Qs]
+Becks Baker: bets $6.58
+SirMarned: calls $6.58
+*** SHOW DOWN ***
+Becks Baker: shows [7h 7c] (a pair of Sevens)
+SirMarned: shows [4d Kd] (a pair of Kings)
+SirMarned collected $22.66 from pot
+*** SUMMARY ***
+Total pot $23.41 | Rake $0.75
+Board [3c 8h Kh Tc Qs]
+Seat 1: SirMarned showed [4d Kd] and won ($22.66) with a pair of Kings
+Seat 3: Communist654 (button) folded before Flop (didn't bet)
+Seat 4: é=mc² (small blind) folded before Flop
+Seat 5: Becks Baker (big blind) showed [7h 7c] and lost with a pair of Sevens
+
+
+PokerStars Hand #208994333355:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:50:58 ET
+Table 'Abnoba IV' 6-max Seat #4 is the button
+Seat 1: SirMarned ($38.07 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($50.61 in chips)
+Seat 5: Becks Baker ($50 in chips)
+Seat 6: exidonsk ($50 in chips)
+Becks Baker: posts small blind $0.25
+exidonsk: posts big blind $0.50
+Driezer1: sits out
+*** HOLE CARDS ***
+SirMarned: folds
+Communist654: folds
+SirMarned leaves the table
+ZonTTT joins the table at seat #1
+é=mc²: folds
+Becks Baker: folds
+Uncalled bet ($0.25) returned to exidonsk
+exidonsk collected $0.50 from pot
+exidonsk: doesn't show hand
+*** SUMMARY ***
+Total pot $0.50 | Rake $0
+Seat 1: SirMarned folded before Flop (didn't bet)
+Seat 3: Communist654 folded before Flop (didn't bet)
+Seat 4: é=mc² (button) folded before Flop (didn't bet)
+Seat 5: Becks Baker (small blind) folded before Flop
+Seat 6: exidonsk (big blind) collected ($0.50)
+
+
+PokerStars Hand #208994338976:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:51:16 ET
+Table 'Abnoba IV' 6-max Seat #5 is the button
+Seat 2: Driezer1 ($40 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($50.61 in chips)
+Seat 5: Becks Baker ($50 in chips)
+Seat 6: exidonsk ($50.25 in chips)
+exidonsk: posts small blind $0.25
+Driezer1: posts big blind $0.50
+*** HOLE CARDS ***
+Communist654: folds
+é=mc²: folds
+Becks Baker: raises $0.75 to $1.25
+exidonsk: folds
+Driezer1: calls $0.75
+*** FLOP *** [Ad 9h 4s]
+Driezer1: checks
+Becks Baker: bets $1.06
+Driezer1: calls $1.06
+*** TURN *** [Ad 9h 4s] [As]
+Driezer1: bets $1
+Becks Baker: raises $3.32 to $4.32
+Driezer1: calls $3.32
+*** RIVER *** [Ad 9h 4s As] [2s]
+Driezer1: checks
+Becks Baker: checks
+*** SHOW DOWN ***
+Driezer1: shows [8s Js] (a flush, Ace high)
+Becks Baker: mucks hand
+Driezer1 collected $12.83 from pot
+*** SUMMARY ***
+Total pot $13.51 | Rake $0.68
+Board [Ad 9h 4s As 2s]
+Seat 2: Driezer1 (big blind) showed [8s Js] and won ($12.83) with a flush, Ace high
+Seat 3: Communist654 folded before Flop (didn't bet)
+Seat 4: é=mc² folded before Flop (didn't bet)
+Seat 5: Becks Baker (button) mucked
+Seat 6: exidonsk (small blind) folded before Flop
+
+
+PokerStars Hand #208994357249:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:52:18 ET
+Table 'Abnoba IV' 6-max Seat #6 is the button
+Seat 2: Driezer1 ($46.20 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($50.61 in chips)
+Seat 5: Becks Baker ($50 in chips)
+Seat 6: exidonsk ($50 in chips)
+Driezer1: posts small blind $0.25
+Communist654: posts big blind $0.50
+*** HOLE CARDS ***
+é=mc²: raises $0.75 to $1.25
+Becks Baker: folds
+exidonsk: folds
+Driezer1: calls $1
+Communist654: folds
+*** FLOP *** [3s Ts 4h]
+Driezer1: checks
+é=mc²: checks
+*** TURN *** [3s Ts 4h] [9h]
+Driezer1: checks
+é=mc²: checks
+*** RIVER *** [3s Ts 4h 9h] [Jd]
+Driezer1: checks
+é=mc²: bets $2.25
+Driezer1: folds
+Uncalled bet ($2.25) returned to é=mc²
+é=mc² collected $2.85 from pot
+é=mc²: doesn't show hand
+*** SUMMARY ***
+Total pot $3 | Rake $0.15
+Board [3s Ts 4h 9h Jd]
+Seat 2: Driezer1 (small blind) folded on the River
+Seat 3: Communist654 (big blind) folded before Flop
+Seat 4: é=mc² collected ($2.85)
+Seat 5: Becks Baker folded before Flop (didn't bet)
+Seat 6: exidonsk (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208994366557:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:52:50 ET
+Table 'Abnoba IV' 6-max Seat #2 is the button
+Seat 2: Driezer1 ($44.95 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($52.21 in chips)
+Seat 5: Becks Baker ($50 in chips)
+Seat 6: exidonsk ($50 in chips)
+Communist654: posts small blind $0.25
+é=mc²: posts big blind $0.50
+ZonTTT: sits out
+*** HOLE CARDS ***
+Becks Baker: folds
+exidonsk: folds
+Driezer1: calls $0.50
+Communist654: folds
+é=mc²: checks
+*** FLOP *** [2c 3s 4d]
+é=mc²: checks
+Driezer1: bets $0.50
+é=mc²: calls $0.50
+*** TURN *** [2c 3s 4d] [4c]
+é=mc²: checks
+Driezer1: bets $0.50
+é=mc²: calls $0.50
+*** RIVER *** [2c 3s 4d 4c] [Jd]
+é=mc²: checks
+Driezer1: checks
+*** SHOW DOWN ***
+é=mc²: shows [7c 3d] (two pair, Fours and Threes)
+Driezer1: shows [3c 9d] (two pair, Fours and Threes)
+é=mc² collected $1.55 from pot
+Driezer1 collected $1.54 from pot
+*** SUMMARY ***
+Total pot $3.25 | Rake $0.16
+Board [2c 3s 4d 4c Jd]
+Seat 2: Driezer1 (button) showed [3c 9d] and won ($1.54) with two pair, Fours and Threes
+Seat 3: Communist654 (small blind) folded before Flop
+Seat 4: é=mc² (big blind) showed [7c 3d] and won ($1.55) with two pair, Fours and Threes
+Seat 5: Becks Baker folded before Flop (didn't bet)
+Seat 6: exidonsk folded before Flop (didn't bet)
+
+
+PokerStars Hand #208994392443:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:53:45 ET
+Table 'Abnoba IV' 6-max Seat #3 is the button
+Seat 2: Driezer1 ($44.99 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($52.26 in chips)
+Seat 5: Becks Baker ($50 in chips)
+Seat 6: exidonsk ($50 in chips)
+é=mc²: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+ZonTTT: sits out
+*** HOLE CARDS ***
+exidonsk: folds
+Driezer1 has timed out
+Driezer1: folds
+Communist654: folds
+é=mc²: calls $0.25
+Becks Baker: raises $1.50 to $2
+é=mc²: folds
+Uncalled bet ($1.50) returned to Becks Baker
+Becks Baker collected $1 from pot
+*** SUMMARY ***
+Total pot $1 | Rake $0
+Seat 2: Driezer1 folded before Flop (didn't bet)
+Seat 3: Communist654 (button) folded before Flop (didn't bet)
+Seat 4: é=mc² (small blind) folded before Flop
+Seat 5: Becks Baker (big blind) collected ($1)
+Seat 6: exidonsk folded before Flop (didn't bet)
+
+
+PokerStars Hand #208994405267:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:54:29 ET
+Table 'Abnoba IV' 6-max Seat #4 is the button
+Seat 2: Driezer1 ($44.99 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($51.76 in chips)
+Seat 5: Becks Baker ($50.50 in chips)
+Seat 6: exidonsk ($50 in chips)
+Becks Baker: posts small blind $0.25
+exidonsk: posts big blind $0.50
+ZonTTT: sits out
+*** HOLE CARDS ***
+Driezer1: calls $0.50
+Communist654: raises $1.50 to $2
+é=mc²: folds
+Becks Baker: calls $1.75
+exidonsk: raises $5 to $7
+Driezer1: folds
+Communist654: calls $5
+Becks Baker: calls $5
+*** FLOP *** [5c 9d 8c]
+Becks Baker: checks
+exidonsk: checks
+Communist654: checks
+*** TURN *** [5c 9d 8c] [Jh]
+Becks Baker: bets $10.21
+exidonsk: folds
+Communist654: folds
+Uncalled bet ($10.21) returned to Becks Baker
+Becks Baker collected $20.42 from pot
+*** SUMMARY ***
+Total pot $21.50 | Rake $1.08
+Board [5c 9d 8c Jh]
+Seat 2: Driezer1 folded before Flop
+Seat 3: Communist654 folded on the Turn
+Seat 4: é=mc² (button) folded before Flop (didn't bet)
+Seat 5: Becks Baker (small blind) collected ($20.42)
+Seat 6: exidonsk (big blind) folded on the Turn
+
+
+PokerStars Hand #208994424453:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:55:38 ET
+Table 'Abnoba IV' 6-max Seat #5 is the button
+Seat 1: ZonTTT ($50 in chips)
+Seat 2: Driezer1 ($44.49 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($51.76 in chips)
+Seat 5: Becks Baker ($63.92 in chips)
+Seat 6: exidonsk ($50 in chips)
+exidonsk: posts small blind $0.25
+ZonTTT: posts big blind $0.50
+*** HOLE CARDS ***
+Driezer1: calls $0.50
+Communist654: folds
+é=mc²: folds
+Becks Baker: folds
+exidonsk: folds
+ZonTTT: checks
+*** FLOP *** [Kc 4c Kh]
+ZonTTT: checks
+Driezer1: checks
+*** TURN *** [Kc 4c Kh] [Ts]
+ZonTTT: checks
+Driezer1: checks
+*** RIVER *** [Kc 4c Kh Ts] [2c]
+ZonTTT: checks
+Driezer1: checks
+*** SHOW DOWN ***
+ZonTTT: shows [Js 6c] (a pair of Kings)
+Driezer1: mucks hand
+ZonTTT collected $1.19 from pot
+*** SUMMARY ***
+Total pot $1.25 | Rake $0.06
+Board [Kc 4c Kh Ts 2c]
+Seat 1: ZonTTT (big blind) showed [Js 6c] and won ($1.19) with a pair of Kings
+Seat 2: Driezer1 mucked
+Seat 3: Communist654 folded before Flop (didn't bet)
+Seat 4: é=mc² folded before Flop (didn't bet)
+Seat 5: Becks Baker (button) folded before Flop (didn't bet)
+Seat 6: exidonsk (small blind) folded before Flop
+
+
+PokerStars Hand #208994437738:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:56:31 ET
+Table 'Abnoba IV' 6-max Seat #6 is the button
+Seat 1: ZonTTT ($50.69 in chips)
+Seat 2: Driezer1 ($43.99 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($51.76 in chips)
+Seat 5: Becks Baker ($63.92 in chips)
+Seat 6: exidonsk ($50 in chips)
+ZonTTT: posts small blind $0.25
+Driezer1: posts big blind $0.50
+*** HOLE CARDS ***
+Communist654: folds
+é=mc²: raises $0.75 to $1.25
+Becks Baker: folds
+exidonsk: folds
+ZonTTT: folds
+Driezer1: calls $0.75
+*** FLOP *** [9s 7d 2s]
+Driezer1: checks
+é=mc²: checks
+*** TURN *** [9s 7d 2s] [3d]
+Driezer1: bets $0.50
+é=mc²: raises $1.80 to $2.30
+Driezer1: calls $1.80
+*** RIVER *** [9s 7d 2s 3d] [Kc]
+Driezer1: checks
+é=mc²: checks
+*** SHOW DOWN ***
+Driezer1: shows [Tc Jh] (high card King)
+é=mc²: shows [Th 9h] (a pair of Nines)
+é=mc² collected $6.98 from pot
+*** SUMMARY ***
+Total pot $7.35 | Rake $0.37
+Board [9s 7d 2s 3d Kc]
+Seat 1: ZonTTT (small blind) folded before Flop
+Seat 2: Driezer1 (big blind) showed [Tc Jh] and lost with high card King
+Seat 3: Communist654 folded before Flop (didn't bet)
+Seat 4: é=mc² showed [Th 9h] and won ($6.98) with a pair of Nines
+Seat 5: Becks Baker folded before Flop (didn't bet)
+Seat 6: exidonsk (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208994445932:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:57:03 ET
+Table 'Abnoba IV' 6-max Seat #1 is the button
+Seat 1: ZonTTT ($50.44 in chips)
+Seat 2: Driezer1 ($40.44 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($55.19 in chips)
+Seat 5: Becks Baker ($63.92 in chips)
+Seat 6: exidonsk ($50 in chips)
+Driezer1: posts small blind $0.25
+Communist654: posts big blind $0.50
+*** HOLE CARDS ***
+é=mc²: folds
+Becks Baker: raises $0.75 to $1.25
+exidonsk: folds
+ZonTTT: folds
+Driezer1: raises $0.75 to $2
+Communist654: folds
+Becks Baker: calls $0.75
+*** FLOP *** [Ac 4s 6h]
+Driezer1: checks
+Becks Baker: checks
+*** TURN *** [Ac 4s 6h] [5h]
+Driezer1: bets $0.50
+Becks Baker: raises $3 to $3.50
+Driezer1: calls $3
+*** RIVER *** [Ac 4s 6h 5h] [9d]
+Driezer1: bets $0.50
+Becks Baker: raises $8 to $8.50
+Driezer1: calls $8
+*** SHOW DOWN ***
+Becks Baker: shows [4d 4h] (three of a kind, Fours)
+Driezer1: mucks hand
+Becks Baker collected $27.08 from pot
+*** SUMMARY ***
+Total pot $28.50 | Rake $1.42
+Board [Ac 4s 6h 5h 9d]
+Seat 1: ZonTTT (button) folded before Flop (didn't bet)
+Seat 2: Driezer1 (small blind) mucked
+Seat 3: Communist654 (big blind) folded before Flop
+Seat 4: é=mc² folded before Flop (didn't bet)
+Seat 5: Becks Baker showed [4d 4h] and won ($27.08) with three of a kind, Fours
+Seat 6: exidonsk folded before Flop (didn't bet)
+
+
+PokerStars Hand #208994459832:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:57:58 ET
+Table 'Abnoba IV' 6-max Seat #2 is the button
+Seat 1: ZonTTT ($50.44 in chips)
+Seat 2: Driezer1 ($26.44 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($55.19 in chips)
+Seat 5: Becks Baker ($77 in chips)
+Seat 6: exidonsk ($50 in chips)
+Communist654: posts small blind $0.25
+é=mc²: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: folds
+exidonsk: raises $0.62 to $1.12
+ZonTTT: folds
+Driezer1: calls $1.12
+Communist654: folds
+é=mc²: folds
+*** FLOP *** [5d 2h 6h]
+exidonsk: checks
+Driezer1: checks
+*** TURN *** [5d 2h 6h] [3d]
+exidonsk: checks
+Driezer1: checks
+*** RIVER *** [5d 2h 6h 3d] [6c]
+exidonsk: checks
+Driezer1: checks
+*** SHOW DOWN ***
+exidonsk: shows [8s As] (a pair of Sixes)
+Driezer1: shows [3c Qh] (two pair, Sixes and Threes)
+Driezer1 collected $2.84 from pot
+*** SUMMARY ***
+Total pot $2.99 | Rake $0.15
+Board [5d 2h 6h 3d 6c]
+Seat 1: ZonTTT folded before Flop (didn't bet)
+Seat 2: Driezer1 (button) showed [3c Qh] and won ($2.84) with two pair, Sixes and Threes
+Seat 3: Communist654 (small blind) folded before Flop
+Seat 4: é=mc² (big blind) folded before Flop
+Seat 5: Becks Baker folded before Flop (didn't bet)
+Seat 6: exidonsk showed [8s As] and lost with a pair of Sixes
+
+
+PokerStars Hand #208994467639:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:58:28 ET
+Table 'Abnoba IV' 6-max Seat #3 is the button
+Seat 1: ZonTTT ($50.44 in chips)
+Seat 2: Driezer1 ($28.16 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($54.69 in chips)
+Seat 5: Becks Baker ($77 in chips)
+Seat 6: exidonsk ($50 in chips)
+é=mc²: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+exidonsk: folds
+ZonTTT: folds
+Driezer1: calls $0.50
+Communist654: folds
+é=mc²: calls $0.25
+Becks Baker: checks
+*** FLOP *** [9s Qh Qd]
+é=mc²: checks
+Becks Baker: checks
+Driezer1: checks
+*** TURN *** [9s Qh Qd] [Ks]
+é=mc²: bets $1.12
+Becks Baker: calls $1.12
+Driezer1: calls $1.12
+*** RIVER *** [9s Qh Qd Ks] [5d]
+é=mc²: bets $3.65
+Becks Baker: folds
+Driezer1: folds
+Uncalled bet ($3.65) returned to é=mc²
+é=mc² collected $4.62 from pot
+é=mc²: doesn't show hand
+*** SUMMARY ***
+Total pot $4.86 | Rake $0.24
+Board [9s Qh Qd Ks 5d]
+Seat 1: ZonTTT folded before Flop (didn't bet)
+Seat 2: Driezer1 folded on the River
+Seat 3: Communist654 (button) folded before Flop (didn't bet)
+Seat 4: é=mc² (small blind) collected ($4.62)
+Seat 5: Becks Baker (big blind) folded on the River
+Seat 6: exidonsk folded before Flop (didn't bet)
+
+
+PokerStars Hand #208994480557:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 20:59:19 ET
+Table 'Abnoba IV' 6-max Seat #4 is the button
+Seat 1: ZonTTT ($50.44 in chips)
+Seat 2: Driezer1 ($26.54 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($57.69 in chips)
+Seat 5: Becks Baker ($75.38 in chips)
+Seat 6: exidonsk ($50 in chips)
+Becks Baker: posts small blind $0.25
+exidonsk: posts big blind $0.50
+*** HOLE CARDS ***
+ZonTTT: folds
+Driezer1: calls $0.50
+Communist654: folds
+é=mc²: raises $1.50 to $2
+Becks Baker: folds
+exidonsk: folds
+Driezer1: calls $1.50
+*** FLOP *** [8h 9h 3d]
+Driezer1: checks
+é=mc²: checks
+*** TURN *** [8h 9h 3d] [7d]
+Driezer1: checks
+é=mc²: bets $1.49
+Driezer1: folds
+Uncalled bet ($1.49) returned to é=mc²
+é=mc² collected $4.51 from pot
+é=mc²: doesn't show hand
+*** SUMMARY ***
+Total pot $4.75 | Rake $0.24
+Board [8h 9h 3d 7d]
+Seat 1: ZonTTT folded before Flop (didn't bet)
+Seat 2: Driezer1 folded on the Turn
+Seat 3: Communist654 folded before Flop (didn't bet)
+Seat 4: é=mc² (button) collected ($4.51)
+Seat 5: Becks Baker (small blind) folded before Flop
+Seat 6: exidonsk (big blind) folded before Flop
+
+
+PokerStars Hand #208994493732:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 21:00:10 ET
+Table 'Abnoba IV' 6-max Seat #5 is the button
+Seat 1: ZonTTT ($50.44 in chips)
+Seat 2: Driezer1 ($24.54 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($60.20 in chips)
+Seat 5: Becks Baker ($75.13 in chips)
+Seat 6: exidonsk ($50 in chips)
+exidonsk: posts small blind $0.25
+ZonTTT: posts big blind $0.50
+*** HOLE CARDS ***
+Driezer1 has timed out
+Driezer1: folds
+Communist654: folds
+Driezer1 leaves the table
+é=mc²: folds
+Becks Baker: raises $0.75 to $1.25
+exidonsk: folds
+ZonTTT: folds
+Uncalled bet ($0.75) returned to Becks Baker
+Becks Baker collected $1.25 from pot
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: ZonTTT (big blind) folded before Flop
+Seat 2: Driezer1 folded before Flop (didn't bet)
+Seat 3: Communist654 folded before Flop (didn't bet)
+Seat 4: é=mc² folded before Flop (didn't bet)
+Seat 5: Becks Baker (button) collected ($1.25)
+Seat 6: exidonsk (small blind) folded before Flop
+
+
+PokerStars Hand #208994503052:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/08 21:00:40 ET
+Table 'Abnoba IV' 6-max Seat #6 is the button
+Seat 1: ZonTTT ($50 in chips)
+Seat 3: Communist654 ($50 in chips)
+Seat 4: é=mc² ($60.20 in chips)
+Seat 6: exidonsk ($50 in chips)
+ZonTTT: posts small blind $0.25
+Communist654: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker leaves the table
+é=mc²: raises $1 to $1.50
+exidonsk: folds
+ZonTTT: folds
+Communist654: folds
+Uncalled bet ($1) returned to é=mc²
+é=mc² collected $1.25 from pot
+é=mc²: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: ZonTTT (small blind) folded before Flop
+Seat 3: Communist654 (big blind) folded before Flop
+Seat 4: é=mc² collected ($1.25)
+Seat 6: exidonsk (button) folded before Flop (didn't bet)
+
+
