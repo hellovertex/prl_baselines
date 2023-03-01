@@ -12,6 +12,7 @@ from typing import Dict, Optional
 import click
 import gdown
 import pandas as pd
+from tqdm import tqdm
 
 from prl.baselines import DATA_DIR
 from prl.baselines.supervised_learning.v2.datasets.dataset_options import DatasetOptions
@@ -52,11 +53,12 @@ def download_data(from_gdrive_id, nl: str) -> bool:
 def get_players_showdown_stats(parser):
     players: Dict[str, PlayerSelection] = {}
 
-    for hand_histories in parser.parse_hand_histories_from_all_players():
+    num_files = parser.num_files
+    for hand_histories in tqdm(parser.parse_hand_histories_from_all_players(),
+                               total=num_files):
         for episode in hand_histories:
             if not episode.has_showdown:
                 continue
-            logging.info(f'Updating player stats from hand_id {episode.hand_id}')
             try:
                 # for each player update relevant stats
                 for player in episode.showdown_players:
@@ -133,10 +135,10 @@ class RawData:
                      f'\n=== Extracting hand histories of missing players from '
                      f'data/01_raw/all_players===')
 
-        for i, file in enumerate(self.data_files):
-            if i % 50 == 0: logging.info(
-                f'Extracting games for top {self.opt.num_top_players} players'
-                f'from file {i}/{self.n_files}')
+        for i, file in tqdm(enumerate(self.data_files)):
+            # logging.info(
+            #     f'Extracting games for top {self.opt.num_top_players} players'
+            #     f'from file {i}/{self.n_files}')
 
             with open(file, 'r') as f:
                 try:
