@@ -4,6 +4,7 @@ import glob
 import json
 import logging
 import os
+import re
 import warnings
 from dataclasses import dataclass
 from typing import Dict, Optional
@@ -84,6 +85,7 @@ def get_top_n_players(nl, num_top_players) -> Dict:
                       f'hand histories.')
     return df[:num_top_players].to_dict()
 
+
 class WritePlayerSelectionDataSubset:
     def _extract_hands(self, hands_played):
         for current in hands_played:  # c for current_hand
@@ -132,24 +134,41 @@ class RawData:
     def __init__(self,
                  dataset_options: DatasetOptions):
         self.opt = dataset_options
+        tmp_data_dir = self.opt.dir_raw_data_all_players
+        self.data_files = glob.glob(tmp_data_dir + '**/*.txt')
+        self.data_dir = self.opt.dir_raw_data_top_players
+        self.n_files = len(self.data_files)
+
+    def _to_disk(self, alias, player_name, hand_histories):
+        file_path_out = os.path.join(self.data_dir, alias)
+        for current in hand_histories:  # c for current_hand
+            if player_name in current:
+                result = "PokerStars Hand #" + current
+                if not os.path.exists(file_path_out):
+                    os.makedirs(file_path_out)
+                with open(os.path.join(file_path_out, f'{alias}.txt'),
+                          'a+',
+                          encoding='utf-8') as f:
+                    f.write(result)
 
     def player_dataset_to_disk(self, target_players):
-
+        for i, file in enumerate(self.data_files):
+            if i % 100 == 0: logging.info(
+                f'Extracting games for top {self.opt.num_top_players} players'
+                f'from file {i}/{self.n_files}')
+            with open(file, 'r') as f:
+                hand_histories = re.split(r'PokerStars Hand #', f.read())[1:]
+                for rank, player_name in enumerate(target_players):
+                    alias = f'PlayerRank{str(rank).zfill(3)}'
+                    self._to_disk(alias, player_name, hand_histories)
 
     def generate(self,
                  from_gdrive_id: Optional[str] = None):
         if not self.opt.hand_history_has_been_downloaded_and_unzipped():
             download_data(from_gdrive_id, self.opt.nl)
         if not self.opt.exists_raw_data_for_all_selected_players():
-            # 1. need to get top n players make separate main at some point
-            # 1a) make list of n best players and write it to 00_tmp
             top_players = get_top_n_players(self.opt.nl, self.opt.num_top_players)
-            # 2 need to run hsmithy extractor (create HandHistoryExtractorV2 that runs on
-            a = 1
-
-            # new directory structure
-            # todo: implement and test if successfull
-
+            self.player_dataset_to_disk(list(top_players.keys()))
 
 @click.command()
 @click.option("--num_top_players", default=10,

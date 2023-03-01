@@ -97,7 +97,17 @@ class DatasetOptions:
     nl: str = 'NL50'
 
     @property
-    def dir_raw_data(self):
+    def dir_raw_data_all_players(self):
+        raw_dir = os.path.join(DATA_DIR, '01_raw')
+        # data/00_tmp and data/01_raw/all_players are irrelevant for callers
+        return os.path.join(*[
+            raw_dir,
+            self.nl,
+            'all_players',
+        ])
+
+    @property
+    def dir_raw_data_top_players(self):
         raw_dir = os.path.join(DATA_DIR, '01_raw')
         # data/00_tmp and data/01_raw/all_players are irrelevant for callers
         subdir_00_nl = self.nl
@@ -161,8 +171,8 @@ class DatasetOptions:
         return False
 
     def exists_raw_data_for_all_selected_players(self):
-        if os.path.exists(self.dir_raw_data):
-            dirs_top_players = [x[0] for x in os.walk(self.dir_raw_data)]
+        if os.path.exists(self.dir_raw_data_top_players):
+            dirs_top_players = [x[0] for x in os.walk(self.dir_raw_data_top_players)]
             for i in range(self.num_top_players):
                 # if no folder with name PlayerRank00i/ exists, return False
                 if not f'PlayerRank{str(i).zfill(3)}' in dirs_top_players:
