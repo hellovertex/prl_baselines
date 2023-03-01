@@ -99,12 +99,13 @@ class DatasetOptions:
     @property
     def dir_raw_data(self):
         raw_dir = os.path.join(DATA_DIR, '01_raw')
-        subdir_00_player_or_pool = 'selected_players'
-        subdir_01_nl = self.nl
+        # data/00_tmp and data/01_raw/all_players are irrelevant for callers
+        subdir_00_nl = self.nl
+        subdir_01_player_or_pool = 'selected_players'
         return os.path.join(*[
             raw_dir,
-            subdir_00_player_or_pool,
-            subdir_01_nl,
+            subdir_00_nl,
+            subdir_01_player_or_pool,
         ])
 
     @property
@@ -112,9 +113,9 @@ class DatasetOptions:
         assert self.make_dataset_for_each_individual is not None
         assert self.action_generation_options is not None
         vectorized_dir = os.path.join(DATA_DIR, '02_vectorized')
-        subdir_00_player_or_pool = 'per_selected_player' if \
+        subdir_00_nl = self.nl
+        subdir_01_player_or_pool = 'per_selected_player' if \
             self.make_dataset_for_each_individual else 'player_pool'
-        subdir_01_nl = self.nl
         subdir_02_fold_or_no_fold = self.action_generation_options.name.replace(
             'make_',
             '')
@@ -124,8 +125,8 @@ class DatasetOptions:
             self.make_dataset_for_each_individual else ''
         return os.path.join(*[
             vectorized_dir,
-            subdir_00_player_or_pool,
-            subdir_01_nl,
+            subdir_00_nl,
+            subdir_01_player_or_pool,
             subdir_02_fold_or_no_fold,
             subdir_03_top_n_players
         ])
@@ -135,9 +136,9 @@ class DatasetOptions:
         assert self.make_dataset_for_each_individual is not None
         assert self.action_generation_options is not None
         preprocessed_dir = os.path.join(DATA_DIR, '03_preprocessed')
-        subdir_00_player_or_pool = 'per_selected_player' if \
+        subdir_01_player_or_pool = 'per_selected_player' if \
             self.make_dataset_for_each_individual else 'player_pool'
-        subdir_01_nl = self.nl
+        subdir_00_nl = self.nl
         subdir_02_fold_or_no_fold = self.action_generation_options.name.replace(
             'make_',
             '')
@@ -147,8 +148,8 @@ class DatasetOptions:
             self.make_dataset_for_each_individual else ''
         return os.path.join(*[
             preprocessed_dir,
-            subdir_00_player_or_pool,
-            subdir_01_nl,
+            subdir_00_nl,
+            subdir_01_player_or_pool,
             subdir_02_fold_or_no_fold,
             subdir_03_top_n_players
         ])

@@ -129,8 +129,12 @@ class WritePlayerSelectionDataSubset:
 class RawData:
     # todo how to move all 01_raw-data-related pieces here
     #  including download_data, get_top_players, extract_top_players
-    def __init__(self, dataset_options: DatasetOptions):
+    def __init__(self,
+                 dataset_options: DatasetOptions):
         self.opt = dataset_options
+
+    def player_dataset_to_disk(self, target_players):
+
 
     def generate(self,
                  from_gdrive_id: Optional[str] = None):

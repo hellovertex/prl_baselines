@@ -44,25 +44,23 @@ in case make fails: `sudo apt install libpython3.10-dev`
     ├── 00_tmp
     │   └── bulk_hands.zip
     ├── 01_raw
-    │   ├── all_players
-    │   │   ├── NL50
+    │   ├── NL50
+    │   │   ├── all_players
     │   │   │   ├── file00000.txt
     │   │   │   └── ...
-    │   │   └── NL5000
+    │   │   └── selected_players
+    │   │       ├── PlayerRank001
+    │   │       │   ├── file00000.txt
+    │   │       │   └── ...
+    │   │       ├── PlayerRank002
+    │   │       │   ├── file00000.txt
+    │   │       │   └── ...
     │   │       └── ...
-    │   └── selected_players
-    │       ├── NL50
-    │       │   ├── PlayerRank001
-    │       │   │   ├── file00000.txt
-    │       │   │   └── ...
-    │       │   └── PlayerRank002
-    │       │       ├── file00000.txt
-    │       │       └── ...
-    │       └── NL5000
+    │   └── NL5000
     │           └── ...
     ├── 02_vectorized
-    │   ├── per_selected_player
-    │   │   ├── NL50
+    │   ├── NL50
+    │   │   ├── per_selected_player
     │   │   │   ├── folds_from_top_players
     │   │   │   │   └── PlayerRank001/
     │   │   │   │       ├── data000.csv
@@ -75,36 +73,29 @@ in case make fails: `sudo apt install libpython3.10-dev`
     │   │   │   │       └── ...
     │   │   │   └── no_folds_showdowns_top_player
     │   │   │           └── ...
-    │   │   └── NL5000
-    │   │       └── ...
-    │   └── player_pool
-    │       ├── NL50
-    │       │   ├── folds_from_top_players
-    │       │   │   └── Top20Players/
-    │       │   │       ├── data000.csv
-    │       │   │       └── ...
-    │       │   ├── folds_from_fish_player
-    │       │   │   └── Top20Players/
-    │       │   │       └── ...
-    │       │   ├── folds_from_showdown_loser
-    │       │   |   └── Top20Players/
-    │       │   │       └── ...
-    │       │   ├── no_folds_only_wins_top_player
-    │       │   │   └── Top20Players/
-    │       │   │       └── ...
-    │       │   └── no_folds_showdowns_top_player
-    │       │   |   └── Top20Players/
-    │       │   │       └── ...
-    │       └── NL5000
-    │           └── ...
+    │   │   └── player_pool
+    │   │       ├── folds_from_top_players
+    │   │       │   └── Top20Players/
+    │   │       │       ├── data000.csv
+    │   │       │       └── ...
+    │   │       ├── folds_from_fish_player
+    │   │       │       └── ...
+    │   │       ├── folds_from_showdown_loser
+    │   │       │       └── ...
+    │   │       ├── no_folds_only_wins_top_player
+    │   │       │       └── ...
+    │   │       └── no_folds_showdowns_top_player
+    │   │               └── ...
+    │   └── NL5000
+    │       └── ...
     ├── 03_preprocessed
-    │   └── SAME AS IN `02_datasets_vectorized`
-    └── 04_eval
-    │   └── SAME AS IN `02_datasets_vectorized`
+    │   └── SAME AS IN 02_datasets_vectorized
+    ├── 04_eval
+    │   └── SAME AS IN 02_datasets_vectorized
     └── 05_train_results
-        └── SAME AS IN `02_datasets_vectorized`
-          └── ckpts/
-          └── logs/
+        └── SAME AS IN 02_datasets_vectorized
+            ├── ckpts/
+            └── logs/
 ```
 
 ### Supervised Learning of Poker Baseline Agent from Game Logs for our RL training
