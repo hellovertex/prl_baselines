@@ -124,8 +124,8 @@ class RawData:
         for current in hand_histories:  # c for current_hand
             if player_name in current:
                 result = "PokerStars Hand #" + current
-                if not os.path.exists(file_path_out):
-                    os.makedirs(file_path_out)
+                assert not os.path.exists(file_path_out)
+                os.makedirs(file_path_out)
                 with open(file, 'a+', encoding='utf-8') as f:
                     f.write(result)
 
