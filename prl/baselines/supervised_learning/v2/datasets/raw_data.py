@@ -124,25 +124,25 @@ class RawData:
         for current in hand_histories:  # c for current_hand
             if player_name in current:
                 result = "PokerStars Hand #" + current
-                assert not os.path.exists(file_path_out)
-                os.makedirs(file_path_out)
+                if not os.path.exists(file_path_out):
+                    os.makedirs(file_path_out)
                 with open(file, 'a+', encoding='utf-8') as f:
                     f.write(result)
 
     def player_dataset_to_disk(self, target_players):
-        for i, file in tqdm(enumerate(self.data_files)):
-            with open(file, 'r') as f:
-                try:
-                    hand_histories = re.split(r'PokerStars Hand #', f.read())[1:]
-                except UnicodeDecodeError:
-                    # very few files have invalid continuation bytes, skip them
-                    continue
-                for rank, player_name in enumerate(target_players):
-                    alias = f'PlayerRank{str(rank + 1).zfill(3)}'
-                    # Player Data exists already
-                    if os.path.exists(os.path.join(self.data_dir, alias)):
+        for rank, player_name in enumerate(target_players):
+            alias = f'PlayerRank{str(rank + 1).zfill(3)}'
+            # Player Data exists already
+            if os.path.exists(os.path.join(self.data_dir, alias)):
+                continue
+            logging.info(f'Writing hand history for {alias}')
+            for i, file in tqdm(enumerate(self.data_files)):
+                with open(file, 'r') as f:
+                    try:
+                        hand_histories = re.split(r'PokerStars Hand #', f.read())[1:]
+                    except UnicodeDecodeError:
+                        # very few files have invalid continuation bytes, skip them
                         continue
-                    logging.info(f'Writing hand history for {alias}')
                     self._to_disk(alias, player_name, hand_histories)
 
     def generate(self,
