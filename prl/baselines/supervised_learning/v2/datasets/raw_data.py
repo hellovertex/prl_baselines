@@ -141,7 +141,7 @@ class RawData:
             if os.path.exists(os.path.join(self.data_dir, alias)):
                 continue
             logging.info(f'Writing hand history for {alias}')
-            for i, file in tqdm(enumerate(self.data_files)):
+            for file in tqdm(self.data_files):
                 with open(file, 'r') as f:
                     try:
                         hand_histories = re.split(r'PokerStars Hand #', f.read())[1:]
