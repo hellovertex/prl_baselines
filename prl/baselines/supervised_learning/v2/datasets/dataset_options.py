@@ -71,15 +71,17 @@ class ActionGenOption(enum.IntEnum):
 
 @dataclass
 class DatasetOptions:
-    # 01 raw -- .txt files
+    """Single Source of Truth for all data related metadata"""
+
+    # data/01_raw -- .txt files
     num_top_players: int
 
-    # 02 vectorized -- .csv files
+    # data/02_vectorized -- .csv files
     # hand histories encoded as numerical vectors
     make_dataset_for_each_individual: Optional[bool] = None
     action_generation_options: Optional[ActionGenOption] = None
 
-    # 03 preprocessed -- .csv files
+    # data/03_preprocessed -- .csv files
     # We exclusively use datasets of games where top players participate.
     # Usually we further limit these games to those where a top player
     # participated in showdown because we then know their hand cards.

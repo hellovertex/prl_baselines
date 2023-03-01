@@ -52,7 +52,7 @@ def download_data(from_gdrive_id, nl: str) -> bool:
 def get_players_showdown_stats(parser):
     players: Dict[str, PlayerSelection] = {}
 
-    for hand_histories in parser.parse_hand_histories():
+    for hand_histories in parser.parse_hand_histories_from_all_players():
         for episode in hand_histories:
             if not episode.has_showdown:
                 continue

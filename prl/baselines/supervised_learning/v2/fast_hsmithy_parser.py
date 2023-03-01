@@ -326,8 +326,10 @@ class ParseHsmithyTextToPokerEpisode:
                 hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
 
                 for hand in hands_played:
-                    if not '*** SHOW DOWN ***' in hand and only_showdowns:
-                        continue
+                    # todo: remove `only_showdowns` -- always parse all games
+                    #  filtering is applied during vectorization or preprocessing
+                    # if not '*** SHOW DOWN ***' in hand and only_showdowns:
+                    #     continue
                     if "leaves the table" in hand:
                         continue
                     if "sits out" in hand:
@@ -340,7 +342,7 @@ class ParseHsmithyTextToPokerEpisode:
             return []
         return episodes
 
-    def parse_hand_histories(self) -> Generator[List[PokerEpisodeV2],None,None]:
+    def parse_hand_histories_from_all_players(self) -> Generator[List[PokerEpisodeV2],None,None]:
         data_dir = os.path.join(DATA_DIR, *['01_raw', self.nl, 'all_players'])
         assert os.path.exists(data_dir), "Must download data and unzip to " \
                                          "01_raw/all_players first"
