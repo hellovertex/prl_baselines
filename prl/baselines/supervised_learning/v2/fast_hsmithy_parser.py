@@ -276,6 +276,15 @@ class ParseHsmithyTextToPokerEpisode:
                             raise e
                         amt = round(float(amt) * 100)
                         players[pname].money_won_this_round = amt
+                    elif 'lost' in line:
+                        # get money lost from actionsequence
+                        money_contribution = 0
+                        for action in actions['as_sequence']:
+                            if action.who == pname:
+                                assert action.what != ActionSpace.FOLD
+                                money_contribution += action.how_much
+                        players[pname].money_won_this_round = -money_contribution
+
         except Exception as e:
             return []
         for pname, player in players.items():
@@ -331,102 +340,16 @@ class ParseHsmithyTextToPokerEpisode:
             return []
         return episodes
 
-    def parse_hand_histories(self) -> Generator[List[PokerEpisodeV2]]:
+    def parse_hand_histories(self) -> Generator[List[PokerEpisodeV2],None,None]:
         data_dir = os.path.join(DATA_DIR, *['01_raw', 'all_players', self.nl])
         assert os.path.exists(data_dir), "Must download data and unzip to " \
                                          "01_raw/all_players first"
-        for f in glob.glob(data_dir):
+        for f in glob.glob(data_dir + '**/*.txt'):
             try:
                 episodes = self.parse_file(f)
                 yield episodes
             except Exception:
                 pass
-
-
-class ConverterV2toV1:
-
-    def get_pstacks(self, episode) -> List[PlayerStack]:
-        player_stacks = []
-        for pname, pinfo in episode.players.items():
-            stack = PlayerStack(
-                seat_display_name=f'Seat {pinfo.seat_num_one_indexed}',
-                player_name=pname,
-                stack=pinfo.stack
-            )
-            player_stacks.append(stack)
-        return player_stacks
-
-    def get_actions_total(self, episode) -> Dict[str, List[ActionV1]]:
-        actions_total = {'preflop': [],
-                         'flop': [],
-                         'turn': [],
-                         'river': [],
-                         'as_sequence': []}
-        for stage in ['preflop', 'flop', 'turn', 'river']:
-            for act in episode.actions[f'actions_{stage}']:
-                actv1 = ActionV1(stage=stage,
-                                 player_name=act.who,
-                                 action_type=act.what,
-                                 raise_amount=act.how_much)
-                actions_total[stage].append(actv1)
-                actions_total['as_sequence'].append(actv1)
-        return actions_total
-
-    def get_winners(self, episode) -> List[PlayerWithCards]:
-        winners = []
-        for player in episode.winners:
-            winners.append(PlayerWithCards(player.name,
-                                           player.cards))
-        return winners
-
-    def get_showdown_hands(self, episode) -> List[PlayerWithCards]:
-        showdown_hands = []
-        for player in episode.showdown_players:
-            showdown_hands.append(PlayerWithCards(player.name,
-                                                  player.cards))
-        return showdown_hands
-
-    def get_money_collected(self, episode) -> List[PlayerWinningsCollected]:
-        money_collected = []
-        for player in episode.winners:
-            money_collected.append(PlayerWinningsCollected(player.name,
-                                                           player.money_won_this_round))
-        return money_collected
-
-    def get_blinds(self, episode) -> List[Blind]:
-        sb = episode.blinds['sb']
-        bb = episode.blinds['bb']
-        blinds = []
-        for pname, amount in sb.items():
-            blinds.append(Blind(pname, 'small blind', amount))
-        for pname, amount in bb.items():
-            blinds.append(Blind(pname, 'big blind', amount))
-        return blinds
-
-    def convert_episode(self, episode: PokerEpisodeV2) -> PokerEpisodeV1:
-        player_stacks = self.get_pstacks(episode)
-        blinds = self.get_blinds(episode)
-        actions_total = self.get_actions_total(episode)
-        winners = self.get_winners(episode)
-        showdown_hands = self.get_showdown_hands(episode)
-        money_collected = self.get_money_collected(episode)
-        return PokerEpisodeV1(
-            date=DEFAULT_DATE,
-            hand_id=episode.hand_id,
-            variant='NoLimitHoldEm',
-            currency_symbol=episode.currency_symbol,
-            num_players=len(episode.players),
-            blinds=blinds,  # todo: '$1' vs int(1) in encoder
-            ante='$0.00',
-            player_stacks=player_stacks,  # # todo: '$1' vs int(1) in encoder
-            btn_idx=episode.btn_seat_num_one_indexed,  # todo this shouldnt be needed
-            board_cards=episode.board,
-            actions_total=actions_total,
-            winners=winners,  # todo: maybe be empty list [], check implications
-            showdown_hands=showdown_hands,
-            # todo: maybe be empty list [], check implications
-            money_collected=money_collected  # todo int vs str
-        )
 
 
 def run_on_chunks(chunks):

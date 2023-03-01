@@ -23,7 +23,7 @@ class Player:
     position: Optional[Positions6Max] = None
     cards: Optional[str] = None
     is_showdown_player: Optional[bool] = None
-    money_won_this_round: Optional[int] = None
+    money_won_this_round: Optional[int] = None  # can be negative
 
 
 @dataclass

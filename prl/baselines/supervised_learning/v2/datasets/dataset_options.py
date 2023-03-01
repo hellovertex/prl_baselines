@@ -60,7 +60,7 @@ class ActionGenOption(enum.IntEnum):
     # c) where the top player FOLD action is recorded with randomized hand
     make_folds_from_top_players_with_randomized_hand = 2
     # todo: [Optional] consider adding FOLD range
-    fold_only_hands_in_range: Optional[List] = None
+    # fold_only_hands_in_range: Optional[List] = None
     # d) where the actions of the player who lost showdown are converted to FOLD
     make_folds_from_showdown_loser = 3
     # e) where the actions of the  showdown player that is not a top player is
@@ -166,4 +166,5 @@ class DatasetOptions:
                 # if no folder with name PlayerRank00i/ exists, return False
                 if not f'PlayerRank{str(i).zfill(3)}' in dirs_top_players:
                     return False
-        return True
+            return True
+        return False
