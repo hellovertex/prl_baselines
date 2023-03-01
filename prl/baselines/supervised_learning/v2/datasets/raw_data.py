@@ -137,7 +137,11 @@ class RawData:
                 f'from file {i}/{self.n_files}')
 
             with open(file, 'r') as f:
-                hand_histories = re.split(r'PokerStars Hand #', f.read())[1:]
+                try:
+                    hand_histories = re.split(r'PokerStars Hand #', f.read())[1:]
+                except UnicodeDecodeError:
+                    # very few files have invalid continuation bytes, skip them
+                    continue
                 for rank, player_name in enumerate(target_players):
                     alias = f'PlayerRank{str(rank + 1).zfill(3)}'
                     self._to_disk(alias, player_name, hand_histories)
