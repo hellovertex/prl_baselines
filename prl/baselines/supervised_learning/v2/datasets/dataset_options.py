@@ -47,25 +47,35 @@ class DataImbalanceCorrection(enum.IntEnum):
 
 
 class ActionGenOption(enum.IntEnum):
-    """take (obs,action) tuples from
-    top_player and drop the rest
-    top player is specified in `DatasetOptions.num_top_player`"""
-    # a) only if they were showdown winner
-    no_folds_top_player_wins = 0  # drop_folds=True,only_winners=True
-    # b) only if they participated in showdown
-    # Note that the winner (obs,action)'s are possibly dropped
-    no_folds_top_player_showdowns = 1  # drop_folds=True,False
+    """
+    Don't change this class unless you are willing to risk the stability of the
+    universe"""
+    """
+    Determines which (obs,action) pairs are chosen from hand histories
+    """
+    # Use top-players (obs,action) pairs
+    # only if they participated in showdown
+    # - Note that the winner (obs,action)'s are possibly dropped
+    no_folds_top_player_showdowns = 0
+    # Use top-player (obs,action) pairs
+    # only if they were showdown winner
+    no_folds_top_player_wins = 1
 
     # -- including FOLD actions
-    # c) where the top player FOLD action is recorded with randomized hand
-    make_folds_from_top_players_with_randomized_hand = 2  # drop_folds=False,False
+    # Use top-players (obs,action) pairs
+    # regardless of whether they reached showdown
+    # - FOLDS are obtained from top players folds only
+    # - FOLD actions are recorded with randomized hands because we don't see folded hands
+    make_folds_from_top_players_with_randomized_hand = 2
     # todo: [Optional] consider adding FOLD range
-    # fold_only_hands_in_range: Optional[List] = None
-    # d) where the actions of the player who lost showdown are converted to FOLD
+    # Use showdown winners (obs,action) pairs
+    # regardless of whether they are a top player or not
+    # - FOLDs are obtained by replacing the showdown losers action with FOLD
     make_folds_from_showdown_loser = 3
-    # e) where the actions of the  showdown player that is not a top player is
-    # converted to FOLD
-    # Note that the winner (obs,action)'s are possibly dropped
+    # Use top-players (obs,action) pairs
+    # only if they participated in showdown
+    # - FOLDS are obtained by replacing the actions of the player that is not a top player
+    #    with FOLD,
     make_folds_from_non_top_player = 4
 
 

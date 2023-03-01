@@ -5,10 +5,11 @@ import numpy as np
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
 
-from prl.baselines.supervised_learning.v2.datasets.dataset_options import DatasetOptions
+from prl.baselines.supervised_learning.v2.datasets.dataset_options import DatasetOptions, \
+    ActionGenOption
 from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import \
     ParseHsmithyTextToPokerEpisode
-from prl.baselines.supervised_learning.v2.new_txt_to_vector_encoder import EncoderV2
+from prl.baselines.supervised_learning.v2.datasets.tmp import EncoderV2
 from prl.baselines.supervised_learning.v2.poker_model import PokerEpisodeV2
 
 
@@ -31,15 +32,28 @@ class VectorizedData:
                               recursive=True)
         return filenames
 
-    def encode_episodes(self,
-                        encoder: EncoderV2,
-                        episodesV2: List[PokerEpisodeV2]):
-        n_episodes = len(episodesV2)
+    def _parse_action_gen_option(self, option):
         handle_folds = self.opt.action_generation_option.name
 
         assert 'no_folds' in handle_folds or 'make_folds' in handle_folds
         drop_folds = True if 'no_folds' in handle_folds else False
-        only_winners =
+        only_winners = False
+        if option == ActionGenOption.no_folds_top_player_wins:
+            only_winners = True
+        if option == ActionGenOption.make_folds_from_showdown_loser:
+            only_winners = True
+        # if option == ActionGenOption.no_folds_top_player_showdowns:
+        #     only_winners = False
+        # if option == ActionGenOption.make_folds_from_top_players_with_randomized_hand:
+        #     only_winners = False
+        # if option == ActionGenOption.make_folds_from_non_top_player:
+        #     only_winners = False
+
+    def encode_episodes(self,
+                        encoder: EncoderV2,
+                        episodesV2: List[PokerEpisodeV2]):
+        n_episodes = len(episodesV2)
+
         for i, ep in enumerate(episodesV2):
             print(f'Encoding episode no. {i}/{n_episodes}')
             try:
@@ -79,6 +93,10 @@ class VectorizedData:
         filenames = self.get_selected_player_files()
         for filename in filenames:
             episodesV2 = parser.parse_file(filename)
+            # todo: fix encoder elif player.name in episode.showdown_players and not ...
+            # todo: change input of encoder to be
+            #  `drop_folds`
+            #  `use_showdown_winner_as_target_over_selected_player`
             training_data = self.encode_episodes(encoder)
         # run on file
         # iterate each selected player
