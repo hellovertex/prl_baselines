@@ -590,7 +590,7 @@ if __name__ == "__main__":
     #              selected_players=top_20,
     #              drop_folds=False,
     #              only_winners=False,
-    #              randomize_fold_cards=True,
+    #              fold_random_cards=True,
     #              verbose=True,
     #              debug=debug)
 

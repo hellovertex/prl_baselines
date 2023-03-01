@@ -278,7 +278,7 @@ class EncoderV2:
                 hand = [card(token) for token in cards]
                 hands.append(hand)
             else:
-                # todo: implement this conditional: if self.randomize_fold_cards:
+                # todo: implement this conditional: if self.fold_random_cards:
                 # overwrite default hands with random cards that are not board or player cards
                 idx0 = random.randint(0, len(deck) - 1)
                 c0 = deck.pop(idx0)

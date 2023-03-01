@@ -62,7 +62,7 @@ class VectorizedData:
                                                                drop_folds=drop_folds,
                                                                only_winners=only_winners,
                                                                limit_num_players=more_than_num_players,
-                                                               randomize_fold_cards=randomize_fold_cards,
+                                                               fold_random_cards=randomize_fold_cards,
                                                                selected_players=selected_players,
                                                                # selected_players=['ishuha'],
                                                                verbose=verbose)

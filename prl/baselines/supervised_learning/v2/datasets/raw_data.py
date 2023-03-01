@@ -130,16 +130,7 @@ class RawData:
                     f.write(result)
 
     def player_dataset_to_disk(self, target_players):
-        logging.info(f'Not all hand histories of top {self.opt.num_top_players} '
-                     f'players were found under data/01_raw/selected_players.'
-                     f'\n=== Extracting hand histories of missing players from '
-                     f'data/01_raw/all_players===')
-
         for i, file in tqdm(enumerate(self.data_files)):
-            # logging.info(
-            #     f'Extracting games for top {self.opt.num_top_players} players'
-            #     f'from file {i}/{self.n_files}')
-
             with open(file, 'r') as f:
                 try:
                     hand_histories = re.split(r'PokerStars Hand #', f.read())[1:]
@@ -148,6 +139,10 @@ class RawData:
                     continue
                 for rank, player_name in enumerate(target_players):
                     alias = f'PlayerRank{str(rank + 1).zfill(3)}'
+                    # Player Data exists already
+                    if os.path.exists(os.path.join(self.data_dir, alias)):
+                        continue
+                    logging.info(f'Writing hand history for {alias}')
                     self._to_disk(alias, player_name, hand_histories)
 
     def generate(self,

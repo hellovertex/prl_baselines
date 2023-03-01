@@ -187,13 +187,13 @@ def main(out_dir, from_gdrive_id, unzipped_dir):
     # filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
     # params_0 = {'from_selected_players': True,
     #             'drop_folds': True,
-    #             'randomize_fold_cards': False}
+    #             'fold_random_cards': False}
     # params_1 = {'from_selected_players': True,
     #             'drop_folds': False,
-    #             'randomize_fold_cards': False}
+    #             'fold_random_cards': False}
     # params_2 = {'from_selected_players': True,
     #             'drop_folds': False,
-    #             'randomize_fold_cards': True}
+    #             'fold_random_cards': True}
     # make_datasets_selected_players_from_Dprime(filenames, params_0, debug)
     # make_datasets_selected_players_from_Dprime(filenames, params_1, debug)
     # make_datasets_selected_players_from_Dprime(filenames, params_2, debug)
@@ -204,13 +204,13 @@ def main(out_dir, from_gdrive_id, unzipped_dir):
     filenames = glob.glob(unzipped_dir.__str__() + '/**/*.txt', recursive=True)
     params_0 = {'from_selected_players': False,
                 'drop_folds': False,
-                'randomize_fold_cards': False}
+                'fold_random_cards': False}
     params_1 = {'from_selected_players': False,
                 'drop_folds': False,
-                'randomize_fold_cards': True}
+                'fold_random_cards': True}
     params_2 = {'from_selected_players': False,
                 'drop_folds': True,
-                'randomize_fold_cards': False  # this will be ignored when `drop_folds=true`
+                'fold_random_cards': False  # this will be ignored when `drop_folds=true`
                 }
     # x = 10000  # for unzipped
     x = 12  # for 336 player data
