@@ -64,8 +64,13 @@ def get_players_showdown_stats(parser):
                                                            total_earnings=0)
                 else:
                     players[player.name].n_showdowns += 1
-                    # can be negative
-                    players[player.name].total_earnings += player.money_won_this_round
+                    try:
+                        # can be negative
+                        players[player.name].total_earnings += player.money_won_this_round
+                    except TypeError as e:
+                        print(e)
+                        logging.warning(f'Problems parsing showdown of game with ID'
+                                        f' {episode.hand_id}. Players were {players}')
                     for winner in episode.winners:
                         if winner.name == player.name:
                             players[player.name].n_won += 1

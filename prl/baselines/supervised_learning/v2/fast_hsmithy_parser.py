@@ -290,7 +290,7 @@ class ParseHsmithyTextToPokerEpisode:
         for pname, player in players.items():
             if player.is_showdown_player:
                 showdown_players.append(player)
-                if player.money_won_this_round:
+                if player.money_won_this_round > 0:
                     winners.append(player)
         btn_seat_num = int(hand_str.split('is the button')[0].strip()[-1])
         # except Exception as e:
@@ -459,7 +459,7 @@ def run_on_file(filename,
     env = init_wrapped_env(AugmentObservationWrapper,
                            [5000 for _ in range(6)],
                            blinds=(25, 50),
-                           multiply_by=1, )
+                           multiply_by=1)
     encoder = EncoderV2(env)
     selected_players = [Path(filename).stem]
     if debug:
