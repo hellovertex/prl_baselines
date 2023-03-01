@@ -1,12 +1,15 @@
 import glob
+import logging
 from typing import List
 
+import click
 import numpy as np
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
 
 from prl.baselines.supervised_learning.v2.datasets.dataset_options import DatasetOptions, \
     ActionGenOption
+from prl.baselines.supervised_learning.v2.datasets.raw_data import TopPlayerSelector
 from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import \
     ParseHsmithyTextToPokerEpisode
 from prl.baselines.supervised_learning.v2.datasets.tmp import EncoderV2
@@ -27,33 +30,29 @@ class VectorizedData:
                               recursive=True)
         return filenames
 
-    def get_selected_player_files(self):
-        filenames = glob.glob(f'{self.opt.dir_raw_data_top_players}**/*.txt',
-                              recursive=True)
-        return filenames
-
-    def _parse_action_gen_option(self, option):
-        handle_folds = self.opt.action_generation_option.name
-
-        assert 'no_folds' in handle_folds or 'make_folds' in handle_folds
-        drop_folds = True if 'no_folds' in handle_folds else False
-        only_winners = False
-        if option == ActionGenOption.no_folds_top_player_only_wins:
+    def _parse_action_gen_option(self, a_opt: ActionGenOption):
+        only_winners = drop_folds = fold_random_cards = None
+        if a_opt.no_folds_top_player_all_showdowns:
+            only_winners = False
+            drop_folds = True
+        elif a_opt.no_folds_top_player_all_showdowns:
+            only_winners = drop_folds = True
+        elif a_opt.make_folds_from_top_players_with_randomized_hand:
+            fold_random_cards = True
+        elif a_opt.make_folds_from_showdown_loser_ignoring_rank:
             only_winners = True
-        if option == ActionGenOption.make_folds_from_showdown_loser_ignoring_rank:
-            only_winners = True
-        # if option == ActionGenOption.no_folds_top_player_all_showdowns:
-        #     only_winners = False
-        # if option == ActionGenOption.make_folds_from_top_players_with_randomized_hand:
-        #     only_winners = False
-        # if option == ActionGenOption.make_folds_from_fish:
-        #     only_winners = False
+            drop_folds = False
+        elif a_opt.make_folds_from_fish:
+            only_winners = drop_folds = False
+        return only_winners, drop_folds, fold_random_cards
 
     def encode_episodes(self,
                         encoder: EncoderV2,
                         episodesV2: List[PokerEpisodeV2]):
         n_episodes = len(episodesV2)
-
+        a_opt = self.opt.action_generation_option
+        only_winners, drop_folds, fold_random_cards = self._parse_action_gen_option(a_opt)
+        selected_players = TopPlayerSelector()
         for i, ep in enumerate(episodesV2):
             print(f'Encoding episode no. {i}/{n_episodes}')
             try:
@@ -61,11 +60,11 @@ class VectorizedData:
                                                                # drop_folds=False,
                                                                drop_folds=drop_folds,
                                                                only_winners=only_winners,
-                                                               limit_num_players=more_than_num_players,
-                                                               fold_random_cards=randomize_fold_cards,
+                                                               limit_num_players=5,
+                                                               fold_random_cards=fold_random_cards,
                                                                selected_players=selected_players,
                                                                # selected_players=['ishuha'],
-                                                               verbose=verbose)
+                                                               verbose=False)
             except Exception as e:
                 print(e)
                 continue
@@ -82,31 +81,41 @@ class VectorizedData:
                 except Exception as e:
                     print(e)
 
-    def generate(self):
-        # todo: implement
+    def generate(self, dataset_options):
         parser = ParseHsmithyTextToPokerEpisode()
         env = init_wrapped_env(AugmentObservationWrapper,
                                [5000 for _ in range(6)],
                                blinds=(25, 50),
                                multiply_by=1)
         encoder = EncoderV2(env)
-        filenames = self.get_selected_player_files()
+        filenames = glob.glob(f'{self.opt.dir_raw_data_top_players}**/*.txt',
+                              recursive=True)
         for filename in filenames:
             episodesV2 = parser.parse_file(filename)
-            # todo: fix encoder elif player.name in episode.showdown_players and not ...
-            # todo: change input of encoder to be
-            #  `drop_folds`
-            #  `use_showdown_winner_as_target_over_selected_player`
-            training_data = self.encode_episodes(encoder)
-        # run on file
-        # iterate each selected player
-        # parse file
-        # use encoder
-        # per_selected_player
-        # per_pool
-        # 1. no_folds_top_player_only_wins
-        # 2. no_folds_top_player
-        # 3. make_folds_from_top_players_with_randomized_hand
-        # 4. make_folds_from_showdown_loser_ignoring_rank
-        # 5. make_folds_from_fish
-        pass
+            training_data = self.encode_episodes(encoder, episodesV2)
+            # todo: deprecate new_txt_to_vector_encoder and make tmp.EncoderV2 as
+            #  encoder V2 the new one
+
+
+@click.command()
+@click.option("--num_top_players", default=20,
+              type=int,
+              help="How many top players hand histories should be used to generate the "
+                   "data.")
+@click.option("--nl",
+              default='NL50',
+              type=str,
+              help="Which stakes the hand history belongs to."
+                   "Determines the data directory.")
+def main(num_top_players, nl, from_gdrive_id):
+    parser = ParseHsmithyTextToPokerEpisode(nl=nl)
+    top_player_selector = TopPlayerSelector(parser)
+    dataset_options = DatasetOptions(num_top_players, nl)
+    # raw_data = RawData(dataset_options, top_player_selector)
+    # raw_data.generate(from_gdrive_id)
+    vectorized_data = VectorizedData(dataset_options, top_player_selector)
+
+
+if __name__ == '__main__':
+    logging.getLogger().setLevel(logging.INFO)
+    main()

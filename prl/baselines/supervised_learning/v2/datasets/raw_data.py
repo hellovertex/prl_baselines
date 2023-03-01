@@ -50,16 +50,9 @@ def download_data(from_gdrive_id, nl: str) -> bool:
     return True
 
 
-class RawData:
-    def __init__(self,
-                 dataset_options: DatasetOptions,
-                 parser: ParseHsmithyTextToPokerEpisode):
-        self.opt = dataset_options
+class TopPlayerSelector:
+    def __init__(self, parser: ParseHsmithyTextToPokerEpisode):
         self.parser = parser
-        tmp_data_dir = self.opt.dir_raw_data_all_players
-        self.data_files = glob.glob(tmp_data_dir + '**/*.txt')
-        self.data_dir = self.opt.dir_raw_data_top_players
-        self.n_files = len(self.data_files)
 
     def get_players_showdown_stats(self):
         players: Dict[str, PlayerSelection] = {}
@@ -97,7 +90,7 @@ class RawData:
                     continue
         return players
 
-    def get_top_n_players(self, nl, num_top_players, min_n_showdowns=5000) -> Dict:
+    def get_top_n_players(self, num_top_players, min_n_showdowns=5000) -> Dict:
         logging.info(f'Extracting hand history of top {num_top_players} players. '
                      f'This may take a few minutes up to several hours')
         # parse all files
@@ -117,6 +110,18 @@ class RawData:
                           f'`num_top_players` or provide more '
                           f'hand histories.')
         return df[:num_top_players].to_dict()
+
+
+class RawData:
+    def __init__(self,
+                 dataset_options: DatasetOptions,
+                 top_player_selector: TopPlayerSelector):
+        self.opt = dataset_options
+        self.top_player_selector = top_player_selector
+        tmp_data_dir = self.opt.dir_raw_data_all_players
+        self.data_files = glob.glob(tmp_data_dir + '**/*.txt')
+        self.data_dir = self.opt.dir_raw_data_top_players
+        self.n_files = len(self.data_files)
 
     def _to_disk(self, alias, player_name, hand_histories):
         file_path_out = os.path.join(self.data_dir, alias)
@@ -151,7 +156,8 @@ class RawData:
             assert from_gdrive_id
             download_data(from_gdrive_id, self.opt.nl)
         if not self.opt.exists_raw_data_for_all_selected_players():
-            top_players = self.get_top_n_players(self.opt.nl, self.opt.num_top_players)
+            top_players = self.top_player_selector.get_top_n_players(
+                self.opt.num_top_players)
             self.player_dataset_to_disk(list(top_players.keys()))
 
 
@@ -177,8 +183,9 @@ class RawData:
                    "with unzipping.")
 def main(num_top_players, nl, from_gdrive_id):
     parser = ParseHsmithyTextToPokerEpisode(nl=nl)
+    top_player_selector = TopPlayerSelector(parser)
     dataset_options = DatasetOptions(num_top_players, nl)
-    raw_data = RawData(dataset_options, parser)
+    raw_data = RawData(dataset_options, top_player_selector)
     raw_data.generate(from_gdrive_id)
 
 
