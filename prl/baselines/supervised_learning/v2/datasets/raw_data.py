@@ -156,7 +156,7 @@ class RawData:
 
 
 @click.command()
-@click.option("--num_top_players", default=10,
+@click.option("--num_top_players", default=20,
               type=int,
               help="How many top players hand histories should be used to generate the "
                    "data.")
