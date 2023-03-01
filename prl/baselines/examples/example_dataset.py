@@ -13,8 +13,7 @@ import multiprocessing
 import time
 from functools import partial
 
-from prl.baselines.supervised_learning.data_acquisition import hsmithy_extractor
-
+from prl.baselines.deprecated import hsmithy_extractor
 
 best_players_over20k_gains = ['ishuha',
                               'Sakhacop',
