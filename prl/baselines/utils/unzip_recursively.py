@@ -12,7 +12,7 @@ def extract(filename, out_dir):
     z = zipfile.ZipFile(filename)
     for f in z.namelist():
         try:
-            os.mkdir(out_dir)
+            os.makedirs(out_dir)
         except FileExistsError:
             pass
         # read inner zip file into bytes buffer

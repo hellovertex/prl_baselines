@@ -39,7 +39,7 @@ def download_data(from_gdrive_id, nl: str) -> bool:
                    quiet=False)
     # 2. unzip recursively to DATA_DIR
     zipfiles = glob.glob(path_to_zipfile, recursive=False)
-    unzipped_dir = os.path.join(DATA_DIR, *['01_raw', 'all_players', nl])
+    unzipped_dir = os.path.join(DATA_DIR, *['01_raw', nl, 'all_players'])
     [extract(zipfile, out_dir=unzipped_dir) for zipfile in zipfiles]
     logging.info(f'Unzipped hand histories to {unzipped_dir}')
     return True
@@ -111,20 +111,27 @@ class RawData:
 
     def player_dataset_to_disk(self, target_players):
         for i, file in enumerate(self.data_files):
-            if i % 100 == 0: logging.info(
+            if i % 50 == 0: logging.info(
                 f'Extracting games for top {self.opt.num_top_players} players'
                 f'from file {i}/{self.n_files}')
             with open(file, 'r') as f:
                 hand_histories = re.split(r'PokerStars Hand #', f.read())[1:]
                 for rank, player_name in enumerate(target_players):
-                    alias = f'PlayerRank{str(rank).zfill(3)}'
+                    alias = f'PlayerRank{str(rank+1).zfill(3)}'
                     self._to_disk(alias, player_name, hand_histories)
 
     def generate(self,
                  from_gdrive_id: Optional[str] = None):
         if not self.opt.hand_history_has_been_downloaded_and_unzipped():
+            assert from_gdrive_id
+            logging.info(f'No hand histories found in data/01_raw/all_players. '
+                         f'Downloading using gdrive_id {from_gdrive_id}')
             download_data(from_gdrive_id, self.opt.nl)
         if not self.opt.exists_raw_data_for_all_selected_players():
+            logging.info(f'Not all hand histories of top {self.opt.num_top_players} '
+                         f'players are found under data/01_raw/selected_players.'
+                         f'Extracting hand histories of missing players from '
+                         f'data/01_raw/all_players')
             top_players = get_top_n_players(self.opt.nl, self.opt.num_top_players)
             self.player_dataset_to_disk(list(top_players.keys()))
 
@@ -149,6 +156,7 @@ class RawData:
                    "The runner will try to download the data from gdrive and proceed "
                    "with unzipping.")
 def main(num_top_players, nl, from_gdrive_id):
+    logging.getLogger().setLevel(logging.INFO)
     dataset_options = DatasetOptions(num_top_players, nl)
     raw_data = RawData(dataset_options)
     raw_data.generate(from_gdrive_id)

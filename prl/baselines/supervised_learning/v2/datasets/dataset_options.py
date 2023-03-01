@@ -165,7 +165,7 @@ class DatasetOptions:
         ])
 
     def hand_history_has_been_downloaded_and_unzipped(self):
-        dir_data_unzipped = os.path.join(DATA_DIR, *['01_raw', 'all_players', self.nl])
+        dir_data_unzipped = os.path.join(DATA_DIR, *['01_raw', self.nl, 'all_players'])
         if os.path.exists(dir_data_unzipped):
             return True
         return False

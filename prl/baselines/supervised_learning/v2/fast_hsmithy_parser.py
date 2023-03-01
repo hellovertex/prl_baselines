@@ -341,7 +341,7 @@ class ParseHsmithyTextToPokerEpisode:
         return episodes
 
     def parse_hand_histories(self) -> Generator[List[PokerEpisodeV2],None,None]:
-        data_dir = os.path.join(DATA_DIR, *['01_raw', 'all_players', self.nl])
+        data_dir = os.path.join(DATA_DIR, *['01_raw', self.nl, 'all_players'])
         assert os.path.exists(data_dir), "Must download data and unzip to " \
                                          "01_raw/all_players first"
         for f in glob.glob(data_dir + '**/*.txt'):
