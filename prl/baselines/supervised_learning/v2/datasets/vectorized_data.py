@@ -17,8 +17,11 @@ from prl.baselines.supervised_learning.v2.poker_model import PokerEpisodeV2
 
 
 class VectorizedData:
-    def __init__(self, dataset_options: DatasetOptions):
+    def __init__(self,
+                 dataset_options: DatasetOptions,
+                 parser: ParseHsmithyTextToPokerEpisode):
         self.opt = dataset_options
+        self.parser = parser
         self.make_player_dirs = True if self.opt.make_dataset_for_each_individual else \
             False
 
@@ -113,7 +116,7 @@ def main(num_top_players, nl, from_gdrive_id):
     dataset_options = DatasetOptions(num_top_players, nl)
     # raw_data = RawData(dataset_options, top_player_selector)
     # raw_data.generate(from_gdrive_id)
-    vectorized_data = VectorizedData(dataset_options, top_player_selector)
+    vectorized_data = VectorizedData(dataset_options, parser)
 
 
 if __name__ == '__main__':
