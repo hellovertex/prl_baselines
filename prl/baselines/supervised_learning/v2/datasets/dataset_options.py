@@ -1,10 +1,9 @@
 import enum
 import os
+from dataclasses import dataclass
 from typing import List, Optional
 
-from dataclasses import dataclass
 from prl.environment.Wrappers.base import ActionSpaceMinimal as Action
-from prl.environment.steinberger.PokerRL import Poker
 
 from prl.baselines import DATA_DIR
 

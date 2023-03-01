@@ -35,7 +35,7 @@ class InMemoryDataset(Dataset):
                          compression='bz2')
         df = df.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
         df = df.sample(frac=1)
-        # todo: if rounds != 'all', sample for round only
+        # todo: move to preprocessor
         if rounds != 'all':
             if rounds == 'preflop':
                 df = df[df['round_preflop'] == 1]

@@ -95,6 +95,7 @@ def train_eval(abs_input_dir,
 
         for hdims in params['hdims']:
             for lr in params['lrs']:
+
                 model = get_model(traindata, output_dim=8, hidden_dims=hdims, device=device)
                 logdir = base_logdir + f'/{r}/{Path(abs_input_dir).stem}/{hdims}_{lr}'
                 ckptdir = base_ckptdir + f'/{r}/{Path(abs_input_dir).stem}/{hdims}_{lr}'
@@ -107,6 +108,7 @@ def train_eval(abs_input_dir,
                 writer = SummaryWriter(log_dir=logdir)
                 n_iter = start_n_iter
                 j = start_n_iter
+                # todo: refactor into run_train_loop(model, optim, writer, train_options)
                 for epoch in range(start_epoch, epochs):
                     len_data = round(len(train_dataloader))
                     env_steps = j * len_data

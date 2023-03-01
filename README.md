@@ -100,7 +100,11 @@ in case make fails: `sudo apt install libpython3.10-dev`
     ├── 03_preprocessed
     │   └── SAME AS IN `02_datasets_vectorized`
     └── 04_eval
+    │   └── SAME AS IN `02_datasets_vectorized`
+    └── 05_train_results
         └── SAME AS IN `02_datasets_vectorized`
+          └── ckpts/
+          └── logs/
 ```
 
 ### Supervised Learning of Poker Baseline Agent from Game Logs for our RL training

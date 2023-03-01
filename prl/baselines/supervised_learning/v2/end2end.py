@@ -17,12 +17,13 @@ def make_dataset_from_scratch(dataset_options: DatasetOptions,
                               from_gdrive_id="18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO",
                               use_multiprocessing=False) -> bool:
     opt = dataset_options
-    # run main_raw(dataset_options)
+    # run main_raw(dataset_options) -- assert nothing happens if data already avail
+    # todo: logging that tells us if operation did not do anything because data is there
     RawData(dataset_options).generate(from_gdrive_id=from_gdrive_id)
 
-    # run main_vectorized(dataset_options)
+    # run main_vectorized(dataset_options) -- assert nothing happens if data already avai
 
-    # run main_preprocess(dataset_options)
+    # run main_preprocess(dataset_options) -- assert nothing happens if data already avail
     class Preprocessor:
         @staticmethod
         def run(dataset_options: DatasetOptions):
@@ -30,6 +31,8 @@ def make_dataset_from_scratch(dataset_options: DatasetOptions,
 
     preprocessor = Preprocessor()
     preprocessor.run(dataset_options)
+
+    # todo: c.f. refactor into run_train_loop(model, optim, writer, train_options)
     return True
 
 
