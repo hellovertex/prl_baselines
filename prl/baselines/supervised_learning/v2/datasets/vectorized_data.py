@@ -38,15 +38,15 @@ class VectorizedData:
         assert 'no_folds' in handle_folds or 'make_folds' in handle_folds
         drop_folds = True if 'no_folds' in handle_folds else False
         only_winners = False
-        if option == ActionGenOption.no_folds_top_player_wins:
+        if option == ActionGenOption.no_folds_top_player_only_wins:
             only_winners = True
-        if option == ActionGenOption.make_folds_from_showdown_loser:
+        if option == ActionGenOption.make_folds_from_showdown_loser_ignoring_rank:
             only_winners = True
-        # if option == ActionGenOption.no_folds_top_player_showdowns:
+        # if option == ActionGenOption.no_folds_top_player_all_showdowns:
         #     only_winners = False
         # if option == ActionGenOption.make_folds_from_top_players_with_randomized_hand:
         #     only_winners = False
-        # if option == ActionGenOption.make_folds_from_non_top_player:
+        # if option == ActionGenOption.make_folds_from_fish:
         #     only_winners = False
 
     def encode_episodes(self,
@@ -104,9 +104,9 @@ class VectorizedData:
         # use encoder
         # per_selected_player
         # per_pool
-        # 1. no_folds_top_player_wins
+        # 1. no_folds_top_player_only_wins
         # 2. no_folds_top_player
         # 3. make_folds_from_top_players_with_randomized_hand
-        # 4. make_folds_from_showdown_loser
-        # 5. make_folds_from_non_top_player
+        # 4. make_folds_from_showdown_loser_ignoring_rank
+        # 5. make_folds_from_fish
         pass

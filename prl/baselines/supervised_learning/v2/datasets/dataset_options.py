@@ -56,10 +56,10 @@ class ActionGenOption(enum.IntEnum):
     # Use top-players (obs,action) pairs
     # only if they participated in showdown
     # - Note that the winner (obs,action)'s are possibly dropped
-    no_folds_top_player_showdowns = 0
+    no_folds_top_player_all_showdowns = 0
     # Use top-player (obs,action) pairs
     # only if they were showdown winner
-    no_folds_top_player_wins = 1
+    no_folds_top_player_only_wins = 1
 
     # -- including FOLD actions
     # Use top-players (obs,action) pairs
@@ -71,12 +71,12 @@ class ActionGenOption(enum.IntEnum):
     # Use showdown winners (obs,action) pairs
     # regardless of whether they are a top player or not
     # - FOLDs are obtained by replacing the showdown losers action with FOLD
-    make_folds_from_showdown_loser = 3
+    make_folds_from_showdown_loser_ignoring_rank = 3
     # Use top-players (obs,action) pairs
     # only if they participated in showdown
     # - FOLDS are obtained by replacing the actions of the player that is not a top player
     #    with FOLD,
-    make_folds_from_non_top_player = 4
+    make_folds_from_fish = 4
 
 
 @dataclass
