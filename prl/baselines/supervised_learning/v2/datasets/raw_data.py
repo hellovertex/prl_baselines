@@ -31,6 +31,9 @@ class PlayerSelection:
 
 
 def download_data(from_gdrive_id, nl: str) -> bool:
+    logging.info(f'No hand histories found in data/01_raw/all_players. '
+                 f'Downloading using gdrive_id {from_gdrive_id}')
+
     path_to_zipfile = os.path.join(DATA_DIR, *['00_tmp', 'bulk_hands.zip'])
     # 1. download .zip file from gdrive to disk
     gdown.download(id=from_gdrive_id,
@@ -41,6 +44,7 @@ def download_data(from_gdrive_id, nl: str) -> bool:
     zipfiles = glob.glob(path_to_zipfile, recursive=False)
     unzipped_dir = os.path.join(DATA_DIR, *['01_raw', nl, 'all_players'])
     [extract(zipfile, out_dir=unzipped_dir) for zipfile in zipfiles]
+
     logging.info(f'Unzipped hand histories to {unzipped_dir}')
     return True
 
@@ -87,8 +91,6 @@ def get_top_n_players(nl, num_top_players) -> Dict:
 
 
 class RawData:
-    # todo how to move all 01_raw-data-related pieces here
-    #  including download_data, get_top_players, extract_top_players
     def __init__(self,
                  dataset_options: DatasetOptions):
         self.opt = dataset_options
@@ -110,10 +112,16 @@ class RawData:
                     f.write(result)
 
     def player_dataset_to_disk(self, target_players):
+        logging.info(f'Not all hand histories of top {self.opt.num_top_players} '
+                     f'players were found under data/01_raw/selected_players.'
+                     f'\n=== Extracting hand histories of missing players from '
+                     f'data/01_raw/all_players===')
+
         for i, file in enumerate(self.data_files):
             if i % 50 == 0: logging.info(
                 f'Extracting games for top {self.opt.num_top_players} players'
                 f'from file {i}/{self.n_files}')
+
             with open(file, 'r') as f:
                 hand_histories = re.split(r'PokerStars Hand #', f.read())[1:]
                 for rank, player_name in enumerate(target_players):
@@ -124,14 +132,8 @@ class RawData:
                  from_gdrive_id: Optional[str] = None):
         if not self.opt.hand_history_has_been_downloaded_and_unzipped():
             assert from_gdrive_id
-            logging.info(f'No hand histories found in data/01_raw/all_players. '
-                         f'Downloading using gdrive_id {from_gdrive_id}')
             download_data(from_gdrive_id, self.opt.nl)
         if not self.opt.exists_raw_data_for_all_selected_players():
-            logging.info(f'Not all hand histories of top {self.opt.num_top_players} '
-                         f'players are found under data/01_raw/selected_players.'
-                         f'Extracting hand histories of missing players from '
-                         f'data/01_raw/all_players')
             top_players = get_top_n_players(self.opt.nl, self.opt.num_top_players)
             self.player_dataset_to_disk(list(top_players.keys()))
 
@@ -156,11 +158,11 @@ class RawData:
                    "The runner will try to download the data from gdrive and proceed "
                    "with unzipping.")
 def main(num_top_players, nl, from_gdrive_id):
-    logging.getLogger().setLevel(logging.INFO)
     dataset_options = DatasetOptions(num_top_players, nl)
     raw_data = RawData(dataset_options)
     raw_data.generate(from_gdrive_id)
 
 
 if __name__ == '__main__':
+    logging.getLogger().setLevel(logging.INFO)
     main()
