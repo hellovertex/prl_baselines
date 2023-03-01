@@ -56,24 +56,31 @@ def get_players_showdown_stats(parser):
         for episode in hand_histories:
             if not episode.has_showdown:
                 continue
-            # for each player update relevant stats
-            for player in episode.showdown_players:
-                if not player.name in players:
-                    players[player.name] = PlayerSelection(n_showdowns=0,
-                                                           n_won=0,
-                                                           total_earnings=0)
-                else:
-                    players[player.name].n_showdowns += 1
-                    try:
-                        # can be negative
-                        players[player.name].total_earnings += player.money_won_this_round
-                    except TypeError as e:
-                        print(e)
-                        logging.warning(f'Problems parsing showdown of game with ID'
-                                        f' {episode.hand_id}. Players were {players}')
-                    for winner in episode.winners:
-                        if winner.name == player.name:
-                            players[player.name].n_won += 1
+            logging.info(f'Updating player stats from hand_id {episode.hand_id}')
+            try:
+                # for each player update relevant stats
+                for player in episode.showdown_players:
+                    if not player.name in players:
+                        players[player.name] = PlayerSelection(n_showdowns=0,
+                                                               n_won=0,
+                                                               total_earnings=0)
+                    else:
+                        players[player.name].n_showdowns += 1
+                        try:
+                            # can be negative
+                            players[
+                                player.name].total_earnings += player.money_won_this_round
+                        except TypeError as e:
+                            print(e)
+                            logging.warning(f'Problems parsing showdown of game with ID'
+                                            f' {episode.hand_id}. Players were {players}')
+                            continue
+                        for winner in episode.winners:
+                            if winner.name == player.name:
+                                players[player.name].n_won += 1
+            except Exception as e:
+                print(e)
+                continue
     return players
 
 
@@ -132,7 +139,7 @@ class RawData:
             with open(file, 'r') as f:
                 hand_histories = re.split(r'PokerStars Hand #', f.read())[1:]
                 for rank, player_name in enumerate(target_players):
-                    alias = f'PlayerRank{str(rank+1).zfill(3)}'
+                    alias = f'PlayerRank{str(rank + 1).zfill(3)}'
                     self._to_disk(alias, player_name, hand_histories)
 
     def generate(self,
@@ -143,6 +150,7 @@ class RawData:
         if not self.opt.exists_raw_data_for_all_selected_players():
             top_players = get_top_n_players(self.opt.nl, self.opt.num_top_players)
             self.player_dataset_to_disk(list(top_players.keys()))
+
 
 @click.command()
 @click.option("--num_top_players", default=10,
