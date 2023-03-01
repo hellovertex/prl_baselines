@@ -6,7 +6,7 @@ click
 gdown
 scikit-learn
 numpy
-pandas
+pandas==1.5.3
 pydantic
 gin-config
 pettingzoo==1.22.3
