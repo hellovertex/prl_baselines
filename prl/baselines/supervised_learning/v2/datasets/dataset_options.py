@@ -51,14 +51,14 @@ class ActionGenOption(enum.IntEnum):
     top_player and drop the rest
     top player is specified in `DatasetOptions.num_top_player`"""
     # a) only if they were showdown winner
-    no_folds_top_player_wins = 0
+    no_folds_top_player_wins = 0  # drop_folds=True,only_winners=True
     # b) only if they participated in showdown
     # Note that the winner (obs,action)'s are possibly dropped
-    no_folds_top_player_showdowns = 1
+    no_folds_top_player_showdowns = 1  # drop_folds=True,False
 
     # -- including FOLD actions
     # c) where the top player FOLD action is recorded with randomized hand
-    make_folds_from_top_players_with_randomized_hand = 2
+    make_folds_from_top_players_with_randomized_hand = 2  # drop_folds=False,False
     # todo: [Optional] consider adding FOLD range
     # fold_only_hands_in_range: Optional[List] = None
     # d) where the actions of the player who lost showdown are converted to FOLD
@@ -79,7 +79,7 @@ class DatasetOptions:
     # data/02_vectorized -- .csv files
     # hand histories encoded as numerical vectors
     make_dataset_for_each_individual: Optional[bool] = None
-    action_generation_options: Optional[ActionGenOption] = None
+    action_generation_option: Optional[ActionGenOption] = None
 
     # data/03_preprocessed -- .csv files
     # We exclusively use datasets of games where top players participate.
@@ -123,12 +123,12 @@ class DatasetOptions:
     @property
     def dir_vectorized_data(self):
         assert self.make_dataset_for_each_individual is not None
-        assert self.action_generation_options is not None
+        assert self.action_generation_option is not None
         vectorized_dir = os.path.join(DATA_DIR, '02_vectorized')
         subdir_00_nl = self.nl
         subdir_01_player_or_pool = 'per_selected_player' if \
             self.make_dataset_for_each_individual else 'player_pool'
-        subdir_02_fold_or_no_fold = self.action_generation_options.name.replace(
+        subdir_02_fold_or_no_fold = self.action_generation_option.name.replace(
             'make_',
             '')
         # when `make_dataset_for_each_individual` is set, the individual folders
@@ -146,12 +146,12 @@ class DatasetOptions:
     @property
     def dir_preprocessed_data(self):
         assert self.make_dataset_for_each_individual is not None
-        assert self.action_generation_options is not None
+        assert self.action_generation_option is not None
         preprocessed_dir = os.path.join(DATA_DIR, '03_preprocessed')
         subdir_01_player_or_pool = 'per_selected_player' if \
             self.make_dataset_for_each_individual else 'player_pool'
         subdir_00_nl = self.nl
-        subdir_02_fold_or_no_fold = self.action_generation_options.name.replace(
+        subdir_02_fold_or_no_fold = self.action_generation_option.name.replace(
             'make_',
             '')
         # when `make_dataset_for_each_individual` is set, the individual folders
@@ -181,3 +181,5 @@ class DatasetOptions:
                     return False
             return True
         return False
+
+

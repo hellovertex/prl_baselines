@@ -287,11 +287,15 @@ class ParseHsmithyTextToPokerEpisode:
 
         except Exception as e:
             return []
-        for pname, player in players.items():
-            if player.is_showdown_player:
-                showdown_players.append(player)
-                if player.money_won_this_round > 0:
-                    winners.append(player)
+        try:
+            for pname, player in players.items():
+                if player.is_showdown_player:
+                    showdown_players.append(player)
+                    if player.money_won_this_round > 0:
+                        winners.append(player)
+        except Exception as e:
+            print(e)
+            return []
         btn_seat_num = int(hand_str.split('is the button')[0].strip()[-1])
         # except Exception as e:
         #     print(e)

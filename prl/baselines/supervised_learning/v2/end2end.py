@@ -47,7 +47,7 @@ if __name__ == '__main__':
         target_rounds=[Poker.FLOP, Poker.TURN, Poker.RIVER],
         sub_sampling_techniques=DataImbalanceCorrection
         .dont_resample_but_use_label_weights_in_optimizer,
-        action_generation_options=ActionGenOption
+        action_generation_option=ActionGenOption
         .make_folds_from_top_players_with_randomized_hand
     )
 
