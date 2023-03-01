@@ -84,7 +84,7 @@ def get_players_showdown_stats(parser):
     return players
 
 
-def get_top_n_players(nl, num_top_players) -> Dict:
+def get_top_n_players(nl, num_top_players, min_n_showdowns=5000) -> Dict:
     logging.info(f'Extracting hand history of top {num_top_players} players. '
                  f'This may take a few minutes up to several hours')
     # parse all files
@@ -93,6 +93,9 @@ def get_top_n_players(nl, num_top_players) -> Dict:
     # sort for winnings per showdown
     serialized = dict([(k, dataclasses.asdict(v)) for k, v in players.items()])
     df = pd.DataFrame.from_dict(serialized, orient='index')
+    df = df.sort_values('n_showdowns', ascending=False).dropna()
+    # only use players that went to more than 10_000 showdowns
+    df = df[df['n_showdowns'] > min_n_showdowns]
     df = df['total_earnings'] / df['n_showdowns']
     df = df.sort_values(0, ascending=False).dropna()
     if len(df) < num_top_players:
@@ -115,14 +118,13 @@ class RawData:
 
     def _to_disk(self, alias, player_name, hand_histories):
         file_path_out = os.path.join(self.data_dir, alias)
+        file = os.path.join(file_path_out, f'{alias}.txt')
         for current in hand_histories:  # c for current_hand
             if player_name in current:
                 result = "PokerStars Hand #" + current
                 if not os.path.exists(file_path_out):
                     os.makedirs(file_path_out)
-                with open(os.path.join(file_path_out, f'{alias}.txt'),
-                          'a+',
-                          encoding='utf-8') as f:
+                with open(file, 'a+', encoding='utf-8') as f:
                     f.write(result)
 
     def player_dataset_to_disk(self, target_players):
