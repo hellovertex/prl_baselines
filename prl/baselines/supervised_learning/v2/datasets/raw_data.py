@@ -78,6 +78,8 @@ def get_players_showdown_stats(parser):
 
 
 def get_top_n_players(nl, num_top_players) -> Dict:
+    logging.info(f'Extracting hand history of top {num_top_players} players. '
+                 f'This may take a few minutes up to several hours')
     # parse all files
     parser = ParseHsmithyTextToPokerEpisode(nl=nl)
     players = get_players_showdown_stats(parser)
