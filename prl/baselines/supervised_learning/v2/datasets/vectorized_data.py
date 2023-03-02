@@ -168,8 +168,31 @@ class VectorizedData:
               type=str,
               help="Which stakes the hand history belongs to."
                    "Determines the data directory.")
-def main(num_top_players, nl, from_gdrive_id):
-    opt = DatasetOptions(num_top_players, nl)
+@click.option("--make_dataset_for_each_individual",
+              default=False,
+              type=bool,
+              help="If True, creates a designated directory per player for "
+                   "training data. Defaults to False.")
+@click.option("--action_generation_option",
+              default=False,
+              type=int,
+              help="Possible Values are \n"
+                   "0: no_folds_top_player_all_showdowns\n"
+                   "1: no_folds_top_player_only_wins\n"
+                   "2: make_folds_from_top_players_with_randomized_hand\n"
+                   "3: make_folds_from_showdown_loser_ignoring_rank\n"
+                   "4: make_folds_from_fish\n"
+                   "See `ActionGenOption`. ")
+def main(num_top_players,
+         nl,
+         make_dataset_for_each_individual,
+         action_generation_option):
+    # Assumes raw_data.py has been ran to download and extract hand histories.
+    opt = DatasetOptions(
+        num_top_players=num_top_players,
+        nl=nl,
+        make_dataset_for_each_individual=make_dataset_for_each_individual,
+        action_generation_option=action_generation_option)
     # raw_data = RawData(dataset_options, top_player_selector)
     # raw_data.generate(from_gdrive_id)
     parser_cls = ParseHsmithyTextToPokerEpisode
@@ -180,8 +203,10 @@ def main(num_top_players, nl, from_gdrive_id):
     vectorized_data = VectorizedData(dataset_options=opt,
                                      parser_cls=parser_cls,
                                      top_player_selector=selector)
-    # todo: 1. get top players, write to disk and ONLY THEN
-    #  2. start multiprocessing
+
+    vectorized_data.generate()
+    # todo: test
+    # todo: multiprocessing
 
 
 if __name__ == '__main__':

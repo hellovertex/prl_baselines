@@ -105,7 +105,7 @@ class TopPlayerSelector:
             top_n_player_dict = ast.literal_eval(data.read())
         return top_n_player_dict
 
-    def get_top_n_players(self, num_top_players, min_n_showdowns=5000) -> Dict:
+    def get_top_n_players(self, num_top_players, min_n_showdowns=5) -> Dict:
         # from disk
         if os.path.exists(self.dir_top_n_players_dict(num_top_players)):
             return self._get_precomputed_from_disk(num_top_players)
