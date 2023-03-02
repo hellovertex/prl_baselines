@@ -57,8 +57,7 @@ class VectorizedData:
         a_opt = self.opt.action_generation_option
         only_winners, drop_folds, fold_random_cards = self._parse_action_gen_option(a_opt)
         selected_players = self.top_player_selector.get_top_n_players(self.opt.num_top_players)
-        # todo: fix ordering of the selected players
-        # selected_players =
+        selected_players = list(selected_players.keys())
         for i, ep in enumerate(episodesV2):
             print(f'Encoding episode no. {i}/{n_episodes}')
             try:
@@ -99,7 +98,7 @@ class VectorizedData:
         for filename in filenames:
             episodesV2 = parser.parse_file(filename)
             training_data = self.encode_episodes(encoder, episodesV2)
-            # todo: deprecate new_txt_to_vector_encoder and make tmp.EncoderV2 as
+            # todo: deprecate new_txt_to_vector_encoder and make tmp.EncoderV2
             #  encoder V2 the new one
 
 

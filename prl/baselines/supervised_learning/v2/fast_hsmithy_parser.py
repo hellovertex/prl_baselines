@@ -248,6 +248,15 @@ class ParseHsmithyTextToPokerEpisode:
             players, blinds = self.get_players_and_blinds(hand_str)
             info = self.rounds(hand_str)
             actions = self.get_actions(info)
+
+            # get money lost from actionsequence
+            try:
+                for action in actions['as_sequence']:
+                    amt = min(action.how_much, 0)
+                    players[action.who].money_won_this_round -= amt
+            except Exception as e:
+                print(e)
+                return []
             board_cards = ''
             showdown_players = []
             winners = []
@@ -279,15 +288,15 @@ class ParseHsmithyTextToPokerEpisode:
                             print(e)
                             raise e
                         amt = round(float(amt) * 100)
-                        players[pname].money_won_this_round = amt
-                    elif 'lost' in line:
-                        # get money lost from actionsequence
-                        money_contribution = 0
-                        for action in actions['as_sequence']:
-                            if action.who == pname:
-                                assert action.what != ActionSpace.FOLD
-                                money_contribution += action.how_much
-                        players[pname].money_won_this_round = -money_contribution
+                        players[pname].money_won_this_round += amt
+                    # elif 'lost' in line:
+                    #     # get money lost from actionsequence
+                    #     money_contribution = 0
+                    #     for action in actions['as_sequence']:
+                    #         if action.who == pname:
+                    #             assert action.what != ActionSpace.FOLD
+                    #             money_contribution += action.how_much
+                    #     players[pname].money_won_this_round = -money_contribution
 
         except Exception as e:
             return []
