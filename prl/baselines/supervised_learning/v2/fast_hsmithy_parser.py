@@ -152,7 +152,8 @@ class ParseHsmithyTextToPokerEpisode:
                 stack = float(stack)
                 player = Player(name=pname,
                                 seat_num_one_indexed=seat_num,
-                                stack=round(stack * 100))
+                                stack=round(stack * 100),
+                                money_won_this_round=0)
                 players[pname] = player
             elif 'posts small blind' in line:
                 sb_name: str = line.split(": ")[0]
@@ -251,6 +252,7 @@ class ParseHsmithyTextToPokerEpisode:
 
             # get money lost from actionsequence
             try:
+
                 for action in actions['as_sequence']:
                     amt = min(action.how_much, 0)
                     players[action.who].money_won_this_round -= amt
@@ -289,14 +291,6 @@ class ParseHsmithyTextToPokerEpisode:
                             raise e
                         amt = round(float(amt) * 100)
                         players[pname].money_won_this_round += amt
-                    # elif 'lost' in line:
-                    #     # get money lost from actionsequence
-                    #     money_contribution = 0
-                    #     for action in actions['as_sequence']:
-                    #         if action.who == pname:
-                    #             assert action.what != ActionSpace.FOLD
-                    #             money_contribution += action.how_much
-                    #     players[pname].money_won_this_round = -money_contribution
 
         except Exception as e:
             return []

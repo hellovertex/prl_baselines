@@ -20,10 +20,10 @@ class Player:
     name: str
     seat_num_one_indexed: int
     stack: int
+    money_won_this_round: int  # can be zero or negative
     position: Optional[Positions6Max] = None
     cards: Optional[str] = None
     is_showdown_player: Optional[bool] = None
-    money_won_this_round: Optional[int] = None  # can be negative
 
 
 @dataclass
