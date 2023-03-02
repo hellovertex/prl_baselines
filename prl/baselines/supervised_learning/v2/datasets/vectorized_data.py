@@ -1,6 +1,6 @@
 import glob
 import logging
-from typing import List
+from typing import List, Type
 
 import click
 import numpy as np
@@ -19,9 +19,10 @@ from prl.baselines.supervised_learning.v2.poker_model import PokerEpisodeV2
 class VectorizedData:
     def __init__(self,
                  dataset_options: DatasetOptions,
-                 parser: ParseHsmithyTextToPokerEpisode):
+                 parser_cls: Type[ParseHsmithyTextToPokerEpisode]):
         self.opt = dataset_options
-        self.parser = parser
+        self.parser_cls = parser_cls
+        self.top_player_selector = TopPlayerSelector(parser=self.parser_cls(self.opt.nl))
         self.make_player_dirs = True if self.opt.make_dataset_for_each_individual else \
             False
 
@@ -55,7 +56,9 @@ class VectorizedData:
         n_episodes = len(episodesV2)
         a_opt = self.opt.action_generation_option
         only_winners, drop_folds, fold_random_cards = self._parse_action_gen_option(a_opt)
-        selected_players = TopPlayerSelector()
+        selected_players = self.top_player_selector.get_top_n_players(self.opt.num_top_players)
+        # todo: fix ordering of the selected players
+        # selected_players =
         for i, ep in enumerate(episodesV2):
             print(f'Encoding episode no. {i}/{n_episodes}')
             try:
@@ -111,12 +114,12 @@ class VectorizedData:
               help="Which stakes the hand history belongs to."
                    "Determines the data directory.")
 def main(num_top_players, nl, from_gdrive_id):
-    parser = ParseHsmithyTextToPokerEpisode(nl=nl)
-    top_player_selector = TopPlayerSelector(parser)
+
     dataset_options = DatasetOptions(num_top_players, nl)
     # raw_data = RawData(dataset_options, top_player_selector)
     # raw_data.generate(from_gdrive_id)
-    vectorized_data = VectorizedData(dataset_options, parser)
+    vectorized_data = VectorizedData(dataset_options,
+                                     parser_cls=ParseHsmithyTextToPokerEpisode)
 
 
 if __name__ == '__main__':

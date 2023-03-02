@@ -6,6 +6,7 @@ import logging
 import os
 import re
 import warnings
+from collections import OrderedDict
 from dataclasses import dataclass
 from typing import Dict, Optional
 
@@ -102,14 +103,17 @@ class TopPlayerSelector:
         # only use players that went to more than 10_000 showdowns
         df = df[df['n_showdowns'] > min_n_showdowns]
         df = df['total_earnings'] / df['n_showdowns']
-        df = df.sort_values(0, ascending=False).dropna()
+        df = df.sort_values(ascending=False).dropna()
         if len(df) < num_top_players:
             warnings.warn(f'{num_top_players} top players were '
                           f'requests, but only {len(df)} players '
                           f'are in database. Please decrease '
                           f'`num_top_players` or provide more '
                           f'hand histories.')
-        return df[:num_top_players].to_dict()
+        # todo: resulting dictionary is not necessarily ordered
+        d = df[:num_top_players].to_dict()
+        ordered_dict = OrderedDict((k,d.get(k)) for k in df.index[:num_top_players])
+        return ordered_dict
 
 
 class RawData:
@@ -153,7 +157,7 @@ class RawData:
     def generate(self,
                  from_gdrive_id: Optional[str] = None):
         if not self.opt.hand_history_has_been_downloaded_and_unzipped():
-            assert from_gdrive_id
+            assert from_gdrive_id, "Downloading data requires parameter `from_gdrive_id`"
             download_data(from_gdrive_id, self.opt.nl)
         if not self.opt.exists_raw_data_for_all_selected_players():
             top_players = self.top_player_selector.get_top_n_players(

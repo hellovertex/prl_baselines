@@ -39,6 +39,10 @@ from prl.baselines.supervised_learning.v2.poker_model import Player, Action, \
 # 1. parse .txt files given list of players (only games containing players, or all if list is None)
 # 2.
 
+# class Parser:
+#     def __init__(self, dataset_options: DatasetOptions, *args, **kwargs):
+#         self.opt = dataset_options
+#     pass
 
 class ParseHsmithyTextToPokerEpisode:
     def __init__(self,
