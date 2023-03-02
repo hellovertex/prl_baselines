@@ -15,6 +15,7 @@ from prl.baselines.supervised_learning.data_acquisition.core.encoder import Posi
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import \
     card_tokens, card, make_board_cards
+from prl.baselines.supervised_learning.v2.datasets.dataset_options import ActionGenOption
 from prl.baselines.supervised_learning.v2.poker_model import PokerEpisodeV2, Player, \
     Action
 
@@ -309,17 +310,34 @@ class EncoderV2:
                 hands.append(random_hand)
         return hands
 
+    @staticmethod
+    def _parse_action_gen_option(a_opt: ActionGenOption):
+        only_winners = drop_folds = fold_random_cards = None
+        if a_opt.no_folds_top_player_all_showdowns:
+            only_winners = False
+            drop_folds = True
+        elif a_opt.no_folds_top_player_all_showdowns:
+            only_winners = drop_folds = True
+        elif a_opt.make_folds_from_top_players_with_randomized_hand:
+            fold_random_cards = True
+        elif a_opt.make_folds_from_showdown_loser_ignoring_rank:
+            only_winners = True
+            drop_folds = False
+        elif a_opt.make_folds_from_fish:
+            only_winners = drop_folds = False
+        return only_winners, drop_folds, fold_random_cards
+
     def encode_episode(self,
                        episode: PokerEpisodeV2,
-                       drop_folds: bool,
-                       only_winners: False,
-                       fold_random_cards: bool,
+                       a_opt: ActionGenOption,
                        selected_players: List[str],
                        limit_num_players: int = None,
                        verbose: bool = False) -> Tuple[
         Observations, Actions_Taken]:
         """Runs environment with steps from PokerEpisode.
-        Returns observations and corresponding actions of players that made it to showdown."""
+                Returns observations and corresponding actions of players that made it to showdown."""
+
+        only_winners, drop_folds, fold_random_cards = self._parse_action_gen_option(a_opt)
         # todo: for each selected player
         #  pick (obs, action)
         #  if players cards are unknown (no showdown) randomize them
