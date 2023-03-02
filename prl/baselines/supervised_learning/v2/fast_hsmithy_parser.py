@@ -13,7 +13,7 @@ import re
 import time
 from functools import partial
 from pathlib import Path
-from typing import Optional, List, Tuple, Dict, Generator
+from typing import List, Tuple, Dict, Generator
 
 import numpy as np
 import pandas as pd
@@ -22,15 +22,9 @@ from prl.environment.Wrappers.base import ActionSpace
 from prl.environment.Wrappers.utils import init_wrapped_env
 
 from prl.baselines import DATA_DIR
-from prl.baselines.evaluation.core.experiment import DEFAULT_DATE
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
-from prl.baselines.supervised_learning.data_acquisition.core.parser import \
-    Action as ActionV1
-from prl.baselines.supervised_learning.data_acquisition.core.parser import \
-    PokerEpisode as PokerEpisodeV1, PlayerStack, \
-    PlayerWithCards, PlayerWinningsCollected, Blind
 from prl.baselines.supervised_learning.v2.config import top_100, top_20
-from prl.baselines.supervised_learning.v2.new_txt_to_vector_encoder import EncoderV2
+from prl.baselines.deprecated.new_txt_to_vector_encoder import EncoderV2
 from prl.baselines.supervised_learning.v2.poker_model import Player, Action, \
     PokerEpisodeV2
 

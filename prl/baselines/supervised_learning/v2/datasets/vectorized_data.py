@@ -29,6 +29,7 @@ class VectorizedData:
         self.parser_cls = parser_cls
         self.parser = parser_cls(nl=self.opt.nl)  # todo replace nl= with opt=
         self.top_player_selector = top_player_selector
+        self.num_files_written_to_disk = 0
 
     def _generate_per_selected_player(self, filenames, encoder, use_multiprocessing):
         # todo: implement
@@ -80,13 +81,17 @@ class VectorizedData:
     def flush_data_to_disk(self,
                            training_data: np.ndarray,
                            labels: np.ndarray,
-                           feature_names: List[str]):
+                           feature_names: List[str],
+                           compression='.bz2'  # set to '' if you want to save raw .csv
+                           ):
         if training_data is not None:
             columns = None
             header = False
             # write to self.opt.dir_vectorized_data
-            file_path = os.path.abspath(
-                f'{out_dir}/{player_name}/data.csv.bz2')
+            file_path = os.path.join(self.opt.dir_vectorized_data,
+                                     f'data_'
+                                     f'{str(self.num_files_written_to_disk).zfill(3)}'
+                                     f'.csv{compression}')
             if not os.path.exists(Path(file_path).parent):
                 os.makedirs(os.path.realpath(Path(file_path).parent), exist_ok=True)
             if not os.path.exists(file_path):
@@ -106,7 +111,7 @@ class VectorizedData:
             df.to_csv(file_path,
                       index=True,
                       header=header,
-                      index_label='label',
+                      index_label='label',  # index=False ?
                       mode='a',
                       float_format='%.5f',
                       compression='bz2'
