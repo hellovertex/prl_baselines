@@ -7,17 +7,36 @@ I want a parser that can handle incomplete episodes. I.e. if no showdown happene
 I need a data pipeline that is not unnecessarily complex
 """
 import glob
+import multiprocessing
 import os
 import re
+import time
+from functools import partial
+from pathlib import Path
 from typing import List, Tuple, Dict, Generator
 
+import numpy as np
+import pandas as pd
+from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.base import ActionSpace
+from prl.environment.Wrappers.utils import init_wrapped_env
 
 from prl.baselines import DATA_DIR
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
+from prl.baselines.supervised_learning.v2.config import top_100, top_20
+from prl.baselines.deprecated.new_txt_to_vector_encoder import EncoderV2
 from prl.baselines.supervised_learning.v2.poker_model import Player, Action, \
     PokerEpisodeV2
 
+
+# all the following functionality should be possible with only minimal parameterization (input_dir, output_dir, ...)
+# 1. parse .txt files given list of players (only games containing players, or all if list is None)
+# 2.
+
+# class Parser:
+#     def __init__(self, dataset_options: DatasetOptions, *args, **kwargs):
+#         self.opt = dataset_options
+#     pass
 
 class ParseHsmithyTextToPokerEpisode:
     def __init__(self,
@@ -344,3 +363,285 @@ class ParseHsmithyTextToPokerEpisode:
                 yield episodes
             except Exception:
                 pass
+
+
+def run_on_chunks(chunks):
+    filenames = chunks
+    parser = ParseHsmithyTextToPokerEpisode()
+    env = init_wrapped_env(AugmentObservationWrapper,
+                           [5000 for _ in range(6)],
+                           blinds=(25, 50),
+                           multiply_by=1, )
+    encoder = EncoderV2(env)
+    it = 0
+    suffix = filenames[-1]
+    filenames = filenames[:-1]
+
+    while True:
+        start = it * max_files_in_memory_at_once
+        end = min((it + 1) * max_files_in_memory_at_once, n_files)
+        if not filenames[start:end]:
+            print(f'BREAK AT it={it}')
+            break
+        t0 = time.time()
+        for player_name in top_100:
+            training_data, labels = None, None
+            for i, filename in enumerate(filenames[start:end]):
+                print(f'Encoding file {i} / {n_files}')
+                episodesV2 = parser.parse_file(filename)
+                # convert episodes to PokerEpisodeV1
+                # episodesV1 = [converter.convert_episode(ep) for ep in episodes]
+                # episodes = None  # help gc
+                # run rl_encoder
+
+                for ep in episodesV2:
+                    try:
+                        observations, actions = encoder.encode_episode(ep,
+                                                                       # drop_folds=False,
+                                                                       drop_folds=True,
+                                                                       only_winners=True,
+                                                                       limit_num_players=5,
+                                                                       randomize_fold_cards=True,
+                                                                       selected_players=top_100,
+                                                                       # selected_players=['ishuha'],
+                                                                       verbose=True)
+                    except Exception as e:
+                        print(e)
+                        continue
+                    if not observations:
+                        continue
+                    if training_data is None:
+                        training_data = observations
+                        labels = actions
+                    else:
+                        try:
+                            training_data = np.concatenate((training_data, observations),
+                                                           axis=0)
+                            labels = np.concatenate((labels, actions), axis=0)
+                        except Exception as e:
+                            print(e)
+            print(
+                f'Encoding {max_files_in_memory_at_once} files took {time.time() - t0} seconds.')
+            if training_data is not None:
+                columns = None
+                header = False
+                # file_path = os.path.abspath(f'./data_{it}.csv.bz2')
+                # file_path = os.path.abspath(f'./top_100_only_wins_no_folds/data_{it}{suffix}.csv.bz2')
+                file_path = os.path.abspath(
+                    f'./top_100_only_wins_no_folds_per_player/{player_name}/data_{it}{suffix}.csv.bz2')
+                if not os.path.exists(Path(file_path).parent):
+                    os.makedirs(os.path.realpath(Path(file_path).parent), exist_ok=True)
+                if not os.path.exists(file_path):
+                    columns = encoder.feature_names
+                    header = True
+                df = pd.DataFrame(data=training_data,
+                                  index=labels,
+                                  # The index (row labels) of the DataFrame.
+                                  columns=columns)
+                # float to int if applicable
+                df = df.apply(
+                    lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
+                # one hot encode button
+                one_hot_btn = pd.get_dummies(df['btn_idx'], prefix='btn_idx')
+                df = pd.concat([df, one_hot_btn], axis=1)
+                df.drop('btn_idx', axis=1, inplace=True)
+                df.to_csv(file_path,
+                          index=True,
+                          header=header,
+                          index_label='label',
+                          mode='a',
+                          float_format='%.5f',
+                          compression='bz2'
+                          )
+        it += 1
+    return "Success."
+
+
+def run_on_file(filename,
+                out_dir,
+                selected_players,
+                drop_folds,
+                only_winners,
+                randomize_fold_cards,
+                verbose=True,
+                more_than_num_players=5,
+                debug=False):
+    parser = ParseHsmithyTextToPokerEpisode()
+    env = init_wrapped_env(AugmentObservationWrapper,
+                           [5000 for _ in range(6)],
+                           blinds=(25, 50),
+                           multiply_by=1)
+    encoder = EncoderV2(env)
+    selected_players = [Path(filename).stem]
+    if debug:
+        selected_players = selected_players[:5]
+    for player_name in selected_players:
+        training_data, labels = None, None
+        episodesV2 = parser.parse_file(filename)
+        n_episodes = len(episodesV2)
+        for i, ep in enumerate(episodesV2):
+            print(f'Encoding episode no. {i}/{n_episodes}')
+            try:
+                observations, actions = encoder.encode_episode(ep,
+                                                               # drop_folds=False,
+                                                               drop_folds=drop_folds,
+                                                               only_winners=only_winners,
+                                                               limit_num_players=more_than_num_players,
+                                                               randomize_fold_cards=randomize_fold_cards,
+                                                               selected_players=selected_players,
+                                                               # selected_players=['ishuha'],
+                                                               verbose=verbose)
+            except Exception as e:
+                print(e)
+                continue
+            if not observations:
+                continue
+            if training_data is None:
+                training_data = observations
+                labels = actions
+            else:
+                try:
+                    training_data = np.concatenate((training_data, observations), axis=0)
+                    labels = np.concatenate((labels, actions), axis=0)
+                except Exception as e:
+                    print(e)
+        if training_data is not None:
+            columns = None
+            header = False
+            # file_path = os.path.abspath(f'./data_{it}.csv.bz2')
+            # file_path = os.path.abspath(f'./top_100_only_wins_no_folds/data_{it}{suffix}.csv.bz2')
+            file_path = os.path.abspath(
+                f'{out_dir}/{player_name}/data.csv.bz2')
+            if not os.path.exists(Path(file_path).parent):
+                os.makedirs(os.path.realpath(Path(file_path).parent), exist_ok=True)
+            if not os.path.exists(file_path):
+                columns = encoder.feature_names
+                header = True
+            df = pd.DataFrame(data=training_data,
+                              index=labels,  # The index (row labels) of the DataFrame.
+                              columns=columns)
+            # float to int if applicable
+            df = df.apply(lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
+
+            # one hot encode button
+            one_hot_btn = pd.get_dummies(df['btn_idx'], prefix='btn_idx')
+            df = pd.concat([df, one_hot_btn], axis=1)
+            df.drop('btn_idx', axis=1, inplace=True)
+
+            df.to_csv(file_path,
+                      index=True,
+                      header=header,
+                      index_label='label',
+                      mode='a',
+                      float_format='%.5f',
+                      compression='bz2'
+                      )
+    return "Success."
+
+
+def make_dataset(unzipped_dir,
+                 out_dir,
+                 selected_players,
+                 drop_folds,
+                 only_winners,
+                 randomize_fold_cards,
+                 verbose=True,
+                 more_than_num_players=5,
+                 debug=False):
+    filenames = glob.glob(unzipped_dir + "/**/*.txt", recursive=True)
+    assert len(filenames) < 101
+    start = time.time()
+    # p = multiprocessing.Pool(20)
+    if debug:
+        p = multiprocessing.Pool(1)
+    else:
+        p = multiprocessing.Pool()
+    # run f0
+    run_fn = partial(run_on_file,
+                     out_dir=out_dir,
+                     selected_players=selected_players,
+                     drop_folds=drop_folds,
+                     only_winners=only_winners,
+                     randomize_fold_cards=randomize_fold_cards,
+                     verbose=verbose,
+                     more_than_num_players=more_than_num_players,
+                     debug=debug)
+    for x in p.imap_unordered(run_fn, filenames):
+        print(x + f'. Took {time.time() - start} seconds')
+    print(f'Finished job after {time.time() - start} seconds.')
+
+    p.close()
+
+
+if __name__ == "__main__":
+    """The new behaviour of the episode-encoder should be to
+                     encode even non-showdown episodes. A set of selected players
+                     is now mandatory. We choose the best 100 players.
+                     We always use their actions as-they-are. This implies
+                     we use all their games including non-showdown games.
+                     When there is no showdown, we dont know their cards,
+                     so we give them random cards and only use the observations
+                     until they fold and end the game there."""
+    unzipped_dir_to_S20 = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_10"
+    out_dir = "./results/top20/no_folds"
+    debug = False
+    # # make dataset DF2(20)
+    # make_dataset(unzipped_dir=unzipped_dir_to_S20,
+    #              out_dir=out_dir,
+    #              selected_players=top_20,
+    #              drop_folds=False,
+    #              only_winners=False,
+    #              fold_random_cards=True,
+    #              verbose=True,
+    #              debug=debug)
+
+    # make dataset DNF1(20)
+    make_dataset(unzipped_dir=unzipped_dir_to_S20,
+                 out_dir=out_dir,
+                 selected_players=top_20,
+                 drop_folds=True,
+                 only_winners=True,
+                 randomize_fold_cards=True,
+                 verbose=True,
+                 debug=debug)
+
+    # unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/player_data_test"
+    # unzipped_dir = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
+    # unzipped_dir = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
+    # out_dir = "example.txt"
+    # filenames = glob.glob(unzipped_dir + "/**/*.txt", recursive=True)
+    # # parser = ParseHsmithyTextToPokerEpisode()
+    # # converter = ConverterV2toV1()
+    # # env = init_wrapped_env(AugmentObservationWrapper,
+    # #                        [5000 for _ in range(6)],
+    # #                        blinds=(25, 50),
+    # #                        multiply_by=1, )
+    # # encoder = EncoderV2(env)
+    # max_files_in_memory_at_once = 1000
+    # n_files = len(filenames)
+    #
+    # """ MULTIPROCESSING START """
+    # x = 10000
+    # chunks = []
+    # current_chunk = []
+    # i = 0
+    # for file in filenames:
+    #     current_chunk.append(file)
+    #     if (i + 1) % x == 0:
+    #         chunks.append(current_chunk)
+    #         current_chunk = []
+    #     i += 1
+    # # trick to avoid multiprocessing writes to same file
+    # for i, chunk in enumerate(chunks):
+    #     chunk.append(f'{i}')
+    # """ MP END """
+    #
+    # start = time.time()
+    # # p = multiprocessing.Pool(20)
+    # p = multiprocessing.Pool()
+    # # run f0
+    # for x in p.imap_unordered(run_on_chunks, chunks):
+    #     print(x + f'. Took {time.time() - start} seconds')
+    # print(f'Finished job after {time.time() - start} seconds.')
+    #
+    # p.close()

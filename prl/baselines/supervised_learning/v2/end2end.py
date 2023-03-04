@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from prl.environment.Wrappers.base import ActionSpaceMinimal as Action
 from prl.environment.steinberger.PokerRL import Poker
 
+from prl.baselines.supervised_learning.v2.datasets import raw_data, vectorized_data
 from prl.baselines.supervised_learning.v2.datasets.dataset_options import \
     DatasetOptions, DataImbalanceCorrection, ActionGenOption
 from prl.baselines.supervised_learning.v2.datasets.raw_data import RawData
@@ -17,13 +18,21 @@ def make_dataset_from_scratch(dataset_options: DatasetOptions,
                               from_gdrive_id="18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO",
                               use_multiprocessing=False) -> bool:
     opt = dataset_options
-    # run main_raw(dataset_options) -- assert nothing happens if data already avail
-    # todo: logging that tells us if operation did not do anything because data is there
-    RawData(dataset_options).generate(from_gdrive_id=from_gdrive_id)
+    # Download + Unzip + Extract Top N Player Hand history .txt files
+    raw_data.main(opt.num_top_players,
+                  opt.nl,
+                  from_gdrive_id)
 
-    # run main_vectorized(dataset_options) -- assert nothing happens if data already avai
+    # Encode + Vectorize Top N Player Hand Histories
+    # Write as .csv.bz2 files to disk
+    vectorized_data.main(opt.num_top_players,
+                         opt.nl,
+                         opt.make_dataset_for_each_individual,
+                         opt.action_generation_option,
+                         use_multiprocessing=True,
+                         min_showdowns=5)
 
-    # run main_preprocess(dataset_options) -- assert nothing happens if data already avail
+    # Preprocess data -- Use Specified Actions + Specified Rounds
     class Preprocessor:
         @staticmethod
         def run(dataset_options: DatasetOptions):
@@ -42,13 +51,13 @@ if __name__ == '__main__':
         num_top_players=17,
         # -- vectorized
         make_dataset_for_each_individual=False,
-        action_space=[Action.FOLD, Action.CHECK_CALL, Action.RAISE],
+        action_generation_option=ActionGenOption
+        .make_folds_from_top_players_with_randomized_hand,
         # -- preprocessed
         target_rounds=[Poker.FLOP, Poker.TURN, Poker.RIVER],
         sub_sampling_techniques=DataImbalanceCorrection
         .dont_resample_but_use_label_weights_in_optimizer,
-        action_generation_option=ActionGenOption
-        .make_folds_from_top_players_with_randomized_hand
+        action_space=[Action.FOLD, Action.CHECK_CALL, Action.RAISE],
     )
 
     make_dataset_from_scratch(dataset_options)
