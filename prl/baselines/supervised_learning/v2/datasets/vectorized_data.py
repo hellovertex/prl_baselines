@@ -1,6 +1,9 @@
 import glob
 import logging
+import multiprocessing
 import os
+import time
+from functools import partial
 from pathlib import Path
 from typing import List, Type, Dict, Optional
 import re
@@ -22,7 +25,7 @@ from prl.baselines.supervised_learning.v2.datasets.tmp import EncoderV2
 from prl.baselines.supervised_learning.v2.poker_model import PokerEpisodeV2
 
 
-class PersistantStorage:
+class PersistentStorage:
     def __init__(self, dataset_options):
         self.opt = dataset_options
         self.num_files_written_to_disk = 0
@@ -74,16 +77,16 @@ class VectorizedData:
                  dataset_options: DatasetOptions,
                  parser_cls: Type[ParseHsmithyTextToPokerEpisode],
                  top_player_selector: TopPlayerSelector,
-                 storage: Optional[PersistantStorage] = None):
+                 storage: Optional[PersistentStorage] = None):
         self.opt = dataset_options
         self.parser_cls = parser_cls
         self.parser = parser_cls(nl=self.opt.nl)  # todo replace nl= with opt=
         self.top_player_selector = top_player_selector
-        self.storage = storage if storage else PersistantStorage(self.opt)
+        self.storage = storage if storage else PersistentStorage(self.opt)
         self.num_files_written_to_disk = 0
 
-    def alias_player_rank_to_ingame_name(self,
-                                         selected_player_names,
+    @staticmethod
+    def alias_player_rank_to_ingame_name(selected_player_names,
                                          filename:
                                          str) -> List[str]:
         # map `01_raw/NL50/selected_players/PlayerRank0008` to int(8)
@@ -129,36 +132,70 @@ class VectorizedData:
     def _generate_per_selected_player(self,
                                       selected_player_names: List[str],
                                       files: List[str],
-                                      encoder: EncoderV2,
-                                      use_multiprocessing: bool):
+                                      encoder_cls: Type[EncoderV2],
+                                      env: Optional[AugmentObservationWrapper] = None,
+                                      use_multiprocessing: bool = False):
         # todo: implement
         raise NotImplementedError
+
+    def _generate_vectorized_hand_histories(self,
+                                            env,
+                                            encoder_cls,
+                                            selected_player_names,
+                                            filename) -> str:
+        if env is None:
+            env = init_wrapped_env(AugmentObservationWrapper,
+                                   [5000 for _ in range(6)],
+                                   blinds=(25, 50),
+                                   multiply_by=1)
+        encoder = encoder_cls(env)
+        # single files, pretty large
+        if not os.path.exists(self.opt.dir_vectorized_data):
+            # filename to playername to one selected_players
+            selected_players = self.alias_player_rank_to_ingame_name(
+                selected_player_names, filename)
+            episodesV2 = self.parser.parse_file(filename)
+            training_data, labels = self.encode_episodes(episodesV2,
+                                                         encoder,
+                                                         selected_players)
+            self.storage.flush_data_to_disk(training_data, labels,
+                                            encoder.feature_names)
+            # todo: deprecate new_txt_to_vector_encoder and make tmp.EncoderV2
+            #  encoder V2 the new one
+        else:
+            logging.info(f"Skipping encoding of hand histories, because they already "
+                         f"exist at \n{self.opt.dir_vectorized_data}")
+        return f"Success: encoded {filename}..."
 
     def _generate_player_pool_data(self,
                                    selected_player_names: List[str],
                                    files: List[str],
-                                   encoder: EncoderV2,
-                                   use_multiprocessing: bool):
-        # In: 01_raw/NL50/selected_players/`Player Ranks zfilled`
-        # Out: 02_vectorized/NL50/player_pool/folds_from_top_players/TopNPlayers/
-        # consider creating parser for multiprocessing use
-        # single files, pretty large
-        if not os.path.exists(self.opt.dir_vectorized_data):
-            for filename in files:
-                # filename to playername to one selected_players
-                selected_players = self.alias_player_rank_to_ingame_name(
-                    selected_player_names, filename)
-                episodesV2 = self.parser.parse_file(filename)
-                training_data, labels = self.encode_episodes(episodesV2,
-                                                             encoder,
-                                                             selected_players)
-                self.storage.flush_data_to_disk(training_data, labels,
-                                                encoder.feature_names)
-                # todo: deprecate new_txt_to_vector_encoder and make tmp.EncoderV2
-                #  encoder V2 the new one
+                                   encoder_cls: Type[EncoderV2],
+                                   env: Optional[AugmentObservationWrapper] = None,
+                                   use_multiprocessing: bool = False):
+        if use_multiprocessing:
+            logging.info('Starting handhistory encoding using multiprocessing...')
+            gen_fn = partial(self._generate_vectorized_hand_histories,
+                             env=env,
+                             encoder_cls=encoder_cls,
+                             selected_player_names=selected_player_names)
+            assert len(files) < 101, f'Dont use multiprocessing for more than Top 100 ' \
+                                     f'players.'
+            start = time.time()
+            p = multiprocessing.Pool()
+            for x in p.imap_unordered(gen_fn, files):
+                logging.info(x + f'. Took {time.time() - start} seconds\n')
+            logging.info(f'*** Finished job after {time.time() - start} seconds. ***')
+            p.close()
+
         else:
-            logging.info(f"Skipping encoding of hand histories, because they already "
-                         f"exist at \n{self.opt.dir_vectorized_data}")
+            logging.info('Starting handhistory encoding without multiprocessing...')
+            for filename in files:
+                self._generate_vectorized_hand_histories(
+                    env=env,
+                    encoder_cls=encoder_cls,
+                    selected_player_names=selected_player_names,
+                    filename=filename)
 
     def _make_missing_data(self):
         # extracts hand histories for Top M players,
@@ -167,13 +204,8 @@ class VectorizedData:
 
     def generate(self,
                  env=None,
-                 encoder_cls=EncoderV2):
-        if env is None:
-            env = init_wrapped_env(AugmentObservationWrapper,
-                                   [5000 for _ in range(6)],
-                                   blinds=(25, 50),
-                                   multiply_by=1)
-        encoder = encoder_cls(env)
+                 encoder_cls: Type[EncoderV2] = EncoderV2,
+                 use_multiprocessing=False):
 
         if not self.opt.exists_raw_data_for_all_selected_players():
             self._make_missing_data()
@@ -185,16 +217,21 @@ class VectorizedData:
             self.opt.num_top_players, self.opt.min_showdowns)
         logging.info(f"Encoding and vectorizing hand histories to .csv files for top "
                      f"{len(selected_players)} players. ")
+
         if self.opt.make_dataset_for_each_individual:
-            return self._generate_per_selected_player(list(selected_players.keys()),
-                                                      filenames,
-                                                      encoder,
-                                                      use_multiprocessing=True)
+            return self._generate_per_selected_player(
+                selected_player_names=list(selected_players.keys()),
+                files=filenames,
+                encoder_cls=encoder_cls,
+                env=env,
+                use_multiprocessing=use_multiprocessing)
         else:
-            return self._generate_player_pool_data(list(selected_players.keys()),
-                                                   filenames,
-                                                   encoder,
-                                                   use_multiprocessing=True)
+            return self._generate_player_pool_data(
+                selected_player_names=list(selected_players.keys()),
+                files=filenames,
+                encoder_cls=encoder_cls,
+                env=env,
+                use_multiprocessing=use_multiprocessing)
 
 
 @click.command()
@@ -222,10 +259,16 @@ class VectorizedData:
                    "3: make_folds_from_showdown_loser_ignoring_rank\n"
                    "4: make_folds_from_fish\n"
                    "See `ActionGenOption`. ")
+@click.option("--use_multiprocessing",
+              default=False,
+              type=bool,
+              help="Whether to parallelize encoding of files per TopRanked Player. "
+                   "Defaults to false.")
 def main(num_top_players,
          nl,
          make_dataset_for_each_individual,
-         action_generation_option):
+         action_generation_option,
+         use_multiprocessing):
     # Assumes raw_data.py has been ran to download and extract hand histories.
     opt = DatasetOptions(
         num_top_players=num_top_players,
@@ -235,14 +278,11 @@ def main(num_top_players,
         min_showdowns=5
     )
     parser_cls = ParseHsmithyTextToPokerEpisode
-    # write top players
     selector = TopPlayerSelector(parser=parser_cls(nl))
     vectorized_data = VectorizedData(dataset_options=opt,
                                      parser_cls=parser_cls,
                                      top_player_selector=selector)
-    vectorized_data.generate()
-    # todo: test
-    # todo: multiprocessing
+    vectorized_data.generate(use_multiprocessing=use_multiprocessing)
 
 
 if __name__ == '__main__':
