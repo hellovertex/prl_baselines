@@ -264,6 +264,12 @@ class VectorizedData:
               type=bool,
               help="Whether to parallelize encoding of files per TopRanked Player. "
                    "Defaults to false.")
+@click.option("--min_showdowns",
+              default=5,
+              type=int,
+              help="Minimum number of showdowns required to be eligible for top player "
+                   "ranking. Default is 5 for debugging. 5000 is recommended for real "
+                   "data.")
 def main(num_top_players,
          nl,
          make_dataset_for_each_individual,
