@@ -52,10 +52,10 @@ class PersistantStorage:
             # float to int if applicable
             df = df.apply(lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
 
-            # one hot encode button
-            one_hot_btn = pd.get_dummies(df['btn_idx'], prefix='btn_idx')
-            df = pd.concat([df, one_hot_btn], axis=1)
-            df.drop('btn_idx', axis=1, inplace=True)
+            # # one hot encode button -- done by CanonicalVectorizer now
+            # one_hot_btn = pd.get_dummies(df['btn_idx'], prefix='btn_idx')
+            # df = pd.concat([df, one_hot_btn], axis=1)
+            # df.drop('btn_idx', axis=1, inplace=True)
 
             df.to_csv(file_path,
                       index=True,
@@ -82,16 +82,13 @@ class VectorizedData:
         self.storage = storage if storage else PersistantStorage(self.opt)
         self.num_files_written_to_disk = 0
 
-    def alias_player_rank_to_ingame_name(self, filename: str):
-        selected_players = self.top_player_selector.get_top_n_players(
-            self.opt.num_top_players)
-        selected_player_names = list(selected_players.keys())
+    def alias_player_rank_to_ingame_name(self, selected_player_names, filename: str):
         # map `01_raw/NL50/selected_players/PlayerRank0008` to int(8)
         filename = Path(filename).name
         rank: int = int(re.search(r'\d+', filename).group())
         # map rank int to key index of top players
         for i, name in enumerate(selected_player_names):
-            if i == rank:
+            if i + 1 == rank:
                 return [name]
         raise ValueError(f"No Player name has been found for file {filename}")
 
@@ -138,15 +135,20 @@ class VectorizedData:
         # Out: 02_vectorized/NL50/player_pool/folds_from_top_players/TopNPlayers/
         # consider creating parser for multiprocessing use
         # single files, pretty large
+        selected_players = self.top_player_selector.get_top_n_players_min_showdowns(
+            self.opt.num_top_players, self.opt.min_showdowns)
+        selected_player_names = list(selected_players.keys())
+
         for filename in files:
             # filename to playername to one selected_players
-            selected_players = self.alias_player_rank_to_ingame_name(filename)
+            selected_players = self.alias_player_rank_to_ingame_name(
+                selected_player_names, filename)
             episodesV2 = self.parser.parse_file(filename)
             training_data, labels = self.encode_episodes(episodesV2,
                                                          encoder,
                                                          selected_players)
             self.storage.flush_data_to_disk(training_data, labels,
-                                                encoder.feature_names)
+                                            encoder.feature_names)
             # todo: deprecate new_txt_to_vector_encoder and make tmp.EncoderV2
             #  encoder V2 the new one
 
@@ -213,13 +215,12 @@ def main(num_top_players,
         num_top_players=num_top_players,
         nl=nl,
         make_dataset_for_each_individual=make_dataset_for_each_individual,
-        action_generation_option=action_generation_option,
+        action_generation_option=ActionGenOption(action_generation_option),
         min_showdowns=5
     )
     parser_cls = ParseHsmithyTextToPokerEpisode
     # write top players
-    selector = TopPlayerSelector(parser=parser_cls(nl),
-                                 min_showdowns=opt.min_showdowns)
+    selector = TopPlayerSelector(parser=parser_cls(nl))
     vectorized_data = VectorizedData(dataset_options=opt,
                                      parser_cls=parser_cls,
                                      top_player_selector=selector)

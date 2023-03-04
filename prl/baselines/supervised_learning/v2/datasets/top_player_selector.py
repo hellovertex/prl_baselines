@@ -66,22 +66,25 @@ class TopPlayerSelector:
                     continue
         return players
 
-    def dir_top_n_players_dict(self, n, min_showdowns):
+    def file_top_n_players_min_showdowns(self, n, min_showdowns):
+        """Path to .txt file containing python dictionary with Top N players and their
+        serialized `PlayerSelection` data."""
         raw_dir = os.path.join(DATA_DIR, '01_raw')
         return os.path.join(raw_dir,
                             self.parser.nl,  # replace with self.parser.opt.nl
-                            f'top_{n}_players_min_showdowns={min_showdowns}')
+                            f'top_{n}_players_min_showdowns={min_showdowns}.txt')
 
     def _get_precomputed_from_disk(self, num_top_players, min_showdowns) -> Dict:
         logging.info(f'Loading top {num_top_players} players dictionary from disk.')
-        filename = self.dir_top_n_players_dict(num_top_players, min_showdowns)
+        filename = self.file_top_n_players_min_showdowns(num_top_players, min_showdowns)
         with open(filename, "r") as data:
             top_n_player_dict = ast.literal_eval(data.read())
         return top_n_player_dict
 
     def get_top_n_players_min_showdowns(self, num_top_players, min_showdowns) -> Dict:
         # from disk
-        if os.path.exists(self.dir_top_n_players_dict(num_top_players, min_showdowns)):
+        if os.path.exists(
+                self.file_top_n_players_min_showdowns(num_top_players, min_showdowns)):
             return self._get_precomputed_from_disk(num_top_players, min_showdowns)
 
         # compute and flush to disk
@@ -108,8 +111,9 @@ class TopPlayerSelector:
             # maintain rank from 1 to n
             ordered_dict = OrderedDict((k, d.get(k)) for k in df.index[:num_top_players])
             # flush to disk
-            self.write(ordered_dict, self.dir_top_n_players_dict(num_top_players,
-                                                                 min_showdowns))
+            self.write(ordered_dict,
+                       self.file_top_n_players_min_showdowns(num_top_players,
+                                                             min_showdowns))
 
             return ordered_dict
 

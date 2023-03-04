@@ -110,6 +110,15 @@ class DatasetOptions:
     # meta
     nl: str = 'NL50'
 
+    """Google drive id of a .zip file containing hand histories. "
+    "For small example, use 18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO"
+    "For complete database (VERY LARGE), use "
+    "18kkgEM2CYF_Tl4Dn8oro6tUgqDfr9IAN"
+    "The id can be obtained from the google drive download-link url."
+    "The runner will try to download the data from gdrive and proceed "
+    "with unzipping."""
+    from_gdrive_id: Optional[str] = "18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO"
+
     @property
     def dir_raw_data_all_players(self):
         raw_dir = os.path.join(DATA_DIR, '01_raw')

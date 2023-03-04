@@ -76,6 +76,9 @@ class RawData:
 
     def generate(self,
                  from_gdrive_id: Optional[str] = None):
+        if from_gdrive_id is None:
+            from_gdrive_id = self.opt.from_gdrive_id
+
         # Maybe download + unzip
         if not self.opt.hand_history_has_been_downloaded_and_unzipped():
             assert from_gdrive_id, "Downloading data requires parameter `from_gdrive_id`"
