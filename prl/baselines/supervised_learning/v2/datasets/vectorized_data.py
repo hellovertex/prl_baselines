@@ -123,22 +123,23 @@ class VectorizedData:
                     print(e)
         return training_data, labels
 
-    def _generate_per_selected_player(self, filenames, encoder, use_multiprocessing):
+    def _generate_per_selected_player(self,
+                                      selected_player_names: List[str],
+                                      files: List[str],
+                                      encoder: EncoderV2,
+                                      use_multiprocessing: bool):
         # todo: implement
         raise NotImplementedError
 
     def _generate_player_pool_data(self,
-                                   files,
-                                   encoder,
-                                   use_multiprocessing):
+                                   selected_player_names: List[str],
+                                   files: List[str],
+                                   encoder: EncoderV2,
+                                   use_multiprocessing: bool):
         # In: 01_raw/NL50/selected_players/`Player Ranks zfilled`
         # Out: 02_vectorized/NL50/player_pool/folds_from_top_players/TopNPlayers/
         # consider creating parser for multiprocessing use
         # single files, pretty large
-        selected_players = self.top_player_selector.get_top_n_players_min_showdowns(
-            self.opt.num_top_players, self.opt.min_showdowns)
-        selected_player_names = list(selected_players.keys())
-
         for filename in files:
             # filename to playername to one selected_players
             selected_players = self.alias_player_rank_to_ingame_name(
@@ -153,10 +154,9 @@ class VectorizedData:
             #  encoder V2 the new one
 
     def _make_missing_data(self):
-        raw_data = RawData(self.opt, self.top_player_selector)
         # extracts hand histories for Top M players,
         # where M=self.opt.num_top_players-missing
-        raw_data.generate()
+        RawData(self.opt, self.top_player_selector).generate()
 
     def generate(self,
                  env=None,
@@ -167,16 +167,24 @@ class VectorizedData:
                                    blinds=(25, 50),
                                    multiply_by=1)
         encoder = encoder_cls(env)
-        filenames = glob.glob(f'{self.opt.dir_raw_data_top_players}/**/*.txt',
-                              recursive=True)
+
         if not self.opt.exists_raw_data_for_all_selected_players():
             self._make_missing_data()
+
+        filenames = glob.glob(f'{self.opt.dir_raw_data_top_players}/**/*.txt',
+                              recursive=True)
+
+        selected_players = self.top_player_selector.get_top_n_players_min_showdowns(
+            self.opt.num_top_players, self.opt.min_showdowns)
+
         if self.opt.make_dataset_for_each_individual:
-            return self._generate_per_selected_player(filenames,
+            return self._generate_per_selected_player(list(selected_players.keys()),
+                                                      filenames,
                                                       encoder,
                                                       use_multiprocessing=True)
         else:
-            return self._generate_player_pool_data(filenames,
+            return self._generate_player_pool_data(list(selected_players.keys()),
+                                                   filenames,
                                                    encoder,
                                                    use_multiprocessing=True)
 

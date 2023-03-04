@@ -44,6 +44,7 @@ class RawData:
         self.top_player_selector = top_player_selector
         tmp_data_dir = self.opt.dir_raw_data_all_players
         self.data_files = glob.glob(tmp_data_dir + '**/*.txt')
+        assert self.data_files, "Data Files must not be empty "
         self.data_dir = self.opt.dir_raw_data_top_players
         self.n_files = len(self.data_files)
 
@@ -61,9 +62,9 @@ class RawData:
     def player_dataset_to_disk(self, target_players):
         for rank, player_name in enumerate(target_players):
             alias = f'PlayerRank{str(rank + 1).zfill(3)}'
-            # Player Data exists already
             if os.path.exists(os.path.join(self.data_dir, alias)):
                 continue
+
             logging.info(f'Writing hand history for {alias}')
             for file in tqdm(self.data_files):
                 with open(file, 'r') as f:
