@@ -42,11 +42,7 @@ class RawData:
                  top_player_selector: TopPlayerSelector):
         self.opt = dataset_options
         self.top_player_selector = top_player_selector
-        tmp_data_dir = self.opt.dir_raw_data_all_players
-        self.data_files = glob.glob(tmp_data_dir + '**/*.txt')
-        assert self.data_files, "Data Files must not be empty "
         self.data_dir = self.opt.dir_raw_data_top_players
-        self.n_files = len(self.data_files)
 
     def _to_disk(self, alias, player_name, hand_histories):
         file_path_out = os.path.join(self.data_dir, alias)
@@ -66,7 +62,9 @@ class RawData:
                 continue
 
             logging.info(f'Writing hand history for {alias}')
-            for file in tqdm(self.data_files):
+
+            data_files = glob.glob(self.opt.dir_raw_data_all_players + '**/*.txt')
+            for file in tqdm(data_files):
                 with open(file, 'r') as f:
                     try:
                         hand_histories = re.split(r'PokerStars Hand #', f.read())[1:]
