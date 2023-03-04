@@ -274,14 +274,15 @@ def main(num_top_players,
          nl,
          make_dataset_for_each_individual,
          action_generation_option,
-         use_multiprocessing):
+         use_multiprocessing,
+         min_showdowns):
     # Assumes raw_data.py has been ran to download and extract hand histories.
     opt = DatasetOptions(
         num_top_players=num_top_players,
         nl=nl,
         make_dataset_for_each_individual=make_dataset_for_each_individual,
         action_generation_option=ActionGenOption(action_generation_option),
-        min_showdowns=5
+        min_showdowns=min_showdowns
     )
     parser_cls = ParseHsmithyTextToPokerEpisode
     selector = TopPlayerSelector(parser=parser_cls(nl))
