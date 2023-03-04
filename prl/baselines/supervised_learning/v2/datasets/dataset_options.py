@@ -90,6 +90,8 @@ class DatasetOptions:
     # hand histories encoded as numerical vectors
     make_dataset_for_each_individual: Optional[bool] = None
     action_generation_option: Optional[ActionGenOption] = None
+    # minimum number of showdowns required to be eligible for top player ranking
+    min_showdowns: int = 5000
 
     # data/03_preprocessed -- .csv files
     # We exclusively use datasets of games where top players participate.
@@ -123,7 +125,7 @@ class DatasetOptions:
         raw_dir = os.path.join(DATA_DIR, '01_raw')
         # data/00_tmp and data/01_raw/all_players are irrelevant for callers
         subdir_00_nl = self.nl
-        subdir_01_player_or_pool = 'selected_players'
+        subdir_01_player_or_pool = f'selected_players_n_showdowns={self.min_showdowns}'
         return os.path.join(*[
             raw_dir,
             subdir_00_nl,
@@ -143,7 +145,8 @@ class DatasetOptions:
             '')
         # when `make_dataset_for_each_individual` is set, the individual folders
         # must be created during encoding, since we dont know the ranks a priori here
-        subdir_03_top_n_players = f'Top{self.num_top_players}Players' if not \
+        subdir_03_top_n_players = f'Top{self.num_top_players}Players_' \
+                                  f'n_showdowns={self.min_showdowns}' if not \
             self.make_dataset_for_each_individual else ''
         return os.path.join(*[
             vectorized_dir,

@@ -14,7 +14,8 @@ from tqdm import tqdm
 
 from prl.baselines.supervised_learning.v2.datasets.dataset_options import DatasetOptions, \
     ActionGenOption
-from prl.baselines.supervised_learning.v2.datasets.raw_data import TopPlayerSelector
+from prl.baselines.supervised_learning.v2.datasets.raw_data import TopPlayerSelector, \
+    RawData
 from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import \
     ParseHsmithyTextToPokerEpisode
 from prl.baselines.supervised_learning.v2.datasets.tmp import EncoderV2
@@ -73,7 +74,7 @@ class VectorizedData:
                  dataset_options: DatasetOptions,
                  parser_cls: Type[ParseHsmithyTextToPokerEpisode],
                  top_player_selector: TopPlayerSelector,
-                 storage: Optional[PersistantStorage]=None):
+                 storage: Optional[PersistantStorage] = None):
         self.opt = dataset_options
         self.parser_cls = parser_cls
         self.parser = parser_cls(nl=self.opt.nl)  # todo replace nl= with opt=
@@ -108,11 +109,12 @@ class VectorizedData:
                     selected_players=selected_players,
                     verbose=False)
             except Exception as e:
-                print(e)
-                continue
+                raise e
+                # print(e)
+                # continue
             if not observations:
                 continue
-            if training_data is None:
+            elif training_data is None:
                 training_data = observations
                 labels = actions
             else:
@@ -137,14 +139,22 @@ class VectorizedData:
         # consider creating parser for multiprocessing use
         # single files, pretty large
         for filename in files:
+            # filename to playername to one selected_players
             selected_players = self.alias_player_rank_to_ingame_name(filename)
             episodesV2 = self.parser.parse_file(filename)
             training_data, labels = self.encode_episodes(episodesV2,
                                                          encoder,
                                                          selected_players)
-            self.storage.flush_data_to_disk(training_data, labels, encoder.feature_names)
+            self.storage.flush_data_to_disk(training_data, labels,
+                                                encoder.feature_names)
             # todo: deprecate new_txt_to_vector_encoder and make tmp.EncoderV2
             #  encoder V2 the new one
+
+    def _make_missing_data(self):
+        raw_data = RawData(self.opt, self.top_player_selector)
+        # extracts hand histories for Top M players,
+        # where M=self.opt.num_top_players-missing
+        raw_data.generate()
 
     def generate(self,
                  env=None,
@@ -155,8 +165,10 @@ class VectorizedData:
                                    blinds=(25, 50),
                                    multiply_by=1)
         encoder = encoder_cls(env)
-        filenames = glob.glob(f'{self.opt.dir_raw_data_top_players}**/*.txt',
+        filenames = glob.glob(f'{self.opt.dir_raw_data_top_players}/**/*.txt',
                               recursive=True)
+        if not self.opt.exists_raw_data_for_all_selected_players():
+            self._make_missing_data()
         if self.opt.make_dataset_for_each_individual:
             return self._generate_per_selected_player(filenames,
                                                       encoder,
@@ -201,18 +213,16 @@ def main(num_top_players,
         num_top_players=num_top_players,
         nl=nl,
         make_dataset_for_each_individual=make_dataset_for_each_individual,
-        action_generation_option=action_generation_option)
-    # raw_data = RawData(dataset_options, top_player_selector)
-    # raw_data.generate(from_gdrive_id)
+        action_generation_option=action_generation_option,
+        min_showdowns=5
+    )
     parser_cls = ParseHsmithyTextToPokerEpisode
     # write top players
-    selector = TopPlayerSelector(parser=parser_cls(nl))
-    # sharks: Dict = selector.get_top_n_players(num_top_players)
-
+    selector = TopPlayerSelector(parser=parser_cls(nl),
+                                 min_showdowns=opt.min_showdowns)
     vectorized_data = VectorizedData(dataset_options=opt,
                                      parser_cls=parser_cls,
                                      top_player_selector=selector)
-
     vectorized_data.generate()
     # todo: test
     # todo: multiprocessing

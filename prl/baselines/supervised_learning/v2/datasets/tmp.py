@@ -313,17 +313,17 @@ class EncoderV2:
     @staticmethod
     def _parse_action_gen_option(a_opt: ActionGenOption):
         only_winners = drop_folds = fold_random_cards = None
-        if a_opt.no_folds_top_player_all_showdowns:
+        if a_opt == ActionGenOption.no_folds_top_player_all_showdowns:
             only_winners = False
             drop_folds = True
-        elif a_opt.no_folds_top_player_all_showdowns:
+        elif a_opt == ActionGenOption.no_folds_top_player_all_showdowns:
             only_winners = drop_folds = True
-        elif a_opt.make_folds_from_top_players_with_randomized_hand:
+        elif a_opt == ActionGenOption.make_folds_from_top_players_with_randomized_hand:
             fold_random_cards = True
-        elif a_opt.make_folds_from_showdown_loser_ignoring_rank:
+        elif a_opt == ActionGenOption.make_folds_from_showdown_loser_ignoring_rank:
             only_winners = True
             drop_folds = False
-        elif a_opt.make_folds_from_fish:
+        elif a_opt == ActionGenOption.make_folds_from_fish:
             only_winners = drop_folds = False
         return only_winners, drop_folds, fold_random_cards
 

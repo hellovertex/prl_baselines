@@ -1,35 +1,20 @@
-import ast
-import dataclasses
 import glob
-import json
 import logging
 import os
 import re
-import warnings
-from collections import OrderedDict
-from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Optional
 
 import click
 import gdown
-import pandas as pd
 from tqdm import tqdm
 
 from prl.baselines import DATA_DIR
 from prl.baselines.supervised_learning.v2.datasets.dataset_options import DatasetOptions
+from prl.baselines.supervised_learning.v2.datasets.top_player_selector import \
+    TopPlayerSelector
 from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import \
     ParseHsmithyTextToPokerEpisode
 from prl.baselines.utils.unzip_recursively import extract
-
-
-@dataclass
-class PlayerSelection:
-    # don't need these to select top players
-    # n_hands_dealt: int
-    # n_hands_played: int
-    n_showdowns: int
-    n_won: int
-    total_earnings: float
 
 
 def download_data(from_gdrive_id, nl: str) -> bool:
@@ -49,100 +34,6 @@ def download_data(from_gdrive_id, nl: str) -> bool:
 
     logging.info(f'Unzipped hand histories to {unzipped_dir}')
     return True
-
-
-class TopPlayerSelector:
-    def __init__(self, parser: ParseHsmithyTextToPokerEpisode):
-        self.parser = parser
-        self.num_top_players = None
-
-    def get_players_showdown_stats(self):
-        players: Dict[str, PlayerSelection] = {}
-
-        num_files = self.parser.num_files
-        for hand_histories in tqdm(self.parser.parse_hand_histories_from_all_players(),
-                                   total=num_files):
-            for episode in hand_histories:
-                if not episode.has_showdown:
-                    continue
-                try:
-                    # for each player count hands, showdowns and chips won
-                    for player in episode.showdown_players:
-                        if not player.name in players:
-                            players[player.name] = PlayerSelection(n_showdowns=0,
-                                                                   n_won=0,
-                                                                   total_earnings=0)
-                        else:
-                            players[player.name].n_showdowns += 1
-                            try:
-                                # can be negative
-                                players[
-                                    player.name].total_earnings += player.money_won_this_round
-                            except TypeError as e:
-                                print(e)
-                                logging.warning(
-                                    f'Problems parsing showdown of game with ID'
-                                    f' {episode.hand_id}. Players were {players}')
-                                continue
-                            for winner in episode.winners:
-                                if winner.name == player.name:
-                                    players[player.name].n_won += 1
-                except Exception as e:
-                    print(e)
-                    continue
-        return players
-
-    def dir_top_n_players_dict(self, n):
-        raw_dir = os.path.join(DATA_DIR, '01_raw')
-        return os.path.join(raw_dir,
-                            self.parser.nl,  # replace with self.parser.opt.nl
-                            f'top_{n}_players.txt')
-
-    def _get_precomputed_from_disk(self, num_top_players) -> Dict:
-        logging.info(f'Loading top {num_top_players} players dictionary from disk.')
-        filename = self.dir_top_n_players_dict(num_top_players)
-        with open(filename, "r") as data:
-            top_n_player_dict = ast.literal_eval(data.read())
-        return top_n_player_dict
-
-    def get_top_n_players(self, num_top_players, min_n_showdowns=5) -> Dict:
-        # from disk
-        if os.path.exists(self.dir_top_n_players_dict(num_top_players)):
-            return self._get_precomputed_from_disk(num_top_players)
-
-        # compute and flush to disk
-        else:
-            logging.info(f'Extracting hand history of top {num_top_players} players. '
-                         f'This may take a few minutes up to several hours')
-            # parse all files
-            players = self.get_players_showdown_stats()
-            # sort for winnings per showdown
-            serialized = dict([(k, dataclasses.asdict(v)) for k, v in players.items()])
-            df = pd.DataFrame.from_dict(serialized, orient='index')
-            df = df.sort_values('n_showdowns', ascending=False).dropna()
-            # only use players that went to more than 10_000 showdowns
-            df = df[df['n_showdowns'] > min_n_showdowns]
-            df = df['total_earnings'] / df['n_showdowns']
-            df = df.sort_values(ascending=False).dropna()
-            if len(df) < num_top_players:
-                warnings.warn(f'{num_top_players} top players were '
-                              f'requests, but only {len(df)} players '
-                              f'are in database. Please decrease '
-                              f'`num_top_players` or provide more '
-                              f'hand histories.')
-            d = df[:num_top_players].to_dict()
-            # maintain rank from 1 to n
-            ordered_dict = OrderedDict((k, d.get(k)) for k in df.index[:num_top_players])
-            # flush to disk
-            self.write(ordered_dict, self.dir_top_n_players_dict(num_top_players))
-
-            return ordered_dict
-
-    @staticmethod
-    def write(player_dict, outfile):
-        """Writes player_dict to result.txt file"""
-        with open(outfile, 'w') as f:
-            f.write(json.dumps(player_dict))
 
 
 class RawData:
@@ -185,12 +76,15 @@ class RawData:
 
     def generate(self,
                  from_gdrive_id: Optional[str] = None):
+        # Maybe download + unzip
         if not self.opt.hand_history_has_been_downloaded_and_unzipped():
             assert from_gdrive_id, "Downloading data requires parameter `from_gdrive_id`"
             download_data(from_gdrive_id, self.opt.nl)
+
+        # Maybe extract Top N players hand_histories
         if not self.opt.exists_raw_data_for_all_selected_players():
-            top_players = self.top_player_selector.get_top_n_players(
-                self.opt.num_top_players)
+            top_players = self.top_player_selector.get_top_n_players_min_showdowns(
+                self.opt.num_top_players, self.opt.min_showdowns)
             self.player_dataset_to_disk(list(top_players.keys()))
 
 
@@ -216,8 +110,8 @@ class RawData:
                    "with unzipping.")
 def main(num_top_players, nl, from_gdrive_id):
     parser = ParseHsmithyTextToPokerEpisode(nl=nl)
-    top_player_selector = TopPlayerSelector(parser)
     dataset_options = DatasetOptions(num_top_players, nl)
+    top_player_selector = TopPlayerSelector(parser)
     raw_data = RawData(dataset_options, top_player_selector)
     raw_data.generate(from_gdrive_id)
 
