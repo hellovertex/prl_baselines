@@ -95,9 +95,9 @@ class VectorizedData:
         raise NotImplementedError
 
     def _generate_vectorized_hand_histories(self,
-                                            encoder_cls,
-                                            selected_player_names,
-                                            filename) -> str:
+                                            encoder_cls=None,
+                                            selected_player_names=None,
+                                            filename=None) -> str:
         # the env will be re-initialized with each hand in hand-histories, stacks and
         # blinds will be read from hand-history, so it does not matter what we provide
         # here
