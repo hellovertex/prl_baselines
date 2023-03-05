@@ -23,7 +23,8 @@ class CSVWriter(Writer):
         file_dir = os.path.join(str(DATA_DIR) + "/02_vectorized/", subdir)
         self.num_lines_written += n_samples
         # create new file every 100k lines
-        file_name = self.out_filename_base + '_' + str(int(self.num_lines_written / 100000)) + '.csv'
+        file_name = self.out_filename_base + '_' + str(
+            int(self.num_lines_written / 100000)) + '.csv'
         file_path = os.path.join(file_dir, file_name)
         columns = None
         header = False
@@ -32,11 +33,11 @@ class CSVWriter(Writer):
             columns = feature_names
             header = True
         df = pd.DataFrame(data=data,
-                     index=labels,  # The index (row labels) of the DataFrame.
-                     columns=columns)
+                          index=labels,  # The index (row labels) of the DataFrame.
+                          columns=columns)
         # float to int if applicable
         df = df.apply(lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
-        df.to_csv(file_path+'.bz2',
+        df.to_csv(file_path + '.bz2',
                   index=True,
                   header=header,
                   index_label='label',

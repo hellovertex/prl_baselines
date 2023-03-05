@@ -2,74 +2,30 @@ import glob
 import logging
 import multiprocessing
 import os
+import re
 import time
 from functools import partial
 from pathlib import Path
-from typing import List, Type, Dict, Optional
-import re
+from typing import List, Type, Optional
 
 import click
 import numpy as np
-import pandas as pd
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
 from tqdm import tqdm
 
-from prl.baselines.supervised_learning.v2.datasets.dataset_options import DatasetOptions, \
-    ActionGenOption
-from prl.baselines.supervised_learning.v2.datasets.raw_data import TopPlayerSelector, \
-    RawData
+from prl.baselines.supervised_learning.v2.datasets.dataset_options import (
+    DatasetOptions,
+    ActionGenOption)
+from prl.baselines.supervised_learning.v2.datasets.persistent_storage import \
+    PersistentStorage
+from prl.baselines.supervised_learning.v2.datasets.raw_data import (
+    TopPlayerSelector,
+    RawData)
+from prl.baselines.supervised_learning.v2.datasets.tmp import EncoderV2
 from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import \
     ParseHsmithyTextToPokerEpisode
-from prl.baselines.supervised_learning.v2.datasets.tmp import EncoderV2
 from prl.baselines.supervised_learning.v2.poker_model import PokerEpisodeV2
-
-
-class PersistentStorage:
-    def __init__(self, dataset_options):
-        self.opt = dataset_options
-        self.num_files_written_to_disk = 0
-
-    def flush_data_to_disk(self,
-                           training_data: np.ndarray,
-                           labels: np.ndarray,
-                           feature_names: List[str],
-                           compression='.bz2'  # set to '' if you want to save raw .csv
-                           ):
-        if training_data is not None:
-            columns = None
-            header = False
-            # write to self.opt.dir_vectorized_data
-            file_path = os.path.join(self.opt.dir_vectorized_data,
-                                     f'data_'
-                                     f'{str(self.num_files_written_to_disk).zfill(3)}'
-                                     f'.csv{compression}')
-            if not os.path.exists(Path(file_path).parent):
-                os.makedirs(os.path.realpath(Path(file_path).parent), exist_ok=True)
-            if not os.path.exists(file_path):
-                columns = feature_names
-                header = True
-            df = pd.DataFrame(data=training_data,
-                              index=labels,  # The index (row labels) of the DataFrame.
-                              columns=columns)
-            # float to int if applicable
-            df = df.apply(lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
-
-            # # one hot encode button -- done by CanonicalVectorizer now
-            # one_hot_btn = pd.get_dummies(df['btn_idx'], prefix='btn_idx')
-            # df = pd.concat([df, one_hot_btn], axis=1)
-            # df.drop('btn_idx', axis=1, inplace=True)
-
-            df.to_csv(file_path,
-                      index=True,
-                      header=header,
-                      index_label='label',  # index=False ?
-                      mode='a',
-                      float_format='%.5f',
-                      compression='bz2'
-                      )
-            return "Success"
-        return "Failure"
 
 
 class VectorizedData:
@@ -158,8 +114,8 @@ class VectorizedData:
             training_data, labels = self.encode_episodes(episodesV2,
                                                          encoder,
                                                          selected_players)
-            self.storage.flush_data_to_disk(training_data, labels,
-                                            encoder.feature_names)
+            self.storage.vectorized_data_to_disk(training_data, labels,
+                                                 encoder.feature_names)
             # todo: deprecate new_txt_to_vector_encoder and make tmp.EncoderV2
             #  encoder V2 the new one
         else:
