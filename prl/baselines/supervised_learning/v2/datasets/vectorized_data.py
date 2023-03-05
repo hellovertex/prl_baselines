@@ -159,8 +159,6 @@ class VectorizedData:
         self.storage.vectorized_player_pool_data_to_disk(training_data,
                                                          labels,
                                                          encoder.feature_names)
-        # todo: deprecate new_txt_to_vector_encoder and make tmp.EncoderV2
-        #  encoder V2 the new one
         # else:
         #     logging.info(f"Skipping encoding of hand histories, because they already "
         #                  f"exist at \n{self.opt.dir_vectorized_data}")
@@ -210,26 +208,23 @@ class VectorizedData:
                     selected_player_names=selected_player_names,
                     filename=filename)
 
-    def _make_missing_data(self):
-        # extracts hand histories for Top M players,
-        # where M=self.opt.num_top_players-missing
-        RawData(self.opt, self.top_player_selector).generate()
-
     def generate(self,
                  encoder_cls: Type[EncoderV2] = EncoderV2,
                  use_multiprocessing=False):
 
         if not self.opt.exists_raw_data_for_all_selected_players():
-            self._make_missing_data()
+            # extracts hand histories for Top M players,
+            # where M=self.opt.num_top_players-missing
+            RawData(self.opt, self.top_player_selector).generate()
 
         filenames = glob.glob(f'{self.opt.dir_raw_data_top_players}/**/*.txt',
                               recursive=True)
 
         selected_players = self.top_player_selector.get_top_n_players_min_showdowns(
             self.opt.num_top_players, self.opt.min_showdowns)
+
         logging.info(f"Encoding and vectorizing hand histories to .csv files for top "
                      f"{len(selected_players)} players. ")
-
         if self.opt.make_dataset_for_each_individual:
             return self._generate_per_selected_player(
                 selected_player_names=list(selected_players.keys()),
@@ -261,7 +256,7 @@ class VectorizedData:
                    "training data. Defaults to False.")
 @click.option("--action_generation_option",
               # default=ActionGenOption.make_folds_from_top_players_with_randomized_hand.value,
-              default=ActionGenOption.no_folds_top_player_all_showdowns.value,
+              default=ActionGenOption.make_folds_from_top_players_with_randomized_hand.value,
               type=int,
               help="Possible Values are \n"
                    "0: no_folds_top_player_all_showdowns\n"
