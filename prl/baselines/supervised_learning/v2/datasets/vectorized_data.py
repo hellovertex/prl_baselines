@@ -134,36 +134,37 @@ class VectorizedData:
         # todo: implement
         raise NotImplementedError
 
-    # def _generate_vectorized_hand_histories(self,
-    #                                         filename,
-    #                                         encoder_cls,
-    #                                         selected_player_names) -> str:
-    #     # the env will be re-initialized with each hand in hand-histories, stacks and
-    #     # blinds will be read from hand-history, so it does not matter what we provide
-    #     # here
-    #     dummy_env = init_wrapped_env(AugmentObservationWrapper,
-    #                                  [5000 for _ in range(6)],
-    #                                  blinds=(25, 50),
-    #                                  multiply_by=1)
-    #     encoder = encoder_cls(dummy_env)
-    #     # single files, pretty large
-    #     if not os.path.exists(self.opt.dir_vectorized_data):
-    #         # filename to playername to one selected_players
-    #         selected_players = alias_player_rank_to_ingame_name(
-    #             selected_player_names, filename)
-    #         episodesV2 = self.parser.parse_file(filename)
-    #         training_data, labels = encode_episodes(self.opt,
-    #                                                 episodesV2,
-    #                                                 encoder,
-    #                                                 selected_players)
-    #         self.storage.vectorized_data_to_disk(training_data, labels,
-    #                                              encoder.feature_names)
-    #         # todo: deprecate new_txt_to_vector_encoder and make tmp.EncoderV2
-    #         #  encoder V2 the new one
-    #     else:
-    #         logging.info(f"Skipping encoding of hand histories, because they already "
-    #                      f"exist at \n{self.opt.dir_vectorized_data}")
-    #     return f"Success: encoded {filename}..."
+    def _generate_vectorized_hand_histories(self,
+                                            filename,
+                                            encoder_cls,
+                                            selected_player_names) -> str:
+        # the env will be re-initialized with each hand in hand-histories, stacks and
+        # blinds will be read from hand-history, so it does not matter what we provide
+        # here
+        dummy_env = init_wrapped_env(AugmentObservationWrapper,
+                                     [5000 for _ in range(6)],
+                                     blinds=(25, 50),
+                                     multiply_by=1)
+        encoder = encoder_cls(dummy_env)
+        # single files, pretty large
+        #if not os.path.exists(self.opt.dir_vectorized_data):
+        # filename to playername to one selected_players
+        selected_players = alias_player_rank_to_ingame_name(
+            selected_player_names, filename)
+        episodesV2 = self.parser.parse_file(filename)
+        training_data, labels = encode_episodes(self.opt,
+                                                episodesV2,
+                                                encoder,
+                                                selected_players)
+        self.storage.vectorized_player_pool_data_to_disk(training_data,
+                                                         labels,
+                                                         encoder.feature_names)
+        # todo: deprecate new_txt_to_vector_encoder and make tmp.EncoderV2
+        #  encoder V2 the new one
+        # else:
+        #     logging.info(f"Skipping encoding of hand histories, because they already "
+        #                  f"exist at \n{self.opt.dir_vectorized_data}")
+        return f"Success: encoded {filename}..."
 
     def _generate_player_pool_data(self,
                                    selected_player_names: List[str],
@@ -201,13 +202,13 @@ class VectorizedData:
             logging.info(f'*** Finished job after {time.time() - start} seconds. ***')
             p.close()
         else:
-            raise NotImplementedError
-            # logging.info('Starting handhistory encoding without multiprocessing...')
-            # for filename in files:
-            #     self._generate_vectorized_hand_histories(
-            #         encoder_cls=encoder_cls,
-            #         selected_player_names=selected_player_names,
-            #         filename=filename)
+            # raise NotImplementedError
+            logging.info('Starting handhistory encoding without multiprocessing...')
+            for filename in files:
+                self._generate_vectorized_hand_histories(
+                    encoder_cls=encoder_cls,
+                    selected_player_names=selected_player_names,
+                    filename=filename)
 
     def _make_missing_data(self):
         # extracts hand histories for Top M players,
@@ -259,7 +260,8 @@ class VectorizedData:
               help="If True, creates a designated directory per player for "
                    "training data. Defaults to False.")
 @click.option("--action_generation_option",
-              default=2,
+              # default=ActionGenOption.make_folds_from_top_players_with_randomized_hand.value,
+              default=ActionGenOption.no_folds_top_player_all_showdowns.value,
               type=int,
               help="Possible Values are \n"
                    "0: no_folds_top_player_all_showdowns\n"

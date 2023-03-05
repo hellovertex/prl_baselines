@@ -178,7 +178,10 @@ class EncoderV2:
                     fold_players = [p.name for p in players if
                                     p in episode.showdown_players and
                                     p.name not in selected_players]
-
+        if fold_players == target_players == remaining_selected_players == []:
+            # case that selected player folded but we dont want folds in dataset
+            assert not self.fold_random_cards
+            return [], []
         while not done:
             try:
                 action = action_list[it]
@@ -190,20 +193,25 @@ class EncoderV2:
             next_to_act = action.who
             for player in players:
                 if player.name == next_to_act:
-                    if player.name in target_players or player.name in remaining_selected_players:
-                        observations.append(obs)
-                        actions.append(action_label)
+                    if player.name in remaining_selected_players:
                         if action_label == ActionSpace.FOLD:
                             assert player.name in remaining_selected_players
                             assert player.name not in target_players
+                            observations.append(obs)
+                            actions.append(action_label)
                             remaining_selected_players.remove(player.name)
+                    if player.name in target_players:
+                        observations.append(obs)
+                        actions.append(action_label)
+
                     elif player.name in fold_players:
                         observations.append(obs)
                         actions.append(ActionSpace.FOLD.value)
 
             debug_action_list.append(action_formatted)
             if not remaining_selected_players:
-                return observations, actions
+                if self.fold_random_cards:
+                    return observations, actions
             obs, _, done, _ = self.env.step(action_formatted)
             it += 1
 
@@ -316,7 +324,7 @@ class EncoderV2:
         if a_opt == ActionGenOption.no_folds_top_player_all_showdowns:
             only_winners = False
             drop_folds = True
-        elif a_opt == ActionGenOption.no_folds_top_player_all_showdowns:
+        elif a_opt == ActionGenOption.no_folds_top_player_only_wins:
             only_winners = drop_folds = True
         elif a_opt == ActionGenOption.make_folds_from_top_players_with_randomized_hand:
             fold_random_cards = True
@@ -347,15 +355,12 @@ class EncoderV2:
         self.fold_random_cards = fold_random_cards
         self._currency_symbol = episode.currency_symbol
         self.only_winners = only_winners
-        if drop_folds:
-            skip_hand = True
-            target_players = episode.winners if only_winners else episode.showdown_players
-            for p in target_players:
-                if p.name in selected_players:
-                    if p.cards:
-                        skip_hand = False
-            if skip_hand:
-                return None, None
+        skip_hand = True
+        for pname in list(episode.players.keys()):
+            if pname in selected_players:
+                skip_hand = False
+        if skip_hand:
+            return None, None
         try:
             players = self.get_players_starting_with_button(episode)
         except AssertionError as e:
