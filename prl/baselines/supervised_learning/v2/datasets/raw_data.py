@@ -101,7 +101,7 @@ class RawData:
               help="Which stakes the hand history belongs to."
                    "Determines the data directory.")
 @click.option("--from_gdrive_id",
-              default="18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO",
+              default="18kkgEM2CYF_Tl4Dn8oro6tUgqDfr9IAN",
               type=str,
               help="Google drive id of a .zip file containing hand histories. "
                    "For small example, use 18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO"

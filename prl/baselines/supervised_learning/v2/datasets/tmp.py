@@ -356,8 +356,11 @@ class EncoderV2:
                         skip_hand = False
             if skip_hand:
                 return None, None
-
-        players = self.get_players_starting_with_button(episode)
+        try:
+            players = self.get_players_starting_with_button(episode)
+        except AssertionError as e:
+            print(e)
+            return None, None
         if limit_num_players:
             if len(players) < limit_num_players:
                 return None, None
