@@ -1,15 +1,19 @@
 import glob
 import logging
 import os
+from pathlib import Path
 from typing import Type, Union
 
 import click
 import numpy as np
 import pandas as pd
+from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.base import ActionSpace, ActionSpaceMinimal
+from prl.environment.Wrappers.utils import init_wrapped_env
 
 from prl.baselines.supervised_learning.v2.datasets.dataset_options import DatasetOptions, ActionGenOption, Stage
 from prl.baselines.supervised_learning.v2.datasets.top_player_selector import TopPlayerSelector
+from prl.baselines.supervised_learning.v2.datasets.utils import parse_cmd_action_to_action_cls
 from prl.baselines.supervised_learning.v2.datasets.vectorized_data import VectorizedData
 from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import ParseHsmithyTextToPokerEpisode
 
@@ -19,6 +23,11 @@ class PreprocessedData:
     def __init__(self,
                  dataset_options: DatasetOptions):
         self.opt = dataset_options
+        dummy_env = init_wrapped_env(AugmentObservationWrapper,
+                                     [5000 for _ in range(6)],
+                                     blinds=(25, 50),
+                                     multiply_by=1)
+        self.env = dummy_env
 
     def maybe_encode_missing_data(self):
         parser_cls = ParseHsmithyTextToPokerEpisode
@@ -33,47 +42,57 @@ class PreprocessedData:
             logging.info(f'Preprocessed data already exists at directory '
                          f'{self.opt.dir_preprocessed_data} '
                          f'for given configuration: {self.opt}')
-        else:
-            self.maybe_encode_missing_data()
-            # return
-            # load .csv files into dataframe
-            csv_files = glob.glob(self.opt.dir_vectorized_data + '/**/*.csv.bz2',
-                                  recursive=True)
-            for file in csv_files:
-                df = pd.read_csv(file,
-                                 sep=',',
-                                 dtype='float32',
-                                 encoding='cp1252',
-                                 compression='bz2')
-                # float to int if applicable
-                df = df.apply(
-                    lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
-                # int64 to int8 to save memory
-                df = df.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
-                # todo: check why only preflop actions for
-                #  data/02_vectorized/NL50/player_pool/no_folds_top_player_all_showdowns/Top20Players_n_showdowns=5000
-                # maybe remove unused round
-                # maybe reduce action space
-                # write to disk
+        # else:
+        self.maybe_encode_missing_data()
+        # return
+        # load .csv files into dataframe
+        csv_files = glob.glob(self.opt.dir_vectorized_data + '/**/*.csv.bz2',
+                              recursive=True)
+        feature_names = list(self.env.obs_idx_dict.keys())
+        for file in csv_files:
+            df = pd.read_csv(file,
+                             sep=',',
+                             dtype='float32',
+                             encoding='cp1252',
+                             compression='bz2')
+            # float to int if applicable
+            df = df.apply(
+                lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
+            # int64 to int8 to save memory
+            df = df.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
+            # todo: check why only preflop actions for
+            #  data/02_vectorized/NL50/player_pool/no_folds_top_player_all_showdowns/Top20Players_n_showdowns=5000
+            # maybe remove unused round
+            for stage in list(Stage):
+                if stage not in self.opt.target_rounds:
+                    name = 'round_' + stage.name.casefold()
+                    # todo: check if this actually removes the desired rows, consider adding axis=1?
+                    df.drop(df[df[name] == 1], inplace=True)
 
+            # maybe reduce action space
+            if self.opt.action_space is ActionSpaceMinimal:
+                assert df['label'].max < 3
+            elif self.opt.action_space is ActionSpace:
+                assert df['label'].min == min(ActionSpace).value
+                assert df['label'].max == max(ActionSpace).value
+            elif isinstance(self.opt.action_space, ActionSpaceMinimal):
+                # todo: remove all labels that are greater than 2
+                pass
+            # write to disk
+            filepath = os.path.join(self.opt.dir_preprocessed_data, Path(file).name + '.bz2')
+            header = False
+            if not os.path.exists(filepath):
+                os.makedirs(os.path.realpath(Path(filepath).parent), exist_ok=True)
+                df.columns = feature_names
+                header = True
+            df.to_csv(filepath,
+                      index=True,
+                      header=header,
+                      index_label='label',
+                      mode='a',
+                      float_format='%.5f',
+                      compression='bz2')
 
-def parse_cmd_action_to_action_cls(action: str) -> Union[
-    ActionSpaceMinimal,  # Allow dichotomizers only for FOLD,CHECK,RAISE (Single bet size)
-    Type[ActionSpaceMinimal],
-    Type[ActionSpace]
-]:
-    if action == 'ActionSpace':
-        return ActionSpace
-    elif action == 'ActionSpaceMinimal':
-        return ActionSpaceMinimal
-    elif action.casefold().strip() == 'fold':
-        return ActionSpaceMinimal.FOLD
-    elif 'check' in action.casefold().strip():
-        return ActionSpaceMinimal.CHECK_CALL
-    elif action.casefold().strip() == 'raise':
-        return ActionSpaceMinimal.RAISE
-    else:
-        raise NotImplementedError
 
 
 @click.command()
@@ -140,9 +159,6 @@ def main(num_top_players,
     )
     preprocessed_data = PreprocessedData(opt)
     preprocessed_data.generate()
-    # top_player_selector = TopPlayerSelector(parser)
-    # raw_data = RawData(dataset_options, top_player_selector)
-    # raw_data.generate(from_gdrive_id)
 
 
 if __name__ == '__main__':

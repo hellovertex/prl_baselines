@@ -423,5 +423,8 @@ class EncoderV2:
         except AssertionError as e:
             print(e)
             return None, None
+        except Exception as e:
+            print(e)
+            return None, None
 # in: .txt files
 # out: .csv files? maybe npz or easier-on-memory formats preferred?
