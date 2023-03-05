@@ -1,11 +1,21 @@
 import enum
 import os
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Union, Type
 
-from prl.environment.Wrappers.base import ActionSpaceMinimal as Action
+from prl.environment.Wrappers.base import ActionSpaceMinimal, ActionSpace
 
 from prl.baselines import DATA_DIR
+
+# Preprocessed data can contain
+# - Individual Action (when training dichotomizers)
+# - Action Space with single bet size (ActionSpaceMinimal)
+# - Action Space with multiple bet sizes (ActionSpace)
+Action = Union[
+    ActionSpaceMinimal,  # Allow dichotomizers only for FOLD,CHECK,RAISE (Single bet size)
+    Type[ActionSpaceMinimal],
+    Type[ActionSpace]
+]
 
 
 class Stage(enum.IntEnum):
@@ -178,15 +188,40 @@ class DatasetOptions:
             '')
         # when `make_dataset_for_each_individual` is set, the individual folders
         # must be created during encoding, since we dont know the ranks a priori here
-        subdir_03_top_n_players = f'Top{self.num_top_players}Players' if not \
+        subdir_03_top_n_players = f'Top{self.num_top_players}Players_' \
+                                  f'n_showdowns={self.min_showdowns}' if not \
             self.make_dataset_for_each_individual else ''
+        subdir_04_rounds = self._target_rounds_to_str()
+        subdir_05_actions = self._actions_to_str()
         return os.path.join(*[
             preprocessed_dir,
             subdir_00_nl,
             subdir_01_player_or_pool,
             subdir_02_fold_or_no_fold,
-            subdir_03_top_n_players
+            subdir_03_top_n_players,
+            subdir_04_rounds,
+            subdir_05_actions
         ])
+
+    def _target_rounds_to_str(self):
+        result = 'target_rounds='
+        for stage in self.target_rounds:
+            result += stage.name[0]  # use first letter for shorthand notation
+        return result
+
+    def _actions_to_str(self):
+        result = 'actions='
+        for action in self.action_space:
+            if action is ActionSpaceMinimal:
+                return result + 'ActionSpaceMinimal'
+            elif action is ActionSpace:
+                return result + 'ActionSpace'
+            else:
+                assert isinstance(action,
+                                  ActionSpaceMinimal), \
+                    "Allow dichotomizers only for FOLD,CHECK,RAISE (Single bet size)"
+                result += action.name
+        return result
 
     def hand_history_has_been_downloaded_and_unzipped(self):
         dir_data_unzipped = os.path.join(DATA_DIR, *['01_raw', self.nl, 'all_players'])
@@ -203,5 +238,3 @@ class DatasetOptions:
                     return False
             return True
         return False
-
-

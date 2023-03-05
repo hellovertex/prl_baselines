@@ -33,13 +33,6 @@ def make_dataset_from_scratch(dataset_options: DatasetOptions,
                          min_showdowns=5)
 
     # Preprocess data -- Use Specified Actions + Specified Rounds
-    class Preprocessor:
-        @staticmethod
-        def run(dataset_options: DatasetOptions):
-            pass
-
-    preprocessor = Preprocessor()
-    preprocessor.run(dataset_options)
 
     # todo: c.f. refactor into run_train_loop(model, optim, writer, train_options)
     return True
