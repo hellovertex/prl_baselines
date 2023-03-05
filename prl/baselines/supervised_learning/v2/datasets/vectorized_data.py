@@ -142,7 +142,6 @@ class VectorizedData:
                 logging.info(x + f'. Took {time.time() - start} seconds\n')
             logging.info(f'*** Finished job after {time.time() - start} seconds. ***')
             p.close()
-
         else:
             logging.info('Starting handhistory encoding without multiprocessing...')
             for filename in files:
