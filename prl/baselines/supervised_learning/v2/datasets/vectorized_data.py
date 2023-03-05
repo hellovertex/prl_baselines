@@ -95,16 +95,17 @@ class VectorizedData:
         raise NotImplementedError
 
     def _generate_vectorized_hand_histories(self,
-                                            env,
                                             encoder_cls,
                                             selected_player_names,
                                             filename) -> str:
-        if env is None:
-            env = init_wrapped_env(AugmentObservationWrapper,
-                                   [5000 for _ in range(6)],
-                                   blinds=(25, 50),
-                                   multiply_by=1)
-        encoder = encoder_cls(env)
+        # the env will be re-initialized with each hand in hand-histories, stacks and
+        # blinds will be read from hand-history, so it does not matter what we provide
+        # here
+        dummy_env = init_wrapped_env(AugmentObservationWrapper,
+                                     [5000 for _ in range(6)],
+                                     blinds=(25, 50),
+                                     multiply_by=1)
+        encoder = encoder_cls(dummy_env)
         # single files, pretty large
         if not os.path.exists(self.opt.dir_vectorized_data):
             # filename to playername to one selected_players
@@ -127,12 +128,10 @@ class VectorizedData:
                                    selected_player_names: List[str],
                                    files: List[str],
                                    encoder_cls: Type[EncoderV2],
-                                   env: Optional[AugmentObservationWrapper] = None,
                                    use_multiprocessing: bool = False):
         if use_multiprocessing:
             logging.info('Starting handhistory encoding using multiprocessing...')
             gen_fn = partial(self._generate_vectorized_hand_histories,
-                             env=env,
                              encoder_cls=encoder_cls,
                              selected_player_names=selected_player_names)
             assert len(files) < 101, f'Dont use multiprocessing for more than Top 100 ' \
@@ -148,7 +147,6 @@ class VectorizedData:
             logging.info('Starting handhistory encoding without multiprocessing...')
             for filename in files:
                 self._generate_vectorized_hand_histories(
-                    env=env,
                     encoder_cls=encoder_cls,
                     selected_player_names=selected_player_names,
                     filename=filename)
@@ -159,7 +157,6 @@ class VectorizedData:
         RawData(self.opt, self.top_player_selector).generate()
 
     def generate(self,
-                 env=None,
                  encoder_cls: Type[EncoderV2] = EncoderV2,
                  use_multiprocessing=False):
 
@@ -179,14 +176,12 @@ class VectorizedData:
                 selected_player_names=list(selected_players.keys()),
                 files=filenames,
                 encoder_cls=encoder_cls,
-                env=env,
                 use_multiprocessing=use_multiprocessing)
         else:
             return self._generate_player_pool_data(
                 selected_player_names=list(selected_players.keys()),
                 files=filenames,
                 encoder_cls=encoder_cls,
-                env=env,
                 use_multiprocessing=use_multiprocessing)
 
 
