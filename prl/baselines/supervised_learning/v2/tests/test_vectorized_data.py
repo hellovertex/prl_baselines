@@ -72,7 +72,7 @@ def test_vectorized_episode(dataset_config: DatasetConfig,
                                           verbose=True)
             # assert cards remain correct after encoding
             cards = get_player_cards(obs[0])[0]
-            assert cards == '[As Ah]'
+            assert cards == '[As, Ah]'
             assert cards == get_player_cards(obs[1])[0]
             assert cards == get_player_cards(obs[2])[0]
             # assert actions remain correct after encoding
