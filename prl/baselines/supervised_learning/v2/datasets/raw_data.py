@@ -23,25 +23,6 @@ from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
 )
 
 
-def download_data(from_gdrive_id, nl: str) -> bool:
-    logging.info(f'No hand histories found in data/01_raw/all_players. '
-                 f'Downloading using gdrive_id {from_gdrive_id}')
-
-    path_to_zipfile = os.path.join(DATA_DIR, *['00_tmp', 'bulk_hands.zip'])
-    # 1. download .zip file from gdrive to disk
-    gdown.download(id=from_gdrive_id,
-                   # must end with .zip
-                   output=path_to_zipfile,
-                   quiet=False)
-    # 2. unzip recursively to DATA_DIR
-    zipfiles = glob.glob(path_to_zipfile, recursive=False)
-    unzipped_dir = os.path.join(DATA_DIR, *['01_raw', nl, 'all_players'])
-    [extract(zipfile, out_dir=unzipped_dir) for zipfile in zipfiles]
-
-    logging.info(f'Unzipped hand histories to {unzipped_dir}')
-    return True
-
-
 class RawData:
     def __init__(self,
                  dataset_options: DatasetConfig,
@@ -60,6 +41,25 @@ class RawData:
                     os.makedirs(file_path_out)
                 with open(file, 'a+', encoding='utf-8') as f:
                     f.write(result)
+
+    def download_data(self) -> bool:
+        logging.info(f'No hand histories found in data/01_raw/all_players. '
+                     f'Downloading using gdrive_id {self.opt.from_gdrive_id}')
+
+        path_to_zipfile = os.path.join(self.opt.DATA_DIR, *['00_tmp', 'bulk_hands.zip'])
+        # 1. download .zip file from gdrive to disk
+        gdown.download(id=self.opt.from_gdrive_id,
+                       # must end with .zip
+                       output=path_to_zipfile,
+                       quiet=False)
+        # 2. unzip recursively to DATA_DIR
+        zipfiles = glob.glob(path_to_zipfile, recursive=False)
+        unzipped_dir = os.path.join(self.opt.DATA_DIR, *['01_raw', self.opt.nl,
+                                                         'all_players'])
+        [extract(zipfile, out_dir=unzipped_dir) for zipfile in zipfiles]
+
+        logging.info(f'Unzipped hand histories to {unzipped_dir}')
+        return True
 
     def player_dataset_to_disk(self, target_players):
         for rank, player_name in enumerate(target_players):
@@ -83,7 +83,7 @@ class RawData:
         # Maybe download + unzip
         if not self.opt.hand_history_has_been_downloaded_and_unzipped():
             assert self.opt.from_gdrive_id, "Downloading data requires parameter `from_gdrive_id`"
-            download_data(self.opt.from_gdrive_id, self.opt.nl)
+            self.download_data()
 
         # Maybe extract Top N players hand_histories
         if not self.opt.exists_raw_data_for_all_selected_players():
