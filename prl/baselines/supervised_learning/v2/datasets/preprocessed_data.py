@@ -33,8 +33,10 @@ from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
 class PreprocessedData:
 
     def __init__(self,
-                 dataset_options: DatasetConfig):
+                 dataset_options: DatasetConfig,
+                 parser_cls=ParseHsmithyTextToPokerEpisode):
         self.opt = dataset_options
+        self.parser_cls = parser_cls
         dummy_env = init_wrapped_env(AugmentObservationWrapper,
                                      [5000 for _ in range(6)],
                                      blinds=(25, 50),
@@ -42,12 +44,12 @@ class PreprocessedData:
         self.env = dummy_env
 
     def maybe_encode_missing_data(self):
-        parser_cls = ParseHsmithyTextToPokerEpisode
-        selector = TopPlayerSelector(parser=parser_cls(self.opt.nl))
+
+        selector = TopPlayerSelector(parser=self.parser_cls(self.opt))
         vectorized_data = VectorizedData(dataset_options=self.opt,
-                                         parser_cls=parser_cls,
+                                         parser_cls=self.parser_cls,
                                          top_player_selector=selector)
-        vectorized_data.generate(use_multiprocessing=False)
+        vectorized_data.generate_missing(use_multiprocessing=False)
 
     def generate(self):
         if os.path.exists(self.opt.dir_preprocessed_data):
