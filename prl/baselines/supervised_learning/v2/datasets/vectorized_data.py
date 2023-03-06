@@ -112,8 +112,7 @@ def generate_vectorized_hand_histories(files,
                                  blinds=(25, 50),
                                  multiply_by=1)
     encoder = encoder_cls(dummy_env)
-    parser = parser_cls(
-        nl=dataset_options.nl)  # todo replace `nl` with dataset_options param
+    parser = parser_cls(dataset_options=dataset_options)
     storage = storage_cls(dataset_options)
     for filename in files[:-1]:
         selected_players = alias_player_rank_to_ingame_name(selected_player_names,
