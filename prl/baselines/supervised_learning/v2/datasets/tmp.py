@@ -15,7 +15,7 @@ from prl.baselines.supervised_learning.data_acquisition.core.encoder import Posi
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind
 from prl.baselines.supervised_learning.data_acquisition.environment_utils import \
     card_tokens, card, make_board_cards
-from prl.baselines.supervised_learning.v2.datasets.dataset_options import ActionGenOption
+from prl.baselines.supervised_learning.v2.datasets.dataset_config import ActionGenOption
 from prl.baselines.supervised_learning.v2.poker_model import PokerEpisodeV2, Player, \
     Action
 

@@ -4,8 +4,8 @@ from prl.environment.Wrappers.base import ActionSpaceMinimal as Action
 from prl.environment.steinberger.PokerRL import Poker
 
 from prl.baselines.supervised_learning.v2.datasets import raw_data, vectorized_data
-from prl.baselines.supervised_learning.v2.datasets.dataset_options import \
-    DatasetOptions, DataImbalanceCorrection, ActionGenOption
+from prl.baselines.supervised_learning.v2.datasets.dataset_config import \
+    DatasetConfig, DataImbalanceCorrection, ActionGenOption
 from prl.baselines.supervised_learning.v2.datasets.raw_data import RawData
 
 
@@ -14,7 +14,7 @@ class TrainingOptions:
     pass
 
 
-def make_dataset_from_scratch(dataset_options: DatasetOptions,
+def make_dataset_from_scratch(dataset_options: DatasetConfig,
                               from_gdrive_id="18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO",
                               use_multiprocessing=False) -> bool:
     opt = dataset_options
@@ -39,7 +39,7 @@ def make_dataset_from_scratch(dataset_options: DatasetOptions,
 
 
 if __name__ == '__main__':
-    dataset_options = DatasetOptions(
+    dataset_options = DatasetConfig(
         # -- raw
         num_top_players=17,
         # -- vectorized

@@ -8,7 +8,7 @@ Model/
 --
 
 Data/
--- DatasetOptions
+-- DatasetConfig
 -- Dataset (InMemory)
 -- Preprocessor
 

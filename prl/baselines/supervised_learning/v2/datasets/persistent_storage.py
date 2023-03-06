@@ -5,12 +5,12 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from prl.baselines.supervised_learning.v2.datasets.dataset_options import DatasetOptions
+from prl.baselines.supervised_learning.v2.datasets.dataset_config import DatasetConfig
 
 
 class PersistentStorage:
     def __init__(self,
-                 dataset_options: DatasetOptions):
+                 dataset_options: DatasetConfig):
         self.opt = dataset_options
         self.num_files_written_to_disk = 0
 

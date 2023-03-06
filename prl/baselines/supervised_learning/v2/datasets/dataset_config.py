@@ -3,6 +3,7 @@ import os
 from dataclasses import dataclass
 from typing import List, Optional, Union, Type
 
+import click
 from prl.environment.Wrappers.base import ActionSpaceMinimal, ActionSpace
 
 from prl.baselines import DATA_DIR
@@ -90,7 +91,7 @@ class ActionGenOption(enum.IntEnum):
 
 
 @dataclass
-class DatasetOptions:
+class DatasetConfig:
     """Single Source of Truth for all data related metadata"""
 
     # data/01_raw -- .txt files
@@ -114,7 +115,7 @@ class DatasetOptions:
     action_space: Optional[List[Action]] = None
 
     # 99 in memory training data
-    sub_sampling_techniques: Optional[DataImbalanceCorrection] = None  # dont allow
+    sub_sampling_technique: Optional[DataImbalanceCorrection] = None  # dont allow
     # multiple
     # options
     # meta
@@ -238,3 +239,68 @@ class DatasetOptions:
                     return False
             return True
         return False
+
+
+arg_num_top_players = click.option("--num_top_players", default=20,
+                               type=int,
+                               help="How many top players hand histories should be used to generate the "
+                                    "data.")
+arg_nl = click.option("--nl",
+                  default='NL50',
+                  type=str,
+                  help="Which stakes the hand history belongs to."
+                       "Determines the data directory.")
+
+arg_make_dataset_for_each_individual = click.option("--make_dataset_for_each_individual",
+                                                default=False,
+                                                type=bool,
+                                                help="If True, creates a designated directory per player for "
+                                                     "training data. Defaults to False.")
+arg_from_gdrive_id = click.option("--from_gdrive_id",
+                              default="18kkgEM2CYF_Tl4Dn8oro6tUgqDfr9IAN",
+                              type=str,
+                              help="Google drive id of a .zip file containing hand histories. "
+                                   "For small example, use 18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO"
+                                   "For complete database (VERY LARGE), use "
+                                   "18kkgEM2CYF_Tl4Dn8oro6tUgqDfr9IAN"
+                                   "The id can be obtained from the google drive download-link url."
+                                   "The runner will try to download the data from gdrive and proceed "
+                                   "with unzipping.")
+arg_action_generation_option = click.option("--action_generation_option",
+                                        # default=ActionGenOption.make_folds_from_top_players_with_randomized_hand.value,
+                                        default=ActionGenOption.make_folds_from_top_players_with_randomized_hand.value,
+                                        type=int,
+                                        help="Possible Values are \n"
+                                             "0: no_folds_top_player_all_showdowns\n"
+                                             "1: no_folds_top_player_only_wins\n"
+                                             "2: make_folds_from_top_players_with_randomized_hand\n"
+                                             "3: make_folds_from_showdown_loser_ignoring_rank\n"
+                                             "4: make_folds_from_fish\n"
+                                             "See `ActionGenOption`. ")
+arg_use_multiprocessing = click.option("--use_multiprocessing",
+                                   default=True,
+                                   type=bool,
+                                   help="Whether to parallelize encoding of files per TopRanked Player. "
+                                        "Defaults to True. If turned off, data generation can be VERY slow (days).")
+arg_min_showdowns = click.option("--min_showdowns",
+                             default=5000,
+                             type=int,
+                             help="Minimum number of showdowns required to be eligible for top player "
+                                  "ranking. Default is 5 for debugging. 5000 is recommended for real "
+                                  "data.")
+arg_target_rounds = click.option("--target_rounds",
+                             multiple=True,
+                             default=[  # Stage.PREFLOP.value,
+                                 Stage.FLOP.value,
+                                 Stage.TURN.value,
+                                 Stage.RIVER.value],
+                             type=int,
+                             help="Preprocessing will reduce data to the rounds specified. Possible values: "
+                                  "Stage.PREFLOP.value: 0\nStage.FLOP.value: 1\nStage.TURN.value: 2\nStage.RIVER.value: 3\n"
+                                  "Defaults to [FLOP,TURN,RIVER] rounds.")
+arg_action_space = click.option("--action_space",
+                            default="ActionSpaceMinimal",
+                            type=str,
+                            help="Possible values are ActionSpace, ActionSpaceMinimal, FOLD, CHECK_CALL, RAISE")
+# todo
+arg_sub_sampling_technique = click.option()

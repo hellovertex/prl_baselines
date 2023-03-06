@@ -15,18 +15,28 @@ from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
 from tqdm import tqdm
 
-from prl.baselines.supervised_learning.v2.datasets.dataset_options import (
-    DatasetOptions,
+from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
+    DatasetConfig,
     ActionGenOption)
 from prl.baselines.supervised_learning.v2.datasets.persistent_storage import \
     PersistentStorage
 from prl.baselines.supervised_learning.v2.datasets.raw_data import (
     TopPlayerSelector,
-    RawData)
+    RawData, make_raw_data)
 from prl.baselines.supervised_learning.v2.datasets.tmp import EncoderV2
 from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import \
     ParseHsmithyTextToPokerEpisode
 from prl.baselines.supervised_learning.v2.poker_model import PokerEpisodeV2
+
+from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
+    arg_num_top_players,
+    arg_nl,
+    arg_from_gdrive_id,
+    arg_make_dataset_for_each_individual,
+    arg_action_generation_option,
+    arg_use_multiprocessing,
+    arg_min_showdowns
+)
 
 
 def alias_player_rank_to_ingame_name(selected_player_names,
@@ -75,7 +85,7 @@ def encode_episodes(dataset_options,
 
 
 def generate_vectorized_hand_histories(files,
-                                       dataset_options: DatasetOptions,
+                                       dataset_options: DatasetConfig,
                                        parser_cls,
                                        encoder_cls,
                                        selected_player_names,
@@ -114,7 +124,7 @@ def generate_vectorized_hand_histories(files,
 
 class VectorizedData:
     def __init__(self,
-                 dataset_options: DatasetOptions,
+                 dataset_options: DatasetConfig,
                  parser_cls: Type[ParseHsmithyTextToPokerEpisode],
                  top_player_selector: TopPlayerSelector,
                  storage: Optional[PersistentStorage] = None):
@@ -147,7 +157,7 @@ class VectorizedData:
                                      multiply_by=1)
         encoder = encoder_cls(dummy_env)
         # single files, pretty large
-        #if not os.path.exists(self.opt.dir_vectorized_data):
+        # if not os.path.exists(self.opt.dir_vectorized_data):
         # filename to playername to one selected_players
         selected_players = alias_player_rank_to_ingame_name(
             selected_player_names, filename)
@@ -239,51 +249,23 @@ class VectorizedData:
                 use_multiprocessing=use_multiprocessing)
 
 
-@click.command()
-@click.option("--num_top_players", default=20,
-              type=int,
-              help="How many top players hand histories should be used to generate the "
-                   "data.")
-@click.option("--nl",
-              default='NL50',
-              type=str,
-              help="Which stakes the hand history belongs to."
-                   "Determines the data directory.")
-@click.option("--make_dataset_for_each_individual",
-              default=False,
-              type=bool,
-              help="If True, creates a designated directory per player for "
-                   "training data. Defaults to False.")
-@click.option("--action_generation_option",
-              # default=ActionGenOption.make_folds_from_top_players_with_randomized_hand.value,
-              default=ActionGenOption.make_folds_from_top_players_with_randomized_hand.value,
-              type=int,
-              help="Possible Values are \n"
-                   "0: no_folds_top_player_all_showdowns\n"
-                   "1: no_folds_top_player_only_wins\n"
-                   "2: make_folds_from_top_players_with_randomized_hand\n"
-                   "3: make_folds_from_showdown_loser_ignoring_rank\n"
-                   "4: make_folds_from_fish\n"
-                   "See `ActionGenOption`. ")
-@click.option("--use_multiprocessing",
-              default=True,
-              type=bool,
-              help="Whether to parallelize encoding of files per TopRanked Player. "
-                   "Defaults to false.")
-@click.option("--min_showdowns",
-              default=5000,
-              type=int,
-              help="Minimum number of showdowns required to be eligible for top player "
-                   "ranking. Default is 5 for debugging. 5000 is recommended for real "
-                   "data.")
-def main(num_top_players,
-         nl,
-         make_dataset_for_each_individual,
-         action_generation_option,
-         use_multiprocessing,
-         min_showdowns):
+@click.command()  # 'make_vectorized_data'
+@arg_num_top_players
+@arg_nl
+@arg_from_gdrive_id
+@arg_make_dataset_for_each_individual
+@arg_action_generation_option
+@arg_use_multiprocessing
+@arg_min_showdowns
+def make_vectorized_data(num_top_players,  # see click command main_raw_data
+                         nl,  # see click command main_raw_data
+                         from_gdrive_id,  # see click command main_raw_data
+                         make_dataset_for_each_individual,
+                         action_generation_option,
+                         use_multiprocessing,
+                         min_showdowns):
     # Assumes raw_data.py has been ran to download and extract hand histories.
-    opt = DatasetOptions(
+    opt = DatasetConfig(
         num_top_players=num_top_players,
         nl=nl,
         make_dataset_for_each_individual=make_dataset_for_each_individual,
@@ -300,4 +282,4 @@ def main(num_top_players,
 
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
-    main()
+    make_vectorized_data()

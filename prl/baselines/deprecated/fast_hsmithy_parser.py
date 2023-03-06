@@ -34,7 +34,7 @@ from prl.baselines.supervised_learning.v2.poker_model import Player, Action, \
 # 2.
 
 # class Parser:
-#     def __init__(self, dataset_options: DatasetOptions, *args, **kwargs):
+#     def __init__(self, dataset_options: DatasetConfig, *args, **kwargs):
 #         self.opt = dataset_options
 #     pass
 

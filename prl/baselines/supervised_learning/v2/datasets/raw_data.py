@@ -9,12 +9,18 @@ import gdown
 from tqdm import tqdm
 
 from prl.baselines import DATA_DIR
-from prl.baselines.supervised_learning.v2.datasets.dataset_options import DatasetOptions
+from prl.baselines.supervised_learning.v2.datasets.dataset_config import DatasetConfig
 from prl.baselines.supervised_learning.v2.datasets.top_player_selector import \
     TopPlayerSelector
 from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import \
     ParseHsmithyTextToPokerEpisode
 from prl.baselines.utils.unzip_recursively import extract
+
+from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
+    arg_num_top_players,
+    arg_nl,
+    arg_from_gdrive_id
+)
 
 
 def download_data(from_gdrive_id, nl: str) -> bool:
@@ -38,7 +44,7 @@ def download_data(from_gdrive_id, nl: str) -> bool:
 
 class RawData:
     def __init__(self,
-                 dataset_options: DatasetOptions,
+                 dataset_options: DatasetConfig,
                  top_player_selector: TopPlayerSelector):
         self.opt = dataset_options
         self.top_player_selector = top_player_selector
@@ -91,28 +97,12 @@ class RawData:
 
 
 @click.command()
-@click.option("--num_top_players", default=20,
-              type=int,
-              help="How many top players hand histories should be used to generate the "
-                   "data.")
-@click.option("--nl",
-              default='NL50',
-              type=str,
-              help="Which stakes the hand history belongs to."
-                   "Determines the data directory.")
-@click.option("--from_gdrive_id",
-              default="18kkgEM2CYF_Tl4Dn8oro6tUgqDfr9IAN",
-              type=str,
-              help="Google drive id of a .zip file containing hand histories. "
-                   "For small example, use 18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO"
-                   "For complete database (VERY LARGE), use "
-                   "18kkgEM2CYF_Tl4Dn8oro6tUgqDfr9IAN"
-                   "The id can be obtained from the google drive download-link url."
-                   "The runner will try to download the data from gdrive and proceed "
-                   "with unzipping.")
-def main(num_top_players, nl, from_gdrive_id):
+@arg_num_top_players
+@arg_nl
+@arg_from_gdrive_id
+def make_raw_data(num_top_players, nl, from_gdrive_id):
     parser = ParseHsmithyTextToPokerEpisode(nl=nl)
-    dataset_options = DatasetOptions(num_top_players, nl)
+    dataset_options = DatasetConfig(num_top_players, nl)
     top_player_selector = TopPlayerSelector(parser)
     raw_data = RawData(dataset_options, top_player_selector)
     raw_data.generate(from_gdrive_id)
@@ -120,4 +110,4 @@ def main(num_top_players, nl, from_gdrive_id):
 
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
-    main()
+    make_raw_data()
