@@ -61,7 +61,7 @@ class RawData:
         logging.info(f'Unzipped hand histories to {unzipped_dir}')
         return True
 
-    def player_dataset_to_disk(self, target_players):
+    def hand_histories_to_disk(self, target_players):
         for rank, player_name in enumerate(target_players):
             alias = f'PlayerRank{str(rank + 1).zfill(3)}'
             if os.path.exists(os.path.join(self.data_dir, alias)):
@@ -89,7 +89,7 @@ class RawData:
         if not self.opt.exists_raw_data_for_all_selected_players():
             top_players = self.top_player_selector.get_top_n_players_min_showdowns(
                 self.opt.num_top_players, self.opt.min_showdowns)
-            self.player_dataset_to_disk(list(top_players.keys()))
+            self.hand_histories_to_disk(list(top_players.keys()))
 
 
 def make_raw_data_if_not_exists_already(dataset_config):

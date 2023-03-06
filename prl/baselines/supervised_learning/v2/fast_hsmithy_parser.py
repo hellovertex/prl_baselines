@@ -11,7 +11,7 @@ import os
 import re
 from typing import List, Tuple, Dict, Generator
 
-from prl.environment.Wrappers.base import ActionSpace
+from prl.environment.Wrappers.base import ActionSpace, ActionSpaceMinimal
 
 from prl.baselines import DATA_DIR
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
@@ -135,11 +135,13 @@ class ParseHsmithyTextToPokerEpisode:
                 sb_name: str = line.split(": ")[0]
                 sb_amt = round(float(line.split(self.currency_symbol)[-1]) * 100)
                 players[sb_name].position = Positions6Max.SB
+                players[sb_name].money_won_this_round = -sb_amt
                 blinds['sb'] = sb_amt  # {sb_name: sb_amt}
             elif 'posts big blind' in line:
                 bb_name: str = line.split(": ")[0]
                 bb_amt = round(float(line.split(self.currency_symbol)[-1]) * 100)
                 players[bb_name].position = Positions6Max.BB
+                players[bb_name].money_won_this_round = -bb_amt
                 blinds['bb'] = bb_amt  # {bb_name: bb_amt}
         num_players = len(players)
         return players, blinds
@@ -160,20 +162,28 @@ class ParseHsmithyTextToPokerEpisode:
             a = a.split(' and')[0]
             amt = round(float(a) * 100)
             return Action(who=pname, what=ActionSpace.RAISE_MIN_OR_THIRD_OF_POT,
-                          how_much=amt)
+                          how_much=amt,
+                          info={'is_bet': True})
         elif 'raises' in action:
             a = action.split('to ')[1].split(self.currency_symbol)[1]
             a = a.split(' and')[0]
             amt = round(float(a) * 100)
             return Action(who=pname, what=ActionSpace.RAISE_MIN_OR_THIRD_OF_POT,
-                          how_much=amt)
+                          how_much=amt,
+                          info={'is_bet': False})
         else:
             raise ValueError(f"Unknown action in {line}.")
 
     def _get_actions(self, lines, stage):
         lines = lines.split('\n')
         actions = []
+        uncalled_bet = 0
+        returned_to = None
         for line in lines:
+            if 'Uncalled' in line:
+                uncalled_bet = round(float(line.split(self.currency_symbol)[1][0]) * 100)
+                returned_to = line.split('returned to ')[1]
+                continue
             if not line:
                 continue
             if not ':' in line:
@@ -181,8 +191,6 @@ class ParseHsmithyTextToPokerEpisode:
             if 'said' in line:
                 continue
             if "show hand" in line or 'shows' in line:
-                continue
-            if 'Uncalled' in line:
                 continue
             if 'collected' in line:
                 continue
@@ -193,13 +201,21 @@ class ParseHsmithyTextToPokerEpisode:
             action = self.get_action(line)
             action.stage = stage
             actions.append(action)
-        return actions
+        return actions, uncalled_bet, returned_to
 
     def get_actions(self, info):
-        actions_preflop = self._get_actions(info['preflop'], 'preflop')
-        actions_flop = self._get_actions(info['flop'], 'flop')
-        actions_turn = self._get_actions(info['turn'], 'turn')
-        actions_river = self._get_actions(info['river'], 'river')
+        actions_flop = []
+        actions_turn = []
+        actions_river = []
+        actions_preflop, uncalled_bet, returned_to = self._get_actions(info['preflop'],
+                                                                       'preflop')
+        if not uncalled_bet:
+            actions_flop, uncalled_bet, returned_to = self._get_actions(info['flop'], 'flop')
+        if not uncalled_bet:
+            actions_turn, uncalled_bet, returned_to = self._get_actions(info['turn'], 'turn')
+        if not uncalled_bet:
+            actions_river, uncalled_bet, returned_to = self._get_actions(info['river'],
+                                                                     'river')
         as_sequence = []
 
         for actions in [actions_preflop, actions_flop, actions_turn, actions_river]:
@@ -209,13 +225,34 @@ class ParseHsmithyTextToPokerEpisode:
                 'actions_flop': actions_flop,
                 'actions_turn': actions_turn,
                 'actions_river': actions_river,
-                'as_sequence': as_sequence}
+                'as_sequence': as_sequence}, uncalled_bet, returned_to
 
+    def blinds_folded(self, players: Dict[str, Player], actions: List[Action]):
+        sb_first_action_was_fold = True
+        bb_first_action_was_fold = True
+        for action in actions:
+            if players[action.who].position == Positions6Max.SB:
+                if action.what == ActionSpaceMinimal.FOLD:
+                    break
+                else:
+                    sb_first_action_was_fold = False
+                    break
+        for action in actions:
+            if players[action.who].position == Positions6Max.BB:
+                if action.what == ActionSpaceMinimal.FOLD:
+                    break
+                else:
+                    bb_first_action_was_fold = False
+                    break
+        return sb_first_action_was_fold, bb_first_action_was_fold
     def parse_hand(self, hand_str):
         # if not '208958141851' in hand_str:
         #     return []
         # try:
         try:
+            if '208958099944' in hand_str:
+                a = 1
+                print('debugme')
             if '209160564676' in hand_str:
                 print(hand_str)
             if '217918054212' in hand_str:
@@ -224,14 +261,31 @@ class ParseHsmithyTextToPokerEpisode:
                 print(hand_str)
             players, blinds = self.get_players_and_blinds(hand_str)
             info = self.rounds(hand_str)
-            actions = self.get_actions(info)
+            actions, uncalled_bet, returned_to = self.get_actions(info)
 
             # get money lost from actionsequence
             try:
-
-                for action in actions['as_sequence']:
-                    amt = min(action.how_much, 0)
-                    players[action.who].money_won_this_round -= amt
+                # total_pot = blinds['sb'] + blinds['bb']  # included in total already
+                total_pot = 0
+                count_sb, count_bb = self.blinds_folded(players, actions['as_sequence'])
+                if count_sb:
+                    total_pot += blinds['sb']
+                if count_bb:
+                    total_pot += blinds['bb']
+                for i, action in enumerate(actions['as_sequence']):
+                    amt = max(action.how_much, 0)
+                    total_pot += amt
+                    # supersimple2018: raises $37.50 to $50:
+                    # set money_won_this_round to +- $50 and not count previous bets/calls
+                    if action.what == ActionSpaceMinimal.RAISE:
+                        if action.info['is_bet']:
+                            players[action.who].money_won_this_round -= amt
+                        else:
+                            players[action.who].money_won_this_round = -amt
+                    else:
+                        players[action.who].money_won_this_round -= amt
+                # players[returned_to].money_won_this_round += uncalled_bet
+                players[returned_to].money_won_this_round += total_pot
             except Exception as e:
                 print(e)
                 return []
@@ -267,10 +321,6 @@ class ParseHsmithyTextToPokerEpisode:
                             raise e
                         amt = round(float(amt) * 100)
                         players[pname].money_won_this_round += amt
-
-        except Exception as e:
-            return []
-        try:
             for pname, player in players.items():
                 if player.is_showdown_player:
                     showdown_players.append(player)
@@ -331,12 +381,14 @@ class ParseHsmithyTextToPokerEpisode:
 
     @property
     def num_files(self):
-        data_dir = os.path.join(DATA_DIR, *['01_raw', self.dataset_config.nl, 'all_players'])
+        data_dir = os.path.join(DATA_DIR,
+                                *['01_raw', self.dataset_config.nl, 'all_players'])
         return len(glob.glob(data_dir + '**/*.txt'))
 
     def parse_hand_histories_from_all_players(self) -> Generator[
         List[PokerEpisodeV2], None, None]:
-        data_dir = os.path.join(DATA_DIR, *['01_raw', self.dataset_config.nl, 'all_players'])
+        data_dir = os.path.join(DATA_DIR,
+                                *['01_raw', self.dataset_config.nl, 'all_players'])
         assert os.path.exists(data_dir), "Must download data and unzip to " \
                                          "01_raw/all_players first"
         for f in glob.glob(data_dir + '**/*.txt'):
