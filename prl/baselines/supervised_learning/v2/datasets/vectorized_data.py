@@ -52,7 +52,7 @@ def alias_player_rank_to_ingame_name(selected_player_names,
     raise ValueError(f"No Player name has been found for file {filename}")
 
 
-def encode_episodes(dataset_options,
+def encode_episodes(dataset_config,
                     episodesV2: List[PokerEpisodeV2],
                     encoder: EncoderV2,
                     selected_players: List[str],
@@ -65,7 +65,7 @@ def encode_episodes(dataset_options,
         try:
             observations, actions = encoder.encode_episode(
                 ep,
-                a_opt=dataset_options.action_generation_option,
+                a_opt=dataset_config.action_generation_option,
                 limit_num_players=5,
                 selected_players=selected_players,
                 verbose=False)
@@ -97,13 +97,13 @@ def encode_episodes(dataset_options,
 
 
 def generate_vectorized_hand_histories(files,
-                                       dataset_options: DatasetConfig,
+                                       dataset_config: DatasetConfig,
                                        parser_cls,
                                        encoder_cls,
                                        selected_player_names,
                                        storage_cls) -> str:
     # make deepcopy so that multiprocessing does not share options object
-    dataset_options = copy.deepcopy(dataset_options)
+    dataset_config = copy.deepcopy(dataset_config)
     # the env will be re-initialized with each hand in hand-histories, stacks and
     # blinds will be read from hand-history, so it does not matter what we provide
     # here
@@ -112,31 +112,28 @@ def generate_vectorized_hand_histories(files,
                                  blinds=(25, 50),
                                  multiply_by=1)
     encoder = encoder_cls(dummy_env)
-    parser = parser_cls(dataset_options=dataset_options)
-    storage = storage_cls(dataset_options)
+    parser = parser_cls(dataset_config=dataset_config)
+    storage = storage_cls(dataset_config)
     for filename in files[:-1]:
         selected_players = alias_player_rank_to_ingame_name(selected_player_names,
                                                             filename)
         episodesV2 = parser.parse_file(filename)
-        training_data, labels = encode_episodes(dataset_options,
-                                                episodesV2,
-                                                encoder,
-                                                selected_players,
-                                                storage=storage,
-                                                file_suffix=files[-1])
-        # else:
-        #     logging.info(f"Skipping encoding of hand histories, because they already "
-        #                  f"exist at \n{dataset_options.dir_vectorized_data}")
+        encode_episodes(dataset_config,
+                        episodesV2,
+                        encoder,
+                        selected_players,
+                        storage=storage,
+                        file_suffix=files[-1])
     return f"Success: encoded chunk {files}..."
 
 
 class VectorizedData:
     def __init__(self,
-                 dataset_options: DatasetConfig,
+                 dataset_config: DatasetConfig,
                  parser_cls: Type[ParseHsmithyTextToPokerEpisode],
                  top_player_selector: TopPlayerSelector,
                  storage: Optional[PersistentStorage] = None):
-        self.opt = dataset_options
+        self.opt = dataset_config
         self.parser_cls = parser_cls
         self.parser = parser_cls(self.opt)  # todo replace nl= with opt=
         self.top_player_selector = top_player_selector
@@ -154,6 +151,7 @@ class VectorizedData:
 
     def _generate_vectorized_hand_histories(self,
                                             filename,
+                                            suffix,
                                             encoder_cls,
                                             selected_player_names) -> str:
         # the env will be re-initialized with each hand in hand-histories, stacks and
@@ -171,7 +169,9 @@ class VectorizedData:
         training_data, labels = encode_episodes(self.opt,
                                                 episodesV2,
                                                 encoder,
-                                                selected_players)
+                                                selected_players,
+                                                storage=self.storage,
+                                                file_suffix=suffix)
         self.storage.vectorized_player_pool_data_to_disk(training_data,
                                                          labels,
                                                          encoder.feature_names)
@@ -188,7 +188,7 @@ class VectorizedData:
         if use_multiprocessing:
             logging.info('Starting handhistory encoding using multiprocessing...')
             gen_fn = partial(generate_vectorized_hand_histories,
-                             dataset_options=self.opt,
+                             dataset_config=self.opt,
                              parser_cls=type(self.parser),
                              encoder_cls=encoder_cls,
                              selected_player_names=selected_player_names,
@@ -220,7 +220,8 @@ class VectorizedData:
                 self._generate_vectorized_hand_histories(
                     encoder_cls=encoder_cls,
                     selected_player_names=selected_player_names,
-                    filename=filename)
+                    filename=filename,
+                    suffix=files[-1])
 
     def generate_missing(self,
                          encoder_cls: Type[EncoderV2] = EncoderV2,
@@ -250,11 +251,11 @@ class VectorizedData:
                     use_multiprocessing=use_multiprocessing)
 
 
-def make_vectorized_data_if_not_exists_already(dataset_config, use_multiprocessing ):
+def make_vectorized_data_if_not_exists_already(dataset_config, use_multiprocessing):
     make_raw_data_if_not_exists_already(dataset_config)
     parser_cls = ParseHsmithyTextToPokerEpisode
     selector = TopPlayerSelector(parser=parser_cls(dataset_config=dataset_config))
-    vectorized_data = VectorizedData(dataset_options=dataset_config,
+    vectorized_data = VectorizedData(dataset_config=dataset_config,
                                      parser_cls=parser_cls,
                                      top_player_selector=selector)
     vectorized_data.generate_missing(use_multiprocessing=use_multiprocessing)
