@@ -15,20 +15,21 @@ from prl.environment.Wrappers.base import ActionSpace
 
 from prl.baselines import DATA_DIR
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
+from prl.baselines.supervised_learning.v2.datasets.dataset_config import DatasetConfig
 from prl.baselines.supervised_learning.v2.poker_model import Player, Action, \
     PokerEpisodeV2
 
 
 class ParseHsmithyTextToPokerEpisode:
     def __init__(self,
-                 nl='NL50',
+                 dataset_config: DatasetConfig,
                  preflop_sep="*** HOLE CARDS ***",
                  flop_sep="*** FLOP ***",
                  turn_sep="*** TURN ***",
                  river_sep="*** RIVER ***",
                  showdown_sep="*** SHOW DOWN ***",
                  summary_sep="*** SUMMARY ***"):
-        self.nl = nl
+        self.dataset_config = dataset_config
         self.preflop_sep = preflop_sep
         self.flop_sep = flop_sep
         self.turn_sep = turn_sep
@@ -330,12 +331,12 @@ class ParseHsmithyTextToPokerEpisode:
 
     @property
     def num_files(self):
-        data_dir = os.path.join(DATA_DIR, *['01_raw', self.nl, 'all_players'])
+        data_dir = os.path.join(DATA_DIR, *['01_raw', self.dataset_config.nl, 'all_players'])
         return len(glob.glob(data_dir + '**/*.txt'))
 
     def parse_hand_histories_from_all_players(self) -> Generator[
         List[PokerEpisodeV2], None, None]:
-        data_dir = os.path.join(DATA_DIR, *['01_raw', self.nl, 'all_players'])
+        data_dir = os.path.join(DATA_DIR, *['01_raw', self.dataset_config.nl, 'all_players'])
         assert os.path.exists(data_dir), "Must download data and unzip to " \
                                          "01_raw/all_players first"
         for f in glob.glob(data_dir + '**/*.txt'):

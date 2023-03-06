@@ -12,10 +12,9 @@ from prl.environment.Wrappers.base import ActionSpace, ActionSpaceMinimal
 from prl.environment.Wrappers.utils import init_wrapped_env
 
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import DatasetConfig, ActionGenOption, Stage
-from prl.baselines.supervised_learning.v2.datasets.raw_data import main_raw_data
 from prl.baselines.supervised_learning.v2.datasets.top_player_selector import TopPlayerSelector
 from prl.baselines.supervised_learning.v2.datasets.utils import parse_cmd_action_to_action_cls
-from prl.baselines.supervised_learning.v2.datasets.vectorized_data import VectorizedData, main_vectorized_data
+from prl.baselines.supervised_learning.v2.datasets.vectorized_data import VectorizedData
 from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import ParseHsmithyTextToPokerEpisode
 
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
@@ -117,13 +116,15 @@ class PreprocessedData:
 @arg_min_showdowns
 @arg_target_rounds
 @arg_action_space
-def main_preprocessed_data(num_top_players,
-                           nl,
-                           make_dataset_for_each_individual,
-                           action_generation_option,
-                           min_showdowns,
-                           target_rounds,
-                           action_space):
+def make_preprocessed_data_if_not_exists_already(num_top_players,
+                                                 nl,
+                                                 from_gdrive_id,
+                                                 make_dataset_for_each_individual,
+                                                 action_generation_option,
+                                                 use_multiprocessing,
+                                                 min_showdowns,
+                                                 target_rounds,
+                                                 action_space):
     # Assumes raw_data.py has been ran to download and extract hand histories.
     opt = DatasetConfig(
         num_top_players=num_top_players,
@@ -140,11 +141,4 @@ def main_preprocessed_data(num_top_players,
 
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
-    from dataset_config import cli
-
-    # this way we can also call `python main_preprocessed_data.py` from command line with options for main_raw_data and
-    # main_vectorized_data without duplicating them here
-    cli.add_command(main_raw_data)
-    cli.add_command(main_vectorized_data)
-    cli.add_command(main_preprocessed_data)
-    cli()
+    make_preprocessed_data_if_not_exists_already()

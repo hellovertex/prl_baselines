@@ -79,15 +79,11 @@ class RawData:
                         continue
                     self._to_disk(alias, player_name, hand_histories)
 
-    def generate(self,
-                 from_gdrive_id: Optional[str] = None):
-        if from_gdrive_id is None:
-            from_gdrive_id = self.opt.from_gdrive_id
-
+    def generate_missing(self):
         # Maybe download + unzip
         if not self.opt.hand_history_has_been_downloaded_and_unzipped():
-            assert from_gdrive_id, "Downloading data requires parameter `from_gdrive_id`"
-            download_data(from_gdrive_id, self.opt.nl)
+            assert self.opt.from_gdrive_id, "Downloading data requires parameter `from_gdrive_id`"
+            download_data(self.opt.from_gdrive_id, self.opt.nl)
 
         # Maybe extract Top N players hand_histories
         if not self.opt.exists_raw_data_for_all_selected_players():
@@ -100,14 +96,14 @@ class RawData:
 @arg_num_top_players
 @arg_nl
 @arg_from_gdrive_id
-def make_raw_data(num_top_players, nl, from_gdrive_id):
-    parser = ParseHsmithyTextToPokerEpisode(nl=nl)
-    dataset_options = DatasetConfig(num_top_players, nl)
+def make_raw_data_if_not_exists_already(num_top_players, nl, from_gdrive_id):
+    dataset_options = DatasetConfig(num_top_players, nl, from_gdrive_id)
+    parser = ParseHsmithyTextToPokerEpisode(dataset_options)
     top_player_selector = TopPlayerSelector(parser)
     raw_data = RawData(dataset_options, top_player_selector)
-    raw_data.generate(from_gdrive_id)
+    raw_data.generate_missing()
 
 
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
-    make_raw_data()
+    make_raw_data_if_not_exists_already()

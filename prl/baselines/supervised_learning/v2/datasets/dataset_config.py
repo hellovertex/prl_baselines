@@ -204,6 +204,15 @@ class DatasetConfig:
             subdir_05_actions
         ])
 
+    @property
+    def file_top_n_players_min_showdowns(self):
+        """Path to .txt file containing python dictionary with Top N players and their
+                serialized `PlayerSelection` data."""
+        raw_dir = os.path.join(DATA_DIR, '01_raw')
+        return os.path.join(raw_dir,
+                            self.nl,
+                            f'top_{self.num_top_players}_players_min_showdowns={self.min_showdowns}.txt')
+
     def _target_rounds_to_str(self):
         result = 'target_rounds='
         for stage in self.target_rounds:
@@ -239,6 +248,19 @@ class DatasetConfig:
                     return False
             return True
         return False
+
+    def exists_vectorized_data_for_all_selected_players(self):
+        # Traverse for n selected players, if each has their own directory
+        if self.make_dataset_for_each_individual:
+            if os.path.exists(self.dir_vectorized_data):
+                dirs_top_players = [x[0] for x in os.walk(self.dir_vectorized_data)]
+                for i in range(self.num_top_players):
+                    # if no folder with name PlayerRank00i/ exists, return False
+                    if not f'PlayerRank{str(i).zfill(3)}' in dirs_top_players:
+                        return False
+                return True
+        # Otherwise simply return whether player pool vectorized data exists
+        return os.path.exists(self.dir_vectorized_data)
 
 
 arg_num_top_players = click.option("--num_top_players", default=20,

@@ -22,7 +22,7 @@ from prl.baselines.supervised_learning.v2.datasets.persistent_storage import \
     PersistentStorage
 from prl.baselines.supervised_learning.v2.datasets.raw_data import (
     TopPlayerSelector,
-    RawData, make_raw_data)
+    RawData, make_raw_data_if_not_exists_already)
 from prl.baselines.supervised_learning.v2.datasets.tmp import EncoderV2
 from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import \
     ParseHsmithyTextToPokerEpisode
@@ -130,7 +130,7 @@ class VectorizedData:
                  storage: Optional[PersistentStorage] = None):
         self.opt = dataset_options
         self.parser_cls = parser_cls
-        self.parser = parser_cls(nl=self.opt.nl)  # todo replace nl= with opt=
+        self.parser = parser_cls(self.opt)  # todo replace nl= with opt=
         self.top_player_selector = top_player_selector
         self.storage = storage if storage else PersistentStorage(self.opt)
         self.num_files_written_to_disk = 0
@@ -156,9 +156,7 @@ class VectorizedData:
                                      blinds=(25, 50),
                                      multiply_by=1)
         encoder = encoder_cls(dummy_env)
-        # single files, pretty large
-        # if not os.path.exists(self.opt.dir_vectorized_data):
-        # filename to playername to one selected_players
+        # few files, pretty large, one per top player
         selected_players = alias_player_rank_to_ingame_name(
             selected_player_names, filename)
         episodesV2 = self.parser.parse_file(filename)
@@ -169,9 +167,6 @@ class VectorizedData:
         self.storage.vectorized_player_pool_data_to_disk(training_data,
                                                          labels,
                                                          encoder.feature_names)
-        # else:
-        #     logging.info(f"Skipping encoding of hand histories, because they already "
-        #                  f"exist at \n{self.opt.dir_vectorized_data}")
         return f"Success: encoded {filename}..."
 
     def _generate_player_pool_data(self,
@@ -218,35 +213,32 @@ class VectorizedData:
                     selected_player_names=selected_player_names,
                     filename=filename)
 
-    def generate(self,
-                 encoder_cls: Type[EncoderV2] = EncoderV2,
-                 use_multiprocessing=False):
-
-        if not self.opt.exists_raw_data_for_all_selected_players():
-            # extracts hand histories for Top M players,
-            # where M=self.opt.num_top_players-missing
-            RawData(self.opt, self.top_player_selector).generate()
-
+    def generate_missing(self,
+                         encoder_cls: Type[EncoderV2] = EncoderV2,
+                         use_multiprocessing=False):
         filenames = glob.glob(f'{self.opt.dir_raw_data_top_players}/**/*.txt',
                               recursive=True)
 
         selected_players = self.top_player_selector.get_top_n_players_min_showdowns(
             self.opt.num_top_players, self.opt.min_showdowns)
 
-        logging.info(f"Encoding and vectorizing hand histories to .csv files for top "
-                     f"{len(selected_players)} players. ")
-        if self.opt.make_dataset_for_each_individual:
-            return self._generate_per_selected_player(
-                selected_player_names=list(selected_players.keys()),
-                files=filenames,
-                encoder_cls=encoder_cls,
-                use_multiprocessing=use_multiprocessing)
+        if self.opt.exists_vectorized_data_for_all_selected_players():
+            logging.info("Vectorized Data exists already. Skipping Encoder Step.")
         else:
-            return self._generate_player_pool_data(
-                selected_player_names=list(selected_players.keys()),
-                files=filenames,
-                encoder_cls=encoder_cls,
-                use_multiprocessing=use_multiprocessing)
+            logging.info(f"Encoding and vectorizing hand histories to .csv files for top "
+                         f"{len(selected_players)} players. ")
+            if self.opt.make_dataset_for_each_individual:
+                return self._generate_per_selected_player(
+                    selected_player_names=list(selected_players.keys()),
+                    files=filenames,
+                    encoder_cls=encoder_cls,
+                    use_multiprocessing=use_multiprocessing)
+            else:
+                return self._generate_player_pool_data(
+                    selected_player_names=list(selected_players.keys()),
+                    files=filenames,
+                    encoder_cls=encoder_cls,
+                    use_multiprocessing=use_multiprocessing)
 
 
 @click.command()  # 'make_vectorized_data'
@@ -257,29 +249,31 @@ class VectorizedData:
 @arg_action_generation_option
 @arg_use_multiprocessing
 @arg_min_showdowns
-def make_vectorized_data(num_top_players,  # see click command main_raw_data
-                         nl,  # see click command main_raw_data
-                         from_gdrive_id,  # see click command main_raw_data
-                         make_dataset_for_each_individual,
-                         action_generation_option,
-                         use_multiprocessing,
-                         min_showdowns):
+def make_vectorized_data_if_not_exists_already(num_top_players,  # see click command main_raw_data
+                                               nl,  # see click command main_raw_data
+                                               from_gdrive_id,  # see click command main_raw_data
+                                               make_dataset_for_each_individual,
+                                               action_generation_option,
+                                               use_multiprocessing,
+                                               min_showdowns):
     # Assumes raw_data.py has been ran to download and extract hand histories.
     opt = DatasetConfig(
         num_top_players=num_top_players,
         nl=nl,
+        from_gdrive_id=from_gdrive_id,
         make_dataset_for_each_individual=make_dataset_for_each_individual,
         action_generation_option=ActionGenOption(action_generation_option),
         min_showdowns=min_showdowns
     )
     parser_cls = ParseHsmithyTextToPokerEpisode
-    selector = TopPlayerSelector(parser=parser_cls(nl))
+    selector = TopPlayerSelector(parser=parser_cls(dataset_config=opt))
     vectorized_data = VectorizedData(dataset_options=opt,
                                      parser_cls=parser_cls,
                                      top_player_selector=selector)
-    vectorized_data.generate(use_multiprocessing=use_multiprocessing)
+    vectorized_data.generate_missing(use_multiprocessing=use_multiprocessing)
 
 
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
-    make_vectorized_data()
+    make_raw_data_if_not_exists_already()  # skipped if exists already
+    make_vectorized_data_if_not_exists_already()  # skipped if exits_already
