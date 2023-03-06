@@ -92,11 +92,10 @@ class RawData:
             self.player_dataset_to_disk(list(top_players.keys()))
 
 
-def make_raw_data_if_not_exists_already(num_top_players, nl, from_gdrive_id):
-    dataset_options = DatasetConfig(num_top_players, nl, from_gdrive_id)
-    parser = ParseHsmithyTextToPokerEpisode(dataset_options)
+def make_raw_data_if_not_exists_already(dataset_config):
+    parser = ParseHsmithyTextToPokerEpisode(dataset_config)
     top_player_selector = TopPlayerSelector(parser)
-    raw_data = RawData(dataset_options, top_player_selector)
+    raw_data = RawData(dataset_config, top_player_selector)
     raw_data.generate_missing()
 
 
@@ -105,7 +104,8 @@ def make_raw_data_if_not_exists_already(num_top_players, nl, from_gdrive_id):
 @arg_nl
 @arg_from_gdrive_id
 def main(num_top_players, nl, from_gdrive_id):
-    make_raw_data_if_not_exists_already(num_top_players, nl, from_gdrive_id)
+    dataset_config = DatasetConfig(num_top_players, nl, from_gdrive_id)
+    make_raw_data_if_not_exists_already(dataset_config)
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ from typing import List, Optional, Union, Type
 import click
 from prl.environment.Wrappers.base import ActionSpaceMinimal, ActionSpace
 
-from prl.baselines import DATA_DIR
+from prl.baselines import DATA_DIR as DEFAULT_DATA_DIR
 
 # Preprocessed data can contain
 # - Individual Action (when training dichotomizers)
@@ -129,9 +129,10 @@ class DatasetConfig:
     "The runner will try to download the data from gdrive and proceed "
     "with unzipping."""
     from_gdrive_id: Optional[str] = "18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO"
-
+    DATA_DIR: Optional[str] = None
     @property
     def dir_raw_data_all_players(self):
+        DATA_DIR = DEFAULT_DATA_DIR if not self.DATA_DIR else self.DATA_DIR
         raw_dir = os.path.join(DATA_DIR, '01_raw')
         # data/00_tmp and data/01_raw/all_players are irrelevant for callers
         return os.path.join(*[
@@ -142,6 +143,7 @@ class DatasetConfig:
 
     @property
     def dir_raw_data_top_players(self):
+        DATA_DIR = DEFAULT_DATA_DIR if not self.DATA_DIR else self.DATA_DIR
         raw_dir = os.path.join(DATA_DIR, '01_raw')
         # data/00_tmp and data/01_raw/all_players are irrelevant for callers
         subdir_00_nl = self.nl
@@ -156,6 +158,7 @@ class DatasetConfig:
     def dir_vectorized_data(self):
         assert self.make_dataset_for_each_individual is not None
         assert self.action_generation_option is not None
+        DATA_DIR = DEFAULT_DATA_DIR if not self.DATA_DIR else self.DATA_DIR
         vectorized_dir = os.path.join(DATA_DIR, '02_vectorized')
         subdir_00_nl = self.nl
         subdir_01_player_or_pool = 'per_selected_player' if \
@@ -180,6 +183,7 @@ class DatasetConfig:
     def dir_preprocessed_data(self):
         assert self.make_dataset_for_each_individual is not None
         assert self.action_generation_option is not None
+        DATA_DIR = DEFAULT_DATA_DIR if not self.DATA_DIR else self.DATA_DIR
         preprocessed_dir = os.path.join(DATA_DIR, '03_preprocessed')
         subdir_01_player_or_pool = 'per_selected_player' if \
             self.make_dataset_for_each_individual else 'player_pool'
@@ -208,6 +212,7 @@ class DatasetConfig:
     def file_top_n_players_min_showdowns(self):
         """Path to .txt file containing python dictionary with Top N players and their
                 serialized `PlayerSelection` data."""
+        DATA_DIR = DEFAULT_DATA_DIR if not self.DATA_DIR else self.DATA_DIR
         raw_dir = os.path.join(DATA_DIR, '01_raw')
         return os.path.join(raw_dir,
                             self.nl,
@@ -234,6 +239,7 @@ class DatasetConfig:
         return result
 
     def hand_history_has_been_downloaded_and_unzipped(self):
+        DATA_DIR = DEFAULT_DATA_DIR if not self.DATA_DIR else self.DATA_DIR
         dir_data_unzipped = os.path.join(DATA_DIR, *['01_raw', self.nl, 'all_players'])
         if os.path.exists(dir_data_unzipped):
             return True

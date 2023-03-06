@@ -89,7 +89,8 @@ def encode_episodes(dataset_options,
                 storage.vectorized_player_pool_data_to_disk(training_data,
                                                             labels,
                                                             encoder.feature_names,
-                                                            file_suffix=file_suffix+str(it))
+                                                            file_suffix=file_suffix + str(
+                                                                it))
                 it += 1
 
     return training_data, labels
@@ -111,10 +112,12 @@ def generate_vectorized_hand_histories(files,
                                  blinds=(25, 50),
                                  multiply_by=1)
     encoder = encoder_cls(dummy_env)
-    parser = parser_cls(nl=dataset_options.nl)  # todo replace `nl` with dataset_options param
+    parser = parser_cls(
+        nl=dataset_options.nl)  # todo replace `nl` with dataset_options param
     storage = storage_cls(dataset_options)
     for filename in files[:-1]:
-        selected_players = alias_player_rank_to_ingame_name(selected_player_names, filename)
+        selected_players = alias_player_rank_to_ingame_name(selected_player_names,
+                                                            filename)
         episodesV2 = parser.parse_file(filename)
         training_data, labels = encode_episodes(dataset_options,
                                                 episodesV2,
@@ -180,7 +183,8 @@ class VectorizedData:
                                    files: List[str],
                                    encoder_cls: Type[EncoderV2],
                                    use_multiprocessing: bool = False,
-                                   chunksize=5  # use with multiprocessing to avoid stackoverflow
+                                   chunksize=5
+                                   # use with multiprocessing to avoid stackoverflow
                                    ):
         if use_multiprocessing:
             logging.info('Starting handhistory encoding using multiprocessing...')
@@ -247,25 +251,11 @@ class VectorizedData:
                     use_multiprocessing=use_multiprocessing)
 
 
-def make_vectorized_data_if_not_exists_already(num_top_players,  # see click command main_raw_data
-                                               nl,  # see click command main_raw_data
-                                               from_gdrive_id,  # see click command main_raw_data
-                                               make_dataset_for_each_individual,
-                                               action_generation_option,
-                                               use_multiprocessing,
-                                               min_showdowns):
-    make_raw_data_if_not_exists_already(num_top_players, nl, from_gdrive_id)
-    opt = DatasetConfig(
-        num_top_players=num_top_players,
-        nl=nl,
-        from_gdrive_id=from_gdrive_id,
-        make_dataset_for_each_individual=make_dataset_for_each_individual,
-        action_generation_option=ActionGenOption(action_generation_option),
-        min_showdowns=min_showdowns
-    )
+def make_vectorized_data_if_not_exists_already(dataset_config):
+    make_raw_data_if_not_exists_already(dataset_config)
     parser_cls = ParseHsmithyTextToPokerEpisode
-    selector = TopPlayerSelector(parser=parser_cls(dataset_config=opt))
-    vectorized_data = VectorizedData(dataset_options=opt,
+    selector = TopPlayerSelector(parser=parser_cls(dataset_config=dataset_config))
+    vectorized_data = VectorizedData(dataset_options=dataset_config,
                                      parser_cls=parser_cls,
                                      top_player_selector=selector)
     vectorized_data.generate_missing(use_multiprocessing=use_multiprocessing)
@@ -286,13 +276,15 @@ def main(num_top_players,  # see click command main_raw_data
          action_generation_option,
          use_multiprocessing,
          min_showdowns):
-    make_vectorized_data_if_not_exists_already(num_top_players,
-                                               nl,
-                                               from_gdrive_id,
-                                               make_dataset_for_each_individual,
-                                               action_generation_option,
-                                               use_multiprocessing,
-                                               min_showdowns)
+    dataset_config = DatasetConfig(
+        num_top_players=num_top_players,
+        nl=nl,
+        from_gdrive_id=from_gdrive_id,
+        make_dataset_for_each_individual=make_dataset_for_each_individual,
+        action_generation_option=ActionGenOption(action_generation_option),
+        min_showdowns=min_showdowns
+    )
+    make_vectorized_data_if_not_exists_already(dataset_config)
 
 
 if __name__ == '__main__':

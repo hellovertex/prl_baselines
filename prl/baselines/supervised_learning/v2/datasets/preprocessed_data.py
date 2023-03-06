@@ -11,13 +11,18 @@ from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.base import ActionSpace, ActionSpaceMinimal
 from prl.environment.Wrappers.utils import init_wrapped_env
 
-from prl.baselines.supervised_learning.v2.datasets.dataset_config import DatasetConfig, ActionGenOption, Stage
-from prl.baselines.supervised_learning.v2.datasets.raw_data import make_raw_data_if_not_exists_already
-from prl.baselines.supervised_learning.v2.datasets.top_player_selector import TopPlayerSelector
-from prl.baselines.supervised_learning.v2.datasets.utils import parse_cmd_action_to_action_cls
+from prl.baselines.supervised_learning.v2.datasets.dataset_config import DatasetConfig, \
+    ActionGenOption, Stage
+from prl.baselines.supervised_learning.v2.datasets.raw_data import \
+    make_raw_data_if_not_exists_already
+from prl.baselines.supervised_learning.v2.datasets.top_player_selector import \
+    TopPlayerSelector
+from prl.baselines.supervised_learning.v2.datasets.utils import \
+    parse_cmd_action_to_action_cls
 from prl.baselines.supervised_learning.v2.datasets.vectorized_data import VectorizedData, \
     make_vectorized_data_if_not_exists_already
-from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import ParseHsmithyTextToPokerEpisode
+from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import \
+    ParseHsmithyTextToPokerEpisode
 
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
     arg_num_top_players,
@@ -95,7 +100,8 @@ class PreprocessedData:
                 # todo: remove all labels that are greater than 2
                 pass
             # write to disk
-            filepath = os.path.join(self.opt.dir_preprocessed_data, Path(file).name + '.bz2')
+            filepath = os.path.join(self.opt.dir_preprocessed_data,
+                                    Path(file).name + '.bz2')
             header = False
             if not os.path.exists(filepath):
                 os.makedirs(os.path.realpath(Path(filepath).parent), exist_ok=True)
@@ -110,35 +116,11 @@ class PreprocessedData:
                       compression='bz2')
 
 
-def make_preprocessed_data_if_not_exists_already(num_top_players,
-                                                 nl,
-                                                 from_gdrive_id,
-                                                 make_dataset_for_each_individual,
-                                                 action_generation_option,
-                                                 use_multiprocessing,
-                                                 min_showdowns,
-                                                 target_rounds,
-                                                 action_space):
+def make_preprocessed_data_if_not_exists_already(dataset_config):
     # Assumes raw_data.py has been ran to download and extract hand histories.
-    opt = DatasetConfig(
-        num_top_players=num_top_players,
-        nl=nl,
-        make_dataset_for_each_individual=make_dataset_for_each_individual,
-        action_generation_option=ActionGenOption(action_generation_option),
-        min_showdowns=min_showdowns,
-        target_rounds=[Stage(x) for x in target_rounds],
-        action_space=[parse_cmd_action_to_action_cls(action_space)]
-    )
-
-    make_raw_data_if_not_exists_already(num_top_players, nl, from_gdrive_id)
-    make_vectorized_data_if_not_exists_already(num_top_players,
-                                               nl,
-                                               from_gdrive_id,
-                                               make_dataset_for_each_individual,
-                                               action_generation_option,
-                                               use_multiprocessing,
-                                               min_showdowns)
-    preprocessed_data = PreprocessedData(opt)
+    make_raw_data_if_not_exists_already(dataset_config)
+    make_vectorized_data_if_not_exists_already(dataset_config)
+    preprocessed_data = PreprocessedData(dataset_config)
     preprocessed_data.generate_missing()
 
 
@@ -161,15 +143,16 @@ def main(num_top_players,
          min_showdowns,
          target_rounds,
          action_space):
-    make_preprocessed_data_if_not_exists_already(num_top_players,
-                                                 nl,
-                                                 from_gdrive_id,
-                                                 make_dataset_for_each_individual,
-                                                 action_generation_option,
-                                                 use_multiprocessing,
-                                                 min_showdowns,
-                                                 target_rounds,
-                                                 action_space)
+    dataset_config = DatasetConfig(
+        num_top_players=num_top_players,
+        nl=nl,
+        make_dataset_for_each_individual=make_dataset_for_each_individual,
+        action_generation_option=ActionGenOption(action_generation_option),
+        min_showdowns=min_showdowns,
+        target_rounds=[Stage(x) for x in target_rounds],
+        action_space=[parse_cmd_action_to_action_cls(action_space)]
+    )
+    make_preprocessed_data_if_not_exists_already(dataset_config)
 
 
 if __name__ == '__main__':
