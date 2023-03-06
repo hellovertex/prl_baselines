@@ -1,19 +1,17 @@
 import os
 from pathlib import Path
+from typing import List
 
 import pytest
+from prl.environment.Wrappers.utils import init_wrapped_env
 
+from prl.baselines.deprecated.fast_hsmithy_parser import ParseHsmithyTextToPokerEpisode
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import ActionGenOption, \
     DatasetConfig
-import os
-from pathlib import Path
-
-import pytest
-
-from prl.baselines.supervised_learning.v2.datasets.dataset_config import ActionGenOption, \
-    DatasetConfig
-
-
+from prl.baselines.supervised_learning.v2.poker_model import PokerEpisodeV2
+from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns, \
+    AugmentObservationWrapper
+from prl.baselines.supervised_learning.v2.datasets.encoder import EncoderV2
 @pytest.fixture
 def dataset_config():
     num_top_players = 20
@@ -32,3 +30,39 @@ def dataset_config():
                                    from_gdrive_id=from_gdrive_id,
                                    DATA_DIR=data_dir)
     return dataset_config
+
+
+@pytest.fixture
+def episodes(dataset_config) -> List[PokerEpisodeV2]:
+    file = 'hand_histories.txt'
+    parser = ParseHsmithyTextToPokerEpisode(dataset_config)
+    return parser.parse_file(file)
+
+
+def test_parser_has_eps(episodes):
+    hasep_1 = False
+    hasep_2 = False
+    for ep in episodes:
+        if ep.hand_id == 208958099944:
+            hasep_1 = True
+        if ep.hand_id == 208958141851:
+            hasep_2 = True
+    assert hasep_1
+    assert hasep_2
+
+
+def test_vectorized_episode(episodes):
+    dummy_env = init_wrapped_env(AugmentObservationWrapper,
+                                 [5000 for _ in range(6)],
+                                 blinds=(25, 50),
+                                 multiply_by=1)
+    enc = EncoderV2(dummy_env)
+
+    for ep in episodes:
+        if ep.hand_id == 208958099944:
+            # todo: make sure vectorized form is ok
+            obs, act = enc.encode_episode(ep,)
+            pass
+        elif ep.hand_id == 208958141851:
+            # todo: make sure vectorized form is ok
+            pass

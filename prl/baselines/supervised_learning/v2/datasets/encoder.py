@@ -319,7 +319,7 @@ class EncoderV2:
         return hands
 
     @staticmethod
-    def _parse_action_gen_option(a_opt: ActionGenOption):
+    def parse_action_gen_option(a_opt: ActionGenOption):
         only_winners = drop_folds = fold_random_cards = None
         if a_opt == ActionGenOption.no_folds_top_player_all_showdowns:
             only_winners = False
@@ -345,7 +345,7 @@ class EncoderV2:
         """Runs environment with steps from PokerEpisode.
                 Returns observations and corresponding actions of players that made it to showdown."""
         try:
-            only_winners, drop_folds, fold_random_cards = self._parse_action_gen_option(a_opt)
+            only_winners, drop_folds, fold_random_cards = self.parse_action_gen_option(a_opt)
             # todo: for each selected player
             #  pick (obs, action)
             #  if players cards are unknown (no showdown) randomize them
