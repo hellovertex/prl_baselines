@@ -285,7 +285,7 @@ arg_make_dataset_for_each_individual = click.option("--make_dataset_for_each_ind
                                                     help="If True, creates a designated directory per player for "
                                                          "training data. Defaults to False.")
 arg_from_gdrive_id = click.option("--from_gdrive_id",
-                                  default="18kkgEM2CYF_Tl4Dn8oro6tUgqDfr9IAN",
+                                  default="18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO",
                                   type=str,
                                   help="Google drive id of a .zip file containing hand histories. "
                                        "For small example, use 18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO"
