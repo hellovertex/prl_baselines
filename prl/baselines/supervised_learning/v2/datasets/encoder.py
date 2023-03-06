@@ -194,11 +194,11 @@ class EncoderV2:
             for player in players:
                 if player.name == next_to_act:
                     if player.name in remaining_selected_players:
+                        observations.append(obs)
+                        actions.append(action_label)
                         if action_label == ActionSpace.FOLD:
                             assert player.name in remaining_selected_players
                             assert player.name not in target_players
-                            observations.append(obs)
-                            actions.append(action_label)
                             remaining_selected_players.remove(player.name)
                     if player.name in target_players:
                         observations.append(obs)
