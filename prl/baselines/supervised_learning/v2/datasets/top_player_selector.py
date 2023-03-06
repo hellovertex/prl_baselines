@@ -92,7 +92,7 @@ class TopPlayerSelector:
             serialized = dict([(k, dataclasses.asdict(v)) for k, v in players.items()])
             df = pd.DataFrame.from_dict(serialized, orient='index')
             df = df.sort_values('n_showdowns', ascending=False).dropna()
-            # only use players that went to more than 10_000 showdowns
+            # only use players that went to more than `min_showdowns` showdowns
             df = df[df['n_showdowns'] > min_showdowns]
             df = df['total_earnings'] / df['n_showdowns']
             df = df.sort_values(ascending=False).dropna()

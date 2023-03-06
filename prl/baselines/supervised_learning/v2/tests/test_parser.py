@@ -1,11 +1,14 @@
 import os
 from pathlib import Path
+from typing import List
+
 import pytest
 
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import ActionGenOption, \
     DatasetConfig
 from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import \
     ParseHsmithyTextToPokerEpisode
+from prl.baselines.supervised_learning.v2.poker_model import PokerEpisodeV2
 
 
 @pytest.fixture
@@ -29,10 +32,22 @@ def dataset_config():
 
 
 @pytest.fixture
-def episodes(dataset_config):
+def episodes(dataset_config) -> List[PokerEpisodeV2]:
     file = 'hand_histories.txt'
     parser = ParseHsmithyTextToPokerEpisode(dataset_config)
     return parser.parse_file(file)
+
+
+def test_parser_has_eps(episodes):
+    hasep_1 = False
+    hasep_2 = False
+    for ep in episodes:
+        if ep.hand_id == 208958099944:
+            hasep_1 = True
+        if ep.hand_id == 208958141851:
+            hasep_2 = True
+    assert hasep_1
+    assert hasep_2
 
 
 def test_parser_ep_money_won(episodes):
@@ -60,6 +75,18 @@ def test_parser_ep_money_won(episodes):
                 elif name == 'Clamfish0':
                     assert player.money_won_this_round == -50
                 elif name == 'JuanAlmighty':
-                    assert player.money_won_this_round == 9875 - (175 + 1250 + 3750)
+                    assert player.money_won_this_round == 9875 - (1250 + 3750)
                 elif name == 'supersimple2018':
                     assert player.money_won_this_round == -5000
+
+
+def test_parser_cards(episodes):
+    for ep in episodes:
+        if ep.hand_id == 208958141851:
+            for pname, player in ep.players.items():
+                if pname == 'supersimple2018':
+                    assert player.cards == '[Qs Qd]'
+                elif pname == 'JuanAlmighty':
+                    assert player.cards == '[As Ah]'
+                else:
+                    assert player.cards is None

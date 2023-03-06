@@ -210,12 +210,14 @@ class ParseHsmithyTextToPokerEpisode:
         actions_preflop, uncalled_bet, returned_to = self._get_actions(info['preflop'],
                                                                        'preflop')
         if not uncalled_bet:
-            actions_flop, uncalled_bet, returned_to = self._get_actions(info['flop'], 'flop')
+            actions_flop, uncalled_bet, returned_to = self._get_actions(info['flop'],
+                                                                        'flop')
         if not uncalled_bet:
-            actions_turn, uncalled_bet, returned_to = self._get_actions(info['turn'], 'turn')
+            actions_turn, uncalled_bet, returned_to = self._get_actions(info['turn'],
+                                                                        'turn')
         if not uncalled_bet:
             actions_river, uncalled_bet, returned_to = self._get_actions(info['river'],
-                                                                     'river')
+                                                                         'river')
         as_sequence = []
 
         for actions in [actions_preflop, actions_flop, actions_turn, actions_river]:
@@ -245,47 +247,74 @@ class ParseHsmithyTextToPokerEpisode:
                     bb_first_action_was_fold = False
                     break
         return sb_first_action_was_fold, bb_first_action_was_fold
+
+    def update_money_won(self, players, blinds, actions, returned_to):
+        # total_pot = blinds['sb'] + blinds['bb']  # included in total already
+        total_pot = 0
+        count_sb, count_bb = self.blinds_folded(players, actions['as_sequence'])
+        if count_sb:
+            total_pot += blinds['sb']
+        if count_bb:
+            total_pot += blinds['bb']
+        for i, action in enumerate(actions['as_sequence']):
+            amt = max(action.how_much, 0)
+            total_pot += amt
+            # supersimple2018: raises $37.50 to $50:
+            # set money_won_this_round to +- $50 and not count previous bets/calls
+            if action.what == ActionSpaceMinimal.RAISE:
+                if action.info['is_bet']:
+                    players[action.who].money_won_this_round -= amt
+                else:
+                    players[action.who].money_won_this_round = -amt
+            else:
+                players[action.who].money_won_this_round -= amt
+        # players[returned_to].money_won_this_round += uncalled_bet
+        if returned_to:
+            players[returned_to].money_won_this_round += total_pot
+        # else case is
+    def make_showdown_cards(self, players: Dict[str, Player], info):
+        for line in info['summary'].split('\n'):
+            if 'Board' in line:
+                # Board [9d Th 3h 7d 6h]
+                board_cards = line.split('Board ')[1]
+            if 'showed' in line:
+                has_showdown = True
+                pname, cards = line.split(': ')[1].split('showed [')
+                pname = pname.strip()
+                if pname.endswith('(button)'):
+                    pname = pname[:-8]
+                pname = pname.strip()
+                if pname.endswith('(small blind)'):
+                    pname = pname[:-13]
+                if pname.endswith('(big blind)'):
+                    pname = pname[:-11]
+                pname = pname.strip()
+                cards = '[' + cards[:6]
+                players[pname].cards = cards
+                players[pname].is_showdown_player = True
+                if ' and won ' in line:
+                    try:
+                        amt = line.split(f'({self.currency_symbol}')[1].split(')')[0]
+                    except Exception as e:
+                        print(line)
+                        print(e)
+                        raise e
+                    amt = round(float(amt) * 100)
+                    players[pname].money_won_this_round += amt
+        return players
     def parse_hand(self, hand_str):
         # if not '208958141851' in hand_str:
         #     return []
         # try:
         try:
-            if '208958099944' in hand_str:
+            if '208958141851' in hand_str:
                 a = 1
                 print('debugme')
-            if '209160564676' in hand_str:
-                print(hand_str)
-            if '217918054212' in hand_str:
-                print(hand_str)
-            if '209160762232' in hand_str:
-                print(hand_str)
             players, blinds = self.get_players_and_blinds(hand_str)
             info = self.rounds(hand_str)
             actions, uncalled_bet, returned_to = self.get_actions(info)
-
-            # get money lost from actionsequence
             try:
-                # total_pot = blinds['sb'] + blinds['bb']  # included in total already
-                total_pot = 0
-                count_sb, count_bb = self.blinds_folded(players, actions['as_sequence'])
-                if count_sb:
-                    total_pot += blinds['sb']
-                if count_bb:
-                    total_pot += blinds['bb']
-                for i, action in enumerate(actions['as_sequence']):
-                    amt = max(action.how_much, 0)
-                    total_pot += amt
-                    # supersimple2018: raises $37.50 to $50:
-                    # set money_won_this_round to +- $50 and not count previous bets/calls
-                    if action.what == ActionSpaceMinimal.RAISE:
-                        if action.info['is_bet']:
-                            players[action.who].money_won_this_round -= amt
-                        else:
-                            players[action.who].money_won_this_round = -amt
-                    else:
-                        players[action.who].money_won_this_round -= amt
-                # players[returned_to].money_won_this_round += uncalled_bet
-                players[returned_to].money_won_this_round += total_pot
+                self.update_money_won(players, blinds, actions, returned_to)
             except Exception as e:
                 print(e)
                 return []
@@ -293,34 +322,7 @@ class ParseHsmithyTextToPokerEpisode:
             showdown_players = []
             winners = []
             has_showdown = False
-            for line in info['summary'].split('\n'):
-                if 'Board' in line:
-                    # Board [9d Th 3h 7d 6h]
-                    board_cards = line.split('Board ')[1]
-                if 'showed' in line:
-                    has_showdown = True
-                    pname, cards = line.split(': ')[1].split('showed [')
-                    pname = pname.strip()
-                    if pname.endswith('(button)'):
-                        pname = pname[:-8]
-                    pname = pname.strip()
-                    if pname.endswith('(small blind)'):
-                        pname = pname[:-13]
-                    if pname.endswith('(big blind)'):
-                        pname = pname[:-11]
-                    pname = pname.strip()
-                    cards = '[' + cards[:6]
-                    players[pname].cards = cards
-                    players[pname].is_showdown_player = True
-                    if ' and won ' in line:
-                        try:
-                            amt = line.split(f'({self.currency_symbol}')[1].split(')')[0]
-                        except Exception as e:
-                            print(line)
-                            print(e)
-                            raise e
-                        amt = round(float(amt) * 100)
-                        players[pname].money_won_this_round += amt
+            players = self.make_showdown_cards(players, info)
             for pname, player in players.items():
                 if player.is_showdown_player:
                     showdown_players.append(player)
