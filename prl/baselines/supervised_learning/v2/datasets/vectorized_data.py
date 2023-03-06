@@ -23,7 +23,7 @@ from prl.baselines.supervised_learning.v2.datasets.persistent_storage import \
 from prl.baselines.supervised_learning.v2.datasets.raw_data import (
     TopPlayerSelector,
     RawData, make_raw_data_if_not_exists_already)
-from prl.baselines.supervised_learning.v2.datasets.tmp import EncoderV2
+from prl.baselines.supervised_learning.v2.datasets.encoder import EncoderV2
 from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import \
     ParseHsmithyTextToPokerEpisode
 from prl.baselines.supervised_learning.v2.poker_model import PokerEpisodeV2
@@ -251,7 +251,7 @@ class VectorizedData:
                     use_multiprocessing=use_multiprocessing)
 
 
-def make_vectorized_data_if_not_exists_already(dataset_config):
+def make_vectorized_data_if_not_exists_already(dataset_config, use_multiprocessing ):
     make_raw_data_if_not_exists_already(dataset_config)
     parser_cls = ParseHsmithyTextToPokerEpisode
     selector = TopPlayerSelector(parser=parser_cls(dataset_config=dataset_config))
@@ -284,7 +284,7 @@ def main(num_top_players,  # see click command main_raw_data
         action_generation_option=ActionGenOption(action_generation_option),
         min_showdowns=min_showdowns
     )
-    make_vectorized_data_if_not_exists_already(dataset_config)
+    make_vectorized_data_if_not_exists_already(dataset_config, use_multiprocessing)
 
 
 if __name__ == '__main__':

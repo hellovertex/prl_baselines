@@ -5,6 +5,7 @@ import os
 import warnings
 from collections import OrderedDict
 import dataclasses
+from pathlib import Path
 from typing import Dict
 
 import pandas as pd
@@ -106,13 +107,14 @@ class TopPlayerSelector:
             ordered_dict = OrderedDict((k, d.get(k)) for k in df.index[:num_top_players])
             # flush to disk
             self.write(ordered_dict,
-                       self.parser.dataset_config.file_top_n_players_min_showdowns(num_top_players,
-                                                                                   min_showdowns))
+                       self.parser.dataset_config.file_top_n_players_min_showdowns)
 
             return ordered_dict
 
     @staticmethod
     def write(player_dict, outfile):
         """Writes player_dict to result.txt file"""
+        if not os.path.exists(Path(outfile).parent):
+            os.makedirs(Path(outfile).parent)
         with open(outfile, 'w') as f:
             f.write(json.dumps(player_dict))
