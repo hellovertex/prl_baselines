@@ -26,7 +26,7 @@ class Stage(enum.IntEnum):
     RIVER = 3
 
 
-class DataImbalanceCorrection(enum.IntEnum):
+class DataImbalanceCorrectionTechnique(enum.IntEnum):
     """Dataset labels are likely imbalanced. For example the number of
     ALL_IN actions is smaller than the number of CHECK_CALL actions.
     There are several ways to counter this when doing Machine learning:
@@ -115,7 +115,7 @@ class DatasetConfig:
     action_space: Optional[List[Action]] = None
 
     # 99 in memory training data
-    sub_sampling_technique: Optional[DataImbalanceCorrection] = None  # dont allow
+    sub_sampling_technique: Optional[DataImbalanceCorrectionTechnique] = None  # dont allow
     # multiple
     # options
     # meta
@@ -333,4 +333,14 @@ arg_action_space = click.option("--action_space",
                                      "to train using all three or ActionSpace to train on "
                                      "prl.environment.Wrappers.base.ActionSpace that has multiple bet sizes.")
 # todo
-arg_sub_sampling_technique = click.option()
+arg_sub_sampling_technique = click.option("--sub_sampling_technique",
+                                          default=
+                                          DataImbalanceCorrectionTechnique.
+                                          dont_resample_but_use_label_weights_in_optimizer.value,
+                                          type=int,
+                                          help="Possible Values are \n"
+                                               "0: dont_resample_but_use_label_weights_in_optimizer\n"
+                                               "1: resample_uniform_minimal\n"
+                                               "2: resample_uniform_extended\n"
+                                               "3: resample_raises__to_max_num_raise\n"
+                                               "See `DataImbalanceCorrectionTechnique`. ")

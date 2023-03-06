@@ -70,7 +70,7 @@ class TopPlayerSelector:
         return players
 
     def _get_precomputed_from_disk(self, num_top_players, min_showdowns) -> Dict:
-        logging.info(f'Loading top {num_top_players} players dictionary from disk.')
+        logging.info(f'File with Top {num_top_players} players dictionary exists already. Loading from disk.')
         filename = self.parser.dataset_config.file_top_n_players_min_showdowns
         with open(filename, "r") as data:
             top_n_player_dict = ast.literal_eval(data.read())

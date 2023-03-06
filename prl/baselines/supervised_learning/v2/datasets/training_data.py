@@ -34,7 +34,8 @@ def main(num_top_players,
          action_generation_option,
          min_showdowns,
          target_rounds,
-         action_space):
+         action_space,
+         sub_sampling_technique):
     # Assumes raw_data.py has been ran to download and extract hand histories.
     opt = DatasetConfig(
         num_top_players=num_top_players,
@@ -43,7 +44,8 @@ def main(num_top_players,
         action_generation_option=ActionGenOption(action_generation_option),
         min_showdowns=min_showdowns,
         target_rounds=[Stage(x) for x in target_rounds],
-        action_space=[parse_cmd_action_to_action_cls(action_space)]
+        action_space=[parse_cmd_action_to_action_cls(action_space)],
+        sub_sampling_technique=sub_sampling_technique
     )
 
 

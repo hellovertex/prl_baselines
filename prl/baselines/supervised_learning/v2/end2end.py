@@ -5,7 +5,7 @@ from prl.environment.steinberger.PokerRL import Poker
 
 from prl.baselines.supervised_learning.v2.datasets import raw_data, vectorized_data
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import \
-    DatasetConfig, DataImbalanceCorrection, ActionGenOption
+    DatasetConfig, DataImbalanceCorrectionTechnique, ActionGenOption
 from prl.baselines.supervised_learning.v2.datasets.raw_data import RawData
 
 
@@ -48,7 +48,7 @@ if __name__ == '__main__':
         .make_folds_from_top_players_with_randomized_hand,
         # -- preprocessed
         target_rounds=[Poker.FLOP, Poker.TURN, Poker.RIVER],
-        sub_sampling_techniques=DataImbalanceCorrection
+        sub_sampling_techniques=DataImbalanceCorrectionTechnique
         .dont_resample_but_use_label_weights_in_optimizer,
         action_space=[Action.FOLD, Action.CHECK_CALL, Action.RAISE],
     )
