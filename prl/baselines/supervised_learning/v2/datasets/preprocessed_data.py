@@ -2,6 +2,7 @@ import glob
 import logging
 import os
 from pathlib import Path
+from typing import Type, Union
 
 import click
 import numpy as np
@@ -25,11 +26,7 @@ from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
 )
 from prl.baselines.supervised_learning.v2.datasets.raw_data import \
     make_raw_data_if_not_exists_already
-from prl.baselines.supervised_learning.v2.datasets.top_player_selector import \
-    TopPlayerSelector
-from prl.baselines.supervised_learning.v2.datasets.utils import \
-    parse_cmd_action_to_action_cls
-from prl.baselines.supervised_learning.v2.datasets.vectorized_data import VectorizedData, \
+from prl.baselines.supervised_learning.v2.datasets.vectorized_data import \
     make_vectorized_data_if_not_exists_already
 from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import \
     ParseHsmithyTextToPokerEpisode
@@ -48,6 +45,25 @@ class PreprocessedData:
                                      multiply_by=1)
         self.env = dummy_env
 
+    @staticmethod
+    def parse_cmd_action_to_action_cls(action: str) -> Union[
+        ActionSpaceMinimal,  # Allow dichotomizers only for FOLD,CHECK,RAISE (Single bet size)
+        Type[ActionSpaceMinimal],
+        Type[ActionSpace]
+    ]:
+        if action == 'ActionSpace':
+            return ActionSpace
+        elif action == 'ActionSpaceMinimal':
+            return ActionSpaceMinimal
+        elif action.casefold().strip() == 'fold':
+            return ActionSpaceMinimal.FOLD
+        elif 'check' in action.casefold().strip():
+            return ActionSpaceMinimal.CHECK_CALL
+        elif action.casefold().strip() == 'raise':
+            return ActionSpaceMinimal.RAISE
+        else:
+            raise NotImplementedError
+
     def generate_missing(self):
         if os.path.exists(self.opt.dir_preprocessed_data):
             logging.info(f'Preprocessed data already exists at directory '
@@ -63,6 +79,11 @@ class PreprocessedData:
                              dtype='float32',
                              encoding='cp1252',
                              compression='bz2')
+            if file == '/home/sascha/Documents/github.com/prl_baselines/prl/baselines' \
+                       '/supervised_learning/v2/tests/data/02_vectorized/NL50' \
+                       '/player_pool/folds_from_top_players_with_randomized_hand/Top20Players_n_showdowns=10/data_PlayerRank009355.csv.bz2':
+                a = 1
+                print('debug')
             # float to int if applicable
             df = df.apply(
                 lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
@@ -85,7 +106,7 @@ class PreprocessedData:
                 df = df[df['label'] == target_action]
             # write to disk
             filepath = os.path.join(self.opt.dir_preprocessed_data,
-                                    Path(file).name + '.bz2')
+                                    Path(file).stem + '.bz2')
             header = False
             # df.columns = feature_names
             if not os.path.exists(filepath):
@@ -134,7 +155,7 @@ def main(num_top_players,
         action_generation_option=ActionGenOption(action_generation_option),
         min_showdowns=min_showdowns,
         target_rounds=[Stage(x) for x in target_rounds],
-        action_space=[parse_cmd_action_to_action_cls(action_space)]
+        action_space=[PreprocessedData.parse_cmd_action_to_action_cls(action_space)]
     )
     make_preprocessed_data_if_not_exists_already(dataset_config, use_multiprocessing)
 
