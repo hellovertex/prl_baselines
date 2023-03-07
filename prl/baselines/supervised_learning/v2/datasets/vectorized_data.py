@@ -58,10 +58,11 @@ def encode_episodes(dataset_config,
                     selected_players: List[str],
                     storage: PersistentStorage,
                     file_suffix: str,
-                    max_lines_per_file=50000):
+                    max_episodes_per_file=25000):
     training_data, labels = None, None
     it = 0
     for ep in tqdm(episodesV2):
+        it += 1
         try:
             observations, actions = encoder.encode_episode(
                 ep,
@@ -85,14 +86,13 @@ def encode_episodes(dataset_config,
                 labels = np.concatenate((labels, actions), axis=0)
             except Exception as e:
                 print(e)
-            if len(training_data) % max_lines_per_file == 0:
+            if it % max_episodes_per_file == 0:
                 storage.vectorized_player_pool_data_to_disk(training_data,
                                                             labels,
                                                             encoder.feature_names,
                                                             file_suffix=file_suffix + str(
                                                                 it))
                 training_data, labels = None, None
-                it += 1
     storage.vectorized_player_pool_data_to_disk(training_data,
                                                 labels,
                                                 encoder.feature_names,
