@@ -325,6 +325,7 @@ class ParseHsmithyTextToPokerEpisode:
             players = self.make_showdown_cards(players, info)
             for pname, player in players.items():
                 if player.is_showdown_player:
+                    has_showdown = True
                     showdown_players.append(player)
                     if player.money_won_this_round > 0:
                         winners.append(player)

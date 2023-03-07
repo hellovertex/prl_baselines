@@ -311,7 +311,7 @@ arg_use_multiprocessing = click.option("--use_multiprocessing",
                                        help="Whether to parallelize encoding of files per TopRanked Player. "
                                             "Defaults to True. If turned off, data generation can be VERY slow (days).")
 arg_min_showdowns = click.option("--min_showdowns",
-                                 default=5000,
+                                 default=10,
                                  type=int,
                                  help="Minimum number of showdowns required to be eligible for top player "
                                       "ranking. Default is 5 for debugging. 5000 is recommended for real "
