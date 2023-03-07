@@ -47,12 +47,11 @@ class InMemoryDataset(Dataset):
             df = pd.read_csv(file,
                              sep=',',
                              dtype='float32',
-                             # dtype='float16',
                              encoding='cp1252',
                              compression='bz2')
             df = df.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
             df = df.sample(frac=1)
-            df_total = pd.concat([df_total, df])
+            df_total = pd.concat([df_total, df], ignore_index=True)
         if self.dataset_config.sub_sampling_technique != \
                 DataImbalanceCorrection.dont_resample_but_use_label_weights_in_optimizer:
             raise NotImplementedError("Downsampling Checks/Folds and Upsampling Raises "

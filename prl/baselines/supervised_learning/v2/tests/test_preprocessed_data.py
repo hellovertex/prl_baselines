@@ -11,6 +11,8 @@ from prl.baselines.supervised_learning.v2.datasets.dataset_config import ActionG
 from prl.baselines.supervised_learning.v2.datasets.preprocessed_data import \
     make_preprocessed_data_if_not_exists_already, PreprocessedData
 
+vectorized_observation_shape = 569
+
 
 # load vectorized data
 # from default directory
@@ -94,3 +96,17 @@ def test_preprocessor_target_round_clipping(dataset_config, csv_files):
             if stage not in dataset_config.target_rounds:
                 name = 'round_' + stage.name.casefold()
                 assert not (df[name] == 1).any()
+
+
+def test_preprocessor_not_changing_vectorized_observation_1(csv_files):
+    for file in csv_files:
+        df = pd.read_csv(file,
+                         sep=',',
+                         dtype='float32',
+                         encoding='cp1252',
+                         compression='bz2')
+        for r in df.to_numpy():
+            # each column can not be much larger than one and most of them are zero,
+            # so if the sum along all dimensions is greater than the length of
+            # the vector, the data has changed after vectorization
+            assert sum(r) < vectorized_observation_shape
