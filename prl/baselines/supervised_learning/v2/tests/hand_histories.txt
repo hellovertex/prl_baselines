@@ -74,6 +74,5940 @@ Seat 5: Clamfish0 (big blind) folded before Flop
 Seat 6: JuanAlmighty showed [As Ah] and won ($98.75) with a pair of Aces
 
 
+PokerStars Hand #208959182234:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:01:32 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($49.50 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: mikkas111 ($52.45 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+mikkas111: folds
+mikkas111 leaves the table
+G.Andrei95: folds
+Straubje: calls $0.25
+vovvesvart joins the table at seat #3
+Becks Baker: checks
+*** FLOP *** [6s 3s 4h]
+max21rus1988 joins the table at seat #4
+Rezzonner joins the table at seat #6
+Straubje: bets $1
+Becks Baker: raises $2.75 to $3.75
+Straubje: folds
+Uncalled bet ($2.75) returned to Becks Baker
+Becks Baker collected $2.85 from pot
+*** SUMMARY ***
+Total pot $3 | Rake $0.15
+Board [6s 3s 4h]
+Seat 1: Straubje (small blind) folded on the Flop
+Seat 2: Becks Baker (big blind) collected ($2.85)
+Seat 3: mikkas111 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959195974:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:02:12 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($48 in chips)
+Seat 2: Becks Baker ($51.35 in chips)
+Seat 3: vovvesvart ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+max21rus1988: sits out
+Rezzonner: sits out
+*** HOLE CARDS ***
+G.Andrei95: folds
+Straubje: calls $0.50
+Becks Baker: raises $2 to $2.50
+vovvesvart: folds
+Straubje: calls $2
+*** FLOP *** [3s 8h 9h]
+Becks Baker: checks
+Straubje: bets $3
+Becks Baker: folds
+Uncalled bet ($3) returned to Straubje
+Straubje collected $5.22 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $5.50 | Rake $0.28
+Board [3s 8h 9h]
+Seat 1: Straubje (button) collected ($5.22)
+Seat 2: Becks Baker (small blind) folded on the Flop
+Seat 3: vovvesvart (big blind) folded before Flop
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959211670:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:02:57 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($50.72 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($49.50 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+Rezzonner: sits out
+*** HOLE CARDS ***
+G.Andrei95: folds
+Straubje: calls $0.50
+Becks Baker: folds
+vovvesvart: calls $0.25
+max21rus1988: checks
+*** FLOP *** [5h Ad Js]
+vovvesvart: checks
+max21rus1988: checks
+Straubje: bets $1.50
+vovvesvart: folds
+max21rus1988: folds
+Uncalled bet ($1.50) returned to Straubje
+Straubje collected $1.42 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $1.50 | Rake $0.08
+Board [5h Ad Js]
+Seat 1: Straubje collected ($1.42)
+Seat 2: Becks Baker (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) folded on the Flop
+Seat 4: max21rus1988 (big blind) folded on the Flop
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959234900:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:03:41 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($51.64 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($49 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 6: Rezzonner ($50 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: is sitting out
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: raises $2 to $2.50
+Becks Baker: folds
+vovvesvart: calls $2.50
+max21rus1988: folds
+Rezzonner: folds
+*** FLOP *** [Jc 6d Jd]
+Straubje: bets $3.50
+vovvesvart: calls $3.50
+*** TURN *** [Jc 6d Jd] [6h]
+Straubje: bets $6
+vovvesvart: folds
+Uncalled bet ($6) returned to Straubje
+Straubje collected $12.11 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $12.75 | Rake $0.64
+Board [Jc 6d Jd 6h]
+Seat 1: Straubje collected ($12.11)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) folded on the Turn
+Seat 4: max21rus1988 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded before Flop
+
+
+PokerStars Hand #208959260633:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:04:54 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($57.75 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($43 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 6: Rezzonner ($50 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: raises $0.75 to $1.25
+vovvesvart: folds
+max21rus1988: folds
+Rezzonner: folds
+Straubje: folds
+Uncalled bet ($0.75) returned to Becks Baker
+Becks Baker collected $1.25 from pot
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: Straubje (big blind) folded before Flop
+Seat 2: Becks Baker collected ($1.25)
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: max21rus1988 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208959264938:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:05:06 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($57.25 in chips)
+Seat 2: Becks Baker ($50.75 in chips)
+Seat 3: vovvesvart ($43 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 6: Rezzonner ($50 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+G.Andrei95: sits out
+*** HOLE CARDS ***
+vovvesvart: raises $0.50 to $1
+max21rus1988: raises $3.50 to $4.50
+Rezzonner: folds
+Straubje: folds
+Becks Baker: folds
+vovvesvart: calls $3.50
+*** FLOP *** [7s Js 8h]
+vovvesvart: checks
+max21rus1988: bets $6.11
+vovvesvart: folds
+Uncalled bet ($6.11) returned to max21rus1988
+max21rus1988 collected $9.26 from pot
+max21rus1988: doesn't show hand
+*** SUMMARY ***
+Total pot $9.75 | Rake $0.49
+Board [7s Js 8h]
+Seat 1: Straubje (small blind) folded before Flop
+Seat 2: Becks Baker (big blind) folded before Flop
+Seat 3: vovvesvart folded on the Flop
+Seat 4: max21rus1988 collected ($9.26)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959279536:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:05:48 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($57 in chips)
+Seat 2: Becks Baker ($50.25 in chips)
+Seat 3: vovvesvart ($38.50 in chips)
+Seat 4: max21rus1988 ($54.76 in chips)
+Seat 6: Rezzonner ($50 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+G.Andrei95: sits out
+*** HOLE CARDS ***
+max21rus1988: folds
+Rezzonner: folds
+Straubje: raises $1.50 to $2
+Becks Baker: folds
+vovvesvart: calls $1.50
+*** FLOP *** [7d 2d 9c]
+vovvesvart: checks
+Straubje: bets $3
+vovvesvart: calls $3
+*** TURN *** [7d 2d 9c] [7h]
+vovvesvart: checks
+Straubje: bets $8
+vovvesvart: calls $8
+*** RIVER *** [7d 2d 9c 7h] [Ts]
+vovvesvart: checks
+Straubje: checks
+*** SHOW DOWN ***
+vovvesvart: shows [2h 6h] (two pair, Sevens and Deuces)
+Straubje: shows [Ks 9h] (two pair, Nines and Sevens)
+Straubje collected $24.94 from pot
+*** SUMMARY ***
+Total pot $26.25 | Rake $1.31
+Board [7d 2d 9c 7h Ts]
+Seat 1: Straubje (button) showed [Ks 9h] and won ($24.94) with two pair, Nines and Sevens
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) showed [2h 6h] and lost with two pair, Sevens and Deuces
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959296629:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:06:38 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($68.94 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($25.50 in chips)
+Seat 4: max21rus1988 ($54.76 in chips)
+Seat 6: Rezzonner ($50 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+G.Andrei95: sits out
+*** HOLE CARDS ***
+Rezzonner: raises $0.75 to $1.25
+Straubje: raises $2.25 to $3.50
+Becks Baker: folds
+vovvesvart: calls $3.25
+max21rus1988: folds
+Rezzonner: calls $2.25
+*** FLOP *** [Kh 9c Jc]
+vovvesvart: bets $22 and is all-in
+Rezzonner: folds
+Straubje: calls $22
+*** TURN *** [Kh 9c Jc] [3c]
+*** RIVER *** [Kh 9c Jc 3c] [Js]
+*** SHOW DOWN ***
+vovvesvart: shows [4d Kc] (two pair, Kings and Jacks)
+Straubje: shows [Ah Th] (a pair of Jacks)
+vovvesvart collected $53 from pot
+*** SUMMARY ***
+Total pot $55 | Rake $2
+Board [Kh 9c Jc 3c Js]
+Seat 1: Straubje showed [Ah Th] and lost with a pair of Jacks
+Seat 2: Becks Baker (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) showed [4d Kc] and won ($53) with two pair, Kings and Jacks
+Seat 4: max21rus1988 (big blind) folded before Flop
+Seat 6: Rezzonner folded on the Flop
+
+
+PokerStars Hand #208959311551:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:07:20 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($43.44 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($53 in chips)
+Seat 4: max21rus1988 ($54.26 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($50 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: raises $0.75 to $1.25
+Straubje: folds
+Becks Baker: folds
+vovvesvart: raises $51.75 to $53 and is all-in
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Uncalled bet ($51.75) returned to vovvesvart
+vovvesvart collected $3.25 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $3.25 | Rake $0
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) collected ($3.25)
+Seat 4: max21rus1988 (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) folded before Flop
+Seat 6: Rezzonner folded before Flop
+
+
+PokerStars Hand #208959319122:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:07:42 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($43.44 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($55 in chips)
+Seat 4: max21rus1988 ($54.01 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($50 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: raises $2 to $2.50
+Becks Baker: folds
+vovvesvart: folds
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Uncalled bet ($2) returned to Straubje
+Straubje collected $1.25 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: Straubje collected ($1.25)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: max21rus1988 (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded before Flop
+
+
+PokerStars Hand #208959325197:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:08:00 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($44.19 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($55 in chips)
+Seat 4: max21rus1988 ($54.01 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($50 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: folds
+vovvesvart: folds
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: raises $1 to $1.50
+Straubje: calls $1
+*** FLOP *** [8c 6c 5d]
+Rezzonner: checks
+Straubje: bets $0.50
+Rezzonner: calls $0.50
+*** TURN *** [8c 6c 5d] [Qh]
+Rezzonner: checks
+Straubje: bets $2.50
+Rezzonner: calls $2.50
+*** RIVER *** [8c 6c 5d Qh] [5c]
+Rezzonner: checks
+Straubje: bets $4
+Rezzonner: folds
+Uncalled bet ($4) returned to Straubje
+Straubje collected $8.55 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $9 | Rake $0.45
+Board [8c 6c 5d Qh 5c]
+Seat 1: Straubje (big blind) collected ($8.55)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded on the River
+
+
+PokerStars Hand #208959345728:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:08:59 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($48.24 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($55 in chips)
+Seat 4: max21rus1988 ($54.01 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($50 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: raises $1 to $1.50
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: raises $2.25 to $3.75
+Straubje: folds
+Becks Baker: folds
+vovvesvart: calls $2.25
+*** FLOP *** [Qs 3s Kc]
+vovvesvart: checks
+Rezzonner: bets $3.82
+vovvesvart: calls $3.82
+*** TURN *** [Qs 3s Kc] [Ks]
+vovvesvart: checks
+Rezzonner: bets $11.50
+vovvesvart: folds
+Uncalled bet ($11.50) returned to Rezzonner
+Rezzonner collected $15.10 from pot
+Rezzonner: doesn't show hand
+*** SUMMARY ***
+Total pot $15.89 | Rake $0.79
+Board [Qs 3s Kc Ks]
+Seat 1: Straubje (small blind) folded before Flop
+Seat 2: Becks Baker (big blind) folded before Flop
+Seat 3: vovvesvart folded on the Turn
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner (button) collected ($15.10)
+
+
+PokerStars Hand #208959370883:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:10:11 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($47.99 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($47.43 in chips)
+Seat 4: max21rus1988 ($54.01 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($57.53 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: folds
+G.Andrei95: raises $0.75 to $1.25
+Rezzonner: folds
+Straubje: calls $1.25
+Becks Baker: folds
+vovvesvart: calls $0.75
+*** FLOP *** [8d 4c Kd]
+vovvesvart: checks
+G.Andrei95: checks
+Straubje: checks
+*** TURN *** [8d 4c Kd] [5h]
+vovvesvart: bets $1.90
+G.Andrei95: folds
+Straubje: raises $1.90 to $3.80
+vovvesvart: raises $42.38 to $46.18 and is all-in
+Straubje: folds
+Uncalled bet ($42.38) returned to vovvesvart
+vovvesvart collected $11.02 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $11.60 | Rake $0.58
+Board [8d 4c Kd 5h]
+Seat 1: Straubje (button) folded on the Turn
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) collected ($11.02)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded on the Turn
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959429446:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:12:46 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($34.97 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($50.43 in chips)
+Seat 4: max21rus1988 ($53.51 in chips)
+Seat 5: G.Andrei95 ($61.66 in chips)
+Seat 6: Rezzonner ($57.53 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: raises $0.75 to $1.25
+Straubje: folds
+Becks Baker: folds
+vovvesvart: calls $1.25
+max21rus1988: folds
+G.Andrei95: calls $0.75
+*** FLOP *** [3c 2d 6h]
+G.Andrei95: checks
+Rezzonner: checks
+vovvesvart: bets $1.90
+G.Andrei95: calls $1.90
+Rezzonner: folds
+*** TURN *** [3c 2d 6h] [9s]
+G.Andrei95: checks
+vovvesvart: bets $7.41
+G.Andrei95: folds
+Uncalled bet ($7.41) returned to vovvesvart
+vovvesvart collected $7.41 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $7.80 | Rake $0.39
+Board [3c 2d 6h 9s]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) collected ($7.41)
+Seat 4: max21rus1988 (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) folded on the Turn
+Seat 6: Rezzonner folded on the Flop
+
+
+PokerStars Hand #208959397747:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:11:29 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($42.94 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($53.40 in chips)
+Seat 4: max21rus1988 ($54.01 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($57.53 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: raises $0.75 to $1.25
+Rezzonner: folds
+Straubje: calls $1.25
+Becks Baker: calls $1.25
+vovvesvart: calls $1
+max21rus1988: folds
+*** FLOP *** [8h Kc Ts]
+vovvesvart: checks
+G.Andrei95: bets $1.72
+Straubje: calls $1.72
+Becks Baker: folds
+vovvesvart: calls $1.72
+*** TURN *** [8h Kc Ts] [9s]
+vovvesvart: checks
+G.Andrei95: checks
+Straubje: bets $5
+vovvesvart: folds
+G.Andrei95: calls $5
+*** RIVER *** [8h Kc Ts 9s] [Qd]
+G.Andrei95: checks
+Straubje: checks
+*** SHOW DOWN ***
+G.Andrei95: shows [Kh Ac] (a pair of Kings)
+Straubje: mucks hand
+G.Andrei95 collected $19.63 from pot
+*** SUMMARY ***
+Total pot $20.66 | Rake $1.03
+Board [8h Kc Ts 9s Qd]
+Seat 1: Straubje mucked
+Seat 2: Becks Baker (button) folded on the Flop
+Seat 3: vovvesvart (small blind) folded on the Turn
+Seat 4: max21rus1988 (big blind) folded before Flop
+Seat 5: G.Andrei95 showed [Kh Ac] and won ($19.63) with a pair of Kings
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959447432:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:13:38 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($48.73 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($54.69 in chips)
+Seat 4: max21rus1988 ($53.26 in chips)
+Seat 5: G.Andrei95 ($58.51 in chips)
+Seat 6: Rezzonner ($56.28 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: folds
+Becks Baker: folds
+vovvesvart: raises $1 to $1.50
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Uncalled bet ($1) returned to vovvesvart
+vovvesvart collected $1.25 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart collected ($1.25)
+Seat 4: max21rus1988 (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded before Flop
+
+
+PokerStars Hand #208959452357:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:13:53 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($48.73 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($55.44 in chips)
+Seat 4: max21rus1988 ($53.26 in chips)
+Seat 5: G.Andrei95 ($58.26 in chips)
+Seat 6: Rezzonner ($55.78 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: folds
+vovvesvart: raises $0.50 to $1
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.50
+*** FLOP *** [3h Qd 2h]
+Straubje: checks
+vovvesvart: bets $1.07
+Straubje has timed out
+Straubje: folds
+Uncalled bet ($1.07) returned to vovvesvart
+vovvesvart collected $2.14 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $2.25 | Rake $0.11
+Board [3h Qd 2h]
+Seat 1: Straubje (big blind) folded on the Flop
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart collected ($2.14)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208959475341:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:15:01 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($56.58 in chips)
+Seat 4: max21rus1988 ($53.26 in chips)
+Seat 5: G.Andrei95 ($58.26 in chips)
+Seat 6: Rezzonner ($55.53 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: folds
+G.Andrei95: raises $0.75 to $1.25
+Rezzonner: raises $2.75 to $4
+Becks Baker: folds
+vovvesvart: calls $3.50
+G.Andrei95: calls $2.75
+*** FLOP *** [7c 3d Tc]
+vovvesvart: checks
+G.Andrei95: checks
+Rezzonner: bets $7.68
+vovvesvart: calls $7.68
+G.Andrei95: folds
+*** TURN *** [7c 3d Tc] [Ah]
+vovvesvart: checks
+Rezzonner: checks
+*** RIVER *** [7c 3d Tc Ah] [7s]
+vovvesvart: checks
+Rezzonner: checks
+*** SHOW DOWN ***
+vovvesvart: shows [3h 5c] (two pair, Sevens and Threes)
+Rezzonner: mucks hand
+vovvesvart collected $26.23 from pot
+*** SUMMARY ***
+Total pot $27.61 | Rake $1.38
+Board [7c 3d Tc Ah 7s]
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) showed [3h 5c] and won ($26.23) with two pair, Sevens and Threes
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded on the Flop
+Seat 6: Rezzonner (button) mucked
+
+
+PokerStars Hand #208959498461:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:16:09 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($47.73 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($71.13 in chips)
+Seat 4: max21rus1988 ($53.26 in chips)
+Seat 5: G.Andrei95 ($54.26 in chips)
+Seat 6: Rezzonner ($50 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+Straubje: posts small blind $0.25
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.50
+Becks Baker: folds
+vovvesvart: raises $0.50 to $1
+max21rus1988: raises $4 to $5
+Straubje: calls $4.50
+vovvesvart: folds
+*** FLOP *** [4c Kc 7h]
+max21rus1988: bets $7.06
+Straubje: raises $10.06 to $17.12
+max21rus1988: raises $31.14 to $48.26 and is all-in
+Straubje: calls $25.36 and is all-in
+Uncalled bet ($5.78) returned to max21rus1988
+*** TURN *** [4c Kc 7h] [6c]
+*** RIVER *** [4c Kc 7h 6c] [Td]
+*** SHOW DOWN ***
+max21rus1988: shows [As Kd] (a pair of Kings)
+Straubje: shows [Tc 7d] (two pair, Tens and Sevens)
+Straubje cashed out the hand for $20.53 | Cash Out Fee $0.21
+*** SUMMARY ***
+Total pot $96.21 | Rake $2
+Board [4c Kc 7h 6c Td]
+Seat 1: Straubje showed [Tc 7d] and won ($94.21) with two pair, Tens and Sevens (pot not awarded as player cashed out)
+Seat 2: Becks Baker (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) folded before Flop
+Seat 4: max21rus1988 (big blind) showed [As Kd] and lost with a pair of Kings
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959521680:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:17:19 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($20.53 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($70.13 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($54.26 in chips)
+Seat 6: Rezzonner ($50 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: raises $0.75 to $1.25
+Straubje: calls $1.25
+Becks Baker: folds
+vovvesvart: calls $1.25
+max21rus1988 said, "nice cash out bro))"
+max21rus1988: folds
+G.Andrei95: folds
+*** FLOP *** [6c 9s 6s]
+Rezzonner: checks
+Straubje: checks
+vovvesvart: checks
+*** TURN *** [6c 9s 6s] [4d]
+Rezzonner: checks
+Straubje: checks
+vovvesvart: bets $2.14
+Rezzonner: folds
+Straubje has timed out
+Straubje: folds
+Uncalled bet ($2.14) returned to vovvesvart
+vovvesvart collected $4.28 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $4.50 | Rake $0.22
+Board [6c 9s 6s 4d]
+Seat 1: Straubje folded on the Turn
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) collected ($4.28)
+Seat 4: max21rus1988 (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) folded before Flop
+Seat 6: Rezzonner folded on the Turn
+
+
+PokerStars Hand #208959557239:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:18:39 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($73.16 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($53.76 in chips)
+Seat 6: Rezzonner ($50 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: raises $0.75 to $1.25
+vovvesvart: calls $1.25
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+*** FLOP *** [8h 9c 5h]
+Becks Baker: checks
+vovvesvart: bets $3.09
+Becks Baker: folds
+Uncalled bet ($3.09) returned to vovvesvart
+vovvesvart collected $3.09 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $3.25 | Rake $0.16
+Board [8h 9c 5h]
+Seat 2: Becks Baker folded on the Flop
+Seat 3: vovvesvart collected ($3.09)
+Seat 4: max21rus1988 (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded before Flop
+
+
+PokerStars Hand #208959567955:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:19:11 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($50 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($75 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($53.51 in chips)
+Seat 6: Rezzonner ($50 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: folds
+vovvesvart: raises $1 to $1.50
+max21rus1988: folds
+G.Andrei95: calls $1.50
+Rezzonner: folds
+Straubje: calls $1
+*** FLOP *** [Ac Th Ts]
+Straubje: checks
+vovvesvart: bets $0.50
+G.Andrei95: folds
+Straubje: calls $0.50
+*** TURN *** [Ac Th Ts] [3h]
+Straubje: checks
+vovvesvart: checks
+*** RIVER *** [Ac Th Ts 3h] [Jh]
+Straubje: checks
+vovvesvart: checks
+*** SHOW DOWN ***
+Straubje: shows [2d 6h] (a pair of Tens)
+vovvesvart: shows [9d Jd] (two pair, Jacks and Tens)
+vovvesvart collected $5.46 from pot
+*** SUMMARY ***
+Total pot $5.75 | Rake $0.29
+Board [Ac Th Ts 3h Jh]
+Seat 1: Straubje (big blind) showed [2d 6h] and lost with a pair of Tens
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart showed [9d Jd] and won ($5.46) with two pair, Jacks and Tens
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded on the Flop
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208959589426:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:20:16 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($48 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($78.46 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($52.01 in chips)
+Seat 6: Rezzonner ($50 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: raises $0.50 to $1
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.75
+Becks Baker: folds
+*** FLOP *** [Ks Kc Jd]
+Straubje: bets $1.50
+vovvesvart: calls $1.50
+*** TURN *** [Ks Kc Jd] [Kd]
+Straubje: checks
+vovvesvart: checks
+*** RIVER *** [Ks Kc Jd Kd] [8s]
+Straubje: checks
+vovvesvart: checks
+*** SHOW DOWN ***
+Straubje: shows [Qh 4h] (three of a kind, Kings)
+vovvesvart: shows [6d 6c] (a full house, Kings full of Sixes)
+vovvesvart collected $5.22 from pot
+*** SUMMARY ***
+Total pot $5.50 | Rake $0.28
+Board [Ks Kc Jd Kd 8s]
+Seat 1: Straubje (small blind) showed [Qh 4h] and lost with three of a kind, Kings
+Seat 2: Becks Baker (big blind) folded before Flop
+Seat 3: vovvesvart showed [6d 6c] and won ($5.22) with a full house, Kings full of Sixes
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959604043:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:21:00 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($45.50 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($81.18 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($52.01 in chips)
+Seat 6: Rezzonner ($50 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.50
+Becks Baker: folds
+vovvesvart: checks
+*** FLOP *** [Kd 7c 3h]
+vovvesvart: checks
+Straubje: bets $1
+vovvesvart: folds
+Uncalled bet ($1) returned to Straubje
+Straubje collected $1.19 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0.06
+Board [Kd 7c 3h]
+Seat 1: Straubje (button) collected ($1.19)
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) folded on the Flop
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959614485:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:21:31 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($46.19 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($80.68 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($52.01 in chips)
+Seat 6: Rezzonner ($50 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.50
+Becks Baker: folds
+vovvesvart: calls $0.25
+max21rus1988: checks
+*** FLOP *** [2c 5s 9h]
+vovvesvart: checks
+max21rus1988: checks
+Straubje: bets $1.50
+vovvesvart: folds
+max21rus1988: folds
+Uncalled bet ($1.50) returned to Straubje
+Straubje collected $1.42 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $1.50 | Rake $0.08
+Board [2c 5s 9h]
+Seat 1: Straubje collected ($1.42)
+Seat 2: Becks Baker (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) folded on the Flop
+Seat 4: max21rus1988 (big blind) folded on the Flop
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959660391:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:23:51 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($45.61 in chips)
+Seat 2: Becks Baker ($54.44 in chips)
+Seat 3: vovvesvart ($78.68 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50.51 in chips)
+Seat 6: Rezzonner ($50 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: folds
+Becks Baker: folds
+vovvesvart: raises $0.50 to $1
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: calls $0.50
+*** FLOP *** [3h Kh 2c]
+Rezzonner: checks
+vovvesvart: checks
+*** TURN *** [3h Kh 2c] [6h]
+Rezzonner: checks
+vovvesvart: bets $1.07
+Rezzonner: calls $1.07
+*** RIVER *** [3h Kh 2c 6h] [5h]
+Rezzonner: checks
+vovvesvart: checks
+*** SHOW DOWN ***
+Rezzonner: shows [Th Ad] (a flush, King high)
+vovvesvart: mucks hand
+Rezzonner collected $4.17 from pot
+*** SUMMARY ***
+Total pot $4.39 | Rake $0.22
+Board [3h Kh 2c 6h 5h]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart mucked
+Seat 4: max21rus1988 (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) showed [Th Ad] and won ($4.17) with a flush, King high
+
+
+PokerStars Hand #208959630222:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:22:19 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($47.11 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($80.18 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($52.01 in chips)
+Seat 6: Rezzonner ($50 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Straubje: calls $0.50
+Becks Baker: raises $1 to $1.50
+vovvesvart: calls $1.50
+max21rus1988: folds
+G.Andrei95: calls $1
+Straubje: calls $1
+*** FLOP *** [9d 4h 8h]
+G.Andrei95: checks
+Straubje: checks
+Becks Baker: checks
+vovvesvart: checks
+*** TURN *** [9d 4h 8h] [2h]
+G.Andrei95: checks
+Straubje: checks
+Becks Baker: bets $3.86
+vovvesvart: folds
+G.Andrei95: folds
+Straubje: folds
+Uncalled bet ($3.86) returned to Becks Baker
+Becks Baker collected $5.94 from pot
+*** SUMMARY ***
+Total pot $6.25 | Rake $0.31
+Board [9d 4h 8h 2h]
+Seat 1: Straubje folded on the Turn
+Seat 2: Becks Baker collected ($5.94)
+Seat 3: vovvesvart (button) folded on the Turn
+Seat 4: max21rus1988 (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) folded on the Turn
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959675961:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:24:38 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($45.61 in chips)
+Seat 2: Becks Baker ($54.44 in chips)
+Seat 3: vovvesvart ($76.61 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50.26 in chips)
+Seat 6: Rezzonner ($52.10 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: raises $0.75 to $1.25
+vovvesvart has timed out
+vovvesvart: folds
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: raises $1.75 to $3
+Becks Baker: folds
+Uncalled bet ($1.75) returned to Straubje
+Straubje collected $2.75 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $2.75 | Rake $0
+Seat 1: Straubje (big blind) collected ($2.75)
+Seat 2: Becks Baker folded before Flop
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208959688936:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:25:17 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($47.11 in chips)
+Seat 2: Becks Baker ($53.19 in chips)
+Seat 3: vovvesvart ($76.61 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50.26 in chips)
+Seat 6: Rezzonner ($51.85 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: raises $0.50 to $1
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.75
+Becks Baker: calls $0.50
+*** FLOP *** [3d 6d 7h]
+Straubje: checks
+Becks Baker: checks
+vovvesvart: checks
+*** TURN *** [3d 6d 7h] [8c]
+Straubje: bets $1.50
+Becks Baker: folds
+vovvesvart: calls $1.50
+*** RIVER *** [3d 6d 7h 8c] [5d]
+Straubje: bets $3
+vovvesvart: raises $3 to $6
+Straubje: calls $3
+*** SHOW DOWN ***
+vovvesvart: shows [9h Jc] (a straight, Five to Nine)
+Straubje: mucks hand
+vovvesvart collected $17.10 from pot
+*** SUMMARY ***
+Total pot $18 | Rake $0.90
+Board [3d 6d 7h 8c 5d]
+Seat 1: Straubje (small blind) mucked
+Seat 2: Becks Baker (big blind) folded on the Turn
+Seat 3: vovvesvart showed [9h Jc] and won ($17.10) with a straight, Five to Nine
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959708268:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:26:16 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($38.61 in chips)
+Seat 2: Becks Baker ($52.19 in chips)
+Seat 3: vovvesvart ($85.21 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50.26 in chips)
+Seat 6: Rezzonner ($51.85 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: raises $0.75 to $1.25
+Straubje: calls $1.25
+Becks Baker: calls $1
+vovvesvart: calls $0.75
+*** FLOP *** [Qd 2h Jc]
+Becks Baker: checks
+vovvesvart: checks
+Rezzonner: bets $3.14
+Straubje: folds
+Becks Baker: folds
+vovvesvart: folds
+Uncalled bet ($3.14) returned to Rezzonner
+Rezzonner collected $4.75 from pot
+Rezzonner: doesn't show hand
+*** SUMMARY ***
+Total pot $5 | Rake $0.25
+Board [Qd 2h Jc]
+Seat 1: Straubje (button) folded on the Flop
+Seat 2: Becks Baker (small blind) folded on the Flop
+Seat 3: vovvesvart (big blind) folded on the Flop
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner collected ($4.75)
+
+
+PokerStars Hand #208959723761:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:27:03 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($48.75 in chips)
+Seat 2: Becks Baker ($50.94 in chips)
+Seat 3: vovvesvart ($83.96 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50.26 in chips)
+Seat 6: Rezzonner ($55.35 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: folds
+Becks Baker: raises $0.75 to $1.25
+vovvesvart: calls $1
+max21rus1988: folds
+*** FLOP *** [9s Ts 6d]
+vovvesvart: checks
+Becks Baker: bets $1.85
+vovvesvart: calls $1.85
+*** TURN *** [9s Ts 6d] [As]
+vovvesvart: checks
+Becks Baker: bets $6.36
+vovvesvart: folds
+Uncalled bet ($6.36) returned to Becks Baker
+Becks Baker collected $6.36 from pot
+*** SUMMARY ***
+Total pot $6.70 | Rake $0.34
+Board [9s Ts 6d As]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker (button) collected ($6.36)
+Seat 3: vovvesvart (small blind) folded on the Turn
+Seat 4: max21rus1988 (big blind) folded before Flop
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959746722:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:28:13 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($48.75 in chips)
+Seat 2: Becks Baker ($54.20 in chips)
+Seat 3: vovvesvart ($80.86 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50.26 in chips)
+Seat 6: Rezzonner ($55.35 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Straubje has timed out
+Straubje: folds
+Becks Baker: folds
+vovvesvart has timed out
+vovvesvart: folds
+max21rus1988: raises $0.75 to $1.25
+G.Andrei95: folds
+Uncalled bet ($0.75) returned to max21rus1988
+max21rus1988 collected $1 from pot
+max21rus1988: doesn't show hand
+*** SUMMARY ***
+Total pot $1 | Rake $0
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) folded before Flop (didn't bet)
+Seat 4: max21rus1988 (small blind) collected ($1)
+Seat 5: G.Andrei95 (big blind) folded before Flop
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959759830:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:28:44 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($48.75 in chips)
+Seat 2: Becks Baker ($54.20 in chips)
+Seat 3: vovvesvart ($80.86 in chips)
+Seat 4: max21rus1988 ($50.50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($55.35 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: folds
+Becks Baker: folds
+vovvesvart: raises $0.50 to $1
+max21rus1988: folds
+G.Andrei95: raises $3.50 to $4.50
+Rezzonner: raises $6.75 to $11.25
+vovvesvart: folds
+G.Andrei95: folds
+Uncalled bet ($6.75) returned to Rezzonner
+Rezzonner collected $10 from pot
+Rezzonner: doesn't show hand
+*** SUMMARY ***
+Total pot $10 | Rake $0
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart folded before Flop
+Seat 4: max21rus1988 (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) collected ($10)
+
+
+PokerStars Hand #208959770696:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:29:18 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($48.75 in chips)
+Seat 2: Becks Baker ($54.20 in chips)
+Seat 3: vovvesvart ($79.86 in chips)
+Seat 4: max21rus1988 ($50.50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($60.85 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: folds
+vovvesvart: raises $1 to $1.50
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $1
+*** FLOP *** [3h 3d Kh]
+Straubje: bets $2
+vovvesvart: folds
+Uncalled bet ($2) returned to Straubje
+Straubje collected $3.09 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $3.25 | Rake $0.16
+Board [3h 3d Kh]
+Seat 1: Straubje (big blind) collected ($3.09)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart folded on the Flop
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208959779992:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:29:47 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($50.34 in chips)
+Seat 2: Becks Baker ($54.20 in chips)
+Seat 3: vovvesvart ($78.36 in chips)
+Seat 4: max21rus1988 ($50.50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($60.60 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: folds
+max21rus1988: raises $0.75 to $1.25
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: folds
+Becks Baker: calls $0.75
+*** FLOP *** [Js 5d Tc]
+Becks Baker: checks
+max21rus1988: bets $1.31
+Becks Baker: calls $1.31
+*** TURN *** [Js 5d Tc] [4c]
+Becks Baker: checks
+max21rus1988: bets $3.82
+Becks Baker: folds
+Uncalled bet ($3.82) returned to max21rus1988
+max21rus1988 collected $5.10 from pot
+max21rus1988: doesn't show hand
+*** SUMMARY ***
+Total pot $5.37 | Rake $0.27
+Board [Js 5d Tc 4c]
+Seat 1: Straubje (small blind) folded before Flop
+Seat 2: Becks Baker (big blind) folded on the Turn
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: max21rus1988 collected ($5.10)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959830465:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:32:08 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($50.09 in chips)
+Seat 2: Becks Baker ($56.79 in chips)
+Seat 3: vovvesvart ($124.93 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($59.35 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Straubje: calls $0.50
+Becks Baker: folds
+vovvesvart: folds
+max21rus1988: folds
+G.Andrei95: checks
+*** FLOP *** [3d 8c Tc]
+G.Andrei95: checks
+Straubje: bets $2
+G.Andrei95: folds
+Uncalled bet ($2) returned to Straubje
+Straubje collected $1.19 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0.06
+Board [3d 8c Tc]
+Seat 1: Straubje collected ($1.19)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) folded before Flop (didn't bet)
+Seat 4: max21rus1988 (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) folded on the Flop
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959822949:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:31:44 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 2: Becks Baker ($56.79 in chips)
+Seat 3: vovvesvart ($72.64 in chips)
+Seat 4: max21rus1988 ($53.04 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($60.60 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: raises $0.75 to $1.25
+Becks Baker: folds
+vovvesvart: raises $71.39 to $72.64 and is all-in
+max21rus1988: calls $52.54 and is all-in
+Rezzonner: folds
+Uncalled bet ($19.60) returned to vovvesvart
+*** FLOP *** [5d Qs 6d]
+*** TURN *** [5d Qs 6d] [Tc]
+*** RIVER *** [5d Qs 6d Tc] [4c]
+*** SHOW DOWN ***
+vovvesvart: shows [Js Jc] (a pair of Jacks)
+max21rus1988: shows [As Ks] (high card Ace)
+vovvesvart collected $105.33 from pot
+*** SUMMARY ***
+Total pot $107.33 | Rake $2
+Board [5d Qs 6d Tc 4c]
+Seat 2: Becks Baker (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) showed [Js Jc] and won ($105.33) with a pair of Jacks
+Seat 4: max21rus1988 (big blind) showed [As Ks] and lost with high card Ace
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop
+
+
+PokerStars Hand #208959798371:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:30:44 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($50.09 in chips)
+Seat 2: Becks Baker ($51.64 in chips)
+Seat 3: vovvesvart ($78.36 in chips)
+Seat 4: max21rus1988 ($53.04 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($60.60 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje has timed out
+Straubje: folds
+Becks Baker: raises $1 to $1.50
+vovvesvart: calls $1
+*** FLOP *** [7d 5h 8c]
+Becks Baker: checks
+vovvesvart: bets $1.43
+Becks Baker: calls $1.43
+*** TURN *** [7d 5h 8c] [5c]
+Becks Baker: checks
+vovvesvart: bets $2.79
+Becks Baker: raises $9.90 to $12.69
+vovvesvart: folds
+Uncalled bet ($9.90) returned to Becks Baker
+Becks Baker collected $10.87 from pot
+*** SUMMARY ***
+Total pot $11.44 | Rake $0.57
+Board [7d 5h 8c 5c]
+Seat 1: Straubje (button) folded before Flop (didn't bet)
+Seat 2: Becks Baker (small blind) collected ($10.87)
+Seat 3: vovvesvart (big blind) folded on the Turn
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959841843:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:32:44 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($50.78 in chips)
+Seat 2: Becks Baker ($56.79 in chips)
+Seat 3: vovvesvart ($124.93 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($59.35 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: calls $0.50
+Becks Baker: raises $2 to $2.50
+vovvesvart: calls $2.50
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $2
+*** FLOP *** [2s 9s Ad]
+Straubje: checks
+Becks Baker: bets $3.92
+vovvesvart: calls $3.92
+Straubje: folds
+*** TURN *** [2s 9s Ad] [5c]
+Becks Baker: bets $10.69
+vovvesvart: folds
+Uncalled bet ($10.69) returned to Becks Baker
+Becks Baker collected $15.29 from pot
+*** SUMMARY ***
+Total pot $16.09 | Rake $0.80
+Board [2s 9s Ad 5c]
+Seat 1: Straubje folded on the Flop
+Seat 2: Becks Baker collected ($15.29)
+Seat 3: vovvesvart folded on the Turn
+Seat 4: max21rus1988 (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded before Flop
+
+
+PokerStars Hand #208959892868:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:35:24 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($63.36 in chips)
+Seat 2: Becks Baker ($65.66 in chips)
+Seat 3: vovvesvart ($106.51 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($54.35 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: raises $0.50 to $1
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: folds
+Becks Baker: folds
+Uncalled bet ($0.50) returned to vovvesvart
+vovvesvart collected $1.25 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: Straubje (small blind) folded before Flop
+Seat 2: Becks Baker (big blind) folded before Flop
+Seat 3: vovvesvart collected ($1.25)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959867059:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:34:03 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($48.28 in chips)
+Seat 2: Becks Baker ($65.66 in chips)
+Seat 3: vovvesvart ($118.51 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($58.85 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: folds
+vovvesvart: raises $0.50 to $1
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: raises $3.50 to $4.50
+Straubje: calls $4
+vovvesvart: calls $3.50
+*** FLOP *** [7h 8d 8s]
+Rezzonner: checks
+Straubje: bets $7.50
+vovvesvart: calls $7.50
+Rezzonner: folds
+*** TURN *** [7h 8d 8s] [5d]
+Straubje: checks
+vovvesvart: checks
+*** RIVER *** [7h 8d 8s 5d] [5h]
+Straubje: bets $13
+vovvesvart: folds
+Uncalled bet ($13) returned to Straubje
+Straubje collected $27.08 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $28.50 | Rake $1.42
+Board [7h 8d 8s 5d 5h]
+Seat 1: Straubje (big blind) collected ($27.08)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart folded on the River
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded on the Flop
+
+
+PokerStars Hand #208959897502:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:35:39 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($63.11 in chips)
+Seat 2: Becks Baker ($65.16 in chips)
+Seat 3: vovvesvart ($107.26 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($54.35 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: raises $0.75 to $1.25
+G.Andrei95: folds
+Rezzonner: calls $1.25
+Straubje: folds
+Becks Baker: folds
+vovvesvart: calls $0.75
+*** FLOP *** [9d Qc 2h]
+vovvesvart: checks
+max21rus1988: checks
+Rezzonner: checks
+*** TURN *** [9d Qc 2h] [As]
+vovvesvart: checks
+max21rus1988: bets $1.90
+Rezzonner: folds
+vovvesvart: calls $1.90
+*** RIVER *** [9d Qc 2h As] [3s]
+vovvesvart: checks
+max21rus1988: bets $4.25
+vovvesvart: raises $4.25 to $8.50
+max21rus1988: calls $4.25
+*** SHOW DOWN ***
+vovvesvart: shows [2s 3h] (two pair, Threes and Deuces)
+max21rus1988: mucks hand
+vovvesvart collected $23.56 from pot
+*** SUMMARY ***
+Total pot $24.80 | Rake $1.24
+Board [9d Qc 2h As 3s]
+Seat 1: Straubje (button) folded before Flop (didn't bet)
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) showed [2s 3h] and won ($23.56) with two pair, Threes and Deuces
+Seat 4: max21rus1988 mucked
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded on the Turn
+
+
+PokerStars Hand #208959918758:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:36:45 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($63.11 in chips)
+Seat 2: Becks Baker ($64.91 in chips)
+Seat 3: vovvesvart ($119.17 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($53.10 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: folds
+Becks Baker: raises $0.75 to $1.25
+vovvesvart: calls $1
+max21rus1988: calls $0.75
+*** FLOP *** [9c 4h Jh]
+vovvesvart: checks
+max21rus1988: checks
+Becks Baker: bets $1.78
+vovvesvart: calls $1.78
+max21rus1988: folds
+*** TURN *** [9c 4h Jh] [3s]
+vovvesvart: checks
+Becks Baker: checks
+*** RIVER *** [9c 4h Jh 3s] [6h]
+vovvesvart: bets $6.94
+Becks Baker: calls $6.94
+*** SHOW DOWN ***
+vovvesvart: shows [4s 6c] (two pair, Sixes and Fours)
+Becks Baker: mucks hand
+vovvesvart collected $20.13 from pot
+*** SUMMARY ***
+Total pot $21.19 | Rake $1.06
+Board [9c 4h Jh 3s 6h]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker (button) mucked
+Seat 3: vovvesvart (small blind) showed [4s 6c] and won ($20.13) with two pair, Sixes and Fours
+Seat 4: max21rus1988 (big blind) folded on the Flop
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959942421:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:37:39 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($63.11 in chips)
+Seat 2: Becks Baker ($54.94 in chips)
+Seat 3: vovvesvart ($129.33 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($53.10 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Straubje: calls $0.50
+Becks Baker: folds
+vovvesvart: raises $1.75 to $2.25
+max21rus1988: folds
+G.Andrei95: folds
+Straubje: calls $1.75
+*** FLOP *** [Ks 4d Kc]
+Straubje: checks
+vovvesvart: bets $2.50
+Straubje: folds
+Uncalled bet ($2.50) returned to vovvesvart
+vovvesvart collected $4.99 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $5.25 | Rake $0.26
+Board [Ks 4d Kc]
+Seat 1: Straubje folded on the Flop
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) collected ($4.99)
+Seat 4: max21rus1988 (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) folded before Flop
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208959952286:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:38:11 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($60.86 in chips)
+Seat 2: Becks Baker ($54.94 in chips)
+Seat 3: vovvesvart ($132.07 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($53.10 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: calls $0.50
+Becks Baker: folds
+vovvesvart: calls $0.50
+max21rus1988: folds
+G.Andrei95: calls $0.25
+Rezzonner: checks
+*** FLOP *** [7d 6s Js]
+G.Andrei95: checks
+Rezzonner: checks
+Straubje: checks
+vovvesvart: bets $1.90
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $1.90
+*** TURN *** [7d 6s Js] [Qh]
+Straubje: bets $4.50
+vovvesvart: folds
+Uncalled bet ($4.50) returned to Straubje
+Straubje collected $5.51 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $5.80 | Rake $0.29
+Board [7d 6s Js Qh]
+Seat 1: Straubje collected ($5.51)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart folded on the Turn
+Seat 4: max21rus1988 (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) folded on the Flop
+Seat 6: Rezzonner (big blind) folded on the Flop
+
+
+PokerStars Hand #208959967174:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:38:58 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($63.97 in chips)
+Seat 2: Becks Baker ($54.94 in chips)
+Seat 3: vovvesvart ($129.67 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($52.60 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: raises $0.75 to $1.25
+vovvesvart: calls $1.25
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.75
+*** FLOP *** [9d 5c 5h]
+Straubje: checks
+Becks Baker: checks
+vovvesvart: bets $1.90
+Straubje: calls $1.90
+Becks Baker: calls $1.90
+*** TURN *** [9d 5c 5h] [4h]
+Straubje: checks
+Becks Baker: checks
+vovvesvart: checks
+*** RIVER *** [9d 5c 5h 4h] [Kd]
+Straubje: bets $8.50
+Becks Baker: folds
+vovvesvart: folds
+Uncalled bet ($8.50) returned to Straubje
+Straubje collected $9.22 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $9.70 | Rake $0.48
+Board [9d 5c 5h 4h Kd]
+Seat 1: Straubje (big blind) collected ($9.22)
+Seat 2: Becks Baker folded on the River
+Seat 3: vovvesvart folded on the River
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208960008274:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:40:40 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($68.54 in chips)
+Seat 2: Becks Baker ($53.14 in chips)
+Seat 3: vovvesvart ($126.52 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($52.35 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: raises $0.75 to $1.25
+Straubje: calls $1.25
+Becks Baker: folds
+vovvesvart: calls $0.75
+*** FLOP *** [9s 7h Td]
+vovvesvart: checks
+Rezzonner: bets $2.51
+Straubje: folds
+vovvesvart: folds
+Uncalled bet ($2.51) returned to Rezzonner
+Rezzonner collected $3.80 from pot
+Rezzonner: doesn't show hand
+*** SUMMARY ***
+Total pot $4 | Rake $0.20
+Board [9s 7h Td]
+Seat 1: Straubje (button) folded on the Flop
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) folded on the Flop
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner collected ($3.80)
+
+
+PokerStars Hand #208959994913:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:39:58 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($70.04 in chips)
+Seat 2: Becks Baker ($51.79 in chips)
+Seat 3: vovvesvart ($126.52 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($52.35 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: folds
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.25
+Becks Baker: checks
+*** FLOP *** [2s As 6c]
+Straubje: bets $1
+Becks Baker: raises $2.75 to $3.75
+Straubje: folds
+Uncalled bet ($2.75) returned to Becks Baker
+Becks Baker collected $2.85 from pot
+*** SUMMARY ***
+Total pot $3 | Rake $0.15
+Board [2s As 6c]
+Seat 1: Straubje (small blind) folded on the Flop
+Seat 2: Becks Baker (big blind) collected ($2.85)
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960025893:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:41:37 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($67.29 in chips)
+Seat 2: Becks Baker ($52.89 in chips)
+Seat 3: vovvesvart ($125.27 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($54.90 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: raises $1.50 to $2
+Becks Baker: folds
+vovvesvart: calls $1.75
+max21rus1988: calls $1.50
+*** FLOP *** [Kc 7d 3h]
+vovvesvart: checks
+max21rus1988: checks
+Straubje: bets $4
+vovvesvart: calls $4
+max21rus1988: folds
+*** TURN *** [Kc 7d 3h] [Td]
+vovvesvart: checks
+Straubje: checks
+*** RIVER *** [Kc 7d 3h Td] [4c]
+vovvesvart: bets $0.50
+Straubje: raises $13.50 to $14
+vovvesvart: calls $13.50
+*** SHOW DOWN ***
+Straubje: shows [5s 6d] (a straight, Three to Seven)
+vovvesvart: mucks hand
+Straubje collected $40 from pot
+*** SUMMARY ***
+Total pot $42 | Rake $2
+Board [Kc 7d 3h Td 4c]
+Seat 1: Straubje showed [5s 6d] and won ($40) with a straight, Three to Seven
+Seat 2: Becks Baker (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) mucked
+Seat 4: max21rus1988 (big blind) folded on the Flop
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960041486:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:42:26 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($87.29 in chips)
+Seat 2: Becks Baker ($52.89 in chips)
+Seat 3: vovvesvart ($105.27 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($54.90 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: raises $0.75 to $1.25
+Straubje: folds
+Becks Baker: folds
+vovvesvart: calls $1.25
+max21rus1988: folds
+G.Andrei95: folds
+*** FLOP *** [Jd Kc 4d]
+Rezzonner: checks
+vovvesvart: checks
+*** TURN *** [Jd Kc 4d] [4c]
+Rezzonner: checks
+vovvesvart: bets $3.09
+Rezzonner: calls $3.09
+*** RIVER *** [Jd Kc 4d 4c] [Th]
+Rezzonner: checks
+vovvesvart: checks
+*** SHOW DOWN ***
+Rezzonner: shows [6d 6c] (two pair, Sixes and Fours)
+vovvesvart: mucks hand
+Rezzonner collected $8.96 from pot
+*** SUMMARY ***
+Total pot $9.43 | Rake $0.47
+Board [Jd Kc 4d 4c Th]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) mucked
+Seat 4: max21rus1988 (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) folded before Flop
+Seat 6: Rezzonner showed [6d 6c] and won ($8.96) with two pair, Sixes and Fours
+
+
+PokerStars Hand #208960058205:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:43:19 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($87.29 in chips)
+Seat 2: Becks Baker ($52.89 in chips)
+Seat 3: vovvesvart ($100.93 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($59.52 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: folds
+Becks Baker: raises $0.75 to $1.25
+vovvesvart: folds
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Uncalled bet ($0.75) returned to Becks Baker
+Becks Baker collected $1.25 from pot
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker collected ($1.25)
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: max21rus1988 (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded before Flop
+
+
+PokerStars Hand #208960063442:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:43:36 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($87.29 in chips)
+Seat 2: Becks Baker ($53.64 in chips)
+Seat 3: vovvesvart ($100.93 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($59.02 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: raises $0.75 to $1.25
+vovvesvart: calls $1.25
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: calls $1
+Straubje: calls $0.75
+*** FLOP *** [Td 2d 9d]
+Rezzonner: checks
+Straubje: checks
+Becks Baker: checks
+vovvesvart: bets $2.38
+Rezzonner: folds
+Straubje: folds
+Becks Baker: folds
+Uncalled bet ($2.38) returned to vovvesvart
+vovvesvart collected $4.75 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $5 | Rake $0.25
+Board [Td 2d 9d]
+Seat 1: Straubje (big blind) folded on the Flop
+Seat 2: Becks Baker folded on the Flop
+Seat 3: vovvesvart collected ($4.75)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded on the Flop
+
+
+PokerStars Hand #208960073257:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:44:08 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($86.04 in chips)
+Seat 2: Becks Baker ($52.39 in chips)
+Seat 3: vovvesvart ($104.43 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($57.77 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: calls $0.50
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.25
+Becks Baker: raises $2 to $2.50
+vovvesvart: calls $2
+Straubje: folds
+*** FLOP *** [2c 6c 5s]
+Becks Baker: checks
+vovvesvart: bets $5.22
+Becks Baker: folds
+Uncalled bet ($5.22) returned to vovvesvart
+vovvesvart collected $5.22 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $5.50 | Rake $0.28
+Board [2c 6c 5s]
+Seat 1: Straubje (small blind) folded before Flop
+Seat 2: Becks Baker (big blind) folded on the Flop
+Seat 3: vovvesvart collected ($5.22)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960089830:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:44:47 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($85.54 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($107.15 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($57.77 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.50
+Becks Baker: folds
+vovvesvart: checks
+*** FLOP *** [9c 2s Js]
+vovvesvart: checks
+Straubje: bets $1
+vovvesvart: raises $1 to $2
+Straubje: calls $1
+*** TURN *** [9c 2s Js] [Kh]
+vovvesvart: checks
+Straubje: checks
+*** RIVER *** [9c 2s Js Kh] [9d]
+vovvesvart: checks
+Straubje: bets $14.50
+vovvesvart: folds
+Uncalled bet ($14.50) returned to Straubje
+Straubje collected $4.99 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $5.25 | Rake $0.26
+Board [9c 2s Js Kh 9d]
+Seat 1: Straubje (button) collected ($4.99)
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) folded on the River
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960129771:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:46:56 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($86.78 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($100.55 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($63.83 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Straubje: raises $3.50 to $4
+Becks Baker: folds
+vovvesvart has timed out
+vovvesvart: folds
+max21rus1988: folds
+G.Andrei95: folds
+Uncalled bet ($3.50) returned to Straubje
+Straubje collected $1.25 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: Straubje collected ($1.25)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) folded before Flop (didn't bet)
+Seat 4: max21rus1988 (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) folded before Flop
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960102812:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:45:29 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($88.03 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($104.65 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($57.77 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: raises $0.75 to $1.25
+Straubje: calls $1.25
+Becks Baker: folds
+vovvesvart: calls $1
+max21rus1988: calls $0.75
+*** FLOP *** [6c 3c Tc]
+vovvesvart: checks
+max21rus1988: checks
+Rezzonner: checks
+Straubje: checks
+*** TURN *** [6c 3c Tc] [Kd]
+vovvesvart: checks
+max21rus1988: checks
+Rezzonner: bets $2.85
+Straubje: folds
+vovvesvart: calls $2.85
+max21rus1988: folds
+*** RIVER *** [6c 3c Tc Kd] [3s]
+vovvesvart: checks
+Rezzonner: bets $6.10
+vovvesvart: folds
+Uncalled bet ($6.10) returned to Rezzonner
+Rezzonner collected $10.16 from pot
+Rezzonner: doesn't show hand
+*** SUMMARY ***
+Total pot $10.70 | Rake $0.54
+Board [6c 3c Tc Kd 3s]
+Seat 1: Straubje folded on the Turn
+Seat 2: Becks Baker (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) folded on the River
+Seat 4: max21rus1988 (big blind) folded on the Turn
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner collected ($10.16)
+
+
+PokerStars Hand #208960143584:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:47:42 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($88.28 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($100.55 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($63.33 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: folds
+vovvesvart: calls $0.50
+max21rus1988: raises $1.25 to $1.75
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $1.25
+vovvesvart: raises $98.80 to $100.55 and is all-in
+max21rus1988: folds
+Straubje: folds
+Uncalled bet ($98.80) returned to vovvesvart
+vovvesvart collected $5.50 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $5.50 | Rake $0
+Seat 1: Straubje (big blind) folded before Flop
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart collected ($5.50)
+Seat 4: max21rus1988 folded before Flop
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208960149906:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:48:03 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($86.53 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($104.30 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($50 in chips)
+Seat 6: Rezzonner ($63.08 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: calls $0.50
+max21rus1988: folds
+G.Andrei95: raises $1.50 to $2
+Rezzonner: folds
+Straubje: folds
+Becks Baker: folds
+vovvesvart: calls $1.50
+*** FLOP *** [Jc 4h 7d]
+vovvesvart: checks
+G.Andrei95: bets $1.13
+vovvesvart: calls $1.13
+*** TURN *** [Jc 4h 7d] [2d]
+vovvesvart: checks
+G.Andrei95: checks
+*** RIVER *** [Jc 4h 7d 2d] [8d]
+vovvesvart: bets $6.66
+G.Andrei95: calls $6.66
+*** SHOW DOWN ***
+vovvesvart: shows [3c 6h] (high card Jack)
+G.Andrei95: shows [8h 7h] (two pair, Eights and Sevens)
+G.Andrei95 collected $19.31 from pot
+*** SUMMARY ***
+Total pot $20.33 | Rake $1.02
+Board [Jc 4h 7d 2d 8d]
+Seat 1: Straubje (small blind) folded before Flop
+Seat 2: Becks Baker (big blind) folded before Flop
+Seat 3: vovvesvart showed [3c 6h] and lost with high card Jack
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 showed [8h 7h] and won ($19.31) with two pair, Eights and Sevens
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960181103:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:49:20 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($86.28 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($94.51 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($59.52 in chips)
+Seat 6: Rezzonner ($63.08 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: raises $2 to $2.50
+Becks Baker: folds
+vovvesvart: raises $92.01 to $94.51 and is all-in
+Straubje: calls $83.78 and is all-in
+Uncalled bet ($8.23) returned to vovvesvart
+*** FLOP *** [Tc Kh 4d]
+*** TURN *** [Tc Kh 4d] [2s]
+*** RIVER *** [Tc Kh 4d 2s] [5s]
+*** SHOW DOWN ***
+vovvesvart: shows [Ks Ah] (a pair of Kings)
+Straubje: shows [Ac Jd] (high card Ace)
+vovvesvart collected $170.81 from pot
+Straubje cashed out the hand for $44.48 | Cash Out Fee $0.45
+*** SUMMARY ***
+Total pot $172.81 | Rake $2
+Board [Tc Kh 4d 2s 5s]
+Seat 1: Straubje (button) showed [Ac Jd] and lost with high card Ace (cashed out).
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) showed [Ks Ah] and won ($170.81) with a pair of Kings
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960189567:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:49:48 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($44.48 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($179.04 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($59.52 in chips)
+Seat 6: Rezzonner ($63.08 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: raises $0.75 to $1.25
+Straubje: folds
+Becks Baker: folds
+vovvesvart: calls $1
+max21rus1988: calls $0.75
+*** FLOP *** [9d 2c Ts]
+vovvesvart: checks
+max21rus1988: checks
+Rezzonner: checks
+*** TURN *** [9d 2c Ts] [2d]
+vovvesvart: checks
+max21rus1988: bets $2.25
+Rezzonner: calls $2.25
+vovvesvart: calls $2.25
+*** RIVER *** [9d 2c Ts 2d] [3h]
+vovvesvart: checks
+max21rus1988: checks
+Rezzonner: checks
+*** SHOW DOWN ***
+vovvesvart: shows [2s Th] (a full house, Deuces full of Tens)
+max21rus1988: mucks hand
+Rezzonner: mucks hand
+vovvesvart collected $9.98 from pot
+*** SUMMARY ***
+Total pot $10.50 | Rake $0.52
+Board [9d 2c Ts 2d 3h]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) showed [2s Th] and won ($9.98) with a full house, Deuces full of Tens
+Seat 4: max21rus1988 (big blind) mucked
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner mucked
+
+
+PokerStars Hand #208960207014:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:50:45 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($50 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($185.52 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($59.52 in chips)
+Seat 6: Rezzonner ($59.58 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Straubje: calls $0.50
+Becks Baker: folds
+vovvesvart: calls $0.50
+max21rus1988: folds
+G.Andrei95: checks
+*** FLOP *** [As Th Kd]
+G.Andrei95: checks
+Straubje: checks
+vovvesvart: bets $0.50
+G.Andrei95: calls $0.50
+Straubje: calls $0.50
+*** TURN *** [As Th Kd] [Ad]
+G.Andrei95: checks
+Straubje: checks
+vovvesvart: checks
+*** RIVER *** [As Th Kd Ad] [5c]
+G.Andrei95: checks
+Straubje: checks
+vovvesvart: checks
+*** SHOW DOWN ***
+G.Andrei95: shows [8d Tc] (two pair, Aces and Tens)
+Straubje: mucks hand
+vovvesvart: mucks hand
+G.Andrei95 collected $3.09 from pot
+*** SUMMARY ***
+Total pot $3.25 | Rake $0.16
+Board [As Th Kd Ad 5c]
+Seat 1: Straubje mucked
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) mucked
+Seat 4: max21rus1988 (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) showed [8d Tc] and won ($3.09) with two pair, Aces and Tens
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960220852:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:51:31 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($49 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($184.52 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($61.61 in chips)
+Seat 6: Rezzonner ($59.58 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: folds
+Becks Baker: folds
+vovvesvart: raises $0.50 to $1
+max21rus1988: calls $1
+G.Andrei95: folds
+Rezzonner: calls $0.50
+*** FLOP *** [5c 2h 9h]
+Rezzonner: checks
+vovvesvart: checks
+max21rus1988: checks
+*** TURN *** [5c 2h 9h] [8d]
+Rezzonner: checks
+vovvesvart: bets $1.55
+max21rus1988: folds
+Rezzonner: folds
+Uncalled bet ($1.55) returned to vovvesvart
+vovvesvart collected $3.09 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $3.25 | Rake $0.16
+Board [5c 2h 9h 8d]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart collected ($3.09)
+Seat 4: max21rus1988 (button) folded on the Turn
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded on the Turn
+
+
+PokerStars Hand #208960255950:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:53:27 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($55.11 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($180.61 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($61.36 in chips)
+Seat 6: Rezzonner ($58.33 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: raises $0.75 to $1.25
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: folds
+Becks Baker: folds
+vovvesvart: folds
+Uncalled bet ($0.75) returned to max21rus1988
+max21rus1988 collected $1.25 from pot
+max21rus1988: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: Straubje (button) folded before Flop (didn't bet)
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) folded before Flop
+Seat 4: max21rus1988 collected ($1.25)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960244575:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:52:49 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($52.39 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($183.11 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($61.36 in chips)
+Seat 6: Rezzonner ($58.33 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: raises $0.50 to $1
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.75
+Becks Baker: folds
+*** FLOP *** [Ts Kc 8c]
+Straubje: bets $1.50
+vovvesvart: calls $1.50
+*** TURN *** [Ts Kc 8c] [3c]
+Straubje: bets $3.50
+vovvesvart: folds
+Uncalled bet ($3.50) returned to Straubje
+Straubje collected $5.22 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $5.50 | Rake $0.28
+Board [Ts Kc 8c 3c]
+Seat 1: Straubje (small blind) collected ($5.22)
+Seat 2: Becks Baker (big blind) folded before Flop
+Seat 3: vovvesvart folded on the Turn
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960236150:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:52:22 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($49 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($186.61 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($61.36 in chips)
+Seat 6: Rezzonner ($58.58 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: folds
+vovvesvart: raises $1 to $1.50
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: raises $2 to $3.50
+vovvesvart: calls $2
+*** FLOP *** [2d Jc Qh]
+Straubje: bets $4.50
+vovvesvart: folds
+Uncalled bet ($4.50) returned to Straubje
+Straubje collected $6.89 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $7.25 | Rake $0.36
+Board [2d Jc Qh]
+Seat 1: Straubje (big blind) collected ($6.89)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart folded on the Flop
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208960259532:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:53:38 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($55.11 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($180.11 in chips)
+Seat 4: max21rus1988 ($50.75 in chips)
+Seat 5: G.Andrei95 ($61.36 in chips)
+Seat 6: Rezzonner ($58.33 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.50
+Becks Baker: folds
+vovvesvart: calls $0.25
+max21rus1988: checks
+*** FLOP *** [Ks Kc 4s]
+vovvesvart: checks
+max21rus1988: checks
+Straubje: bets $1.50
+vovvesvart: folds
+max21rus1988: calls $1.50
+*** TURN *** [Ks Kc 4s] [Qc]
+max21rus1988: checks
+Straubje: checks
+*** RIVER *** [Ks Kc 4s Qc] [Ac]
+max21rus1988: checks
+Straubje: checks
+*** SHOW DOWN ***
+max21rus1988: shows [Qs 7s] (two pair, Kings and Queens)
+Straubje: shows [Jc 4c] (a flush, Ace high)
+Straubje collected $4.28 from pot
+*** SUMMARY ***
+Total pot $4.50 | Rake $0.22
+Board [Ks Kc 4s Qc Ac]
+Seat 1: Straubje showed [Jc 4c] and won ($4.28) with a flush, Ace high
+Seat 2: Becks Baker (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) folded on the Flop
+Seat 4: max21rus1988 (big blind) showed [Qs 7s] and lost with two pair, Kings and Queens
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960270844:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:54:16 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($57.39 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($179.61 in chips)
+Seat 4: max21rus1988 ($50 in chips)
+Seat 5: G.Andrei95 ($61.36 in chips)
+Seat 6: Rezzonner ($58.33 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Straubje: raises $1.50 to $2
+Becks Baker: folds
+vovvesvart: calls $2
+max21rus1988: calls $1.75
+G.Andrei95: folds
+*** FLOP *** [Ac 7h Jc]
+max21rus1988: checks
+Straubje: checks
+vovvesvart: checks
+*** TURN *** [Ac 7h Jc] [As]
+max21rus1988: bets $4.64
+Straubje: calls $4.64
+vovvesvart: calls $4.64
+*** RIVER *** [Ac 7h Jc As] [6h]
+max21rus1988: bets $9.70
+Straubje: folds
+vovvesvart: folds
+Uncalled bet ($9.70) returned to max21rus1988
+max21rus1988 collected $19.40 from pot
+max21rus1988: doesn't show hand
+*** SUMMARY ***
+Total pot $20.42 | Rake $1.02
+Board [Ac 7h Jc As 6h]
+Seat 1: Straubje folded on the River
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) folded on the River
+Seat 4: max21rus1988 (small blind) collected ($19.40)
+Seat 5: G.Andrei95 (big blind) folded before Flop
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960297041:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:55:48 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($4.51 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($222.47 in chips)
+Seat 4: max21rus1988 ($62.76 in chips)
+Seat 5: G.Andrei95 ($60.61 in chips)
+Seat 6: Rezzonner ($57.83 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: raises $0.75 to $1.25
+vovvesvart: raises $1.25 to $2.50
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $2
+Becks Baker: calls $1.25
+*** FLOP *** [5s 7s Qs]
+Straubje: bets $2.01 and is all-in
+Becks Baker: folds
+vovvesvart: calls $2.01
+*** TURN *** [5s 7s Qs] [4s]
+*** RIVER *** [5s 7s Qs 4s] [4d]
+*** SHOW DOWN ***
+Straubje: shows [Jc 9s] (a flush, Queen high)
+vovvesvart: shows [2s Ks] (a flush, King high)
+vovvesvart collected $11.18 from pot
+*** SUMMARY ***
+Total pot $11.77 | Rake $0.59
+Board [5s 7s Qs 4s 4d]
+Seat 1: Straubje (big blind) showed [Jc 9s] and lost with a flush, Queen high
+Seat 2: Becks Baker folded on the Flop
+Seat 3: vovvesvart showed [2s Ks] and won ($11.18) with a flush, King high
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208960283930:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:54:59 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($50.75 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($172.97 in chips)
+Seat 4: max21rus1988 ($62.76 in chips)
+Seat 5: G.Andrei95 ($60.86 in chips)
+Seat 6: Rezzonner ($58.33 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: raises $1.50 to $2
+Becks Baker: folds
+vovvesvart: calls $2
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+*** FLOP *** [5h 2h Kd]
+Straubje: bets $3.50
+vovvesvart: calls $3.50
+*** TURN *** [5h 2h Kd] [5d]
+Straubje: bets $13
+vovvesvart: raises $154.47 to $167.47 and is all-in
+Straubje: calls $32.25 and is all-in
+Uncalled bet ($122.22) returned to vovvesvart
+*** RIVER *** [5h 2h Kd 5d] [3h]
+*** SHOW DOWN ***
+Straubje: shows [Qd Kh] (two pair, Kings and Fives)
+vovvesvart: shows [5s 8h] (three of a kind, Fives)
+vovvesvart collected $100.25 from pot
+Straubje cashed out the hand for $4.51 | Cash Out Fee $0.05
+*** SUMMARY ***
+Total pot $102.25 | Rake $2
+Board [5h 2h Kd 5d 3h]
+Seat 1: Straubje showed [Qd Kh] and lost with two pair, Kings and Fives (cashed out).
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart showed [5s 8h] and won ($100.25) with three of a kind, Fives
+Seat 4: max21rus1988 (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded before Flop
+
+
+PokerStars Hand #208960306531:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:56:25 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($23.07 in chips)
+Seat 2: Becks Baker ($50 in chips)
+Seat 3: vovvesvart ($229.14 in chips)
+Seat 5: G.Andrei95 ($60.61 in chips)
+Seat 6: Rezzonner ($57.58 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: raises $1 to $1.50
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $1.25
+Becks Baker: raises $5.75 to $7.25
+vovvesvart: calls $5.75
+Straubje: folds
+*** FLOP *** [5h 9c 9d]
+Becks Baker: checks
+vovvesvart: checks
+*** TURN *** [5h 9c 9d] [8s]
+Becks Baker: bets $5.02
+vovvesvart: calls $5.02
+*** RIVER *** [5h 9c 9d 8s] [5c]
+Becks Baker: checks
+vovvesvart: bets $216.87 and is all-in
+Becks Baker: calls $37.73 and is all-in
+Uncalled bet ($179.14) returned to vovvesvart
+*** SHOW DOWN ***
+vovvesvart: shows [2h 2d] (two pair, Nines and Fives)
+Becks Baker: shows [Kd Ad] (two pair, Nines and Fives - Ace kicker)
+Becks Baker collected $99.50 from pot
+*** SUMMARY ***
+Total pot $101.50 | Rake $2
+Board [5h 9c 9d 8s 5c]
+Seat 1: Straubje (small blind) folded before Flop
+Seat 2: Becks Baker (big blind) showed [Kd Ad] and won ($99.50) with two pair, Nines and Fives
+Seat 3: vovvesvart showed [2h 2d] and lost with two pair, Nines and Fives
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960339843:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:58:03 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($50 in chips)
+Seat 2: Becks Baker ($99.50 in chips)
+Seat 3: vovvesvart ($179.14 in chips)
+Seat 5: G.Andrei95 ($60.61 in chips)
+Seat 6: Rezzonner ($57.58 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: raises $1.50 to $2
+Becks Baker: folds
+vovvesvart: calls $1.50
+*** FLOP *** [7s Ts Tc]
+vovvesvart: checks
+Straubje: checks
+*** TURN *** [7s Ts Tc] [5h]
+vovvesvart: checks
+Straubje: checks
+*** RIVER *** [7s Ts Tc 5h] [Kh]
+vovvesvart: checks
+Straubje: bets $4.50
+vovvesvart: folds
+Uncalled bet ($4.50) returned to Straubje
+Straubje collected $4.04 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $4.25 | Rake $0.21
+Board [7s Ts Tc 5h Kh]
+Seat 1: Straubje (button) collected ($4.04)
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) folded on the River
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960348135:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:58:35 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($52.04 in chips)
+Seat 2: Becks Baker ($99.25 in chips)
+Seat 3: vovvesvart ($177.14 in chips)
+Seat 5: G.Andrei95 ($60.61 in chips)
+Seat 6: Rezzonner ($57.58 in chips)
+vovvesvart: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Straubje: calls $0.50
+Becks Baker: calls $0.50
+vovvesvart: calls $0.25
+G.Andrei95: checks
+*** FLOP *** [Th 2d 4c]
+vovvesvart: bets $0.95
+G.Andrei95: folds
+Straubje: folds
+Becks Baker: folds
+Uncalled bet ($0.95) returned to vovvesvart
+vovvesvart collected $1.90 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $2 | Rake $0.10
+Board [Th 2d 4c]
+Seat 1: Straubje folded on the Flop
+Seat 2: Becks Baker (button) folded on the Flop
+Seat 3: vovvesvart (small blind) collected ($1.90)
+Seat 5: G.Andrei95 (big blind) folded on the Flop
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960357740:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 20:59:12 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($51.54 in chips)
+Seat 2: Becks Baker ($98.75 in chips)
+Seat 3: vovvesvart ($178.54 in chips)
+Seat 5: G.Andrei95 ($60.11 in chips)
+Seat 6: Rezzonner ($57.58 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: folds
+Becks Baker: raises $0.75 to $1.25
+vovvesvart: calls $1.25
+G.Andrei95: folds
+Rezzonner: folds
+*** FLOP *** [3c Th 5c]
+Becks Baker: checks
+vovvesvart: bets $1.55
+Becks Baker: calls $1.55
+*** TURN *** [3c Th 5c] [Qs]
+Becks Baker: checks
+vovvesvart: checks
+*** RIVER *** [3c Th 5c Qs] [2s]
+Becks Baker: bets $1.99
+vovvesvart: calls $1.99
+*** SHOW DOWN ***
+Becks Baker: shows [Ts Kd] (a pair of Tens)
+vovvesvart: mucks hand
+Becks Baker collected $9.81 from pot
+*** SUMMARY ***
+Total pot $10.33 | Rake $0.52
+Board [3c Th 5c Qs 2s]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker showed [Ts Kd] and won ($9.81) with a pair of Tens
+Seat 3: vovvesvart (button) mucked
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded before Flop
+
+
+PokerStars Hand #208960386275:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:01:00 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 2: Becks Baker ($103.77 in chips)
+Seat 3: vovvesvart ($174.50 in chips)
+Seat 5: G.Andrei95 ($59.86 in chips)
+Seat 6: Rezzonner ($56.83 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+max21rus1988: sits out
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: folds
+Becks Baker: folds
+Uncalled bet ($0.25) returned to vovvesvart
+vovvesvart collected $0.50 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $0.50 | Rake $0
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) collected ($0.50)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960371285:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:00:04 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($51.54 in chips)
+Seat 2: Becks Baker ($103.77 in chips)
+Seat 3: vovvesvart ($173.75 in chips)
+Seat 5: G.Andrei95 ($59.86 in chips)
+Seat 6: Rezzonner ($57.08 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: folds
+vovvesvart: raises $1 to $1.50
+G.Andrei95: folds
+Rezzonner: folds
+Straubje is disconnected
+Straubje has timed out while disconnected
+Straubje: folds
+Uncalled bet ($1) returned to vovvesvart
+vovvesvart collected $1.25 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: Straubje (big blind) folded before Flop
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart collected ($1.25)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208960399717:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:01:46 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 2: Becks Baker ($103.52 in chips)
+Seat 3: vovvesvart ($176.10 in chips)
+Seat 4: max21rus1988 ($61.26 in chips)
+Seat 5: G.Andrei95 ($59.86 in chips)
+Seat 6: Rezzonner ($56.83 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Becks Baker: folds
+vovvesvart: raises $1.25 to $1.75
+max21rus1988: folds
+G.Andrei95: calls $1.25
+*** FLOP *** [7c Kh Ts]
+G.Andrei95: checks
+vovvesvart: bets $1.78
+G.Andrei95: folds
+Uncalled bet ($1.78) returned to vovvesvart
+vovvesvart collected $3.56 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $3.75 | Rake $0.19
+Board [7c Kh Ts]
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) collected ($3.56)
+Seat 4: max21rus1988 (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) folded on the Flop
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960388576:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:01:08 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 2: Becks Baker ($103.52 in chips)
+Seat 3: vovvesvart ($174.75 in chips)
+Seat 4: max21rus1988 ($62.76 in chips)
+Seat 5: G.Andrei95 ($59.86 in chips)
+Seat 6: Rezzonner ($56.83 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: folds
+Becks Baker: folds
+vovvesvart: raises $1 to $1.50
+max21rus1988: calls $1
+*** FLOP *** [Jc Ad Kc]
+vovvesvart: bets $1.43
+max21rus1988: folds
+Uncalled bet ($1.43) returned to vovvesvart
+vovvesvart collected $2.85 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $3 | Rake $0.15
+Board [Jc Ad Kc]
+Seat 2: Becks Baker (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) collected ($2.85)
+Seat 4: max21rus1988 (big blind) folded on the Flop
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960417514:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:02:46 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($51.04 in chips)
+Seat 2: Becks Baker ($103.52 in chips)
+Seat 3: vovvesvart ($180.20 in chips)
+Seat 4: max21rus1988 ($59.26 in chips)
+Seat 5: G.Andrei95 ($57.86 in chips)
+Seat 6: Rezzonner ($56.33 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: folds
+vovvesvart: raises $0.50 to $1
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: calls $0.75
+Straubje: calls $0.50
+*** FLOP *** [2s Tc 9h]
+Rezzonner: checks
+Straubje: bets $2
+vovvesvart: raises $177.20 to $179.20 and is all-in
+Rezzonner: folds
+Straubje: folds
+Uncalled bet ($177.20) returned to vovvesvart
+vovvesvart collected $6.65 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $7 | Rake $0.35
+Board [2s Tc 9h]
+Seat 1: Straubje (big blind) folded on the Flop
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart collected ($6.65)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded on the Flop
+
+
+PokerStars Hand #208960406475:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:02:09 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 2: Becks Baker ($103.52 in chips)
+Seat 3: vovvesvart ($177.91 in chips)
+Seat 4: max21rus1988 ($61.01 in chips)
+Seat 5: G.Andrei95 ($58.11 in chips)
+Seat 6: Rezzonner ($56.83 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+Straubje: sits out
+*** HOLE CARDS ***
+Becks Baker: folds
+vovvesvart: raises $1.25 to $1.75
+max21rus1988: calls $1.75
+G.Andrei95: folds
+Rezzonner: folds
+*** FLOP *** [7d 7s 6h]
+vovvesvart: bets $2.02
+max21rus1988: folds
+Uncalled bet ($2.02) returned to vovvesvart
+vovvesvart collected $4.04 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $4.25 | Rake $0.21
+Board [7d 7s 6h]
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart collected ($4.04)
+Seat 4: max21rus1988 (button) folded on the Flop
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded before Flop
+
+
+PokerStars Hand #208960428209:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:03:23 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($48.04 in chips)
+Seat 2: Becks Baker ($103.52 in chips)
+Seat 3: vovvesvart ($183.85 in chips)
+Seat 4: max21rus1988 ($59.26 in chips)
+Seat 5: G.Andrei95 ($57.86 in chips)
+Seat 6: Rezzonner ($55.33 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: raises $0.50 to $1
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.75
+Becks Baker: calls $0.50
+*** FLOP *** [9s 7d Qc]
+Straubje: checks
+Becks Baker: checks
+vovvesvart: checks
+*** TURN *** [9s 7d Qc] [Td]
+Straubje: checks
+Becks Baker: checks
+vovvesvart: checks
+*** RIVER *** [9s 7d Qc Td] [Js]
+Straubje: checks
+Becks Baker: checks
+vovvesvart: checks
+*** SHOW DOWN ***
+Straubje: shows [3h 5c] (high card Queen)
+Becks Baker: shows [Ad 6d] (high card Ace)
+vovvesvart: shows [As 5s] (high card Ace)
+Becks Baker collected $1.43 from pot
+vovvesvart collected $1.42 from pot
+*** SUMMARY ***
+Total pot $3 | Rake $0.15
+Board [9s 7d Qc Td Js]
+Seat 1: Straubje (small blind) showed [3h 5c] and lost with high card Queen
+Seat 2: Becks Baker (big blind) showed [Ad 6d] and won ($1.43) with high card Ace
+Seat 3: vovvesvart showed [As 5s] and won ($1.42) with high card Ace
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960442685:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:04:12 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($47.04 in chips)
+Seat 2: Becks Baker ($103.95 in chips)
+Seat 3: vovvesvart ($184.27 in chips)
+Seat 4: max21rus1988 ($59.26 in chips)
+Seat 5: G.Andrei95 ($57.86 in chips)
+Seat 6: Rezzonner ($55.33 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje has timed out
+Straubje: folds
+Becks Baker: raises $1 to $1.50
+Straubje is disconnected
+vovvesvart: calls $1
+*** FLOP *** [5c Qc 9c]
+Becks Baker: checks
+vovvesvart: checks
+*** TURN *** [5c Qc 9c] [3h]
+Becks Baker: bets $2.10
+vovvesvart: raises $2.10 to $4.20
+Becks Baker: calls $2.10
+*** RIVER *** [5c Qc 9c 3h] [8d]
+Becks Baker: checks
+vovvesvart: checks
+*** SHOW DOWN ***
+Becks Baker: shows [Qh Kd] (a pair of Queens)
+vovvesvart: mucks hand
+Becks Baker collected $10.83 from pot
+*** SUMMARY ***
+Total pot $11.40 | Rake $0.57
+Board [5c Qc 9c 3h 8d]
+Seat 1: Straubje (button) folded before Flop (didn't bet)
+Seat 2: Becks Baker (small blind) showed [Qh Kd] and won ($10.83) with a pair of Queens
+Seat 3: vovvesvart (big blind) mucked
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960474095:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:05:53 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($28.19 in chips)
+Seat 2: Becks Baker ($109.08 in chips)
+Seat 3: vovvesvart ($176.07 in chips)
+Seat 4: max21rus1988 ($78.61 in chips)
+Seat 5: G.Andrei95 ($57.86 in chips)
+Seat 6: Rezzonner ($55.33 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Straubje: calls $0.50
+Becks Baker: folds
+vovvesvart: raises $1.75 to $2.25
+max21rus1988: folds
+G.Andrei95: raises $6 to $8.25
+Straubje: folds
+vovvesvart: folds
+Uncalled bet ($6) returned to G.Andrei95
+G.Andrei95 collected $5.25 from pot
+G.Andrei95: doesn't show hand
+*** SUMMARY ***
+Total pot $5.25 | Rake $0
+Seat 1: Straubje folded before Flop
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) folded before Flop
+Seat 4: max21rus1988 (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) collected ($5.25)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960462101:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:05:16 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($47.04 in chips)
+Seat 2: Becks Baker ($109.08 in chips)
+Seat 3: vovvesvart ($178.57 in chips)
+Seat 4: max21rus1988 ($59.26 in chips)
+Seat 5: G.Andrei95 ($57.86 in chips)
+Seat 6: Rezzonner ($55.33 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.50
+Becks Baker: folds
+vovvesvart: calls $0.25
+max21rus1988: raises $2 to $2.50
+Straubje: calls $2
+vovvesvart: calls $2
+*** FLOP *** [3d 6h 6s]
+vovvesvart: checks
+max21rus1988: bets $2.35
+Straubje: calls $2.35
+vovvesvart: folds
+*** TURN *** [3d 6h 6s] [3s]
+max21rus1988: checks
+Straubje: bets $4.50
+max21rus1988: calls $4.50
+*** RIVER *** [3d 6h 6s 3s] [Kh]
+max21rus1988: checks
+Straubje: bets $9.50
+max21rus1988: calls $9.50
+*** SHOW DOWN ***
+Straubje: shows [7c Jh] (two pair, Sixes and Threes)
+max21rus1988: shows [8h 8c] (two pair, Eights and Sixes)
+max21rus1988 collected $38.20 from pot
+*** SUMMARY ***
+Total pot $40.20 | Rake $2
+Board [3d 6h 6s 3s Kh]
+Seat 1: Straubje showed [7c Jh] and lost with two pair, Sixes and Threes
+Seat 2: Becks Baker (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) folded on the Flop
+Seat 4: max21rus1988 (big blind) showed [8h 8c] and won ($38.20) with two pair, Eights and Sixes
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960484013:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:06:27 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($27.69 in chips)
+Seat 2: Becks Baker ($109.08 in chips)
+Seat 3: vovvesvart ($173.82 in chips)
+Seat 4: max21rus1988 ($78.36 in chips)
+Seat 5: G.Andrei95 ($60.86 in chips)
+Seat 6: Rezzonner ($55.33 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: folds
+Becks Baker: raises $0.75 to $1.25
+vovvesvart: raises $3.25 to $4.50
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Becks Baker: raises $7 to $11.50
+vovvesvart: raises $162.32 to $173.82 and is all-in
+Becks Baker: folds
+Uncalled bet ($162.32) returned to vovvesvart
+vovvesvart collected $23.75 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $23.75 | Rake $0
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker folded before Flop
+Seat 3: vovvesvart collected ($23.75)
+Seat 4: max21rus1988 (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded before Flop
+
+
+PokerStars Hand #208960506138:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:07:11 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 2: Becks Baker ($97.58 in chips)
+Seat 3: vovvesvart ($186.07 in chips)
+Seat 4: max21rus1988 ($78.36 in chips)
+Seat 5: G.Andrei95 ($60.61 in chips)
+Seat 6: Rezzonner ($54.83 in chips)
+Rezzonner: posts small blind $0.25
+Straubje has timed out
+Straubje: is sitting out
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: raises $1.25 to $1.75
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Becks Baker: folds
+Uncalled bet ($1.25) returned to vovvesvart
+Straubje is disconnected
+vovvesvart collected $1.25 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 2: Becks Baker (big blind) folded before Flop
+Seat 3: vovvesvart collected ($1.25)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208960514331:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:07:39 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 2: Becks Baker ($97.08 in chips)
+Seat 3: vovvesvart ($186.82 in chips)
+Seat 4: max21rus1988 ($78.36 in chips)
+Seat 5: G.Andrei95 ($60.61 in chips)
+Seat 6: Rezzonner ($54.58 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: folds
+G.Andrei95: raises $0.75 to $1.25
+Rezzonner: folds
+Becks Baker: folds
+vovvesvart: calls $0.75
+*** FLOP *** [Kc 2c 5h]
+vovvesvart: checks
+G.Andrei95: bets $0.86
+vovvesvart: raises $4.33 to $5.19
+G.Andrei95: folds
+Uncalled bet ($4.33) returned to vovvesvart
+vovvesvart collected $4.25 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $4.47 | Rake $0.22
+Board [Kc 2c 5h]
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) collected ($4.25)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded on the Flop
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960524182:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:08:13 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 2: Becks Baker ($96.83 in chips)
+Seat 3: vovvesvart ($188.96 in chips)
+Seat 4: max21rus1988 ($78.36 in chips)
+Seat 5: G.Andrei95 ($58.50 in chips)
+Seat 6: Rezzonner ($54.58 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+Straubje: sits out
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: folds
+Becks Baker: raises $0.75 to $1.25
+vovvesvart: calls $1
+max21rus1988: folds
+*** FLOP *** [4h 2c Js]
+vovvesvart: checks
+Becks Baker: bets $0.75
+vovvesvart: calls $0.75
+*** TURN *** [4h 2c Js] [2d]
+vovvesvart: checks
+Becks Baker: checks
+*** RIVER *** [4h 2c Js 2d] [Qc]
+vovvesvart: checks
+Becks Baker: checks
+*** SHOW DOWN ***
+vovvesvart: shows [6h As] (a pair of Deuces)
+Becks Baker: shows [4s Ad] (two pair, Fours and Deuces)
+Becks Baker collected $4.28 from pot
+*** SUMMARY ***
+Total pot $4.50 | Rake $0.22
+Board [4h 2c Js 2d Qc]
+Seat 2: Becks Baker (button) showed [4s Ad] and won ($4.28) with two pair, Fours and Deuces
+Seat 3: vovvesvart (small blind) showed [6h As] and lost with a pair of Deuces
+Seat 4: max21rus1988 (big blind) folded before Flop
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960533093:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:08:43 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($50 in chips)
+Seat 2: Becks Baker ($99.11 in chips)
+Seat 3: vovvesvart ($186.96 in chips)
+Seat 4: max21rus1988 ($77.86 in chips)
+Seat 5: G.Andrei95 ($58.50 in chips)
+Seat 6: Rezzonner ($54.58 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+Straubje: posts small & big blinds $0.75
+*** HOLE CARDS ***
+Rezzonner: raises $1.50 to $2
+Straubje: calls $1.50
+Becks Baker: folds
+vovvesvart: calls $2
+max21rus1988: folds
+G.Andrei95: folds
+*** FLOP *** [5h 4s 3d]
+Rezzonner: bets $3.62
+Straubje: folds
+vovvesvart: calls $3.62
+*** TURN *** [5h 4s 3d] [9s]
+Rezzonner: bets $8.12
+vovvesvart: calls $8.12
+*** RIVER *** [5h 4s 3d 9s] [2s]
+Rezzonner: checks
+vovvesvart: checks
+*** SHOW DOWN ***
+Rezzonner: shows [8c 8h] (a pair of Eights)
+vovvesvart: mucks hand
+Rezzonner collected $28.96 from pot
+*** SUMMARY ***
+Total pot $30.48 | Rake $1.52
+Board [5h 4s 3d 9s 2s]
+Seat 1: Straubje folded on the Flop
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) mucked
+Seat 4: max21rus1988 (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) folded before Flop
+Seat 6: Rezzonner showed [8c 8h] and won ($28.96) with a pair of Eights
+
+
+PokerStars Hand #208960554342:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:09:55 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($47.75 in chips)
+Seat 2: Becks Baker ($99.11 in chips)
+Seat 3: vovvesvart ($173.22 in chips)
+Seat 4: max21rus1988 ($76.36 in chips)
+Seat 5: G.Andrei95 ($57.75 in chips)
+Seat 6: Rezzonner ($71.30 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: folds
+vovvesvart: raises $0.50 to $1
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.50
+*** FLOP *** [6c Qh 8d]
+Straubje: checks
+vovvesvart: checks
+*** TURN *** [6c Qh 8d] [Js]
+Straubje: checks
+vovvesvart: checks
+*** RIVER *** [6c Qh 8d Js] [4s]
+Straubje: bets $2
+vovvesvart: folds
+Uncalled bet ($2) returned to Straubje
+Straubje collected $2.14 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $2.25 | Rake $0.11
+Board [6c Qh 8d Js 4s]
+Seat 1: Straubje (big blind) collected ($2.14)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart folded on the River
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208960549141:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:09:38 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($47.75 in chips)
+Seat 2: Becks Baker ($99.11 in chips)
+Seat 3: vovvesvart ($173.22 in chips)
+Seat 4: max21rus1988 ($77.61 in chips)
+Seat 5: G.Andrei95 ($58 in chips)
+Seat 6: Rezzonner ($69.80 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: folds
+Becks Baker: folds
+vovvesvart: folds
+max21rus1988: raises $0.75 to $1.25
+G.Andrei95: folds
+Rezzonner: raises $3.75 to $5
+max21rus1988: folds
+Uncalled bet ($3.75) returned to Rezzonner
+Rezzonner collected $2.75 from pot
+Rezzonner: doesn't show hand
+*** SUMMARY ***
+Total pot $2.75 | Rake $0
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: max21rus1988 (button) folded before Flop
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) collected ($2.75)
+
+
+PokerStars Hand #208960572603:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:10:58 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($44.39 in chips)
+Seat 2: Becks Baker ($98.61 in chips)
+Seat 3: vovvesvart ($167.72 in chips)
+Seat 4: max21rus1988 ($76.36 in chips)
+Seat 5: G.Andrei95 ($66.55 in chips)
+Seat 6: Rezzonner ($71.05 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: raises $0.75 to $1.25
+G.Andrei95: raises $2.75 to $4
+Rezzonner: folds
+Straubje: folds
+Becks Baker: folds
+vovvesvart: calls $3.50
+max21rus1988: folds
+*** FLOP *** [3h 5h 3c]
+vovvesvart: checks
+G.Andrei95: bets $8.25
+vovvesvart: folds
+Uncalled bet ($8.25) returned to G.Andrei95
+G.Andrei95 collected $9.02 from pot
+G.Andrei95: doesn't show hand
+*** SUMMARY ***
+Total pot $9.50 | Rake $0.48
+Board [3h 5h 3c]
+Seat 1: Straubje (button) folded before Flop (didn't bet)
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) folded on the Flop
+Seat 4: max21rus1988 folded before Flop
+Seat 5: G.Andrei95 collected ($9.02)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960562137:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:10:22 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($48.89 in chips)
+Seat 2: Becks Baker ($99.11 in chips)
+Seat 3: vovvesvart ($172.22 in chips)
+Seat 4: max21rus1988 ($76.36 in chips)
+Seat 5: G.Andrei95 ($57.75 in chips)
+Seat 6: Rezzonner ($71.05 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: raises $1 to $1.50
+max21rus1988: folds
+G.Andrei95: raises $3 to $4.50
+Rezzonner: folds
+Straubje: calls $4.25
+Becks Baker: folds
+vovvesvart: calls $3
+*** FLOP *** [Jh 8h 9s]
+Straubje: checks
+vovvesvart: checks
+G.Andrei95: bets $4.39
+Straubje: folds
+vovvesvart: folds
+Uncalled bet ($4.39) returned to G.Andrei95
+G.Andrei95 collected $13.30 from pot
+G.Andrei95: doesn't show hand
+*** SUMMARY ***
+Total pot $14 | Rake $0.70
+Board [Jh 8h 9s]
+Seat 1: Straubje (small blind) folded on the Flop
+Seat 2: Becks Baker (big blind) folded before Flop
+Seat 3: vovvesvart folded on the Flop
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 collected ($13.30)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960590100:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:11:59 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($44.39 in chips)
+Seat 2: Becks Baker ($98.36 in chips)
+Seat 3: vovvesvart ($162.22 in chips)
+Seat 4: max21rus1988 ($76.46 in chips)
+Seat 5: G.Andrei95 ($71.57 in chips)
+Seat 6: Rezzonner ($71.05 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Straubje: folds
+Becks Baker: folds
+vovvesvart: raises $1.25 to $1.75
+max21rus1988: calls $1.50
+G.Andrei95: folds
+*** FLOP *** [Td 3c Qs]
+max21rus1988: checks
+vovvesvart: bets $1.90
+max21rus1988: folds
+Uncalled bet ($1.90) returned to vovvesvart
+vovvesvart collected $3.80 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $4 | Rake $0.20
+Board [Td 3c Qs]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) collected ($3.80)
+Seat 4: max21rus1988 (small blind) folded on the Flop
+Seat 5: G.Andrei95 (big blind) folded before Flop
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960583294:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:11:36 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($44.39 in chips)
+Seat 2: Becks Baker ($98.36 in chips)
+Seat 3: vovvesvart ($163.72 in chips)
+Seat 4: max21rus1988 ($75.11 in chips)
+Seat 5: G.Andrei95 ($71.57 in chips)
+Seat 6: Rezzonner ($71.05 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: folds
+Becks Baker: folds
+vovvesvart: raises $1 to $1.50
+max21rus1988: calls $1
+*** FLOP *** [7s Td 2c]
+vovvesvart: checks
+max21rus1988: bets $0.94
+vovvesvart: folds
+Uncalled bet ($0.94) returned to max21rus1988
+max21rus1988 collected $2.85 from pot
+max21rus1988: doesn't show hand
+*** SUMMARY ***
+Total pot $3 | Rake $0.15
+Board [7s Td 2c]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) folded on the Flop
+Seat 4: max21rus1988 (big blind) collected ($2.85)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960597462:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:12:25 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($44.39 in chips)
+Seat 2: Becks Baker ($98.36 in chips)
+Seat 3: vovvesvart ($164.27 in chips)
+Seat 4: max21rus1988 ($74.71 in chips)
+Seat 5: G.Andrei95 ($71.07 in chips)
+Seat 6: Rezzonner ($71.05 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: folds
+Becks Baker: folds
+vovvesvart: raises $1 to $1.50
+max21rus1988: folds
+G.Andrei95: calls $1.25
+Rezzonner: calls $1
+*** FLOP *** [Qs 3c Ac]
+G.Andrei95: checks
+Rezzonner: checks
+vovvesvart: checks
+*** TURN *** [Qs 3c Ac] [7s]
+G.Andrei95: checks
+Rezzonner: checks
+vovvesvart: checks
+*** RIVER *** [Qs 3c Ac 7s] [9h]
+G.Andrei95: checks
+Rezzonner: checks
+vovvesvart: bets $2.14
+G.Andrei95: folds
+Rezzonner: folds
+Uncalled bet ($2.14) returned to vovvesvart
+vovvesvart collected $4.28 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $4.50 | Rake $0.22
+Board [Qs 3c Ac 7s 9h]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart collected ($4.28)
+Seat 4: max21rus1988 (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) folded on the River
+Seat 6: Rezzonner (big blind) folded on the River
+
+
+PokerStars Hand #208960627781:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:14:10 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($43.14 in chips)
+Seat 2: Becks Baker ($98.36 in chips)
+Seat 3: vovvesvart ($167.05 in chips)
+Seat 4: max21rus1988 ($74.71 in chips)
+Seat 5: G.Andrei95 ($70.93 in chips)
+Seat 6: Rezzonner ($69.30 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: raises $0.50 to $1
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: folds
+Becks Baker: folds
+Uncalled bet ($0.50) returned to vovvesvart
+vovvesvart collected $1.25 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: Straubje (small blind) folded before Flop
+Seat 2: Becks Baker (big blind) folded before Flop
+Seat 3: vovvesvart collected ($1.25)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960632052:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:14:25 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($42.89 in chips)
+Seat 2: Becks Baker ($97.86 in chips)
+Seat 3: vovvesvart ($167.80 in chips)
+Seat 4: max21rus1988 ($74.71 in chips)
+Seat 5: G.Andrei95 ($70.93 in chips)
+Seat 6: Rezzonner ($69.30 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: raises $0.75 to $1.25
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $1.25
+Becks Baker: folds
+vovvesvart: calls $0.75
+*** FLOP *** [As 3s 6d]
+vovvesvart: checks
+max21rus1988: checks
+Straubje: bets $3
+vovvesvart: folds
+max21rus1988: folds
+Uncalled bet ($3) returned to Straubje
+Straubje collected $3.80 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $4 | Rake $0.20
+Board [As 3s 6d]
+Seat 1: Straubje (button) collected ($3.80)
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) folded on the Flop
+Seat 4: max21rus1988 folded on the Flop
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960621431:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:13:48 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($44.39 in chips)
+Seat 2: Becks Baker ($98.36 in chips)
+Seat 3: vovvesvart ($167.05 in chips)
+Seat 4: max21rus1988 ($74.71 in chips)
+Seat 5: G.Andrei95 ($69.57 in chips)
+Seat 6: Rezzonner ($69.55 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: folds
+vovvesvart: folds
+max21rus1988: folds
+G.Andrei95: raises $0.75 to $1.25
+Rezzonner: folds
+Straubje: calls $0.75
+*** FLOP *** [Kd Th 7s]
+Straubje: checks
+G.Andrei95: bets $1.96
+Straubje: folds
+Uncalled bet ($1.96) returned to G.Andrei95
+G.Andrei95 collected $2.61 from pot
+G.Andrei95: doesn't show hand
+*** SUMMARY ***
+Total pot $2.75 | Rake $0.14
+Board [Kd Th 7s]
+Seat 1: Straubje (big blind) folded on the Flop
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) collected ($2.61)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208960639788:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:14:52 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($45.44 in chips)
+Seat 2: Becks Baker ($97.61 in chips)
+Seat 3: vovvesvart ($166.55 in chips)
+Seat 4: max21rus1988 ($73.46 in chips)
+Seat 5: G.Andrei95 ($70.93 in chips)
+Seat 6: Rezzonner ($69.30 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: raises $0.75 to $1.25
+Straubje: calls $1.25
+Becks Baker: calls $1.25
+vovvesvart: calls $1
+max21rus1988: folds
+*** FLOP *** [Ac Ad Ah]
+vovvesvart: checks
+Rezzonner: checks
+Straubje: checks
+Becks Baker: checks
+*** TURN *** [Ac Ad Ah] [2s]
+vovvesvart: checks
+Rezzonner: bets $1.72
+Straubje: folds
+Becks Baker: folds
+vovvesvart: calls $1.72
+*** RIVER *** [Ac Ad Ah 2s] [Jh]
+vovvesvart: checks
+Rezzonner: bets $6
+vovvesvart: folds
+Uncalled bet ($6) returned to Rezzonner
+Rezzonner collected $8.49 from pot
+Rezzonner: doesn't show hand
+*** SUMMARY ***
+Total pot $8.94 | Rake $0.45
+Board [Ac Ad Ah 2s Jh]
+Seat 1: Straubje folded on the Turn
+Seat 2: Becks Baker (button) folded on the Turn
+Seat 3: vovvesvart (small blind) folded on the River
+Seat 4: max21rus1988 (big blind) folded before Flop
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner collected ($8.49)
+
+
+PokerStars Hand #208960656948:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:15:52 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($44.19 in chips)
+Seat 2: Becks Baker ($96.36 in chips)
+Seat 3: vovvesvart ($163.58 in chips)
+Seat 4: max21rus1988 ($72.96 in chips)
+Seat 5: G.Andrei95 ($70.93 in chips)
+Seat 6: Rezzonner ($74.82 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Straubje: calls $0.50
+Becks Baker: folds
+vovvesvart: raises $1.75 to $2.25
+max21rus1988: folds
+G.Andrei95: folds
+Straubje: calls $1.75
+*** FLOP *** [9h 3c 6d]
+Straubje: checks
+vovvesvart: bets $2.50
+Straubje: calls $2.50
+*** TURN *** [9h 3c 6d] [4s]
+Straubje: bets $7
+vovvesvart: calls $7
+*** RIVER *** [9h 3c 6d 4s] [2h]
+Straubje: bets $32.44 and is all-in
+vovvesvart: folds
+Uncalled bet ($32.44) returned to Straubje
+Straubje collected $23.04 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $24.25 | Rake $1.21
+Board [9h 3c 6d 4s 2h]
+Seat 1: Straubje collected ($23.04)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) folded on the River
+Seat 4: max21rus1988 (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) folded before Flop
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960671060:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:16:37 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($55.48 in chips)
+Seat 2: Becks Baker ($96.36 in chips)
+Seat 3: vovvesvart ($151.83 in chips)
+Seat 4: max21rus1988 ($72.71 in chips)
+Seat 5: G.Andrei95 ($70.43 in chips)
+Seat 6: Rezzonner ($74.82 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: calls $0.50
+Becks Baker: folds
+vovvesvart: raises $1 to $1.50
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $1
+*** FLOP *** [5c 6d Th]
+Straubje: checks
+vovvesvart: checks
+*** TURN *** [5c 6d Th] [2s]
+Straubje: checks
+vovvesvart: checks
+*** RIVER *** [5c 6d Th 2s] [Kd]
+Straubje: checks
+vovvesvart: checks
+*** SHOW DOWN ***
+Straubje: shows [9c Jc] (high card King)
+vovvesvart: shows [Js 9s] (high card King)
+Straubje collected $1.78 from pot
+vovvesvart collected $1.78 from pot
+*** SUMMARY ***
+Total pot $3.75 | Rake $0.19
+Board [5c 6d Th 2s Kd]
+Seat 1: Straubje showed [9c Jc] and won ($1.78) with high card King
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart showed [Js 9s] and won ($1.78) with high card King
+Seat 4: max21rus1988 (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded before Flop
+
+
+PokerStars Hand #208960680502:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:17:04 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($55.76 in chips)
+Seat 2: Becks Baker ($96.36 in chips)
+Seat 3: vovvesvart ($152.11 in chips)
+Seat 4: max21rus1988 ($72.71 in chips)
+Seat 5: G.Andrei95 ($70.18 in chips)
+Seat 6: Rezzonner ($74.32 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: raises $0.75 to $1.25
+vovvesvart: calls $1.25
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.75
+*** FLOP *** [4h Jc 8c]
+Straubje: checks
+Becks Baker: checks
+vovvesvart: checks
+*** TURN *** [4h Jc 8c] [7d]
+Straubje: bets $2
+Becks Baker: folds
+vovvesvart: calls $2
+*** RIVER *** [4h Jc 8c 7d] [Ad]
+Straubje: bets $2
+vovvesvart: raises $2 to $4
+Straubje: calls $2
+*** SHOW DOWN ***
+vovvesvart: shows [Ah 9h] (a pair of Aces)
+Straubje: mucks hand
+vovvesvart collected $15.20 from pot
+*** SUMMARY ***
+Total pot $16 | Rake $0.80
+Board [4h Jc 8c 7d Ad]
+Seat 1: Straubje (big blind) mucked
+Seat 2: Becks Baker folded on the Turn
+Seat 3: vovvesvart showed [Ah 9h] and won ($15.20) with a pair of Aces
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208960710775:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:18:50 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($45.26 in chips)
+Seat 2: Becks Baker ($94.61 in chips)
+Seat 3: vovvesvart ($153.60 in chips)
+Seat 4: max21rus1988 ($72.71 in chips)
+Seat 5: G.Andrei95 ($79.56 in chips)
+Seat 6: Rezzonner ($74.07 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: folds
+G.Andrei95: raises $0.75 to $1.25
+Rezzonner: folds
+Straubje: raises $2.75 to $4
+Becks Baker: folds
+vovvesvart: folds
+G.Andrei95: folds
+Uncalled bet ($2.75) returned to Straubje
+Straubje collected $3.25 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $3.25 | Rake $0
+Seat 1: Straubje (button) collected ($3.25)
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) folded before Flop
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960693321:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:17:49 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($48.51 in chips)
+Seat 2: Becks Baker ($95.11 in chips)
+Seat 3: vovvesvart ($160.06 in chips)
+Seat 4: max21rus1988 ($72.71 in chips)
+Seat 5: G.Andrei95 ($70.18 in chips)
+Seat 6: Rezzonner ($74.07 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: raises $0.50 to $1
+max21rus1988: folds
+G.Andrei95: raises $2.25 to $3.25
+Rezzonner: folds
+Straubje: calls $3
+Becks Baker: folds
+vovvesvart: calls $2.25
+*** FLOP *** [7c Kd As]
+Straubje: checks
+vovvesvart: checks
+G.Andrei95: bets $3.21
+Straubje: folds
+vovvesvart: calls $3.21
+*** TURN *** [7c Kd As] [6s]
+vovvesvart: checks
+G.Andrei95: checks
+*** RIVER *** [7c Kd As 6s] [Kh]
+vovvesvart: checks
+G.Andrei95: bets $3.96
+vovvesvart: folds
+Uncalled bet ($3.96) returned to G.Andrei95
+G.Andrei95 collected $15.84 from pot
+G.Andrei95: doesn't show hand
+*** SUMMARY ***
+Total pot $16.67 | Rake $0.83
+Board [7c Kd As 6s Kh]
+Seat 1: Straubje (small blind) folded on the Flop
+Seat 2: Becks Baker (big blind) folded before Flop
+Seat 3: vovvesvart folded on the River
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 collected ($15.84)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960731991:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:19:37 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($47.26 in chips)
+Seat 2: Becks Baker ($94.36 in chips)
+Seat 3: vovvesvart ($153.10 in chips)
+Seat 4: max21rus1988 ($72.71 in chips)
+Seat 5: G.Andrei95 ($78.31 in chips)
+Seat 6: Rezzonner ($74.07 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.50
+Becks Baker: folds
+vovvesvart: raises $1.50 to $2
+max21rus1988: folds
+Straubje: calls $1.50
+*** FLOP *** [Ah Qs Js]
+vovvesvart: bets $2.14
+Straubje: calls $2.14
+*** TURN *** [Ah Qs Js] [4h]
+vovvesvart: bets $4.17
+Straubje: folds
+Uncalled bet ($4.17) returned to vovvesvart
+vovvesvart collected $8.34 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $8.78 | Rake $0.44
+Board [Ah Qs Js 4h]
+Seat 1: Straubje folded on the Turn
+Seat 2: Becks Baker (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) collected ($8.34)
+Seat 4: max21rus1988 (big blind) folded before Flop
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960738898:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:20:01 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($43.12 in chips)
+Seat 2: Becks Baker ($94.36 in chips)
+Seat 3: vovvesvart ($157.30 in chips)
+Seat 4: max21rus1988 ($72.21 in chips)
+Seat 5: G.Andrei95 ($78.31 in chips)
+Seat 6: Rezzonner ($74.07 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Straubje: folds
+Becks Baker: folds
+vovvesvart: raises $1 to $1.50
+max21rus1988: folds
+G.Andrei95: calls $1
+*** FLOP *** [2c Qh Jc]
+G.Andrei95: checks
+vovvesvart: checks
+*** TURN *** [2c Qh Jc] [9h]
+G.Andrei95: checks
+vovvesvart: bets $3.09
+G.Andrei95: folds
+Uncalled bet ($3.09) returned to vovvesvart
+vovvesvart collected $3.09 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $3.25 | Rake $0.16
+Board [2c Qh Jc 9h]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) collected ($3.09)
+Seat 4: max21rus1988 (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) folded on the Turn
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960746606:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:20:28 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($43.12 in chips)
+Seat 2: Becks Baker ($94.36 in chips)
+Seat 3: vovvesvart ($158.89 in chips)
+Seat 4: max21rus1988 ($71.96 in chips)
+Seat 5: G.Andrei95 ($76.81 in chips)
+Seat 6: Rezzonner ($74.07 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: folds
+Becks Baker: folds
+vovvesvart: raises $1 to $1.50
+max21rus1988: folds
+G.Andrei95: raises $4 to $5.50
+Rezzonner: folds
+vovvesvart: folds
+Uncalled bet ($4) returned to G.Andrei95
+G.Andrei95 collected $3.50 from pot
+G.Andrei95: doesn't show hand
+*** SUMMARY ***
+Total pot $3.50 | Rake $0
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart folded before Flop
+Seat 4: max21rus1988 (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) collected ($3.50)
+Seat 6: Rezzonner (big blind) folded before Flop
+
+
+PokerStars Hand #208960754887:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:20:57 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($43.12 in chips)
+Seat 2: Becks Baker ($94.36 in chips)
+Seat 3: vovvesvart ($157.39 in chips)
+Seat 4: max21rus1988 ($71.96 in chips)
+Seat 5: G.Andrei95 ($78.81 in chips)
+Seat 6: Rezzonner ($73.57 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: folds
+vovvesvart: raises $1 to $1.50
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $1
+*** FLOP *** [Jd 5h 9h]
+Straubje: checks
+vovvesvart: bets $1.55
+Straubje: folds
+Uncalled bet ($1.55) returned to vovvesvart
+vovvesvart collected $3.09 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $3.25 | Rake $0.16
+Board [Jd 5h 9h]
+Seat 1: Straubje (big blind) folded on the Flop
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart collected ($3.09)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208960765185:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:21:34 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($41.62 in chips)
+Seat 2: Becks Baker ($94.36 in chips)
+Seat 3: vovvesvart ($158.98 in chips)
+Seat 4: max21rus1988 ($71.96 in chips)
+Seat 5: G.Andrei95 ($78.81 in chips)
+Seat 6: Rezzonner ($73.32 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: raises $0.50 to $1
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.75
+Becks Baker: folds
+*** FLOP *** [2s 7h 4h]
+Straubje: checks
+vovvesvart: bets $1.19
+Straubje: calls $1.19
+*** TURN *** [2s 7h 4h] [Qd]
+Straubje: checks
+vovvesvart: bets $2.32
+Straubje: calls $2.32
+*** RIVER *** [2s 7h 4h Qd] [Ah]
+Straubje: bets $5
+vovvesvart: folds
+Uncalled bet ($5) returned to Straubje
+Straubje collected $9.04 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $9.52 | Rake $0.48
+Board [2s 7h 4h Qd Ah]
+Seat 1: Straubje (small blind) collected ($9.04)
+Seat 2: Becks Baker (big blind) folded before Flop
+Seat 3: vovvesvart folded on the River
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960799428:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:23:36 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($45.65 in chips)
+Seat 2: Becks Baker ($97.36 in chips)
+Seat 3: vovvesvart ($152.97 in chips)
+Seat 4: max21rus1988 ($71.46 in chips)
+Seat 5: G.Andrei95 ($77.56 in chips)
+Seat 6: Rezzonner ($73.32 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Straubje: raises $2 to $2.50
+Becks Baker: folds
+vovvesvart: folds
+max21rus1988: folds
+G.Andrei95: folds
+Uncalled bet ($2) returned to Straubje
+Straubje collected $1.25 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: Straubje collected ($1.25)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) folded before Flop (didn't bet)
+Seat 4: max21rus1988 (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) folded before Flop
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960793953:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:23:16 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($44.90 in chips)
+Seat 2: Becks Baker ($97.36 in chips)
+Seat 3: vovvesvart ($153.22 in chips)
+Seat 4: max21rus1988 ($71.96 in chips)
+Seat 5: G.Andrei95 ($77.56 in chips)
+Seat 6: Rezzonner ($73.32 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: raises $3 to $3.50
+Becks Baker: folds
+vovvesvart: folds
+max21rus1988: folds
+Uncalled bet ($3) returned to Straubje
+Straubje collected $1.25 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: Straubje collected ($1.25)
+Seat 2: Becks Baker (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) folded before Flop
+Seat 4: max21rus1988 (big blind) folded before Flop
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960777631:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:22:18 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($46.15 in chips)
+Seat 2: Becks Baker ($93.86 in chips)
+Seat 3: vovvesvart ($154.47 in chips)
+Seat 4: max21rus1988 ($71.96 in chips)
+Seat 5: G.Andrei95 ($78.81 in chips)
+Seat 6: Rezzonner ($73.32 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: folds
+G.Andrei95: raises $0.75 to $1.25
+Rezzonner: folds
+Straubje: calls $1.25
+Becks Baker: calls $1
+vovvesvart: calls $0.75
+*** FLOP *** [Kd 5d As]
+Becks Baker: checks
+vovvesvart: checks
+G.Andrei95: checks
+Straubje: checks
+*** TURN *** [Kd 5d As] [3d]
+Becks Baker: bets $3.75
+vovvesvart: folds
+G.Andrei95: folds
+Straubje: folds
+Uncalled bet ($3.75) returned to Becks Baker
+Becks Baker collected $4.75 from pot
+*** SUMMARY ***
+Total pot $5 | Rake $0.25
+Board [Kd 5d As 3d]
+Seat 1: Straubje (button) folded on the Turn
+Seat 2: Becks Baker (small blind) collected ($4.75)
+Seat 3: vovvesvart (big blind) folded on the Turn
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded on the Turn
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960821718:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:24:55 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($46.40 in chips)
+Seat 2: Becks Baker ($96.11 in chips)
+Seat 3: vovvesvart ($158.94 in chips)
+Seat 4: max21rus1988 ($71.21 in chips)
+Seat 5: G.Andrei95 ($76.81 in chips)
+Seat 6: Rezzonner ($68.27 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: folds
+vovvesvart: folds
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Uncalled bet ($0.25) returned to Straubje
+Straubje collected $0.50 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $0.50 | Rake $0
+Seat 1: Straubje (big blind) collected ($0.50)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208960826903:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:25:13 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($46.65 in chips)
+Seat 2: Becks Baker ($96.11 in chips)
+Seat 3: vovvesvart ($158.94 in chips)
+Seat 4: max21rus1988 ($71.21 in chips)
+Seat 5: G.Andrei95 ($76.81 in chips)
+Seat 6: Rezzonner ($68.02 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: folds
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: raises $2 to $2.50
+Becks Baker: folds
+Uncalled bet ($2) returned to Straubje
+Straubje collected $1 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $1 | Rake $0
+Seat 1: Straubje (small blind) collected ($1)
+Seat 2: Becks Baker (big blind) folded before Flop
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960832831:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:25:34 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($47.15 in chips)
+Seat 2: Becks Baker ($95.61 in chips)
+Seat 3: vovvesvart ($158.94 in chips)
+Seat 4: max21rus1988 ($71.21 in chips)
+Seat 5: G.Andrei95 ($76.81 in chips)
+Seat 6: Rezzonner ($68.02 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: raises $0.75 to $1.25
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: folds
+Becks Baker: folds
+vovvesvart: folds
+Uncalled bet ($0.75) returned to max21rus1988
+max21rus1988 collected $1.25 from pot
+max21rus1988: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: Straubje (button) folded before Flop (didn't bet)
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) folded before Flop
+Seat 4: max21rus1988 collected ($1.25)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960802911:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:23:48 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($46.40 in chips)
+Seat 2: Becks Baker ($97.36 in chips)
+Seat 3: vovvesvart ($152.97 in chips)
+Seat 4: max21rus1988 ($71.21 in chips)
+Seat 5: G.Andrei95 ($77.06 in chips)
+Seat 6: Rezzonner ($73.32 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: folds
+Becks Baker: raises $0.75 to $1.25
+vovvesvart: calls $1.25
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: calls $0.75
+*** FLOP *** [5c 4h 6d]
+Rezzonner: checks
+Becks Baker: checks
+vovvesvart: bets $3.80
+Rezzonner: calls $3.80
+Becks Baker: folds
+*** TURN *** [5c 4h 6d] [2c]
+Rezzonner: checks
+vovvesvart: checks
+*** RIVER *** [5c 4h 6d 2c] [4d]
+Rezzonner: checks
+vovvesvart: bets $5.51
+Rezzonner: folds
+Uncalled bet ($5.51) returned to vovvesvart
+vovvesvart collected $11.02 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $11.60 | Rake $0.58
+Board [5c 4h 6d 2c 4d]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker folded on the Flop
+Seat 3: vovvesvart collected ($11.02)
+Seat 4: max21rus1988 (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded on the River
+
+
+PokerStars Hand #208960836089:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:25:46 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($47.15 in chips)
+Seat 2: Becks Baker ($95.36 in chips)
+Seat 3: vovvesvart ($158.44 in chips)
+Seat 4: max21rus1988 ($71.96 in chips)
+Seat 5: G.Andrei95 ($76.81 in chips)
+Seat 6: Rezzonner ($68.02 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: raises $2.50 to $3
+Becks Baker: folds
+vovvesvart: calls $2.75
+max21rus1988: calls $2.50
+*** FLOP *** [9s 7h Qc]
+vovvesvart: checks
+max21rus1988: checks
+Straubje: bets $6
+vovvesvart: calls $6
+max21rus1988: folds
+*** TURN *** [9s 7h Qc] [4d]
+vovvesvart: checks
+Straubje: checks
+*** RIVER *** [9s 7h Qc 4d] [Ac]
+vovvesvart: checks
+Straubje: checks
+*** SHOW DOWN ***
+vovvesvart: shows [Jc Td] (high card Ace)
+Straubje: shows [Jh Js] (a pair of Jacks)
+Straubje collected $19.95 from pot
+*** SUMMARY ***
+Total pot $21 | Rake $1.05
+Board [9s 7h Qc 4d Ac]
+Seat 1: Straubje showed [Jh Js] and won ($19.95) with a pair of Jacks
+Seat 2: Becks Baker (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) showed [Jc Td] and lost with high card Ace
+Seat 4: max21rus1988 (big blind) folded on the Flop
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960867024:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:27:25 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($57.10 in chips)
+Seat 2: Becks Baker ($95.36 in chips)
+Seat 3: vovvesvart ($151.05 in chips)
+Seat 4: max21rus1988 ($68.71 in chips)
+Seat 5: G.Andrei95 ($76.31 in chips)
+Seat 6: Rezzonner ($68.02 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: folds
+Becks Baker: raises $0.75 to $1.25
+vovvesvart: folds
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Uncalled bet ($0.75) returned to Becks Baker
+Becks Baker collected $1.25 from pot
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker collected ($1.25)
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: max21rus1988 (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded before Flop
+
+
+PokerStars Hand #208960849800:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:26:35 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($58.10 in chips)
+Seat 2: Becks Baker ($95.36 in chips)
+Seat 3: vovvesvart ($149.44 in chips)
+Seat 4: max21rus1988 ($68.96 in chips)
+Seat 5: G.Andrei95 ($76.81 in chips)
+Seat 6: Rezzonner ($68.02 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Straubje: calls $0.50
+Becks Baker: folds
+vovvesvart: raises $0.50 to $1
+max21rus1988: folds
+G.Andrei95: folds
+Straubje: calls $0.50
+*** FLOP *** [9c 8s 2c]
+Straubje: checks
+vovvesvart: bets $1.31
+Straubje: folds
+Uncalled bet ($1.31) returned to vovvesvart
+vovvesvart collected $2.61 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $2.75 | Rake $0.14
+Board [9c 8s 2c]
+Seat 1: Straubje folded on the Flop
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) collected ($2.61)
+Seat 4: max21rus1988 (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) folded before Flop
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960871111:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:27:40 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($57.10 in chips)
+Seat 2: Becks Baker ($96.11 in chips)
+Seat 3: vovvesvart ($151.05 in chips)
+Seat 4: max21rus1988 ($68.71 in chips)
+Seat 5: G.Andrei95 ($76.06 in chips)
+Seat 6: Rezzonner ($67.52 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: folds
+vovvesvart has timed out
+vovvesvart: folds
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: raises $1 to $1.50
+Straubje: calls $1
+*** FLOP *** [Qc 6h 9s]
+Rezzonner: checks
+Straubje: checks
+*** TURN *** [Qc 6h 9s] [4s]
+Rezzonner: bets $2.14
+Straubje: folds
+Uncalled bet ($2.14) returned to Rezzonner
+Rezzonner collected $2.85 from pot
+Rezzonner: doesn't show hand
+*** SUMMARY ***
+Total pot $3 | Rake $0.15
+Board [Qc 6h 9s 4s]
+Seat 1: Straubje (big blind) folded on the Turn
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) collected ($2.85)
+
+
+PokerStars Hand #208960892837:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:28:57 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($55.60 in chips)
+Seat 2: Becks Baker ($96.11 in chips)
+Seat 3: vovvesvart ($151.05 in chips)
+Seat 4: max21rus1988 ($68.71 in chips)
+Seat 5: G.Andrei95 ($76.06 in chips)
+Seat 6: Rezzonner ($68.87 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: raises $0.50 to $1
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.75
+Becks Baker: calls $0.50
+*** FLOP *** [2c 9h 3h]
+Straubje: checks
+Becks Baker: checks
+vovvesvart has timed out
+vovvesvart: checks
+*** TURN *** [2c 9h 3h] [3d]
+Straubje: checks
+Becks Baker: bets $1.85
+vovvesvart: folds
+Straubje: folds
+Uncalled bet ($1.85) returned to Becks Baker
+Becks Baker collected $2.85 from pot
+*** SUMMARY ***
+Total pot $3 | Rake $0.15
+Board [2c 9h 3h 3d]
+Seat 1: Straubje (small blind) folded on the Turn
+Seat 2: Becks Baker (big blind) collected ($2.85)
+Seat 3: vovvesvart folded on the Turn
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960931550:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:31:03 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($54.60 in chips)
+Seat 2: Becks Baker ($97.96 in chips)
+Seat 3: vovvesvart ($150.05 in chips)
+Seat 4: max21rus1988 ($68.71 in chips)
+Seat 5: G.Andrei95 ($76.06 in chips)
+Seat 6: Rezzonner ($68.87 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: raises $1.50 to $2
+Becks Baker: folds
+vovvesvart: calls $1.50
+*** FLOP *** [Ts Qd 5c]
+vovvesvart: checks
+Straubje: bets $3.50
+vovvesvart: folds
+Uncalled bet ($3.50) returned to Straubje
+Straubje collected $4.04 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $4.25 | Rake $0.21
+Board [Ts Qd 5c]
+Seat 1: Straubje (button) collected ($4.04)
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) folded on the Flop
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960964411:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:33:02 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($56.64 in chips)
+Seat 2: Becks Baker ($97.71 in chips)
+Seat 3: vovvesvart ($129.26 in chips)
+Seat 4: max21rus1988 ($85.62 in chips)
+Seat 5: G.Andrei95 ($76.06 in chips)
+Seat 6: Rezzonner ($68.87 in chips)
+max21rus1988: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Straubje: calls $0.50
+Becks Baker: folds
+vovvesvart has timed out
+vovvesvart: folds
+max21rus1988: raises $1.75 to $2.25
+G.Andrei95: folds
+Straubje: calls $1.75
+*** FLOP *** [9s Qh 4s]
+max21rus1988: bets $3.14
+Straubje: folds
+Uncalled bet ($3.14) returned to max21rus1988
+max21rus1988 collected $4.75 from pot
+max21rus1988: doesn't show hand
+*** SUMMARY ***
+Total pot $5 | Rake $0.25
+Board [9s Qh 4s]
+Seat 1: Straubje folded on the Flop
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) folded before Flop (didn't bet)
+Seat 4: max21rus1988 (small blind) collected ($4.75)
+Seat 5: G.Andrei95 (big blind) folded before Flop
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960951803:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:32:16 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($56.64 in chips)
+Seat 2: Becks Baker ($97.71 in chips)
+Seat 3: vovvesvart ($148.05 in chips)
+Seat 4: max21rus1988 ($68.71 in chips)
+Seat 5: G.Andrei95 ($76.06 in chips)
+Seat 6: Rezzonner ($68.87 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: folds
+Becks Baker: folds
+vovvesvart: raises $0.50 to $1
+max21rus1988: raises $3.25 to $4.25
+vovvesvart: calls $3.25
+*** FLOP *** [5c 9d Js]
+vovvesvart: checks
+max21rus1988: bets $4.04
+vovvesvart: calls $4.04
+*** TURN *** [5c 9d Js] [7d]
+vovvesvart: checks
+max21rus1988: bets $10.50
+vovvesvart: calls $10.50
+*** RIVER *** [5c 9d Js 7d] [5h]
+vovvesvart: checks
+max21rus1988: checks
+*** SHOW DOWN ***
+vovvesvart: shows [3c 8c] (a pair of Fives)
+max21rus1988: shows [Qc Jc] (two pair, Jacks and Fives)
+max21rus1988 collected $35.70 from pot
+*** SUMMARY ***
+Total pot $37.58 | Rake $1.88
+Board [5c 9d Js 7d 5h]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) showed [3c 8c] and lost with a pair of Fives
+Seat 4: max21rus1988 (big blind) showed [Qc Jc] and won ($35.70) with two pair, Jacks and Fives
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208960995697:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:34:52 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($54.39 in chips)
+Seat 2: Becks Baker ($101.58 in chips)
+Seat 3: vovvesvart ($125.75 in chips)
+Seat 4: max21rus1988 ($88.12 in chips)
+Seat 5: G.Andrei95 ($75.31 in chips)
+Seat 6: Rezzonner ($68.37 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker: raises $0.75 to $1.25
+vovvesvart: folds
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: folds
+Uncalled bet ($0.75) returned to Becks Baker
+Becks Baker collected $1.25 from pot
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: Straubje (big blind) folded before Flop
+Seat 2: Becks Baker collected ($1.25)
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208960975850:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:33:43 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($54.39 in chips)
+Seat 2: Becks Baker ($97.71 in chips)
+Seat 3: vovvesvart ($129.26 in chips)
+Seat 4: max21rus1988 ($88.12 in chips)
+Seat 5: G.Andrei95 ($75.56 in chips)
+Seat 6: Rezzonner ($68.87 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: folds
+Becks Baker: raises $0.75 to $1.25
+vovvesvart: calls $1.25
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+*** FLOP *** [4d Ah 9c]
+Becks Baker: checks
+vovvesvart: checks
+*** TURN *** [4d Ah 9c] [Kh]
+Becks Baker: bets $2.26
+vovvesvart: calls $2.26
+*** RIVER *** [4d Ah 9c Kh] [Ts]
+Becks Baker: bets $2.44
+vovvesvart: folds
+Uncalled bet ($2.44) returned to Becks Baker
+Becks Baker collected $7.38 from pot
+*** SUMMARY ***
+Total pot $7.77 | Rake $0.39
+Board [4d Ah 9c Kh Ts]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker collected ($7.38)
+Seat 3: vovvesvart folded on the River
+Seat 4: max21rus1988 (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded before Flop
+
+
+PokerStars Hand #208961002078:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:35:16 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($53.89 in chips)
+Seat 2: Becks Baker ($102.33 in chips)
+Seat 3: vovvesvart ($125.75 in chips)
+Seat 4: max21rus1988 ($88.12 in chips)
+Seat 5: G.Andrei95 ($75.31 in chips)
+Seat 6: Rezzonner ($68.12 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: folds
+max21rus1988: raises $0.75 to $1.25
+G.Andrei95: calls $1.25
+Rezzonner: folds
+Straubje: folds
+Becks Baker: calls $0.75
+*** FLOP *** [6s 8d 8s]
+Becks Baker: checks
+max21rus1988: checks
+G.Andrei95: bets $0.95
+Becks Baker: folds
+max21rus1988: folds
+Uncalled bet ($0.95) returned to G.Andrei95
+G.Andrei95 collected $3.80 from pot
+G.Andrei95: doesn't show hand
+*** SUMMARY ***
+Total pot $4 | Rake $0.20
+Board [6s 8d 8s]
+Seat 1: Straubje (small blind) folded before Flop
+Seat 2: Becks Baker (big blind) folded on the Flop
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: max21rus1988 folded on the Flop
+Seat 5: G.Andrei95 collected ($3.80)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208961024922:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:36:26 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($53.64 in chips)
+Seat 2: Becks Baker ($101.08 in chips)
+Seat 3: vovvesvart ($125.75 in chips)
+Seat 4: max21rus1988 ($86.87 in chips)
+Seat 5: G.Andrei95 ($77.86 in chips)
+Seat 6: Rezzonner ($68.12 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+max21rus1988: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: raises $1.50 to $2
+Becks Baker: folds
+vovvesvart: calls $1.50
+*** FLOP *** [5d 2d 4d]
+vovvesvart: checks
+Straubje: checks
+*** TURN *** [5d 2d 4d] [6c]
+vovvesvart: bets $0.50
+Straubje: folds
+Uncalled bet ($0.50) returned to vovvesvart
+vovvesvart collected $4.04 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $4.25 | Rake $0.21
+Board [5d 2d 4d 6c]
+Seat 1: Straubje (button) folded on the Turn
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) collected ($4.04)
+Seat 4: max21rus1988 folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208961035809:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:37:05 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($51.64 in chips)
+Seat 2: Becks Baker ($100.83 in chips)
+Seat 3: vovvesvart ($127.79 in chips)
+Seat 5: G.Andrei95 ($77.86 in chips)
+Seat 6: Rezzonner ($68.12 in chips)
+vovvesvart: posts small blind $0.25
+max21rus1988: is sitting out
+max21rus1988 leaves the table
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Meskalita joins the table at seat #4
+Rezzonner: folds
+Straubje: folds
+Becks Baker: folds
+vovvesvart: raises $1 to $1.50
+G.Andrei95: folds
+Uncalled bet ($1) returned to vovvesvart
+vovvesvart collected $1 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $1 | Rake $0
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) collected ($1)
+Seat 5: G.Andrei95 (big blind) folded before Flop
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208961041018:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:37:24 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($51.64 in chips)
+Seat 2: Becks Baker ($100.83 in chips)
+Seat 3: vovvesvart ($128.29 in chips)
+Seat 5: G.Andrei95 ($77.36 in chips)
+Seat 6: Rezzonner ($68.12 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: calls $0.50
+Becks Baker: raises $1.50 to $2
+vovvesvart: calls $2
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $1.50
+*** FLOP *** [Ts 3d Js]
+Straubje: checks
+Becks Baker: checks
+vovvesvart: checks
+*** TURN *** [Ts 3d Js] [4s]
+Straubje: checks
+Becks Baker: checks
+vovvesvart: checks
+*** RIVER *** [Ts 3d Js 4s] [Qs]
+Straubje: checks
+Becks Baker: checks
+vovvesvart: checks
+*** SHOW DOWN ***
+Straubje: shows [9h 7d] (high card Queen)
+Becks Baker: shows [5h 5d] (a pair of Fives)
+vovvesvart: mucks hand
+Becks Baker collected $6.41 from pot
+*** SUMMARY ***
+Total pot $6.75 | Rake $0.34
+Board [Ts 3d Js 4s Qs]
+Seat 1: Straubje showed [9h 7d] and lost with high card Queen
+Seat 2: Becks Baker showed [5h 5d] and won ($6.41) with a pair of Fives
+Seat 3: vovvesvart (button) mucked
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded before Flop
+
+
+PokerStars Hand #208961068648:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:39:04 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($48.39 in chips)
+Seat 2: Becks Baker ($105.24 in chips)
+Seat 3: vovvesvart ($126.29 in chips)
+Seat 5: G.Andrei95 ($78.47 in chips)
+Seat 6: Rezzonner ($67.37 in chips)
+Straubje: posts small blind $0.25
+Becks Baker: posts big blind $0.50
+Meskalita: sits out
+*** HOLE CARDS ***
+vovvesvart: raises $0.50 to $1
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: folds
+Becks Baker: folds
+Uncalled bet ($0.50) returned to vovvesvart
+vovvesvart collected $1.25 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: Straubje (small blind) folded before Flop
+Seat 2: Becks Baker (big blind) folded before Flop
+Seat 3: vovvesvart collected ($1.25)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208961053148:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:38:08 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($49.64 in chips)
+Seat 2: Becks Baker ($105.24 in chips)
+Seat 3: vovvesvart ($126.29 in chips)
+Seat 5: G.Andrei95 ($77.11 in chips)
+Seat 6: Rezzonner ($67.62 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+Meskalita: sits out
+*** HOLE CARDS ***
+Becks Baker: folds
+vovvesvart: folds
+G.Andrei95: raises $0.75 to $1.25
+Rezzonner: folds
+Straubje: calls $0.75
+*** FLOP *** [Tc 3s 8d]
+Straubje: checks
+G.Andrei95: bets $0.86
+Straubje: folds
+Uncalled bet ($0.86) returned to G.Andrei95
+G.Andrei95 collected $2.61 from pot
+G.Andrei95: doesn't show hand
+*** SUMMARY ***
+Total pot $2.75 | Rake $0.14
+Board [Tc 3s 8d]
+Seat 1: Straubje (big blind) folded on the Flop
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) collected ($2.61)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208961092279:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:39:20 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($48.14 in chips)
+Seat 2: Becks Baker ($104.74 in chips)
+Seat 3: vovvesvart ($127.04 in chips)
+Seat 5: G.Andrei95 ($78.47 in chips)
+Seat 6: Rezzonner ($67.37 in chips)
+Becks Baker: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+Meskalita: sits out
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: raises $0.75 to $1.25
+Straubje has timed out
+Straubje: folds
+Becks Baker: folds
+vovvesvart: calls $0.75
+*** FLOP *** [2c 2d 2h]
+vovvesvart: checks
+Rezzonner: bets $0.86
+vovvesvart: calls $0.86
+*** TURN *** [2c 2d 2h] [8c]
+vovvesvart: checks
+Rezzonner: checks
+*** RIVER *** [2c 2d 2h 8c] [9d]
+vovvesvart: checks
+Rezzonner: bets $3
+vovvesvart: calls $3
+*** SHOW DOWN ***
+Rezzonner: shows [Ts Jh] (three of a kind, Deuces)
+vovvesvart: shows [6s Ad] (three of a kind, Deuces - Ace kicker)
+vovvesvart collected $9.95 from pot
+*** SUMMARY ***
+Total pot $10.47 | Rake $0.52
+Board [2c 2d 2h 8c 9d]
+Seat 1: Straubje (button) folded before Flop (didn't bet)
+Seat 2: Becks Baker (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) showed [6s Ad] and won ($9.95) with three of a kind, Deuces
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner showed [Ts Jh] and lost with three of a kind, Deuces
+
+
+PokerStars Hand #208961108397:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:40:18 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($48.14 in chips)
+Seat 2: Becks Baker ($104.49 in chips)
+Seat 3: vovvesvart ($131.88 in chips)
+Seat 4: Meskalita ($50 in chips)
+Seat 5: G.Andrei95 ($78.47 in chips)
+Seat 6: Rezzonner ($62.26 in chips)
+vovvesvart: posts small blind $0.25
+Meskalita: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: raises $0.75 to $1.25
+Straubje: raises $1.75 to $3
+Becks Baker: folds
+vovvesvart: calls $2.75
+Meskalita: folds
+Rezzonner: raises $9 to $12
+Straubje: raises $36.14 to $48.14 and is all-in
+vovvesvart: folds
+Rezzonner: calls $36.14
+*** FLOP *** [9h 4c 3c]
+*** TURN *** [9h 4c 3c] [4d]
+*** RIVER *** [9h 4c 3c 4d] [8d]
+*** SHOW DOWN ***
+Rezzonner: shows [Kh As] (a pair of Fours)
+Straubje: shows [Qd Qh] (two pair, Queens and Fours)
+Straubje collected $97.78 from pot
+*** SUMMARY ***
+Total pot $99.78 | Rake $2
+Board [9h 4c 3c 4d 8d]
+Seat 1: Straubje showed [Qd Qh] and won ($97.78) with two pair, Queens and Fours
+Seat 2: Becks Baker (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) folded before Flop
+Seat 4: Meskalita (big blind) folded before Flop
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner showed [Kh As] and lost with a pair of Fours
+
+
+PokerStars Hand #208961125266:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:41:18 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($97.78 in chips)
+Seat 2: Becks Baker ($104.49 in chips)
+Seat 3: vovvesvart ($128.88 in chips)
+Seat 4: Meskalita ($50 in chips)
+Seat 5: G.Andrei95 ($78.47 in chips)
+Seat 6: Rezzonner ($50 in chips)
+Meskalita: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Straubje: raises $2 to $2.50
+Becks Baker: folds
+vovvesvart: folds
+Meskalita: folds
+G.Andrei95: folds
+Uncalled bet ($2) returned to Straubje
+Straubje collected $1.25 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: Straubje collected ($1.25)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) folded before Flop (didn't bet)
+Seat 4: Meskalita (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) folded before Flop
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208961129876:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:41:35 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($98.53 in chips)
+Seat 2: Becks Baker ($104.49 in chips)
+Seat 3: vovvesvart ($128.88 in chips)
+Seat 4: Meskalita ($50 in chips)
+Seat 5: G.Andrei95 ($77.97 in chips)
+Seat 6: Rezzonner ($50 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: folds
+Becks Baker: folds
+vovvesvart has timed out
+vovvesvart: folds
+Meskalita: raises $0.75 to $1.25
+G.Andrei95: folds
+Rezzonner: raises $3.75 to $5
+Meskalita: calls $3.75
+*** FLOP *** [4c 3c Td]
+Rezzonner: bets $3.21
+Meskalita: raises $5.29 to $8.50
+Straubje is disconnected
+Rezzonner: folds
+Uncalled bet ($5.29) returned to Meskalita
+Meskalita collected $15.84 from pot
+Meskalita: doesn't show hand
+*** SUMMARY ***
+Total pot $16.67 | Rake $0.83
+Board [4c 3c Td]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: Becks Baker folded before Flop (didn't bet)
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: Meskalita (button) collected ($15.84)
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded on the Flop
+
+
+PokerStars Hand #208961150910:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:42:50 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 3: vovvesvart ($128.88 in chips)
+Seat 4: Meskalita ($57.63 in chips)
+Seat 5: G.Andrei95 ($77.72 in chips)
+Seat 6: Rezzonner ($50 in chips)
+Rezzonner: posts small blind $0.25
+Becks Baker: is sitting out
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+Becks Baker leaves the table
+Meskalita: raises $0.75 to $1.25
+G.Andrei95: folds
+Rezzonner: folds
+vovvesvart: calls $0.75
+*** FLOP *** [Kh 5c 9c]
+vovvesvart: checks
+Meskalita: checks
+*** TURN *** [Kh 5c 9c] [7d]
+vovvesvart: bets $1.31
+Meskalita: calls $1.31
+*** RIVER *** [Kh 5c 9c 7d] [3h]
+vovvesvart: checks
+Meskalita: checks
+*** SHOW DOWN ***
+vovvesvart: shows [7h 6h] (a pair of Sevens)
+Meskalita: mucks hand
+vovvesvart collected $5.10 from pot
+*** SUMMARY ***
+Total pot $5.37 | Rake $0.27
+Board [Kh 5c 9c 7d 3h]
+Seat 3: vovvesvart (big blind) showed [7h 6h] and won ($5.10) with a pair of Sevens
+Seat 4: Meskalita mucked
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208961176649:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:44:22 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 3: vovvesvart ($81.42 in chips)
+Seat 4: Meskalita ($54.57 in chips)
+Seat 5: G.Andrei95 ($76.47 in chips)
+Seat 6: Rezzonner ($101 in chips)
+Meskalita: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+vovvesvart: folds
+Meskalita: folds
+Uncalled bet ($0.25) returned to G.Andrei95
+G.Andrei95 collected $0.50 from pot
+G.Andrei95: doesn't show hand
+*** SUMMARY ***
+Total pot $0.50 | Rake $0
+Seat 3: vovvesvart (button) folded before Flop (didn't bet)
+Seat 4: Meskalita (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) collected ($0.50)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208961163544:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:43:36 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 3: vovvesvart ($131.42 in chips)
+Seat 4: Meskalita ($55.07 in chips)
+Seat 5: G.Andrei95 ($77.72 in chips)
+Seat 6: Rezzonner ($50 in chips)
+vovvesvart: posts small blind $0.25
+Meskalita: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: raises $0.75 to $1.25
+Rezzonner: raises $2.75 to $4
+vovvesvart: calls $3.75
+Meskalita: folds
+G.Andrei95: folds
+*** FLOP *** [7c 4d 8d]
+vovvesvart: checks
+Rezzonner: bets $4.63
+vovvesvart: raises $122.79 to $127.42 and is all-in
+Rezzonner: calls $41.37 and is all-in
+Uncalled bet ($81.42) returned to vovvesvart
+*** TURN *** [7c 4d 8d] [6d]
+*** RIVER *** [7c 4d 8d 6d] [4s]
+*** SHOW DOWN ***
+vovvesvart: shows [4c 3c] (three of a kind, Fours)
+Rezzonner: shows [8s 8c] (a full house, Eights full of Fours)
+Rezzonner collected $101 from pot
+*** SUMMARY ***
+Total pot $101.75 | Rake $0.75
+Board [7c 4d 8d 6d 4s]
+Seat 3: vovvesvart (small blind) showed [4c 3c] and lost with three of a kind, Fours
+Seat 4: Meskalita (big blind) folded before Flop
+Seat 5: G.Andrei95 folded before Flop
+Seat 6: Rezzonner (button) showed [8s 8c] and won ($101) with a full house, Eights full of Fours
+
+
+PokerStars Hand #208961187537:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:45:02 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 3: vovvesvart ($83.52 in chips)
+Seat 4: Meskalita ($54.32 in chips)
+Seat 5: G.Andrei95 ($76.47 in chips)
+Seat 6: Rezzonner ($98.93 in chips)
+Rezzonner: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+Meskalita: raises $0.75 to $1.25
+G.Andrei95: folds
+Rezzonner: folds
+vovvesvart: calls $0.75
+*** FLOP *** [4s 5h Jc]
+vovvesvart: checks
+Meskalita: bets $0.65
+vovvesvart: calls $0.65
+*** TURN *** [4s 5h Jc] [5d]
+vovvesvart: checks
+Meskalita: checks
+*** RIVER *** [4s 5h Jc 5d] [8d]
+vovvesvart: checks
+Meskalita: checks
+*** SHOW DOWN ***
+vovvesvart: shows [3s Qh] (a pair of Fives)
+Meskalita: shows [Ac 7h] (a pair of Fives - Ace kicker)
+Meskalita collected $3.85 from pot
+*** SUMMARY ***
+Total pot $4.05 | Rake $0.20
+Board [4s 5h Jc 5d 8d]
+Seat 3: vovvesvart (big blind) showed [3s Qh] and lost with a pair of Fives
+Seat 4: Meskalita showed [Ac 7h] and won ($3.85) with a pair of Fives
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208961178763:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:44:30 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 3: vovvesvart ($81.42 in chips)
+Seat 4: Meskalita ($54.32 in chips)
+Seat 5: G.Andrei95 ($76.72 in chips)
+Seat 6: Rezzonner ($101 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: raises $0.50 to $1
+Meskalita: folds
+G.Andrei95: folds
+Rezzonner: calls $0.50
+*** FLOP *** [Ks 8h 7c]
+Rezzonner: checks
+vovvesvart: bets $1.07
+Rezzonner: calls $1.07
+*** TURN *** [Ks 8h 7c] [Ac]
+Rezzonner: checks
+vovvesvart: checks
+*** RIVER *** [Ks 8h 7c Ac] [5s]
+Bula71 joins the table at seat #2
+Rezzonner: checks
+Bula71 leaves the table
+vovvesvart: checks
+ZonTTT joins the table at seat #2
+*** SHOW DOWN ***
+Rezzonner: shows [6d 7s] (a pair of Sevens)
+vovvesvart: shows [Td 8d] (a pair of Eights)
+vovvesvart collected $4.17 from pot
+*** SUMMARY ***
+Total pot $4.39 | Rake $0.22
+Board [Ks 8h 7c Ac 5s]
+Seat 3: vovvesvart showed [Td 8d] and won ($4.17) with a pair of Eights
+Seat 4: Meskalita (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) showed [6d 7s] and lost with a pair of Sevens
+
+
+PokerStars Hand #208961196019:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:45:32 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 3: vovvesvart ($81.62 in chips)
+Seat 4: Meskalita ($56.27 in chips)
+Seat 5: G.Andrei95 ($76.47 in chips)
+Seat 6: Rezzonner ($98.68 in chips)
+vovvesvart: posts small blind $0.25
+Meskalita: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: raises $0.75 to $1.25
+Rezzonner: folds
+vovvesvart: calls $1
+Meskalita: folds
+*** FLOP *** [7s 5s 8c]
+vovvesvart: bets $0.50
+G.Andrei95: calls $0.50
+*** TURN *** [7s 5s 8c] [Ts]
+vovvesvart: bets $0.50
+G.Andrei95: calls $0.50
+*** RIVER *** [7s 5s 8c Ts] [2d]
+vovvesvart: checks
+G.Andrei95: checks
+*** SHOW DOWN ***
+vovvesvart: shows [Qc 9h] (high card Queen)
+G.Andrei95: shows [Ah Qs] (high card Ace)
+G.Andrei95 collected $4.75 from pot
+*** SUMMARY ***
+Total pot $5 | Rake $0.25
+Board [7s 5s 8c Ts 2d]
+Seat 3: vovvesvart (small blind) showed [Qc 9h] and lost with high card Queen
+Seat 4: Meskalita (big blind) folded before Flop
+Seat 5: G.Andrei95 showed [Ah Qs] and won ($4.75) with high card Ace
+Seat 6: Rezzonner (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208961223679:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:47:12 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($98.53 in chips)
+Seat 3: vovvesvart ($49.62 in chips)
+Seat 4: Meskalita ($50.02 in chips)
+Seat 5: G.Andrei95 ($114.22 in chips)
+Seat 6: Rezzonner ($98.18 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+ZonTTT: sits out
+*** HOLE CARDS ***
+vovvesvart: folds
+Meskalita: raises $0.75 to $1.25
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: folds
+Uncalled bet ($0.75) returned to Meskalita
+G.Andrei95 said, "i fold if u bet"
+Meskalita collected $1.25 from pot
+Meskalita: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 1: Straubje (big blind) folded before Flop
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: Meskalita collected ($1.25)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208961220076:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:46:59 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 3: vovvesvart ($48.87 in chips)
+Seat 4: Meskalita ($50.02 in chips)
+Seat 5: G.Andrei95 ($114.47 in chips)
+Seat 6: Rezzonner ($98.68 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+Straubje: sits out
+ZonTTT: sits out
+*** HOLE CARDS ***
+vovvesvart: raises $1 to $1.50
+Meskalita: folds
+G.Andrei95: folds
+Rezzonner: folds
+Uncalled bet ($1) returned to vovvesvart
+vovvesvart collected $1.25 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $1.25 | Rake $0
+Seat 3: vovvesvart collected ($1.25)
+Seat 4: Meskalita (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded before Flop
+
+
+PokerStars Hand #208961202618:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:45:56 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 3: vovvesvart ($79.37 in chips)
+Seat 4: Meskalita ($55.77 in chips)
+Seat 5: G.Andrei95 ($78.97 in chips)
+Seat 6: Rezzonner ($98.68 in chips)
+Meskalita: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+ZonTTT: sits out
+*** HOLE CARDS ***
+Rezzonner: folds
+vovvesvart: raises $1 to $1.50
+Meskalita: raises $4.25 to $5.75
+G.Andrei95: calls $5.25
+vovvesvart: calls $4.25
+*** FLOP *** [Qs 2c 4c]
+Meskalita: checks
+G.Andrei95: checks
+vovvesvart: bets $8.25
+Meskalita: folds
+G.Andrei95: calls $8.25
+*** TURN *** [Qs 2c 4c] [4h]
+G.Andrei95: checks
+vovvesvart: bets $16.50
+G.Andrei95: calls $16.50
+*** RIVER *** [Qs 2c 4c 4h] [8h]
+G.Andrei95: checks
+vovvesvart: checks
+*** SHOW DOWN ***
+G.Andrei95: shows [9h 9d] (two pair, Nines and Fours)
+vovvesvart: mucks hand
+G.Andrei95 collected $66 from pot
+*** SUMMARY ***
+Total pot $66.75 | Rake $0.75
+Board [Qs 2c 4c 4h 8h]
+Seat 3: vovvesvart (button) mucked
+Seat 4: Meskalita (small blind) folded on the Flop
+Seat 5: G.Andrei95 (big blind) showed [9h 9d] and won ($66) with two pair, Nines and Fours
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208961227752:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:47:26 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($98.03 in chips)
+Seat 2: ZonTTT ($50 in chips)
+Seat 3: vovvesvart ($49.62 in chips)
+Seat 4: Meskalita ($50.77 in chips)
+Seat 5: G.Andrei95 ($114.22 in chips)
+Seat 6: Rezzonner ($97.93 in chips)
+Straubje: posts small blind $0.25
+ZonTTT: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95 said, "again"
+vovvesvart: folds
+Meskalita: folds
+G.Andrei95: folds
+Rezzonner: raises $0.75 to $1.25
+Straubje: calls $1
+ZonTTT: folds
+*** FLOP *** [Th 7h Kd]
+Straubje: checks
+Rezzonner: checks
+*** TURN *** [Th 7h Kd] [Jc]
+Straubje: checks
+Rezzonner: bets $1.55
+Straubje: folds
+Uncalled bet ($1.55) returned to Rezzonner
+Rezzonner collected $2.85 from pot
+Rezzonner: doesn't show hand
+*** SUMMARY ***
+Total pot $3 | Rake $0.15
+Board [Th 7h Kd Jc]
+Seat 1: Straubje (small blind) folded on the Turn
+Seat 2: ZonTTT (big blind) folded before Flop
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: Meskalita folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner (button) collected ($2.85)
+
+
+PokerStars Hand #208961239759:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:48:10 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($96.78 in chips)
+Seat 2: ZonTTT ($50 in chips)
+Seat 3: vovvesvart ($49.62 in chips)
+Seat 4: Meskalita ($50.77 in chips)
+Seat 5: G.Andrei95 ($114.22 in chips)
+Seat 6: Rezzonner ($99.53 in chips)
+ZonTTT: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+Meskalita: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: folds
+ZonTTT: calls $0.25
+vovvesvart: checks
+*** FLOP *** [3c 4c 8h]
+ZonTTT: checks
+vovvesvart: bets $0.50
+ZonTTT: folds
+Uncalled bet ($0.50) returned to vovvesvart
+vovvesvart collected $0.95 from pot
+vovvesvart: doesn't show hand
+*** SUMMARY ***
+Total pot $1 | Rake $0.05
+Board [3c 4c 8h]
+Seat 1: Straubje (button) folded before Flop (didn't bet)
+Seat 2: ZonTTT (small blind) folded on the Flop
+Seat 3: vovvesvart (big blind) collected ($0.95)
+Seat 4: Meskalita folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208961255414:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:49:07 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($96.78 in chips)
+Seat 2: ZonTTT ($50 in chips)
+Seat 3: vovvesvart ($46.32 in chips)
+Seat 4: Meskalita ($54.14 in chips)
+Seat 5: G.Andrei95 ($114.22 in chips)
+Seat 6: Rezzonner ($99.53 in chips)
+Meskalita: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Straubje has timed out
+Straubje: folds
+ZonTTT: raises $0.75 to $1.25
+vovvesvart: calls $1.25
+Meskalita: folds
+G.Andrei95: folds
+*** FLOP *** [2d 4c Jc]
+ZonTTT: checks
+vovvesvart: checks
+*** TURN *** [2d 4c Jc] [Ts]
+ZonTTT: checks
+vovvesvart: checks
+*** RIVER *** [2d 4c Jc Ts] [Qh]
+ZonTTT: checks
+vovvesvart: checks
+*** SHOW DOWN ***
+ZonTTT: shows [Ah 4h] (a pair of Fours)
+vovvesvart: mucks hand
+ZonTTT collected $3.09 from pot
+*** SUMMARY ***
+Total pot $3.25 | Rake $0.16
+Board [2d 4c Jc Ts Qh]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: ZonTTT showed [Ah 4h] and won ($3.09) with a pair of Fours
+Seat 3: vovvesvart (button) mucked
+Seat 4: Meskalita (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) folded before Flop
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208961245001:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:48:29 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($96.78 in chips)
+Seat 2: ZonTTT ($50 in chips)
+Seat 3: vovvesvart ($50.07 in chips)
+Seat 4: Meskalita ($50.77 in chips)
+Seat 5: G.Andrei95 ($114.22 in chips)
+Seat 6: Rezzonner ($99.53 in chips)
+vovvesvart: posts small blind $0.25
+Meskalita: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: folds
+ZonTTT: folds
+vovvesvart: raises $0.50 to $1
+Meskalita: raises $2.75 to $3.75
+vovvesvart: calls $2.75
+*** FLOP *** [Js 3d Qc]
+vovvesvart: checks
+Meskalita: bets $2.35
+vovvesvart: folds
+Uncalled bet ($2.35) returned to Meskalita
+Meskalita collected $7.12 from pot
+Meskalita: doesn't show hand
+*** SUMMARY ***
+Total pot $7.50 | Rake $0.38
+Board [Js 3d Qc]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: ZonTTT (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) folded on the Flop
+Seat 4: Meskalita (big blind) collected ($7.12)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208961273296:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:49:55 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($96.78 in chips)
+Seat 2: ZonTTT ($51.84 in chips)
+Seat 3: vovvesvart ($45.07 in chips)
+Seat 4: Meskalita ($53.89 in chips)
+Seat 5: G.Andrei95 ($113.72 in chips)
+Seat 6: Rezzonner ($99.53 in chips)
+G.Andrei95: posts small blind $0.25
+Rezzonner: posts big blind $0.50
+*** HOLE CARDS ***
+Straubje: calls $0.50
+ZonTTT: folds
+vovvesvart: raises $0.50 to $1
+Meskalita: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: calls $0.50
+*** FLOP *** [Qh 4s 7d]
+Straubje: bets $1.50
+vovvesvart: folds
+Uncalled bet ($1.50) returned to Straubje
+Straubje collected $2.61 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $2.75 | Rake $0.14
+Board [Qh 4s 7d]
+Seat 1: Straubje collected ($2.61)
+Seat 2: ZonTTT folded before Flop (didn't bet)
+Seat 3: vovvesvart folded on the Flop
+Seat 4: Meskalita (button) folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (small blind) folded before Flop
+Seat 6: Rezzonner (big blind) folded before Flop
+
+
+PokerStars Hand #208961281183:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:50:23 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($98.39 in chips)
+Seat 2: ZonTTT ($51.84 in chips)
+Seat 3: vovvesvart ($44.07 in chips)
+Seat 4: Meskalita ($53.89 in chips)
+Seat 5: G.Andrei95 ($113.47 in chips)
+Seat 6: Rezzonner ($99.03 in chips)
+Rezzonner: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+ZonTTT: folds
+vovvesvart: folds
+Meskalita: folds
+G.Andrei95: raises $0.75 to $1.25
+Rezzonner: folds
+Straubje: calls $0.75
+*** FLOP *** [8d 9s Tc]
+Straubje: checks
+G.Andrei95: bets $1.50
+Straubje: folds
+Uncalled bet ($1.50) returned to G.Andrei95
+G.Andrei95 collected $2.61 from pot
+G.Andrei95: doesn't show hand
+*** SUMMARY ***
+Total pot $2.75 | Rake $0.14
+Board [8d 9s Tc]
+Seat 1: Straubje (big blind) folded on the Flop
+Seat 2: ZonTTT folded before Flop (didn't bet)
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: Meskalita folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) collected ($2.61)
+Seat 6: Rezzonner (small blind) folded before Flop
+
+
+PokerStars Hand #208961289579:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:50:54 ET
+Table 'Bohmia IV' 6-max Seat #6 is the button
+Seat 1: Straubje ($97.14 in chips)
+Seat 2: ZonTTT ($51.84 in chips)
+Seat 3: vovvesvart ($44.07 in chips)
+Seat 4: Meskalita ($53.89 in chips)
+Seat 5: G.Andrei95 ($114.83 in chips)
+Seat 6: Rezzonner ($98.78 in chips)
+Straubje: posts small blind $0.25
+ZonTTT: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: raises $0.50 to $1
+Meskalita: folds
+G.Andrei95: folds
+Rezzonner: raises $3 to $4
+Straubje: calls $3.75
+ZonTTT: folds
+vovvesvart: calls $3
+*** FLOP *** [Tc Ts 5d]
+Straubje: bets $5
+vovvesvart: folds
+Rezzonner: calls $5
+*** TURN *** [Tc Ts 5d] [5s]
+Straubje: checks
+Rezzonner: bets $7.06
+Straubje: calls $7.06
+*** RIVER *** [Tc Ts 5d 5s] [8s]
+Straubje: bets $17.50
+Rezzonner: folds
+Uncalled bet ($17.50) returned to Straubje
+Straubje collected $34.79 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $36.62 | Rake $1.83
+Board [Tc Ts 5d 5s 8s]
+Seat 1: Straubje (small blind) collected ($34.79)
+Seat 2: ZonTTT (big blind) folded before Flop
+Seat 3: vovvesvart folded on the Flop
+Seat 4: Meskalita folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner (button) folded on the River
+
+
+PokerStars Hand #208961320223:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:52:47 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($115.87 in chips)
+Seat 2: ZonTTT ($51.34 in chips)
+Seat 3: vovvesvart ($40.07 in chips)
+Seat 4: Meskalita ($53.89 in chips)
+Seat 5: G.Andrei95 ($114.83 in chips)
+Seat 6: Rezzonner ($82.72 in chips)
+ZonTTT: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+Meskalita: folds
+G.Andrei95: folds
+Rezzonner: folds
+Straubje: raises $2 to $2.50
+ZonTTT: folds
+vovvesvart: calls $2
+*** FLOP *** [7d 6c 5s]
+vovvesvart: checks
+Straubje: bets $3.50
+vovvesvart: calls $3.50
+*** TURN *** [7d 6c 5s] [3h]
+vovvesvart: checks
+Straubje: bets $13
+vovvesvart: calls $13
+*** RIVER *** [7d 6c 5s 3h] [3c]
+vovvesvart: checks
+Straubje: bets $96.87 and is all-in
+vovvesvart: folds
+Uncalled bet ($96.87) returned to Straubje
+Straubje collected $36.34 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $38.25 | Rake $1.91
+Board [7d 6c 5s 3h 3c]
+Seat 1: Straubje (button) collected ($36.34)
+Seat 2: ZonTTT (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) folded on the River
+Seat 4: Meskalita folded before Flop (didn't bet)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208961332295:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:53:31 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($133.21 in chips)
+Seat 2: ZonTTT ($51.09 in chips)
+Seat 3: vovvesvart ($21.07 in chips)
+Seat 4: Meskalita ($53.89 in chips)
+Seat 5: G.Andrei95 ($114.83 in chips)
+Seat 6: Rezzonner ($82.72 in chips)
+vovvesvart: posts small blind $0.25
+Meskalita: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95: folds
+Rezzonner: raises $0.75 to $1.25
+Straubje: folds
+ZonTTT: folds
+vovvesvart: folds
+Meskalita: raises $3.75 to $5
+Rezzonner: folds
+Uncalled bet ($3.75) returned to Meskalita
+Meskalita collected $2.75 from pot
+Meskalita: doesn't show hand
+*** SUMMARY ***
+Total pot $2.75 | Rake $0
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: ZonTTT (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) folded before Flop
+Seat 4: Meskalita (big blind) collected ($2.75)
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+Seat 6: Rezzonner folded before Flop
+
+
+PokerStars Hand #208961345785:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:54:21 ET
+Table 'Bohmia IV' 6-max Seat #3 is the button
+Seat 1: Straubje ($133.21 in chips)
+Seat 2: ZonTTT ($51.09 in chips)
+Seat 3: vovvesvart ($20.82 in chips)
+Seat 4: Meskalita ($55.39 in chips)
+Seat 5: G.Andrei95 ($114.83 in chips)
+Seat 6: Rezzonner ($81.47 in chips)
+Meskalita: posts small blind $0.25
+G.Andrei95: posts big blind $0.50
+*** HOLE CARDS ***
+Rezzonner: folds
+Straubje: folds
+ZonTTT: folds
+vovvesvart: raises $1.25 to $1.75
+Rezzonner leaves the table
+Meskalita: folds
+G.Andrei95: calls $1.25
+*** FLOP *** [Ad 5d 2c]
+G.Andrei95: checks
+vovvesvart: checks
+*** TURN *** [Ad 5d 2c] [7d]
+Straubje said, "faster please rezzonner:) where you from?"
+G.Andrei95: checks
+vovvesvart: checks
+*** RIVER *** [Ad 5d 2c 7d] [3h]
+G.Andrei95: checks
+vovvesvart: checks
+*** SHOW DOWN ***
+G.Andrei95: shows [Qc 6c] (high card Ace)
+vovvesvart: shows [Jc Qd] (high card Ace - Queen+Jack kicker)
+vovvesvart collected $3.56 from pot
+*** SUMMARY ***
+Total pot $3.75 | Rake $0.19
+Board [Ad 5d 2c 7d 3h]
+Seat 1: Straubje folded before Flop (didn't bet)
+Seat 2: ZonTTT folded before Flop (didn't bet)
+Seat 3: vovvesvart (button) showed [Jc Qd] and won ($3.56) with high card Ace
+Seat 4: Meskalita (small blind) folded before Flop
+Seat 5: G.Andrei95 (big blind) showed [Qc 6c] and lost with high card Ace
+Seat 6: Rezzonner folded before Flop (didn't bet)
+
+
+PokerStars Hand #208961375965:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:55:59 ET
+Table 'Bohmia IV' 6-max Seat #5 is the button
+Seat 1: Straubje ($132.71 in chips)
+Seat 2: ZonTTT ($51.09 in chips)
+Seat 3: vovvesvart ($22.01 in chips)
+Seat 4: Meskalita ($54.51 in chips)
+Seat 5: G.Andrei95 ($112.83 in chips)
+Straubje: posts small blind $0.25
+ZonTTT: posts big blind $0.50
+*** HOLE CARDS ***
+vovvesvart: folds
+Meskalita: folds
+G.Andrei95: folds
+Straubje: raises $1.50 to $2
+ZonTTT: folds
+Uncalled bet ($1.50) returned to Straubje
+Straubje collected $1 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $1 | Rake $0
+Seat 1: Straubje (small blind) collected ($1)
+Seat 2: ZonTTT (big blind) folded before Flop
+Seat 3: vovvesvart folded before Flop (didn't bet)
+Seat 4: Meskalita folded before Flop (didn't bet)
+Seat 5: G.Andrei95 (button) folded before Flop (didn't bet)
+
+
+PokerStars Hand #208961379098:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:56:13 ET
+Table 'Bohmia IV' 6-max Seat #1 is the button
+Seat 1: Straubje ($133.21 in chips)
+Seat 2: ZonTTT ($50.59 in chips)
+Seat 3: vovvesvart ($22.01 in chips)
+Seat 4: Meskalita ($54.51 in chips)
+Seat 5: G.Andrei95 ($112.83 in chips)
+ZonTTT: posts small blind $0.25
+vovvesvart: posts big blind $0.50
+*** HOLE CARDS ***
+Meskalita: raises $0.75 to $1.25
+G.Andrei95: folds
+Straubje: calls $1.25
+ZonTTT: folds
+vovvesvart: calls $0.75
+*** FLOP *** [5d Kd Qs]
+vovvesvart: checks
+Meskalita: checks
+Straubje: bets $2
+G.Andrei95 said, "wtf? u had 150$ when u lost them?"
+vovvesvart: folds
+Meskalita: folds
+Uncalled bet ($2) returned to Straubje
+Straubje collected $3.80 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $4 | Rake $0.20
+Board [5d Kd Qs]
+Seat 1: Straubje (button) collected ($3.80)
+Seat 2: ZonTTT (small blind) folded before Flop
+Seat 3: vovvesvart (big blind) folded on the Flop
+Seat 4: Meskalita folded on the Flop
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+
+
+PokerStars Hand #208961365641:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:55:13 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($133.21 in chips)
+Seat 2: ZonTTT ($51.09 in chips)
+Seat 3: vovvesvart ($22.63 in chips)
+Seat 4: Meskalita ($55.14 in chips)
+Seat 5: G.Andrei95 ($113.08 in chips)
+G.Andrei95: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+ZonTTT: folds
+vovvesvart: raises $1 to $1.50
+Meskalita: raises $2.50 to $4
+G.Andrei95: folds
+Straubje: folds
+vovvesvart: raises $18.63 to $22.63 and is all-in
+Meskalita: calls $18.63
+*** FLOP *** [Ts 8s Jh]
+*** TURN *** [Ts 8s Jh] [Kc]
+*** RIVER *** [Ts 8s Jh Kc] [Qd]
+*** SHOW DOWN ***
+vovvesvart: shows [Td As] (a straight, Ten to Ace)
+Meskalita: shows [Ah Qs] (a straight, Ten to Ace)
+vovvesvart collected $22.01 from pot
+Meskalita collected $22 from pot
+*** SUMMARY ***
+Total pot $46.01 | Rake $2
+Board [Ts 8s Jh Kc Qd]
+Seat 1: Straubje (big blind) folded before Flop
+Seat 2: ZonTTT folded before Flop (didn't bet)
+Seat 3: vovvesvart showed [Td As] and won ($22.01) with a straight, Ten to Ace
+Seat 4: Meskalita (button) showed [Ah Qs] and won ($22) with a straight, Ten to Ace
+Seat 5: G.Andrei95 (small blind) folded before Flop
+
+
+PokerStars Hand #208961386019:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:56:45 ET
+Table 'Bohmia IV' 6-max Seat #2 is the button
+Seat 1: Straubje ($135.76 in chips)
+Seat 2: ZonTTT ($50.34 in chips)
+Seat 3: vovvesvart ($20.76 in chips)
+Seat 4: Meskalita ($53.26 in chips)
+Seat 5: G.Andrei95 ($112.83 in chips)
+vovvesvart: posts small blind $0.25
+Meskalita: posts big blind $0.50
+*** HOLE CARDS ***
+G.Andrei95 said, "now u play short stak strategy?"
+G.Andrei95: folds
+Straubje: calls $0.50
+ZonTTT: folds
+vovvesvart: raises $1.50 to $2
+Meskalita: folds
+Straubje: calls $1.50
+*** FLOP *** [9d 3s 4h]
+liryka joins the table at seat #6
+vovvesvart: bets $4.28
+Straubje: calls $4.28
+*** TURN *** [9d 3s 4h] [8s]
+vovvesvart: bets $14.48 and is all-in
+Straubje: calls $14.48
+*** RIVER *** [9d 3s 4h 8s] [9h]
+*** SHOW DOWN ***
+vovvesvart: shows [Jc Ts] (a pair of Nines)
+Straubje: shows [4c 5d] (two pair, Nines and Fours)
+Straubje collected $40.02 from pot
+*** SUMMARY ***
+Total pot $42.02 | Rake $2
+Board [9d 3s 4h 8s 9h]
+Seat 1: Straubje showed [4c 5d] and won ($40.02) with two pair, Nines and Fours
+Seat 2: ZonTTT (button) folded before Flop (didn't bet)
+Seat 3: vovvesvart (small blind) showed [Jc Ts] and lost with a pair of Nines
+Seat 4: Meskalita (big blind) folded before Flop
+Seat 5: G.Andrei95 folded before Flop (didn't bet)
+
+
+PokerStars Hand #208961392709:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 21:57:15 ET
+Table 'Bohmia IV' 6-max Seat #4 is the button
+Seat 1: Straubje ($155.02 in chips)
+Seat 2: ZonTTT ($50.34 in chips)
+Seat 4: Meskalita ($52.76 in chips)
+Seat 5: G.Andrei95 ($112.83 in chips)
+G.Andrei95: posts small blind $0.25
+Straubje: posts big blind $0.50
+*** HOLE CARDS ***
+ZonTTT: folds
+Meskalita: raises $0.75 to $1.25
+G.Andrei95: folds
+liryka leaves the table
+Straubje: calls $0.75
+*** FLOP *** [7c 8s Kh]
+vovvesvart leaves the table
+Lexusloal joins the table at seat #3
+Straubje: bets $2
+Meskalita: calls $2
+*** TURN *** [7c 8s Kh] [9s]
+Straubje: bets $4
+Meskalita: calls $4
+*** RIVER *** [7c 8s Kh 9s] [Qc]
+Lexusloal leaves the table
+Straubje: bets $7
+Meskalita: folds
+Uncalled bet ($7) returned to Straubje
+Straubje collected $14.01 from pot
+Straubje: doesn't show hand
+*** SUMMARY ***
+Total pot $14.75 | Rake $0.74
+Board [7c 8s Kh 9s Qc]
+Seat 1: Straubje (big blind) collected ($14.01)
+Seat 2: ZonTTT folded before Flop (didn't bet)
+Seat 4: Meskalita (button) folded on the River
+Seat 5: G.Andrei95 (small blind) folded before Flop
+
+
 PokerStars Hand #208958171037:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 19:18:04 ET
 Table 'Aaltje III' 6-max Seat #4 is the button
 Seat 1: SWING BOLOO ($50.86 in chips)

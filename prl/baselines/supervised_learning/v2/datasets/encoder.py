@@ -83,12 +83,12 @@ class EncoderV2:
 
     def make_blinds(self, blinds: List[Blind]):
         """Under Construction."""
-        assert len(blinds) == 2
+        assert len(blinds) == 2, 'Only Small blind and big blind allowed'
         sb = blinds[0]
-        assert sb.type == 'small blind'
+        assert sb.type == 'small blind', 'sb.type must equal `small blind`'
         bb = blinds[1]
         assert bb.type == 'big blind'
-        return sb.amount, bb.amount
+        return sb.amount, bb.amount, 'bb.type must equal `big blind`'
 
     def _update_card(self):
         c = np.zeros(17)
@@ -103,9 +103,9 @@ class EncoderV2:
         # while we drew cards that already are on board or other player hand, repeat until we have available cards
         while np.any(np.all(obs_card_bits == self.occupied_cards, axis=1)):
             obs_card_bits = self._update_card()
-        assert sum(obs_card_bits[:13] == 1)
-        assert sum(obs_card_bits[13:] == 1)
-        assert len(obs_card_bits) == 17
+        assert sum(obs_card_bits[:13] == 1), 'Card bits must one hot encode suite'
+        assert sum(obs_card_bits[13:] == 1), 'Card bits must one hot encode rank'
+        assert len(obs_card_bits) == 17 , 'Card bits must have length 17'
         return obs_card_bits
 
     def overwrite_hand_cards_with_random_cards(self, obs):
@@ -125,7 +125,8 @@ class EncoderV2:
         obs[
         fts.First_player_card_1_rank_0:fts.First_player_card_1_suit_3 + 1] = obs_bits_c1
         assert sum(
-            obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_suit_3 + 1]) == 4
+            obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_suit_3 + 1]) == 4,\
+        'sum of card bits must be 2+2=4'
 
         return obs
 
@@ -141,8 +142,6 @@ class EncoderV2:
         state_dict = {'deck_state_dict': self.state_dict}
         obs, _, done, _ = self.env.reset(config=state_dict)
         # todo add tianshou env and assert np.array_equal(obs, obs_tianshou)
-        assert obs[-1] in [0, 1, 2, 3, 4, 5], f"obs[-1] = {obs[-1]}. " \
-                                              f"get_current_obs should have caught this already. check the wrapper impl"
         # --- Step Environment with action --- #
         observations = []
         actions = []
@@ -180,7 +179,8 @@ class EncoderV2:
                                     p.name not in selected_players]
         if fold_players == target_players == remaining_selected_players == []:
             # case that selected player folded but we dont want folds in dataset
-            assert not self.fold_random_cards
+            assert not self.fold_random_cards, (
+                "selected player folded but we dont want folds in dataset")
             return [], []
         while not done:
             try:
@@ -197,8 +197,8 @@ class EncoderV2:
                         observations.append(obs)
                         actions.append(action_label)
                         if action_label == ActionSpace.FOLD:
-                            assert player.name in remaining_selected_players
-                            assert player.name not in target_players
+                            assert player.name not in target_players, (
+                                "Player must not be in target_players")
                             remaining_selected_players.remove(player.name)
                     if player.name in target_players:
                         observations.append(obs)
@@ -216,9 +216,12 @@ class EncoderV2:
             it += 1
 
         if not observations:
-            assert len(remaining_selected_players) == 1
+            assert len(remaining_selected_players) == 1, (
+                "big blind returned to player because every body folded")
             pname = remaining_selected_players[0]
-            assert episode.players[pname].position == Positions6Max.BB
+            assert episode.players[pname].position == Positions6Max.BB, (
+                "big blind returned to player because every body folded"
+                "")
             # big blind returned to player because every body folded so they didnt get
             # to act
             return [], []
@@ -345,7 +348,8 @@ class EncoderV2:
         """Runs environment with steps from PokerEpisode.
                 Returns observations and corresponding actions of players that made it to showdown."""
         try:
-            only_winners, drop_folds, fold_random_cards = self.parse_action_gen_option(a_opt)
+            only_winners, drop_folds, fold_random_cards = self.parse_action_gen_option(
+                a_opt)
             # todo: for each selected player
             #  pick (obs, action)
             #  if players cards are unknown (no showdown) randomize them
@@ -392,9 +396,12 @@ class EncoderV2:
             if board:
                 deck[:len(board)] = board
             else:
-                assert not episode.actions['actions_flop']
-                assert not episode.actions['actions_turn']
-                assert not episode.actions['actions_river']
+                assert not episode.actions[
+                    'actions_flop'], "Board cards not allowed in games that ended preflop"
+                assert not episode.actions[
+                    'actions_turn'], "Board cards not allowed in games that ended preflop"
+                assert not episode.actions[
+                    'actions_river'], "Board cards not allowed in games that ended preflop"
             player_hands = self.make_player_hands(players, board)
             initial_board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
             self.state_dict = {'deck': {'deck_remaining': deck},

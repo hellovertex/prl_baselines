@@ -78,6 +78,8 @@ def test_parser_ep_money_won(episodes):
                     assert player.money_won_this_round == 9875 - (1250 + 3750)
                 elif name == 'supersimple2018':
                     assert player.money_won_this_round == -5000
+        elif ep.hand_id == 208959234900:
+            assert ep.board == '[Jc 6d Jd 6h]'
 
 
 def test_parser_cards(episodes):

@@ -301,15 +301,15 @@ class ParseHsmithyTextToPokerEpisode:
                         raise e
                     amt = round(float(amt) * 100)
                     players[pname].money_won_this_round += amt
-        return players
+        return players, board_cards
     def parse_hand(self, hand_str):
         # if not '208958141851' in hand_str:
         #     return []
         # try:
         try:
-            # if '208958141851' in hand_str:
-            #     a = 1
-            #     print('debugme')
+            if '208959234900' in hand_str:
+                a = 1
+                print('debugme')
             players, blinds = self.get_players_and_blinds(hand_str)
             info = self.rounds(hand_str)
             actions, uncalled_bet, returned_to = self.get_actions(info)
@@ -318,11 +318,10 @@ class ParseHsmithyTextToPokerEpisode:
             except Exception as e:
                 print(e)
                 return []
-            board_cards = ''
             showdown_players = []
             winners = []
             has_showdown = False
-            players = self.make_showdown_cards(players, info)
+            players, board_cards = self.make_showdown_cards(players, info)
             for pname, player in players.items():
                 if player.is_showdown_player:
                     has_showdown = True
