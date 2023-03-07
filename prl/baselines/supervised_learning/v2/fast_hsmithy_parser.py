@@ -310,9 +310,9 @@ class ParseHsmithyTextToPokerEpisode:
         #     return []
         # try:
         try:
-            if '208959234900' in hand_str:
-                a = 1
-                print('debugme')
+            # if '208959234900' in hand_str:
+            #     a = 1
+            #     print('debugme')
             players, blinds = self.get_players_and_blinds(hand_str)
             info = self.rounds(hand_str)
             actions, uncalled_bet, returned_to = self.get_actions(info)
