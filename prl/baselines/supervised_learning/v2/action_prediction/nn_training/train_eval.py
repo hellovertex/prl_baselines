@@ -25,14 +25,17 @@ from tqdm import tqdm
 from sklearn.metrics import f1_score, classification_report
 import pprint
 
+target_names_full = ['Fold',
+                     'Check Call',
+                     'Raise Third Pot',
+                     'Raise Two Thirds Pot',
+                     'Raise Pot',
+                     'Raise 2x Pot',
+                     'Raise 3x Pot',
+                     'Raise All in']
 target_names = ['Fold',
                 'Check Call',
-                'Raise Third Pot',
-                'Raise Two Thirds Pot',
-                'Raise Pot',
-                'Raise 2x Pot',
-                'Raise 3x Pot',
-                'Raise All in']
+                'Raise']
 
 
 def init_state(ckpt_dir, model, optim, resume: bool = True):
@@ -199,42 +202,14 @@ class TrainEval:
                                         output, y,
                                         reduction="sum").data.item()
                                     pred = torch.argmax(output, dim=1)
-                                    f1 = f1_score(y.data.cpu(), pred.cpu(),
-                                                  average='weighted')
-                                    f1_0 = f1_score(y.data.cpu(), pred.cpu(),
-                                                    labels=[0],
-                                                    average='macro')
-                                    f1_1 = f1_score(y.data.cpu(), pred.cpu(),
-                                                    labels=[1],
-                                                    average='macro')
-                                    f1_2 = f1_score(y.data.cpu(), pred.cpu(),
-                                                    labels=[2],
-                                                    average='macro')
-                                    f1_3 = f1_score(y.data.cpu(), pred.cpu(),
-                                                    labels=[3],
-                                                    average='macro')
-                                    f1_4 = f1_score(y.data.cpu(), pred.cpu(),
-                                                    labels=[4],
-                                                    average='macro')
-                                    f1_5 = f1_score(y.data.cpu(), pred.cpu(),
-                                                    labels=[5],
-                                                    average='macro')
-                                    f1_6 = f1_score(y.data.cpu(), pred.cpu(),
-                                                    labels=[6],
-                                                    average='macro')
-                                    f1_7 = f1_score(y.data.cpu(), pred.cpu(),
-                                                    labels=[7],
-                                                    average='macro')
                                     test_correct += pred.eq(y.data).cpu().sum().item()
-
-                            test_loss /= len(testdataset)
-                            test_accuracy = 100 * test_correct / len(testdataset)
-                            print(
-                                "\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n".format(
-                                    test_loss, round(test_correct), len(testdataset),
-                                    test_accuracy
-                                )
-                            )
+                            test_loss /= (len(testdataset) * params.batch_size)
+                            test_accuracy = 100 * test_correct / (
+                                    len(testdataset) * params.batch_size)
+                            print(f"\nTest set: Average loss: {round(test_loss, 4)}, "
+                                  f"Accuracy: {round(test_correct)}/"
+                                  f"{len(testdataset) * params.batch_size} "
+                                  f"({test_accuracy}%)\n")
                             if not os.path.exists(self.ckptdir):
                                 os.makedirs(self.ckptdir)
                             if best_accuracy < test_accuracy:
@@ -260,49 +235,12 @@ class TrainEval:
                                            self.ckptdir + '/ckpt_tmp.pt')  # net
                                 # save model for inference
                                 torch.save(self.model, self.ckptdir + '/model_tmp.pt')
-                            # return model to training mode
-                            self.model.train()
-
-                            # write metrics to tensorboard
-                            self.writer.add_scalar(tag='Test Loss',
-                                                   scalar_value=test_loss,
-                                                   global_step=it_train_global)
-                            self.writer.add_scalar(tag='Test F1/average', scalar_value=f1,
-                                                   global_step=it_train_global)
-                            self.writer.add_scalar(tag='Test F1 score/FOLD',
-                                                   scalar_value=f1_0,
-                                                   global_step=it_train_global)
-                            self.writer.add_scalar(tag='Test F1 score/CHECK/CALL',
-                                                   scalar_value=f1_1,
-                                                   global_step=it_train_global)
-                            self.writer.add_scalar(tag='Test F1 score/Raise Third Pot',
-                                                   scalar_value=f1_2,
-                                                   global_step=it_train_global)
-                            self.writer.add_scalar(
-                                tag='Test F1 score/Raise Two Thirds Pot',
-                                scalar_value=f1_3,
-                                global_step=it_train_global)
-                            self.writer.add_scalar(tag='Test F1 score/Raise Pot',
-                                                   scalar_value=f1_4,
-                                                   global_step=it_train_global)
-                            self.writer.add_scalar(tag='Test F1 score/Raise 2x Pot',
-                                                   scalar_value=f1_5,
-                                                   global_step=it_train_global)
-                            self.writer.add_scalar(tag='Test F1 score/Raise 3x Pot',
-                                                   scalar_value=f1_6,
-                                                   global_step=it_train_global)
-                            self.writer.add_scalar(tag='Test F1 score/Raise ALL IN',
-                                                   scalar_value=f1_7,
-                                                   global_step=it_train_global)
-                            self.writer.add_scalar(tag='Test Accuracy',
-                                                   scalar_value=test_accuracy,
-                                                   global_step=it_train_global)
-
                             report = classification_report(y.cpu().numpy(),
                                                            pred.cpu().numpy(),
-                                                           labels=[0, 1, 2, 3, 4, 5,
-                                                                   6,
-                                                                   7],
+                                                           # labels=[0, 1, 2, 3, 4, 5,
+                                                           #         6,
+                                                           #         7],
+                                                           labels=[0, 1, 2],
                                                            target_names=target_names,
                                                            output_dict=True)
 
@@ -317,18 +255,7 @@ class TrainEval:
                                                            values['recall'],
                                                            global_step=it_train_global)
                             pprint.pprint(report)
-                            # write layer histograms to tensorboard
-                            k = 1
-                            for layer in self.model.children():
-                                if isinstance(layer, nn.Linear):
-                                    self.writer.add_histogram(f"layer{k}.weights",
-                                                              layer.state_dict()[
-                                                                  'weight'],
-                                                              global_step=it_train_global)
-                                    self.writer.add_histogram(f"layer{k}.bias",
-                                                              layer.state_dict()['bias'],
-                                                              global_step=it_train_global)
-                                    k += 1
+                            self.model.train()
 
                         it_train_global += 1
                         it_train_curr += 1
