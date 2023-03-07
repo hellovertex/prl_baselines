@@ -273,6 +273,7 @@ class ParseHsmithyTextToPokerEpisode:
             players[returned_to].money_won_this_round += total_pot
         # else case is
     def make_showdown_cards(self, players: Dict[str, Player], info):
+        board_cards = ''
         for line in info['summary'].split('\n'):
             if 'Board' in line:
                 # Board [9d Th 3h 7d 6h]
