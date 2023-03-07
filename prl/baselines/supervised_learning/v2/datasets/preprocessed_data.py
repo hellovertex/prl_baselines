@@ -105,7 +105,7 @@ class PreprocessedData:
 
                 # maybe reduce action space
                 if self.opt.action_space[0] is ActionSpaceMinimal:
-                    df['label'].clip(upper=max(ActionSpaceMinimal))
+                    df['label'].clip(upper=max(ActionSpaceMinimal), inplace=True)
                 elif self.opt.action_space[0] is ActionSpace:
                     assert df['label'].min == min(ActionSpace).value
                     assert df['label'].max == max(ActionSpace).value
