@@ -61,7 +61,7 @@ def encode_episodes(dataset_config,
                     max_episodes_per_file=25000):
     training_data, labels = None, None
     it = 0
-    for ep in episodesV2:
+    for ep in tqdm(episodesV2):
         it += 1
         try:
             observations, actions = encoder.encode_episode(
@@ -119,7 +119,7 @@ def generate_vectorized_hand_histories(files,
     encoder = encoder_cls(dummy_env)
     parser = parser_cls(dataset_config=dataset_config)
     storage = storage_cls(dataset_config)
-    for filename in tqdm(files[:-1]):
+    for filename in files[:-1]:
         selected_players = alias_player_rank_to_ingame_name(selected_player_names,
                                                             filename)
         episodesV2 = parser.parse_file(filename)
