@@ -82,7 +82,7 @@ def main(num_top_players,
     params = TrainingParams(**cfg)
 
     # 3. Run Training
-    train_eval(params)
+    train_eval(params, dataset_config)
 
 
 if __name__ == '__main__':
