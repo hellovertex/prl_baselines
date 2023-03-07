@@ -9,7 +9,7 @@ from prl.environment.Wrappers.base import ActionSpace, ActionSpaceMinimal
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import ActionGenOption, \
     DatasetConfig, Stage
 from prl.baselines.supervised_learning.v2.datasets.preprocessed_data import \
-    make_preprocessed_data_if_not_exists_already
+    make_preprocessed_data_if_not_exists_already, PreprocessedData
 
 
 # load vectorized data
@@ -45,6 +45,14 @@ def csv_files(dataset_config):
                                                  use_multiprocessing=True)
     return glob.glob(dataset_config.dir_preprocessed_data + '/**/*.csv.bz2',
                      recursive=True)
+
+
+def test_preprocessing_is_skipped_if_all_preprocessed_data_exists_already(csv_files,
+                                                                          dataset_config):
+    preprocessed_data = PreprocessedData(dataset_config)
+    # `csv_files` fixture generates preprocessed data via
+    # `make_preprocessed_data_if_not_exists_already`
+    assert preprocessed_data.all_vectorized_data_has_been_preprocessed_before()
 
 
 def assert_all_actions_present_and_no_other_actions_as_specified(df, action_space):

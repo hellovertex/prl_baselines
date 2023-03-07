@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import glob
 import logging
 import math
+from typing import List
 
 import click
 import numpy as np
+import pandas as pd
 import torch
+from prl.environment.Wrappers.base import ActionSpace, ActionSpaceMinimal
 from torch.utils.data import Dataset
 from torch.utils.data import random_split
 
@@ -26,6 +30,8 @@ from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
     arg_sub_sampling_technique,
     arg_seed_dataset
 )
+from prl.baselines.supervised_learning.v2.datasets.preprocessed_data import \
+    make_preprocessed_data_if_not_exists_already
 from prl.baselines.supervised_learning.v2.datasets.utils import \
     parse_cmd_action_to_action_cls
 
@@ -34,7 +40,59 @@ class InMemoryDataset(Dataset):
     def __init__(self,
                  dataset_config: DatasetConfig):
         self.dataset_config = dataset_config
-        # todo: read csv files and
+        csv_files = glob.glob(dataset_config.dir_preprocessed_data + '/**/*.csv.bz2',
+                              recursive=True)
+        df_total = pd.DataFrame()
+        for file in csv_files:
+            df = pd.read_csv(file,
+                             sep=',',
+                             dtype='float32',
+                             # dtype='float16',
+                             encoding='cp1252',
+                             compression='bz2')
+            df = df.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
+            df = df.sample(frac=1)
+            df_total = pd.concat([df_total, df])
+        self.label_counts = self.get_label_counts(df_total)
+        self.y = torch.tensor(df_total['label'].values, dtype=torch.int64)
+        df_total.drop(['label'], axis=1, inplace=True)
+        self.x = torch.tensor(df_total.values, dtype=torch.float32)
+
+        # preprocessor tests should have covered this, but just to be sure we check if
+        # only requested actions are present in dataset
+        self.assert_correct_labels()
+        self.assert_correct_rounds(df_total)
+
+    def assert_correct_labels(self):
+        num_unique_labels = len(self.label_counts)
+        act = self.dataset_config.action_space[0]
+        if act is ActionSpace:
+            assert num_unique_labels == len(ActionSpace)
+        elif act is ActionSpaceMinimal:
+            assert num_unique_labels == len(ActionSpace)
+        elif isinstance(act, ActionSpaceMinimal):
+            assert num_unique_labels == 1
+
+    def assert_correct_rounds(self, df):
+        for stage in self.dataset_config.target_rounds:
+            name = 'round_' + stage.name.casefold()
+            assert (df[name] == 1).any()
+        for stage in list(Stage):
+            if stage not in self.dataset_config.target_rounds:
+                name = 'round_' + stage.name.casefold()
+                assert not (df[name] == 1).any()
+
+    @staticmethod
+    def get_label_counts(df) -> List[int]:
+        label_dict = df['label'].value_counts().to_dict()
+        label_counts = []
+        for i in [0, 1, 2, 3, 4, 5, 6, 7]:
+            if i in label_dict:
+                label_counts.append(label_dict[i])
+            else:
+                label_counts.append(0)
+        # self.label_counts = df['label'].value_counts().to_list()
+        return label_counts
 
     def __len__(self):
         return len(self.y)
@@ -43,7 +101,8 @@ class InMemoryDataset(Dataset):
         return self.x[idx], self.y[idx]
 
 
-def get_label_weights(dataset, dataset_config: DatasetConfig):
+def get_label_weights(dataset: InMemoryDataset,
+                      dataset_config: DatasetConfig):
     weights = None
     use_weights = DataImbalanceCorrectionTechnique. \
         dont_resample_but_use_label_weights_in_optimizer
@@ -58,6 +117,8 @@ def get_label_weights(dataset, dataset_config: DatasetConfig):
 
 
 def get_datasets(dataset_config: DatasetConfig):
+    make_preprocessed_data_if_not_exists_already(dataset_config,
+                                                 use_multiprocessing=True)
     # dataset = OutOfMemoryDatasetV2(input_dir, chunk_size=1)
     dataset = InMemoryDataset(dataset_config)
     total_len = len(dataset)
@@ -95,7 +156,7 @@ def main(num_top_players,
          sub_sampling_technique,
          seed):
     # Assumes raw_data.py has been ran to download and extract hand histories.
-    opt = DatasetConfig(
+    dataset_config = DatasetConfig(
         num_top_players=num_top_players,
         nl=nl,
         make_dataset_for_each_individual=make_dataset_for_each_individual,
@@ -106,6 +167,7 @@ def main(num_top_players,
         sub_sampling_technique=sub_sampling_technique,
         seed=seed
     )
+    train, test, label_weights = get_datasets(dataset_config)
 
 
 if __name__ == '__main__':

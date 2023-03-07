@@ -47,60 +47,81 @@ class PreprocessedData:
                                      multiply_by=1)
         self.env = dummy_env
 
+    def all_vectorized_data_has_been_preprocessed_before(self) -> bool:
+        all_data_is_preprocessed = True
+        # iterate vectorized data
+        vectorized_files = glob.glob(self.opt.dir_vectorized_data + '/**/*.csv.bz2',
+                                     recursive=True)
+        preprocessed_files = glob.glob(self.opt.dir_preprocessed_data + '/**/*.csv.bz2',
+                                       recursive=True)
+        # for each stem, check if it exists in preprocessed dir
+        for vf in vectorized_files:
+            stem = Path(vf).stem
+            exists = False
+            for file in preprocessed_files:
+                if Path(file).stem == stem:
+                    exists = True
+                    break
+            if not exists:
+                all_data_is_preprocessed = False
+                break
+        return all_data_is_preprocessed
+
     def generate_missing(self):
         if os.path.exists(self.opt.dir_preprocessed_data):
             logging.info(f'Preprocessed data already exists at directory '
                          f'{self.opt.dir_preprocessed_data} '
                          f'for given configuration: {self.opt}')
-        # load .csv files into dataframe
-        csv_files = glob.glob(self.opt.dir_vectorized_data + '/**/*.csv.bz2',
-                              recursive=True)
-        feature_names = list(self.env.obs_idx_dict.keys())
-        for file in csv_files:
-            df = pd.read_csv(file,
-                             sep=',',
-                             dtype='float32',
-                             encoding='cp1252',
-                             compression='bz2')
-            # if file == '/home/sascha/Documents/github.com/prl_baselines/prl/baselines' \
-            #            '/supervised_learning/v2/tests/data/02_vectorized/NL50' \
-            #            '/player_pool/folds_from_top_players_with_randomized_hand/Top20Players_n_showdowns=10/data_PlayerRank009355.csv.bz2':
-            #     a = 1
-            #     print('debug')
-            # float to int if applicable
-            df = df.apply(
-                lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
-            # int64 to int8 to save memory
-            df = df.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
-            # maybe remove unused round
-            for stage in list(Stage):
-                if stage not in self.opt.target_rounds:
-                    name = 'round_' + stage.name.casefold()
-                    df = df[df[name] == 0]
+        if not self.all_vectorized_data_has_been_preprocessed_before():
+            # load .csv files into dataframe
+            csv_files = glob.glob(self.opt.dir_vectorized_data + '/**/*.csv.bz2',
+                                  recursive=True)
+            feature_names = list(self.env.obs_idx_dict.keys())
+            for file in csv_files:
+                df = pd.read_csv(file,
+                                 sep=',',
+                                 dtype='float32',
+                                 encoding='cp1252',
+                                 compression='bz2')
+                # if file == '/home/sascha/Documents/github.com/prl_baselines/prl/baselines' \
+                #            '/supervised_learning/v2/tests/data/02_vectorized/NL50' \
+                #            '/player_pool/folds_from_top_players_with_randomized_hand/Top20Players_n_showdowns=10/data_PlayerRank009355.csv.bz2':
+                #     a = 1
+                #     print('debug')
+                # float to int if applicable
+                df = df.apply(
+                    lambda x: x.apply(lambda y: np.int8(y) if int(y) == y else y))
+                # int64 to int8 to save memory
+                df = df.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
+                # maybe remove unused round
+                for stage in list(Stage):
+                    if stage not in self.opt.target_rounds:
+                        name = 'round_' + stage.name.casefold()
+                        df = df[df[name] == 0]
 
-            # maybe reduce action space
-            if self.opt.action_space[0] is ActionSpaceMinimal:
-                df[df['label'] > max(ActionSpaceMinimal)] = max(ActionSpaceMinimal)
-            elif self.opt.action_space[0] is ActionSpace:
-                assert df['label'].min == min(ActionSpace).value
-                assert df['label'].max == max(ActionSpace).value
-            elif isinstance(self.opt.action_space[0], ActionSpaceMinimal):
-                target_action = self.opt.action_space[0].value
-                df = df[df['label'] == target_action]
-            # write to disk
-            filepath = os.path.join(self.opt.dir_preprocessed_data,
-                                    Path(file).stem + '.bz2')
-            header = False
-            # df.columns = feature_names
-            if not os.path.exists(filepath):
-                os.makedirs(os.path.realpath(Path(filepath).parent), exist_ok=True)
-                header = True
-            df.to_csv(filepath,
-                      index=False,
-                      header=header,
-                      mode='a',
-                      float_format='%.5f',
-                      compression='bz2')
+                # maybe reduce action space
+                if self.opt.action_space[0] is ActionSpaceMinimal:
+                    df[df['label'] > max(ActionSpaceMinimal)] = max(ActionSpaceMinimal)
+                elif self.opt.action_space[0] is ActionSpace:
+                    assert df['label'].min == min(ActionSpace).value
+                    assert df['label'].max == max(ActionSpace).value
+                elif isinstance(self.opt.action_space[0], ActionSpaceMinimal):
+                    target_action = self.opt.action_space[0].value
+                    df = df[df['label'] == target_action]
+                # write to disk
+                filepath = os.path.join(self.opt.dir_preprocessed_data,
+                                        Path(file).stem + '.bz2')
+                header = False
+                # df.columns = feature_names
+                if not os.path.exists(filepath):
+                    os.makedirs(os.path.realpath(Path(filepath).parent), exist_ok=True)
+                    header = True
+                df.to_csv(filepath,
+                          index=False,
+                          header=header,
+                          mode='a',
+                          float_format='%.5f',
+                          compression='bz2')
 
 
 def make_preprocessed_data_if_not_exists_already(dataset_config,

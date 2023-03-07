@@ -1,4 +1,3 @@
-import logging
 import os
 import time
 
@@ -6,14 +5,11 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from prefetch_generator import BackgroundGenerator
-from prl.environment.Wrappers.augment import ActionSpace
 from tensorboardX import SummaryWriter
 from torch import nn
-from torch.utils.data import random_split, DataLoader
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from prl.baselines.supervised_learning.models.nn_model import MLP
-from prl.baselines.supervised_learning.training.dataset import InMemoryDataset
 from prl.baselines.supervised_learning.training.utils import init_state, get_in_mem_datasets, get_model
 
 

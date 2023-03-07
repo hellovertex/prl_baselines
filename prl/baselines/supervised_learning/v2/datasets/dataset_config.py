@@ -112,6 +112,7 @@ class DatasetConfig:
     # hand, we randomize the cards the player had when folding, and ignore the showdown
     # when no top player participated in it.
     target_rounds: Optional[List[Stage]] = None
+    # todo: consider removing List as we currently only support single values
     action_space: Optional[List[Action]] = None
 
     # 99 in memory training data
@@ -343,7 +344,6 @@ arg_action_space = click.option("--action_space",
                                      "if you want to train a dichotomizer or ActionSpaceMinimal "
                                      "to train using all three or ActionSpace to train on "
                                      "prl.environment.Wrappers.base.ActionSpace that has multiple bet sizes.")
-# todo
 arg_sub_sampling_technique = click.option("--sub_sampling_technique",
                                           default=
                                           DataImbalanceCorrectionTechnique.
@@ -355,7 +355,6 @@ arg_sub_sampling_technique = click.option("--sub_sampling_technique",
                                                "2: resample_uniform_extended\n"
                                                "3: resample_raises__to_max_num_raise\n"
                                                "See `DataImbalanceCorrectionTechnique`. ")
-
 arg_seed_dataset = click.option("--seed",
                                 default=42,
                                 type=int,

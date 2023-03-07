@@ -12,7 +12,7 @@ from ray.rllib.utils.typing import TensorStructType, TensorType
 
 from prl.baselines.agents.core.base_policy import BaselinePolicy_Base
 from prl.baselines.cpp_hand_evaluator.monte_carlo import HandEvaluator_MonteCarlo
-from prl.baselines.supervised_learning.models.nn_model import MLP
+from prl.baselines.deprecated.models.nn_model import MLP
 from prl.baselines.cpp_hand_evaluator.rank import dict_str_to_sk
 
 IDX_C0_0 = 167  # feature_names.index('0th_player_card_0_rank_0')
