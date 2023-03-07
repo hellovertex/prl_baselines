@@ -57,7 +57,6 @@ def init_state(ckpt_dir, model, optim, resume: bool = True):
     return {"start_n_iter": start_n_iter,
             "start_epoch": start_epoch,
             "best_accuracy": best_accuracy}
-    # return start_n_iter, start_epoch, best_accuracy
 
 
 def train_eval(abs_input_dir,
@@ -90,7 +89,6 @@ def train_eval(abs_input_dir,
 
         for hdims in params['hdims']:
             for lr in params['lrs']:
-
                 model = get_model(traindata, output_dim=8, hidden_dims=hdims,
                                   device=device)
                 logdir = base_logdir + f'/{r}/{Path(abs_input_dir).stem}/{hdims}_{lr}'

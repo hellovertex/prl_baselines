@@ -21,8 +21,8 @@ class TrainingParams:
     # FOLD, CHECK_CALL, RAISE
     output_dim: int = 3  # 1<= output_dim <= len(ActionSpace)
     # nn params
-    lrs: Tuple[float] = (1e-6,)
-    hdims: Tuple[int] = (512,)
+    lrs: Tuple[Tuple[float]] = (1e-6,)
+    hdims: Tuple[Tuple[int]] = (512,)
     batch_size: int = 512
     # progress
     log_interval: int = 5
@@ -31,7 +31,10 @@ class TrainingParams:
     debug: bool = False
     DATA_DIR: Optional[str] = None
 
-    def results_dir(self, conf: DatasetConfig):
+    def results_dir(self,
+                    conf: DatasetConfig,
+                    hdims: Tuple[int],
+                    lr: float):
         # require dataset config here for consistency
         assert conf.make_dataset_for_each_individual is not None
         assert conf.action_generation_option is not None
@@ -57,20 +60,23 @@ class TrainingParams:
             subdir_02_fold_or_no_fold,
             subdir_03_top_n_players,
             subdir_04_rounds,
-            subdir_05_actions
+            subdir_05_actions,
+            f'{hdims}_{lr}'
         ])
 
 
-def get_model(params: TrainingParams):
+def get_model(input_dim, output_dim, hdims, device):
     # todo check if model is dichotomizer, that for e.g.
     #  label ActionSpaceMinimal.Raise, the loss is computed correctly
     #  because there will only be one output neuron and the label is 2
-    net = MLP(input_dim=params.input_dim,
-              output_dim=params.output_dim,
-              hidden_sizes=params.hdims,
+    if isinstance(hdims, int):
+        hdims = [hdims]
+    net = MLP(input_dim=input_dim,
+              output_dim=output_dim,
+              hidden_sizes=hdims,
               norm_layer=None,
               activation=nn.ReLU,
-              device=params.device,
+              device=device,
               linear_layer=nn.Linear,
               flatten_input=False)
     # if running on GPU and we want to use cuda move model there

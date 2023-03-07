@@ -7,8 +7,11 @@ input_dim: 569
 # FOLD, CHECK_CALL, RAISE
 output_dim: 3  # 1<= output_dim <= len(ActionSpace)
 # nn params
-lrs: (1e-6,)
-hdims: (512,)
+lrs:
+  - 1e-6
+hdims:
+  - 512
+  - (512, 512)
 batch_size: 512
 # progress
 log_interval: 5
