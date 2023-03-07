@@ -26,7 +26,7 @@ class Stage(enum.IntEnum):
     RIVER = 3
 
 
-class DataImbalanceCorrectionTechnique(enum.IntEnum):
+class DataImbalanceCorrection(enum.IntEnum):
     """Dataset labels are likely imbalanced. For example the number of
     ALL_IN actions is smaller than the number of CHECK_CALL actions.
     There are several ways to counter this when doing Machine learning:
@@ -117,7 +117,7 @@ class DatasetConfig:
 
     # 99 in memory training data
     sub_sampling_technique: Optional[
-        DataImbalanceCorrectionTechnique] = None  # dont allow
+        DataImbalanceCorrection] = None  # dont allow
     # multiple
     # options
     # meta
@@ -202,8 +202,8 @@ class DatasetConfig:
         subdir_03_top_n_players = f'Top{self.num_top_players}Players_' \
                                   f'n_showdowns={self.min_showdowns}' if not \
             self.make_dataset_for_each_individual else ''
-        subdir_04_rounds = self._target_rounds_to_str()
-        subdir_05_actions = self._actions_to_str()
+        subdir_04_rounds = self.target_rounds_to_str()
+        subdir_05_actions = self.actions_to_str()
         return os.path.join(*[
             preprocessed_dir,
             subdir_00_nl,
@@ -224,13 +224,13 @@ class DatasetConfig:
                             self.nl,
                             f'top_{self.num_top_players}_players_min_showdowns={self.min_showdowns}.txt')
 
-    def _target_rounds_to_str(self):
+    def target_rounds_to_str(self):
         result = 'target_rounds='
         for stage in self.target_rounds:
             result += stage.name[0]  # use first letter for shorthand notation
         return result
 
-    def _actions_to_str(self):
+    def actions_to_str(self):
         result = 'actions='
         for action in self.action_space:
             if action is ActionSpaceMinimal:
@@ -346,7 +346,7 @@ arg_action_space = click.option("--action_space",
                                      "prl.environment.Wrappers.base.ActionSpace that has multiple bet sizes.")
 arg_sub_sampling_technique = click.option("--sub_sampling_technique",
                                           default=
-                                          DataImbalanceCorrectionTechnique.
+                                          DataImbalanceCorrection.
                                           dont_resample_but_use_label_weights_in_optimizer.value,
                                           type=int,
                                           help="Possible Values are \n"
@@ -354,7 +354,7 @@ arg_sub_sampling_technique = click.option("--sub_sampling_technique",
                                                "1: resample_uniform_minimal\n"
                                                "2: resample_uniform_extended\n"
                                                "3: resample_raises__to_max_num_raise\n"
-                                               "See `DataImbalanceCorrectionTechnique`. ")
+                                               "See `DataImbalanceCorrection`. ")
 arg_seed_dataset = click.option("--seed",
                                 default=42,
                                 type=int,

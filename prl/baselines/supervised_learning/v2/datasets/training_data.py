@@ -17,7 +17,7 @@ from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
     ActionGenOption,
     Stage,
     DatasetConfig,
-    DataImbalanceCorrectionTechnique,
+    DataImbalanceCorrection,
     arg_num_top_players,
     arg_nl,
     arg_from_gdrive_id,
@@ -53,6 +53,10 @@ class InMemoryDataset(Dataset):
             df = df.apply(pd.to_numeric, downcast='integer', errors='coerce').dropna()
             df = df.sample(frac=1)
             df_total = pd.concat([df_total, df])
+        if self.dataset_config.sub_sampling_technique != \
+                DataImbalanceCorrection.dont_resample_but_use_label_weights_in_optimizer:
+            raise NotImplementedError("Downsampling Checks/Folds and Upsampling Raises "
+                                      "is not supported anymore.")
         self.label_counts = self.get_label_counts(df_total)
         self.y = torch.tensor(df_total['label'].values, dtype=torch.int64)
         df_total.drop(['label'], axis=1, inplace=True)
@@ -108,7 +112,7 @@ class InMemoryDataset(Dataset):
 def get_label_weights(dataset: InMemoryDataset,
                       dataset_config: DatasetConfig):
     weights = None
-    use_weights = DataImbalanceCorrectionTechnique. \
+    use_weights = DataImbalanceCorrection. \
         dont_resample_but_use_label_weights_in_optimizer
     if dataset_config.sub_sampling_technique == use_weights:
         # label weights to account for dataset imbalance

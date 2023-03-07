@@ -37,7 +37,6 @@ from prl.baselines.supervised_learning.v2.datasets.utils import \
 @arg_from_gdrive_id
 @arg_make_dataset_for_each_individual
 @arg_action_generation_option
-@arg_use_multiprocessing
 @arg_min_showdowns
 @arg_target_rounds
 @arg_action_space
@@ -52,7 +51,6 @@ def main(num_top_players,
          from_gdrive_id,
          make_dataset_for_each_individual,
          action_generation_option,
-         use_multiprocessing,
          min_showdowns,
          target_rounds,
          action_space,
@@ -69,19 +67,15 @@ def main(num_top_players,
         target_rounds=[Stage(x) for x in target_rounds],
         action_space=[parse_cmd_action_to_action_cls(action_space)],
         sub_sampling_technique=sub_sampling_technique,
-        seed=seed
+        seed=seed,
     )
-    # 1. Make dataset, from scratch if necessary
-    # (downloading, extracting, encoding, vectorizing, preprocessing, train/test
-    # splitting)
-    train, test, label_weights = get_datasets(dataset_config, use_multiprocessing)
 
-    # 2. Load training params from .yaml config
+    # Load training params from .yaml config
     initialize(version_base=None, config_path="conf")
     cfg: DictConfig = compose(train_configfile)
     params = TrainingParams(**cfg)
 
-    # 3. Run Training
+    # Run Training
     train_eval(params, dataset_config)
 
 
