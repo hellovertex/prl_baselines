@@ -100,6 +100,7 @@ def encode_episodes(dataset_config,
                                                     it))
     training_data, labels = None, None
 
+
 def generate_vectorized_hand_histories(files,
                                        dataset_config: DatasetConfig,
                                        parser_cls,
@@ -127,7 +128,7 @@ def generate_vectorized_hand_histories(files,
                         encoder,
                         selected_players,
                         storage=storage,
-                        file_suffix=files[-1])
+                        file_suffix=Path(filename).stem+files[-1])
     return f"Success: encoded chunk {files}..."
 
 
@@ -178,7 +179,8 @@ class VectorizedData:
                                                 file_suffix=suffix)
         self.storage.vectorized_player_pool_data_to_disk(training_data,
                                                          labels,
-                                                         encoder.feature_names)
+                                                         encoder.feature_names,
+                                                         file_suffix=Path(filename).stem)
         return f"Success: encoded {filename}..."
 
     def _generate_player_pool_data(self,

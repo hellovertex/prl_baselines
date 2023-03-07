@@ -27,7 +27,6 @@ class PersistentStorage:
             # write to self.opt.dir_vectorized_data
             file_path = os.path.join(self.opt.dir_vectorized_data,
                                      f'data'
-                                     f'{str(self.num_files_written_to_disk).zfill(3)}'
                                      f'_{file_suffix}.csv{compression}')
             if not os.path.exists(Path(file_path).parent):
                 os.makedirs(os.path.realpath(Path(file_path).parent), exist_ok=True)
