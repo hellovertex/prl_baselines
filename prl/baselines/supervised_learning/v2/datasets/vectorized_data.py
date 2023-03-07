@@ -85,7 +85,8 @@ def encode_episodes(dataset_config,
                                                axis=0)
                 labels = np.concatenate((labels, actions), axis=0)
             except Exception as e:
-                print(e)
+                #print(e)
+                pass
             if it % max_episodes_per_file == 0:
                 storage.vectorized_player_pool_data_to_disk(training_data,
                                                             labels,

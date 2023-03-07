@@ -298,8 +298,8 @@ class ParseHsmithyTextToPokerEpisode:
                     try:
                         amt = line.split(f'({self.currency_symbol}')[1].split(')')[0]
                     except Exception as e:
-                        print(line)
-                        print(e)
+                        # print(line)
+                        # print(e)
                         raise e
                     amt = round(float(amt) * 100)
                     players[pname].money_won_this_round += amt
@@ -319,7 +319,7 @@ class ParseHsmithyTextToPokerEpisode:
             try:
                 self.update_money_won(players, blinds, actions, returned_to)
             except Exception as e:
-                print(e)
+                # print(e)
                 return []
             showdown_players = []
             winners = []
@@ -332,7 +332,7 @@ class ParseHsmithyTextToPokerEpisode:
                     if player.money_won_this_round > 0:
                         winners.append(player)
         except Exception as e:
-            print(e)
+            # print(e)
             return []
         btn_seat_num = int(hand_str.split('is the button')[0].strip()[-1])
         # except Exception as e:
@@ -380,7 +380,7 @@ class ParseHsmithyTextToPokerEpisode:
                     if parsed_hand:
                         episodes.append(parsed_hand)
         except Exception as e:
-            print(e)
+            # print(e)
             return []
         return episodes
 
