@@ -7,7 +7,7 @@ from hydra import compose, initialize
 from omegaconf import DictConfig
 
 from prl.baselines.supervised_learning.v2.action_prediction.nn_training.train_eval import \
-    train_eval
+    TrainEval
 from prl.baselines.supervised_learning.v2.action_prediction.nn_training.training_config import \
     TrainingParams
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
@@ -74,7 +74,7 @@ def main(num_top_players,
     params = TrainingParams(**cfg)
 
     # Run Training
-    train_eval(params, dataset_config)
+    TrainEval(dataset_config).run(params)
 
 
 if __name__ == '__main__':
