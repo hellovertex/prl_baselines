@@ -91,14 +91,14 @@ def encode_episodes(dataset_config,
                                                             encoder.feature_names,
                                                             file_suffix=file_suffix + str(
                                                                 it))
+                training_data, labels = None, None
                 it += 1
     storage.vectorized_player_pool_data_to_disk(training_data,
                                                 labels,
                                                 encoder.feature_names,
                                                 file_suffix=file_suffix + str(
                                                     it))
-    return training_data, labels
-
+    training_data, labels = None, None
 
 def generate_vectorized_hand_histories(files,
                                        dataset_config: DatasetConfig,

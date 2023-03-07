@@ -64,7 +64,6 @@ def test_vectorized_episode(dataset_config: DatasetConfig,
     selected_players = ['JuanAlmighty']
     for ep in episodes:
         if ep.hand_id == 208958141851:
-            # todo: make sure vectorized form is ok
             obs, act = enc.encode_episode(ep,
                                           a_opt=opt.action_generation_option,
                                           selected_players=selected_players,
