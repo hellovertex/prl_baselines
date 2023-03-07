@@ -158,7 +158,8 @@ def train_eval(params,
                                         'n_iter': j,  # j * batch_size * len(dataloader) == env_steps
                                         'optim': optim.state_dict(),
                                         'loss': loss,
-                                        'best_accuracy': best_accuracy}, ckptdir + '/ckpt.pt')  # net
+                                        'best_accuracy': best_accuracy},
+                                       ckptdir + '/ckpt.pt')  # net
                             # save model for inference
                             torch.save(model, ckptdir + '/model.pt')
                         else:

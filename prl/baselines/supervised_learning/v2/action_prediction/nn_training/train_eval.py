@@ -161,7 +161,7 @@ class TrainEval:
                         # ------------------------
                         # ------- LOGGING --------
                         # ------------------------
-                        if it_train_curr % params.log_interval == 0:
+                        if (it_train_curr+1) % params.log_interval == 0:
                             f1 = f1_score(y.data.cpu(),
                                           pred.cpu(),
                                           average='weighted')
@@ -187,7 +187,7 @@ class TrainEval:
                         # ---- CHECKPOINTING -----
                         # ------------------------
                         # evaluate once (i==0) every epoch (j % eval_interval)
-                        if it_train_curr % params.eval_interval == 0:
+                        if (it_train_curr+1) % params.eval_interval == 0:
                             self.model.eval()
                             test_loss = 0
                             test_correct = 0
@@ -221,7 +221,7 @@ class TrainEval:
                                             'optim': self.optim.state_dict(),
                                             'loss': loss,
                                             'best_accuracy': best_accuracy},
-                                           self.ckptdir)  # net
+                                           self.ckptdir + '/ckpt.pt')  # net
                                 # save model for inference
                                 torch.save(self.model, self.ckptdir + '/model.pt')
                             else:
