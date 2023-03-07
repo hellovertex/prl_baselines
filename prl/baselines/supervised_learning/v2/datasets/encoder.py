@@ -1,7 +1,7 @@
 import random
 import time
 from typing import List, Tuple, Optional
-
+import logging
 import numpy as np
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as fts, \
     AugmentObservationWrapper
@@ -105,7 +105,7 @@ class EncoderV2:
             obs_card_bits = self._update_card()
         assert sum(obs_card_bits[:13] == 1), 'Card bits must one hot encode suite'
         assert sum(obs_card_bits[13:] == 1), 'Card bits must one hot encode rank'
-        assert len(obs_card_bits) == 17 , 'Card bits must have length 17'
+        assert len(obs_card_bits) == 17, 'Card bits must have length 17'
         return obs_card_bits
 
     def overwrite_hand_cards_with_random_cards(self, obs):
@@ -125,8 +125,8 @@ class EncoderV2:
         obs[
         fts.First_player_card_1_rank_0:fts.First_player_card_1_suit_3 + 1] = obs_bits_c1
         assert sum(
-            obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_suit_3 + 1]) == 4,\
-        'sum of card bits must be 2+2=4'
+            obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_suit_3 + 1]) == 4, \
+            'sum of card bits must be 2+2=4'
 
         return obs
 
@@ -368,7 +368,7 @@ class EncoderV2:
             try:
                 players = self.get_players_starting_with_button(episode)
             except AssertionError as e:
-                print(e)
+                logging.debug(e)
                 return None, None
             if limit_num_players:
                 if len(players) < limit_num_players:
@@ -428,10 +428,10 @@ class EncoderV2:
         except self._EnvironmentDidNotTerminateInTimeError:
             return None, None
         except AssertionError as e:
-            print(e)
+            logging.debug(e)
             return None, None
         except Exception as e:
-            print(e)
+            logging.debug(e)
             return None, None
 # in: .txt files
 # out: .csv files? maybe npz or easier-on-memory formats preferred?

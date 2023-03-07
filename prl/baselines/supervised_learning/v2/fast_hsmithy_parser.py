@@ -272,6 +272,7 @@ class ParseHsmithyTextToPokerEpisode:
         if returned_to:
             players[returned_to].money_won_this_round += total_pot
         # else case is
+
     def make_showdown_cards(self, players: Dict[str, Player], info):
         board_cards = ''
         for line in info['summary'].split('\n'):
@@ -303,6 +304,7 @@ class ParseHsmithyTextToPokerEpisode:
                     amt = round(float(amt) * 100)
                     players[pname].money_won_this_round += amt
         return players, board_cards
+
     def parse_hand(self, hand_str):
         # if not '208958141851' in hand_str:
         #     return []
