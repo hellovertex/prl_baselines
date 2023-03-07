@@ -115,7 +115,8 @@ class DatasetConfig:
     action_space: Optional[List[Action]] = None
 
     # 99 in memory training data
-    sub_sampling_technique: Optional[DataImbalanceCorrectionTechnique] = None  # dont allow
+    sub_sampling_technique: Optional[
+        DataImbalanceCorrectionTechnique] = None  # dont allow
     # multiple
     # options
     # meta
@@ -130,6 +131,10 @@ class DatasetConfig:
     "with unzipping."""
     from_gdrive_id: Optional[str] = "18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO"
     DATA_DIR: Optional[str] = None
+    # Seed used to generate dataset and datasplit using
+    # torch.Generator().manual_seed(seed)
+    seed: int = 42
+
     @property
     def dir_raw_data_all_players(self):
         DATA_DIR = DEFAULT_DATA_DIR if not self.DATA_DIR else self.DATA_DIR
@@ -350,3 +355,10 @@ arg_sub_sampling_technique = click.option("--sub_sampling_technique",
                                                "2: resample_uniform_extended\n"
                                                "3: resample_raises__to_max_num_raise\n"
                                                "See `DataImbalanceCorrectionTechnique`. ")
+
+arg_seed_dataset = click.option("--seed",
+                                default=42,
+                                type=int,
+                                help="Seed used to generate dataset and datasplit using"
+                                     "torch.Generator().manual_seed(seed)"
+                                )

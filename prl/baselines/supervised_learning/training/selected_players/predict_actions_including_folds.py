@@ -81,12 +81,6 @@ def train_eval(abs_input_dir,
         print('Starting training')
         weights = None
         if use_weights:
-            # label weights to account for dataset imbalance
-            weights = np.array(label_counts) / sum(label_counts)
-            weights = 1 / weights
-            weights[weights == np.inf] = 0
-            weights = torch.tensor(weights, dtype=torch.float32)
-            weights = weights / max(weights)
             weights.to(device)
 
         train_dataloader = DataLoader(traindataset, batch_size=BATCH_SIZE, shuffle=True)
