@@ -188,7 +188,7 @@ class VectorizedData:
                                    files: List[str],
                                    encoder_cls: Type[EncoderV2],
                                    use_multiprocessing: bool = False,
-                                   chunksize=5
+                                   chunksize=4
                                    # use with multiprocessing to avoid stackoverflow
                                    ):
         if use_multiprocessing:
