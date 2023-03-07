@@ -10,6 +10,7 @@ import pandas as pd
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.base import ActionSpace, ActionSpaceMinimal
 from prl.environment.Wrappers.utils import init_wrapped_env
+from tqdm import tqdm
 
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import DatasetConfig, \
     ActionGenOption, Stage
@@ -71,13 +72,16 @@ class PreprocessedData:
         if os.path.exists(self.opt.dir_preprocessed_data):
             logging.info(f'Preprocessed data already exists at directory '
                          f'{self.opt.dir_preprocessed_data} '
-                         f'for given configuration: {self.opt}')
+                         f'for given configuration: {self.opt}. ')
+        logging.info("Scanned Preprocessing directory. ")
         if not self.all_vectorized_data_has_been_preprocessed_before():
+            logging.info("Not all requested data found. "
+                         "Starting Preprocessing...")
             # load .csv files into dataframe
             csv_files = glob.glob(self.opt.dir_vectorized_data + '/**/*.csv.bz2',
                                   recursive=True)
             feature_names = list(self.env.obs_idx_dict.keys())
-            for file in csv_files:
+            for file in tqdm(csv_files):
                 df = pd.read_csv(file,
                                  sep=',',
                                  dtype='float32',
@@ -122,6 +126,9 @@ class PreprocessedData:
                           mode='a',
                           float_format='%.5f',
                           compression='bz2')
+        else:
+            logging.info("All requested data found. "
+                         "Skipping Preprocessor Step...")
 
 
 def make_preprocessed_data_if_not_exists_already(dataset_config,

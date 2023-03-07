@@ -72,7 +72,8 @@ def main(num_top_players,
         seed=seed
     )
     # 1. Make dataset, from scratch if necessary
-    # (downloading, extracting, encoding, vectorizing, preprocessing)
+    # (downloading, extracting, encoding, vectorizing, preprocessing, train/test
+    # splitting)
     train, test, label_weights = get_datasets(dataset_config, use_multiprocessing)
 
     # 2. Load training params from .yaml config

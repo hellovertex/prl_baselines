@@ -69,7 +69,7 @@ class InMemoryDataset(Dataset):
         if act is ActionSpace:
             assert num_unique_labels == len(ActionSpace)
         elif act is ActionSpaceMinimal:
-            assert num_unique_labels == len(ActionSpace)
+            assert num_unique_labels == len(ActionSpaceMinimal)
         elif isinstance(act, ActionSpaceMinimal):
             assert num_unique_labels == 1
 
@@ -82,11 +82,15 @@ class InMemoryDataset(Dataset):
                 name = 'round_' + stage.name.casefold()
                 assert not (df[name] == 1).any()
 
-    @staticmethod
-    def get_label_counts(df) -> List[int]:
+    def get_label_counts(self, df) -> List[int]:
         label_dict = df['label'].value_counts().to_dict()
         label_counts = []
-        for i in [0, 1, 2, 3, 4, 5, 6, 7]:
+        num_labels = 1
+        if self.dataset_config.action_space[0] is ActionSpace:
+            num_labels = len(ActionSpace)
+        elif self.dataset_config.action_space[0] is ActionSpaceMinimal:
+            num_labels = len(ActionSpaceMinimal)
+        for i in range(num_labels):
             if i in label_dict:
                 label_counts.append(label_dict[i])
             else:
