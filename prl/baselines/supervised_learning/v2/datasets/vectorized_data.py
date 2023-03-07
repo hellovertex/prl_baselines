@@ -92,7 +92,11 @@ def encode_episodes(dataset_config,
                                                             file_suffix=file_suffix + str(
                                                                 it))
                 it += 1
-
+    storage.vectorized_player_pool_data_to_disk(training_data,
+                                                labels,
+                                                encoder.feature_names,
+                                                file_suffix=file_suffix + str(
+                                                    it))
     return training_data, labels
 
 
