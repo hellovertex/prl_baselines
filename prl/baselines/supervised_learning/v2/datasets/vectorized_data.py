@@ -189,7 +189,7 @@ class VectorizedData:
                                    files: List[str],
                                    encoder_cls: Type[EncoderV2],
                                    use_multiprocessing: bool = False,
-                                   chunksize=4
+                                   chunksize=2  # smaller means more parallelization
                                    # use with multiprocessing to avoid stackoverflow
                                    ):
         if use_multiprocessing:
