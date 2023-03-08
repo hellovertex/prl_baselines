@@ -134,7 +134,10 @@ class TrainEval:
         num_training_samples = num_train_batches * params.batch_size
         num_test_samples = num_test_batches * params.batch_size
         for hdims in params.hdims:
+            # in case yaml file format is not 100% accurate, e.g. (512, 512) instead of 512, 512
+            hdims = eval(str(hdims))
             for lr in params.lrs:
+                lr = eval(str(hdims))
                 self.initialize_training(params, hdims, lr)
                 state_dict = init_state(self.ckptdir, self.model, self.optim)
                 it_train_global = state_dict["start_n_iter"]
@@ -146,7 +149,7 @@ class TrainEval:
                 a = 1
 
                 for epoch in range(start_epoch, params.max_epochs):
-                    if (epoch * len(traindataset)) > params.max_env_steps:
+                    if (epoch * num_training_samples) > params.max_env_steps:
                         break
                     pbar = tqdm(enumerate(BackgroundGenerator(train_dataloader)),
                                 total=num_train_batches)
