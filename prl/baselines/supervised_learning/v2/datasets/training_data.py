@@ -128,7 +128,7 @@ def get_datasets(dataset_config: DatasetConfig, use_multiprocessing=True):
     # dataset = OutOfMemoryDatasetV2(input_dir, chunk_size=1)
     dataset = InMemoryDataset(dataset_config)
     total_len = len(dataset)
-    train_len = math.ceil(len(dataset) * 0.8)
+    train_len = math.ceil(len(dataset) * 0.92)
     test_len = total_len - train_len
     # val_len = int(total_len * 0.01)
     # add residuals to val_len to add up to total_len

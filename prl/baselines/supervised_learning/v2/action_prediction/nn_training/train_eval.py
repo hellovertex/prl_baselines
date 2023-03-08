@@ -102,14 +102,11 @@ class TrainEval:
         self.writer = SummaryWriter(log_dir=self.logdir)
 
     def train_step(self, x, y, label_weights):
-        if self.use_cuda:  # keep
-            x = x.cuda()
-            y = y.cuda()
         # forward and backward pass
         self.optim.zero_grad()
         output = self.model(x)
         pred = torch.argmax(output,
-                            dim=1)  # get the index of the max log-probability
+                            dim=1)
         if label_weights is not None:
             loss = F.cross_entropy(output, y, weight=label_weights.to(self.device))
         else:
@@ -132,13 +129,17 @@ class TrainEval:
         test_dataloader = DataLoader(testdataset,
                                      batch_size=params.batch_size,
                                      shuffle=True)
-        len_data = round(len(train_dataloader))
+        num_train_batches = round(len(train_dataloader))
+        num_test_batches = round(len(test_dataloader))
+        num_training_samples = num_train_batches * params.batch_size
+        num_test_samples = num_test_batches * params.batch_size
         for hdims in params.hdims:
             for lr in params.lrs:
                 self.initialize_training(params, hdims, lr)
                 state_dict = init_state(self.ckptdir, self.model, self.optim)
                 it_train_global = state_dict["start_n_iter"]
-                it_train_curr = 0
+                it_log = 1
+                it_eval = 1
                 start_epoch = state_dict["start_epoch"]
                 best_accuracy = state_dict["best_accuracy"]
                 print('debugme')
@@ -148,46 +149,49 @@ class TrainEval:
                     if (epoch * len(traindataset)) > params.max_env_steps:
                         break
                     pbar = tqdm(enumerate(BackgroundGenerator(train_dataloader)),
-                                total=len_data)
+                                total=num_train_batches)
                     pbar.set_description(
                         f'Training epoch {epoch}/{params.max_epochs} on {len(traindataset)} '
                         f'examples using batches of size {params.batch_size}...')
                     correct = 0
                     total_loss = 0
                     for i, (x, y) in pbar:
+                        if self.use_cuda:  # keep
+                            x = x.cuda()
+                            y = y.cuda()
                         pred, loss = self.train_step(x, y, label_weights)
                         total_loss += loss.data.item()
                         correct += pred.eq(y.data).cpu().sum().item()
                         # ------------------------
                         # ------- LOGGING --------
                         # ------------------------
-                        if (it_train_curr+1) % params.log_interval == 0:
+                        if it_log % params.log_interval == 0:
                             f1 = f1_score(y.data.cpu(),
                                           pred.cpu(),
                                           average='weighted')
-                            n_samples = it_train_curr * params.batch_size
+                            n_samples = it_log * params.batch_size
                             # across all batches seen so far
-                            self.writer.add_scalar(tag='Training Loss',
-                                                   scalar_value=total_loss / n_samples,
+                            self.writer.add_scalar(tag='Training_Loss',
+                                                   scalar_value=total_loss / it_log,
                                                    global_step=it_train_global)
-                            self.writer.add_scalar(tag='Training F1 score',
+                            self.writer.add_scalar(tag='Training_F1_score',
                                                    scalar_value=f1,
                                                    global_step=it_train_global)
-                            self.writer.add_scalar(tag='Training Accuracy',
+                            self.writer.add_scalar(tag='Training_Accuracy',
                                                    scalar_value=100.0 * correct / n_samples,
                                                    global_step=it_train_global)
                             print(f"\nTrain set: "
-                                  f"Average loss: {round(total_loss / n_samples, 4)}, "
-                                  f"Accuracy: {correct}/{it_train_global} "
+                                  f"Average loss: {round(total_loss / it_log, 4)}, "
+                                  f"Accuracy: {correct}/{n_samples} "
                                   f"({round(100.0 * correct / n_samples, 2)}%)\n")
-                            i_train = 0
                             correct = 0
                             total_loss = 0
+                            it_log = 0
                         # ------------------------
                         # ---- CHECKPOINTING -----
                         # ------------------------
                         # evaluate once (i==0) every epoch (j % eval_interval)
-                        if (it_train_curr+1) % params.eval_interval == 0:
+                        if it_eval % params.eval_interval == 0:
                             self.model.eval()
                             test_loss = 0
                             test_correct = 0
@@ -203,13 +207,11 @@ class TrainEval:
                                         reduction="sum").data.item()
                                     pred = torch.argmax(output, dim=1)
                                     test_correct += pred.eq(y.data).cpu().sum().item()
-                            test_loss /= (len(testdataset) * params.batch_size)
-                            test_accuracy = 100 * test_correct / (
-                                    len(testdataset) * params.batch_size)
+                            test_loss /= num_test_batches
+                            test_accuracy = (100 * test_correct ) / num_test_samples
                             print(f"\nTest set: Average loss: {round(test_loss, 4)}, "
-                                  f"Accuracy: {round(test_correct)}/"
-                                  f"{len(testdataset) * params.batch_size} "
-                                  f"({test_accuracy}%)\n")
+                                  f"Accuracy: {round(test_correct)}/{num_test_samples} "
+                                  f"({round(test_accuracy, 6)}%)\n")
                             if not os.path.exists(self.ckptdir):
                                 os.makedirs(self.ckptdir)
                             if best_accuracy < test_accuracy:
@@ -246,16 +248,18 @@ class TrainEval:
 
                             for name, values in report.items():
                                 if name in target_names:
-                                    self.writer.add_scalar(f'precision/{name}',
+                                    self.writer.add_scalar(f'precision/{name.replace(" ", "")}',
                                                            values['precision'],
                                                            global_step=it_train_global)
                             for name, values in report.items():
                                 if name in target_names:
-                                    self.writer.add_scalar(f'recall/{name}',
+                                    self.writer.add_scalar(f'recall/{name.replace(" ", "")}',
                                                            values['recall'],
                                                            global_step=it_train_global)
                             pprint.pprint(report)
                             self.model.train()
+                            it_eval = 0
 
                         it_train_global += 1
-                        it_train_curr += 1
+                        it_log += 1
+                        it_eval += 1

@@ -2,7 +2,7 @@
 max_epochs: 100_000_000
 max_env_steps: 1_000_000
 # model params
-device: 'cpu'  # 'cuda' or 'cpu'
+device: 'cuda'  # 'cuda' or 'cpu'
 input_dim: 569
 # FOLD, CHECK_CALL, RAISE
 output_dim: 3  # 1<= output_dim <= len(ActionSpace)
@@ -14,7 +14,7 @@ hdims:
   - (512, 512)
 batch_size: 512
 # progress
-log_interval: 5
-eval_interval: 5
+log_interval: 100  # log every `n` batches of size `batch_size`
+eval_interval: 100  # log every `n` batches of size `batch_size`
 # misc
 debug: False
