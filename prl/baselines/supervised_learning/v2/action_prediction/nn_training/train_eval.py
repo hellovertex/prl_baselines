@@ -141,13 +141,8 @@ class TrainEval:
                 self.initialize_training(params, hdims, lr)
                 state_dict = init_state(self.ckptdir, self.model, self.optim)
                 it_train_global = state_dict["start_n_iter"]
-                it_log = 1
-                it_eval = 1
                 start_epoch = state_dict["start_epoch"]
                 best_accuracy = state_dict["best_accuracy"]
-                print('debugme')
-                a = 1
-
                 for epoch in range(start_epoch, params.max_epochs):
                     if (epoch * num_training_samples) > params.max_env_steps:
                         break
@@ -158,6 +153,8 @@ class TrainEval:
                         f'examples using batches of size {params.batch_size}...')
                     correct = 0
                     total_loss = 0
+                    it_log = 1
+                    it_eval = 1
                     for i, (x, y) in pbar:
                         if self.use_cuda:  # keep
                             x = x.cuda()
@@ -181,7 +178,7 @@ class TrainEval:
                                                    scalar_value=f1,
                                                    global_step=it_train_global)
                             self.writer.add_scalar(tag='Training_Accuracy',
-                                                   scalar_value=100.0 * correct / n_samples,
+                                                   scalar_value=(100.0 * correct) / n_samples,
                                                    global_step=it_train_global)
                             print(f"\nTrain set: "
                                   f"Average loss: {round(total_loss / it_log, 4)}, "
