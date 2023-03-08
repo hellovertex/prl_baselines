@@ -137,7 +137,7 @@ class TrainEval:
             # in case yaml file format is not 100% accurate, e.g. (512, 512) instead of 512, 512
             hdims = eval(str(hdims))
             for lr in params.lrs:
-                lr = eval(str(hdims))
+                lr = eval(str(lr))
                 self.initialize_training(params, hdims, lr)
                 state_dict = init_state(self.ckptdir, self.model, self.optim)
                 it_train_global = state_dict["start_n_iter"]
