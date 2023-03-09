@@ -203,8 +203,7 @@ class TrainEval:
                                     output = self.model(x)
                                     # sum up batch loss
                                     test_loss += F.cross_entropy(
-                                        output, y,
-                                        reduction="sum").data.item()
+                                        output, y, weight=label_weights.to(self.device)).data.item()
                                     pred = torch.argmax(output, dim=1)
                                     test_correct += pred.eq(y.data).cpu().sum().item()
                             test_loss /= num_test_batches

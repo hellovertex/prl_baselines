@@ -1,6 +1,6 @@
 # early stopping - whatever is triggered first
-max_epochs: 100_000_000
-max_env_steps: 500_000_000
+max_epochs: 10_000
+max_env_steps: 100_000_000_000
 # model params
 device: 'cuda'  # 'cuda' or 'cpu'
 input_dim: 569  # == len(AugmentObservationFeatureColumns)
