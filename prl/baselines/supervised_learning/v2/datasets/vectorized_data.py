@@ -35,7 +35,8 @@ from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
     arg_make_dataset_for_each_individual,
     arg_action_generation_option,
     arg_use_multiprocessing,
-    arg_min_showdowns
+    arg_min_showdowns,
+    arg_hudstats
 )
 
 
@@ -69,6 +70,7 @@ def encode_episodes(dataset_config,
                 a_opt=dataset_config.action_generation_option,
                 limit_num_players=5,
                 selected_players=selected_players,
+                use_hudstats=dataset_config.hudstats_enabled,
                 verbose=False)
         except Exception as e:
             raise e
@@ -276,20 +278,23 @@ def make_vectorized_data_if_not_exists_already(dataset_config, use_multiprocessi
 @arg_action_generation_option
 @arg_use_multiprocessing
 @arg_min_showdowns
+@arg_hudstats
 def main(num_top_players,  # see click command main_raw_data
          nl,  # see click command main_raw_data
          from_gdrive_id,  # see click command main_raw_data
          make_dataset_for_each_individual,
          action_generation_option,
          use_multiprocessing,
-         min_showdowns):
+         min_showdowns,
+         hudstats):
     dataset_config = DatasetConfig(
         num_top_players=num_top_players,
         nl=nl,
         from_gdrive_id=from_gdrive_id,
         make_dataset_for_each_individual=make_dataset_for_each_individual,
         action_generation_option=ActionGenOption(action_generation_option),
-        min_showdowns=min_showdowns
+        min_showdowns=min_showdowns,
+        hudstats_enabled=hudstats
     )
     make_vectorized_data_if_not_exists_already(dataset_config, use_multiprocessing)
 

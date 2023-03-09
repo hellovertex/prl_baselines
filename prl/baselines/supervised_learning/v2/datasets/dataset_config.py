@@ -95,7 +95,7 @@ class DatasetConfig:
     """Single Source of Truth for all data related metadata"""
 
     # data/01_raw -- .txt files
-    num_top_players: int
+    num_top_players: int = 20
 
     # data/02_vectorized -- .csv files
     # hand histories encoded as numerical vectors
@@ -103,6 +103,7 @@ class DatasetConfig:
     action_generation_option: Optional[ActionGenOption] = None
     # minimum number of showdowns required to be eligible for top player ranking
     min_showdowns: int = 5000
+    hudstats_enabled: bool = True
 
     # data/03_preprocessed -- .csv files
     # We exclusively use datasets of games where top players participate.
@@ -177,12 +178,14 @@ class DatasetConfig:
         subdir_03_top_n_players = f'Top{self.num_top_players}Players_' \
                                   f'n_showdowns={self.min_showdowns}' if not \
             self.make_dataset_for_each_individual else ''
+        subdir_04_hudstats_toggled = f'with_hudstats' if self.hudstats_enabled else ''
         return os.path.join(*[
             vectorized_dir,
             subdir_00_nl,
             subdir_01_player_or_pool,
             subdir_02_fold_or_no_fold,
-            subdir_03_top_n_players
+            subdir_03_top_n_players,
+            subdir_04_hudstats_toggled
         ])
 
     @property
@@ -202,16 +205,18 @@ class DatasetConfig:
         subdir_03_top_n_players = f'Top{self.num_top_players}Players_' \
                                   f'n_showdowns={self.min_showdowns}' if not \
             self.make_dataset_for_each_individual else ''
-        subdir_04_rounds = self.target_rounds_to_str()
-        subdir_05_actions = self.actions_to_str()
+        subdir_04_hudstats_toggled = f'with_hudstats' if self.hudstats_enabled else ''
+        subdir_05_rounds = self.target_rounds_to_str()
+        subdir_06_actions = self.actions_to_str()
         return os.path.join(*[
             preprocessed_dir,
             subdir_00_nl,
             subdir_01_player_or_pool,
             subdir_02_fold_or_no_fold,
             subdir_03_top_n_players,
-            subdir_04_rounds,
-            subdir_05_actions
+            subdir_04_hudstats_toggled,
+            subdir_05_rounds,
+            subdir_06_actions
         ])
 
     @property
@@ -359,5 +364,9 @@ arg_seed_dataset = click.option("--seed",
                                 default=42,
                                 type=int,
                                 help="Seed used to generate dataset and datasplit using"
-                                     "torch.Generator().manual_seed(seed)"
-                                )
+                                     "torch.Generator().manual_seed(seed)")
+arg_hudstats = click.option("--hudstats",
+                            default=False,
+                            type=bool,
+                            help="Extends observations by player statistics and hand "
+                                 "strength")

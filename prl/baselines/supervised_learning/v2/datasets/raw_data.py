@@ -42,20 +42,21 @@ class RawData:
                 with open(file, 'a+', encoding='utf-8') as f:
                     f.write(result)
 
-    def download_data(self) -> bool:
+    @staticmethod
+    def download_data(opt) -> bool:
         logging.info(f'No hand histories found in data/01_raw/all_players. '
-                     f'Downloading using gdrive_id {self.opt.from_gdrive_id}')
+                     f'Downloading using gdrive_id {opt.from_gdrive_id}')
 
-        path_to_zipfile = os.path.join(self.opt.DATA_DIR, *['00_tmp', 'bulk_hands.zip'])
+        path_to_zipfile = os.path.join(opt.DATA_DIR, *['00_tmp', 'bulk_hands.zip'])
         # 1. download .zip file from gdrive to disk
-        gdown.download(id=self.opt.from_gdrive_id,
+        gdown.download(id=opt.from_gdrive_id,
                        # must end with .zip
                        output=path_to_zipfile,
                        quiet=False)
         # 2. unzip recursively to DATA_DIR
         zipfiles = glob.glob(path_to_zipfile, recursive=False)
-        unzipped_dir = os.path.join(self.opt.DATA_DIR, *['01_raw', self.opt.nl,
-                                                         'all_players'])
+        unzipped_dir = os.path.join(opt.DATA_DIR, *['01_raw', opt.nl,
+                                                    'all_players'])
         [extract(zipfile, out_dir=unzipped_dir) for zipfile in zipfiles]
 
         logging.info(f'Unzipped hand histories to {unzipped_dir}')
@@ -83,7 +84,7 @@ class RawData:
         # Maybe download + unzip
         if not self.opt.hand_history_has_been_downloaded_and_unzipped():
             assert self.opt.from_gdrive_id, "Downloading data requires parameter `from_gdrive_id`"
-            self.download_data()
+            self.download_data(self.opt)
 
         # Maybe extract Top N players hand_histories
         if not self.opt.exists_raw_data_for_all_selected_players():

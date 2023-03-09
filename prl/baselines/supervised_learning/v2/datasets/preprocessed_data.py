@@ -23,7 +23,8 @@ from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
     arg_use_multiprocessing,
     arg_min_showdowns,
     arg_target_rounds,
-    arg_action_space
+    arg_action_space,
+    arg_hudstats
 )
 from prl.baselines.supervised_learning.v2.datasets.raw_data import \
     make_raw_data_if_not_exists_already
@@ -150,6 +151,7 @@ def make_preprocessed_data_if_not_exists_already(dataset_config,
 @arg_min_showdowns
 @arg_target_rounds
 @arg_action_space
+@arg_hudstats
 def main(num_top_players,
          nl,
          from_gdrive_id,
@@ -158,7 +160,8 @@ def main(num_top_players,
          use_multiprocessing,
          min_showdowns,
          target_rounds,
-         action_space):
+         action_space,
+         hudstats):
     dataset_config = DatasetConfig(
         num_top_players=num_top_players,
         nl=nl,
@@ -166,6 +169,7 @@ def main(num_top_players,
         make_dataset_for_each_individual=make_dataset_for_each_individual,
         action_generation_option=ActionGenOption(action_generation_option),
         min_showdowns=min_showdowns,
+        hudstats_enabled=hudstats,
         target_rounds=[Stage(x) for x in target_rounds],
         action_space=[parse_cmd_action_to_action_cls(action_space)]
     )

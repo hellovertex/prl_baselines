@@ -1,12 +1,16 @@
-""" This module will
- - read .txt files inside ./data/
- - parse them to create corresponding PokerEpisode objects. """
 import re
-from typing import Dict
+
+import click
+
+from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
+    arg_nl,
+    arg_from_gdrive_id, DatasetConfig
+)
+from typing import Dict, List
 
 
 # ---------------------------- PokerStars-Parser ---------------------------------
-class SelectedPlayerStats:
+class _HudStats:
     def __init__(self,
                  pname,
                  preflop_sep="*** HOLE CARDS ***",
@@ -228,18 +232,19 @@ class SelectedPlayerStats:
         }
 
 
-class HSmithyStats:
+class PlayerStats:
     """Reads .txt files with poker games crawled from Pokerstars.com and looks for specific players.
      If found, writes them back to disk in a separate place.
      This is done to speed up parsing of datasets."""
 
-    def __init__(self, pname):
-        self.pstats = SelectedPlayerStats(pname=pname)
+    def __init__(self, pname, hudstats=None):
+        self.stats = _HudStats(pname=pname) if hudstats is None else hudstats
+        assert hasattr(self.stats, 'update')
 
     def split_next_round(self, stringval):
         return True
 
-    def _compute_stats(self, hands_played):
+    def _update_stats(self, hands_played):
         for current in hands_played:  # c for current_hand
             # Only parse hands that went to Showdown stage, i.e. were shown
             # skip hands without target player
@@ -248,13 +253,73 @@ class HSmithyStats:
             if f'{self.target_player}: sits out' in current:
                 continue
             # accumulate stats
-            self.pstats.update(current)
+            self.stats.update(current)
 
-    def compute_from_file(self, file_path_in, target_player):
+    def update_from_file(self, file_path_in, target_player):
         self._variant = 'NoLimitHoldem'  # todo parse variant from filename
         self.target_player = target_player
         with open(file_path_in, 'r',
                   encoding='utf-8') as f:  # pylint: disable=invalid-name,unspecified-encoding
             hand_database = f.read()
             hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
-            self._compute_stats(hands_played)
+            self._update_stats(hands_played)
+
+
+class DatasetStats:
+
+    def __init__(self, dataset_config):
+        self.dataset_config = dataset_config
+        self.total_hands = 0
+        self.total_showdowns = 0
+        self.n_showdowns_no_mucks = 0
+        self.n_showdowns_with_mucks = 0
+        # large lookup containing per player IDs of all hands played
+        # useful to match what each player knows about its opponents,
+        # for example when computing specific hud stats
+        self.player_names_to_hand_ids: Dict[str, List[int]] = {}
+        self.player_names_to_player_stats: Dict[str, PlayerStats] = {}
+
+    def _upd(self, abs_fpath, hands_played):
+        # get player names
+        player_names = []
+        hand_id = 0
+        for pname in player_names:
+            # update hand_ids player participated in
+            if pname not in self.player_names_to_hand_ids:
+                self.player_names_to_hand_ids[pname] = [hand_id]
+            else:
+                self.player_names_to_hand_ids[pname].append(hand_id)
+            # update stats
+            if pname not in self.player_names_to_player_stats:
+                self.player_names_to_player_stats[pname] = PlayerStats(pname)
+            else:
+                self.player_names_to_player_stats[pname].update_from_file(
+                    file_path_in=abs_fpath,
+                    target_player=pname)
+
+    def update_from_file(self, file_path):
+        with open(file_path, 'r',
+                  encoding='utf-8') as f:  # pylint: disable=invalid-name,unspecified-encoding
+            hand_database = f.read()
+            hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
+
+            self._upd(hands_played)
+
+    def to_dict(self):
+        return {'total_hands': self.total_hands,
+                'total_showdowns': self.total_showdowns,
+                'n_showdowns_no_mucks': self.n_showdowns_no_mucks,
+                'n_showdowns_with_mucks': self.n_showdowns_with_mucks, }
+
+
+@click.command()
+@arg_nl
+@arg_from_gdrive_id
+def main(nl, from_gdrive_id):
+    dataset_config = DatasetConfig(nl=nl,
+                                   from_gdrive_id=from_gdrive_id)
+    stats = DatasetStats(dataset_config)
+
+
+if __name__ == '__main__':
+    main()

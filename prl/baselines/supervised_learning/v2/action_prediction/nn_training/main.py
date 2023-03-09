@@ -23,7 +23,7 @@ from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
     arg_target_rounds,
     arg_action_space,
     arg_sub_sampling_technique,
-    arg_seed_dataset
+    arg_seed_dataset, arg_hudstats
 )
 from prl.baselines.supervised_learning.v2.datasets.utils import \
     parse_cmd_action_to_action_cls
@@ -40,6 +40,7 @@ from prl.baselines.supervised_learning.v2.datasets.utils import \
 @arg_action_space
 @arg_sub_sampling_technique
 @arg_seed_dataset
+@arg_hudstats
 @click.option('--train_configfile',
               type=str,
               default='config.yaml',
@@ -50,6 +51,7 @@ def main(num_top_players,
          make_dataset_for_each_individual,
          action_generation_option,
          min_showdowns,
+         hudstats,
          target_rounds,
          action_space,
          sub_sampling_technique,
@@ -62,6 +64,7 @@ def main(num_top_players,
         make_dataset_for_each_individual=make_dataset_for_each_individual,
         action_generation_option=ActionGenOption(action_generation_option),
         min_showdowns=min_showdowns,
+        hudstats_enabled=hudstats,
         target_rounds=[Stage(x) for x in target_rounds],
         action_space=[parse_cmd_action_to_action_cls(action_space)],
         sub_sampling_technique=sub_sampling_technique,

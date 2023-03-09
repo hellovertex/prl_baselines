@@ -18,6 +18,7 @@ from prl.baselines.supervised_learning.data_acquisition.environment_utils import
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import ActionGenOption
 from prl.baselines.supervised_learning.v2.poker_model import PokerEpisodeV2, Player, \
     Action
+from prl.environment.Wrappers.augment import FeaturesWithHudStats
 
 MULTIPLY_BY = 100  # because env expects Integers, we convert $2,58 to $258
 INVISIBLE_CARD = [Poker.CARD_NOT_DEALT_TOKEN_1D, Poker.CARD_NOT_DEALT_TOKEN_1D]
@@ -130,6 +131,18 @@ class EncoderV2:
 
         return obs
 
+    def append_hud_stats(self, obs):
+        # todo: implement, such that obs matches FeaturesWithHudStats
+        #  i.e. compute win_prob using MC simulator
+        #  and extend VPIP stats from database summary
+        """
+        'Player_0_is_tight',  # set only if n_games > 50
+        'Player_0_is_aggressive',  # set only if n_games > 50
+        """
+        # get hand_ids for each player
+        # then when computing vpip af pfr, use only hand_ids['player_name']
+        return obs
+
     def _simulate_environment(self,
                               episode,
                               players: List[Player],
@@ -193,7 +206,11 @@ class EncoderV2:
             next_to_act = action.who
             for player in players:
                 if player.name == next_to_act:
+                    # todo update obs here with win_prob and
+                    #  player stats
                     if player.name in remaining_selected_players:
+                        if self.hudstats:
+                            obs = self.append_hud_stats(obs)
                         observations.append(obs)
                         actions.append(action_label)
                         if action_label == ActionSpace.FOLD:
@@ -201,10 +218,14 @@ class EncoderV2:
                                 "Player must not be in target_players")
                             remaining_selected_players.remove(player.name)
                     if player.name in target_players:
+                        if self.hudstats:
+                            obs = self.append_hud_stats(obs)
                         observations.append(obs)
                         actions.append(action_label)
 
                     elif player.name in fold_players:
+                        if self.hudstats:
+                            obs = self.append_hud_stats(obs)
                         observations.append(obs)
                         actions.append(ActionSpace.FOLD.value)
 
@@ -310,7 +331,6 @@ class EncoderV2:
                 hand = [card(token) for token in cards]
                 hands.append(hand)
             else:
-                # todo: implement this conditional: if self.fold_random_cards:
                 # overwrite default hands with random cards that are not board or player cards
                 idx0 = random.randint(0, len(deck) - 1)
                 c0 = deck.pop(idx0)
@@ -341,6 +361,7 @@ class EncoderV2:
     def encode_episode(self,
                        episode: PokerEpisodeV2,
                        a_opt: ActionGenOption,
+                       use_hudstats: bool,
                        selected_players: List[str],
                        limit_num_players: int = None,
                        verbose: bool = False) -> Tuple[
@@ -348,6 +369,7 @@ class EncoderV2:
         """Runs environment with steps from PokerEpisode.
                 Returns observations and corresponding actions of players that made it to showdown."""
         try:
+            self.use_hudstats = use_hudstats
             only_winners, drop_folds, fold_random_cards = self.parse_action_gen_option(
                 a_opt)
             # todo: for each selected player

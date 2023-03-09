@@ -51,16 +51,18 @@ class TrainingParams:
         subdir_03_top_n_players = f'Top{conf.num_top_players}Players_' \
                                   f'n_showdowns={conf.min_showdowns}' if not \
             conf.make_dataset_for_each_individual else ''
-        subdir_04_rounds = conf.target_rounds_to_str()  # move target_rounds_to_str
-        subdir_05_actions = conf.actions_to_str()  # move  actions_to_str
+        subdir_04_hudstats_toggled = f'with_hudstats' if conf.hudstats_enabled else ''
+        subdir_05_rounds = conf.target_rounds_to_str()  # move target_rounds_to_str
+        subdir_06_actions = conf.actions_to_str()  # move  actions_to_str
         return os.path.join(*[
             train_result_dir,
             subdir_00_nl,
             subdir_01_player_or_pool,
             subdir_02_fold_or_no_fold,
             subdir_03_top_n_players,
-            subdir_04_rounds,
-            subdir_05_actions,
+            subdir_04_hudstats_toggled,
+            subdir_05_rounds,
+            subdir_06_actions,
             f'{hdims}_{lr}'
         ])
 
