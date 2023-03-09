@@ -38,7 +38,10 @@ def main(max_episodes,
     ckpt_abs_fpath = "/home/hellovertex/Documents/github.com/prl_baselines/data/05_train_results/NL50/player_pool/folds_from_top_players_with_randomized_hand/Top20Players_n_showdowns=5000/target_rounds=FTR/actions=ActionSpaceMinimal/512_1e-06/ckptdir/ckpt.pt"
     pname = 'AI_AGENT_v2'
     hidden_dims = [256] if '256' in pname else [512]
-    path_out = "./results_final"
+    path_out = "/home/hellovertex/Documents/github.com/prl_baselines/data" \
+               "/04_eval/NL50/player_pool/folds_from_top_players_with_randomized_hand" \
+               "/Top20Players_n_showdowns=5000/target_rounds=FTR/" \
+               "actions=ActionSpaceMinimal/512_1e-06/results_final"
     agent_names = [f'{pname}', '2', '3', '4', '5', '6']
     # make self play agents
     agents = [BaselineAgent(ckpt_abs_fpath,  # MajorityBaseline

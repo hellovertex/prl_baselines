@@ -401,7 +401,7 @@ def main(num_top_players, nl, from_gdrive_id):
     selector = TopPlayerSelector(parser=parser_cls(
         dataset_config=dataset_config))
     stats = DatasetStats(dataset_config, selector)
-    stats.make_csv_files_with_dataset_summary_if_missing()
+    stats.generate_if_missing()
 
 
 if __name__ == '__main__':
