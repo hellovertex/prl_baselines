@@ -43,7 +43,7 @@ from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
 def alias_player_rank_to_ingame_name(selected_player_names,
                                      filename:
                                      str) -> List[str]:
-    # map `01_raw/NL50/selected_players/PlayerRank0008` to int(8)
+    # map `01_raw/NL50/selected_players/PlayerRank008` to int(8)
     filename = Path(filename).name
     rank: int = int(re.search(r'\d+', filename).group())
     # map rank int to key index of top players
@@ -87,7 +87,7 @@ def encode_episodes(dataset_config,
                                                axis=0)
                 labels = np.concatenate((labels, actions), axis=0)
             except Exception as e:
-                #print(e)
+                # print(e)
                 pass
             if it % max_episodes_per_file == 0:
                 storage.vectorized_player_pool_data_to_disk(training_data,
@@ -131,7 +131,7 @@ def generate_vectorized_hand_histories(files,
                         encoder,
                         selected_players,
                         storage=storage,
-                        file_suffix=Path(filename).stem+files[-1])
+                        file_suffix=Path(filename).stem + files[-1])
     return f"Success: encoded chunk {files}..."
 
 

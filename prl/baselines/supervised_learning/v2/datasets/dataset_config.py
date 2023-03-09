@@ -95,7 +95,7 @@ class DatasetConfig:
     """Single Source of Truth for all data related metadata"""
 
     # data/01_raw -- .txt files
-    num_top_players: int = 20
+    num_top_players: int
 
     # data/02_vectorized -- .csv files
     # hand histories encoded as numerical vectors
@@ -217,6 +217,16 @@ class DatasetConfig:
             subdir_04_hudstats_toggled,
             subdir_05_rounds,
             subdir_06_actions
+        ])
+
+    @property
+    def dir_data_summary(self):
+        DATA_DIR = DEFAULT_DATA_DIR if not self.DATA_DIR else self.DATA_DIR
+        summary_dir = '99_summary'
+        return os.path.join(*[
+            DATA_DIR,
+            summary_dir,
+            self.nl
         ])
 
     @property

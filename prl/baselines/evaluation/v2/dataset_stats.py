@@ -1,12 +1,33 @@
+import os
 import re
 
 import click
 
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
     arg_nl,
-    arg_from_gdrive_id, DatasetConfig
+    arg_from_gdrive_id,
+    arg_num_top_players,
+    DatasetConfig
 )
 from typing import Dict, List
+
+from prl.baselines.supervised_learning.v2.datasets.raw_data import \
+    make_raw_data_if_not_exists_already
+from prl.baselines.supervised_learning.v2.datasets.top_player_selector import \
+    TopPlayerSelector
+from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import \
+    ParseHsmithyTextToPokerEpisode
+
+
+def player_name_to_alias_directory(selected_player_names: List[str],
+                                   target_player_name: str,
+                                   dataset_config: DatasetConfig):
+    for i, name in enumerate(selected_player_names):
+        if name == target_player_name:
+            rank = i + 1
+            return os.path.join(
+                dataset_config.dir_raw_data_top_players,
+                f'PlayerRank{str(rank).zfill(3)}')
 
 
 # ---------------------------- PokerStars-Parser ---------------------------------
@@ -255,6 +276,14 @@ class PlayerStats:
             # accumulate stats
             self.stats.update(current)
 
+    def update_from_episode(self, episode: str):
+        if not self.target_player in episode:
+            return
+        if f'{self.target_player}: sits out' in episode:
+            return
+        # accumulate stats
+        self.stats.update(episode)
+
     def update_from_file(self, file_path_in, target_player):
         self._variant = 'NoLimitHoldem'  # todo parse variant from filename
         self.target_player = target_player
@@ -267,8 +296,11 @@ class PlayerStats:
 
 class DatasetStats:
 
-    def __init__(self, dataset_config):
+    def __init__(self,
+                 dataset_config: DatasetConfig,
+                 top_player_selector: TopPlayerSelector):
         self.dataset_config = dataset_config
+        self.top_player_selector = top_player_selector
         self.total_hands = 0
         self.total_showdowns = 0
         self.n_showdowns_no_mucks = 0
@@ -277,33 +309,46 @@ class DatasetStats:
         # useful to match what each player knows about its opponents,
         # for example when computing specific hud stats
         self.player_names_to_hand_ids: Dict[str, List[int]] = {}
-        self.player_names_to_player_stats: Dict[str, PlayerStats] = {}
+        self.heroes_hud_stats_lookup_table: Dict[str, Dict[str, PlayerStats]] = {}
+        self.pattern = re.compile(r'Seat \d:')
+        self.selected_player_names = list(
+            self.top_player_selector.get_top_n_players_min_showdowns(
+                self.dataset_config.num_top_players,
+                self.dataset_config.min_showdowns
+            ).keys())
 
-    def _upd(self, abs_fpath, hands_played):
-        # get player names
+    def get_player_names_from_episode(self, episode: str) -> List[str]:
+        """
+        :param episode:
+        PokerStars Hand #208958242124:  Hold'em No Limit ($0.25/$0.50 USD) - 2020/02/07 19:20:58 ET
+        Table 'Aaltje III' 6-max Seat #6 is the button
+        Seat 1: SWING BOLOO ($44.86 in chips)
+        Seat 2: romixon36 ($50 in chips)
+        Seat 3: supersimple2018 ($55.66 in chips)
+        Seat 4: Flyyguyy403 ($49.46 in chips)
+        Seat 5: Clamfish0 ($51.25 in chips)
+        Seat 6: JuanAlmighty ($98 in chips), etc.
+        """
         player_names = []
-        hand_id = 0
-        for pname in player_names:
-            # update hand_ids player participated in
-            if pname not in self.player_names_to_hand_ids:
-                self.player_names_to_hand_ids[pname] = [hand_id]
-            else:
-                self.player_names_to_hand_ids[pname].append(hand_id)
-            # update stats
-            if pname not in self.player_names_to_player_stats:
-                self.player_names_to_player_stats[pname] = PlayerStats(pname)
-            else:
-                self.player_names_to_player_stats[pname].update_from_file(
-                    file_path_in=abs_fpath,
-                    target_player=pname)
+        for line in episode.split("\n"):
+            if 'Seat' in line:
+                for token in self.pattern.split(line):
+                    if token:
+                        name = token.split('(')[0].strip()
+                        player_names.append(name)
+        return player_names
 
     def update_from_file(self, file_path):
+        hands_played = self.hands_histories(file_path)
+        return
+
+    @staticmethod
+    def hands_histories(file_path):
         with open(file_path, 'r',
                   encoding='utf-8') as f:  # pylint: disable=invalid-name,unspecified-encoding
             hand_database = f.read()
             hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
-
-            self._upd(hands_played)
+        return hands_played
 
     def to_dict(self):
         return {'total_hands': self.total_hands,
@@ -311,14 +356,52 @@ class DatasetStats:
                 'n_showdowns_no_mucks': self.n_showdowns_no_mucks,
                 'n_showdowns_with_mucks': self.n_showdowns_with_mucks, }
 
+    def _make_top_player_hud_stat_lookup_tables_if_missing(self):
+        # todo: check if they exist already
+        for hero in self.selected_player_names:
+            filename = player_name_to_alias_directory(self.selected_player_names,
+                                                      hero,
+                                                      self.dataset_config)
+            for episode in self.hands_histories(filename):
+                for player in self.get_player_names_from_episode(episode):
+                    if player != hero:
+                        if player in self.heroes_hud_stats_lookup_table[hero]:
+                            self.heroes_hud_stats_lookup_table[hero][
+                                player].update_from_episode(episode)
+                        else:
+                            self.heroes_hud_stats_lookup_table[hero][player] = \
+                                PlayerStats(player)
+
+    def _make_dataset_summary_if_missing(self):
+        # todo make stats and check if missing
+        pass
+
+    def generate_if_missing(self):
+        # make_csv_files_with_dataset_summary_
+        # need to sweep through
+        # all files in self.dataset_config.dir_raw_data_top_players
+        # twice -- first sweep computes dataset stats
+        # for all player_names
+        # update player stats
+        output_dir = self.dataset_config.dir_data_summary
+        self._make_top_player_hud_stat_lookup_tables_if_missing()
+        self._make_dataset_summary_if_missing()
+
 
 @click.command()
+@arg_num_top_players
 @arg_nl
 @arg_from_gdrive_id
-def main(nl, from_gdrive_id):
-    dataset_config = DatasetConfig(nl=nl,
+def main(num_top_players, nl, from_gdrive_id):
+    dataset_config = DatasetConfig(num_top_players=num_top_players,
+                                   nl=nl,
                                    from_gdrive_id=from_gdrive_id)
-    stats = DatasetStats(dataset_config)
+    make_raw_data_if_not_exists_already(dataset_config)
+    parser_cls = ParseHsmithyTextToPokerEpisode
+    selector = TopPlayerSelector(parser=parser_cls(
+        dataset_config=dataset_config))
+    stats = DatasetStats(dataset_config, selector)
+    stats.make_csv_files_with_dataset_summary_if_missing()
 
 
 if __name__ == '__main__':
