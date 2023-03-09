@@ -33,10 +33,16 @@ class PokerExperimentParticipant:
     config: Optional[Dict]
 
 
-def make_participants(agents, agent_names, starting_stack, **kwargs) -> Tuple[PokerExperimentParticipant]:
+def make_participants(agents, agent_names, starting_stack, normalization, **kwargs) -> Tuple[PokerExperimentParticipant]:
     """Returns list of agents using default participant represenation"""
     participants = []
     for i, (agent, name) in enumerate(list(zip(agents, agent_names))):
+        try:
+            # monkey patch for rule based agents
+            agent.normalization = normalization
+            # agent.reset(**kwargs)
+        except Exception as e:
+            pass
         participants.append(PokerExperimentParticipant(id=i,
                                                        name=name,
                                                        starting_stack=starting_stack,

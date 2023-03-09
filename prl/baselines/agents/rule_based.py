@@ -137,7 +137,6 @@ class RuleBasedAgent:
         return result
 
     def act(self, obs: np.ndarray, legal_moves):
-        print('YEAY')
         c0 = obs[cols.First_player_card_0_rank_0:cols.First_player_card_0_suit_3 + 1]
         c1 = obs[cols.First_player_card_1_rank_0:cols.First_player_card_1_suit_3 + 1]
         r0, s0 = np.where(c0 == 1)[0]

@@ -18,15 +18,17 @@ def make_experiment(max_episodes,
                                     stack_sizes=[starting_stack for _ in range(len(agent_names))],
                                     agents=agent_names,
                                     num_players=len(agent_names))
+    normalization = env.env.env.env_wrapped.normalization
     test_env = init_wrapped_env(AugmentObservationWrapper,
                                 [starting_stack for _ in range(len(agent_names))],
-                                blinds=[25, 50],
+                                blinds=(25, 50),
                                 multiply_by=1)
 
     assert len(agents) == num_players
     participants = make_participants(agents=agents,
                                      agent_names=agent_names,
-                                     starting_stack=starting_stack)
+                                     starting_stack=starting_stack,
+                                     normalization=normalization)
     stats = [PlayerStats(pname=pname) for pname in agent_names]
     # run self play
     experiment = PokerExperiment(

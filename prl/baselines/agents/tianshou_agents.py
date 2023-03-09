@@ -11,6 +11,7 @@ from tianshou.policy import BasePolicy
 from tianshou.utils.net.common import MLP
 from torch import softmax
 
+from prl.baselines.agents.rule_based import RuleBasedAgent
 from prl.baselines.cpp_hand_evaluator.rank import dict_str_to_sk
 from prl.baselines.evaluation.utils import pretty_print
 
@@ -141,18 +142,8 @@ class BaselineAgent(BasePolicy):
 
     def load_model(self, ckpt_path, flatten_input):
         input_dim = 569
-        classes = [ActionSpace.FOLD,
-                   ActionSpace.CHECK_CALL,  # CHECK IS INCLUDED in CHECK_CALL
-                   ActionSpace.RAISE_MIN_OR_3BB,
-                   ActionSpace.RAISE_6_BB,
-                   ActionSpace.RAISE_10_BB,
-                   ActionSpace.RAISE_20_BB,
-                   ActionSpace.RAISE_50_BB,
-                   ActionSpace.RAISE_ALL_IN]
-        output_dim = len(classes)
         self._model = MLP(input_dim,
-                          #output_dim,
-                          6,
+                          3,
                           list(self.hidden_dims),
                           flatten_input=flatten_input).to(self.device)
         ckpt = torch.load(ckpt_path,
@@ -179,6 +170,18 @@ class BaselineAgent(BasePolicy):
             device = "cuda" if torch.cuda.is_available() else "cpu"
         self.device = device
         self.load_model(model_ckpt_path, flatten_input)
+        self._normalization = None
+        self.num_players = num_players
+        self.rule_based: Optional[RuleBasedAgent] = None
+
+    @property
+    def normalization(self):
+        return self._normalization
+
+    @normalization.setter
+    def normalization(self, normalization):
+        self._normalization = normalization
+        self.rule_based = RuleBasedAgent(self.num_players, self._normalization)
 
     def compute_action(self, obs: np.ndarray, legal_moves) -> int:
         self.next_legal_moves = legal_moves
@@ -206,7 +209,6 @@ class BaselineAgent(BasePolicy):
             self._prediction = pred
             return pred
 
-
     def act(self, obs: np.ndarray, legal_moves: list, use_pseudo_harmonic_mapping=False):
         """
         See "Action translation in extensive-form games with large action spaces:
@@ -214,12 +216,16 @@ class BaselineAgent(BasePolicy):
 
         for why pseudo-harmonic-mapping is useful to prevent exploitability of a strategy.
         """
+        if obs[0][cols.Round_preflop] == 1:
+            return self.rule_based.act(obs[0], legal_moves)
+
         self.next_legal_moves = legal_moves
         if not type(obs) == torch.Tensor:
             obs = torch.Tensor(np.array([obs])).to(self.device)
+
         self.logits = self._model(obs)
         self.probas = torch.softmax(self.logits, dim=2)
-        pred = torch.argmax(self.probas,dim=2).item()
+        pred = torch.argmax(self.probas, dim=2).item()
         proba = torch.max(self.probas, dim=2).values.item()
         threshold_all_in = .18
         threshold_50bb = .18
