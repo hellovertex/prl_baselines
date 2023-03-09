@@ -34,6 +34,7 @@ def act(obs, agents, agent_names):
     amt = -1
     if isinstance(action, tuple):
         action, amt = action[0], action[1]
+    action = min(action, 2)
     return action, amt
 
 
@@ -130,9 +131,7 @@ def test_rule_based_six(env_six_players):
 
     # run
     obs_dict = env_six_players.reset(options=options)
-    action, amt = act_current(obs_dict)
-    assert action == expected_preflop_actions[0]
-    env.step(action)
-    obs_dict, cum_reward, terminated, truncated, info = env.step(action)
-    action, amt = act_current(obs_dict)
-    assert action == expected_preflop_actions[1]
+    for a in expected_preflop_actions:
+        action, amt = act_current(obs_dict)
+        assert action == a
+        obs_dict, cum_reward, terminated, truncated, info = env.step(action)
