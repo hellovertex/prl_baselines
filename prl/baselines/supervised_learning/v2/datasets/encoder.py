@@ -42,9 +42,12 @@ class EncoderV2:
                                        3: (pos.BTN, pos.SB, pos.BB),
                                        4: (pos.CO, pos.BTN, pos.SB, pos.BB),
                                        5: (pos.MP, pos.CO, pos.BTN, pos.SB, pos.BB),
-                                       6: (pos.UTG, pos.MP, pos.CO, pos.BTN, pos.SB, pos.BB)}
+                                       6: (
+                                           pos.UTG, pos.MP, pos.CO, pos.BTN, pos.SB,
+                                           pos.BB)}
         self.positions = None
         self.mc_simulator = HandEvaluator_MonteCarlo()
+        self._lut = None
         # self._feature_names = None
         # positions_from_btn = {2: (pos.BTN, pos.BB),
         #                       3: (pos.BTN, pos.SB, pos.BB),
@@ -58,6 +61,14 @@ class EncoderV2:
         #                           6: (pos.UTG, pos.MP, pos.CO, pos.BTN, pos.SB, pos.BB)}
         # self.positions_from_btn = positions_from_btn[num_players]
         # self.turn_ordered_positions = turn_ordered_positions[num_players]
+
+    @property
+    def lut(self):
+        return self._lut
+
+    @lut.setter
+    def lut(self, value):
+        self._lut = value
 
     class _EnvironmentEdgeCaseEncounteredError(ValueError):
         """This error is thrown in rare cases where the PokerEnv written by Erich Steinberger,
@@ -162,17 +173,26 @@ class EncoderV2:
         """
         # get hand_ids for each player
         # then when computing vpip af pfr, use only hand_ids['player_name']
-        augmentation = []
-        winprob = self.mc_simulator.run_mc(hero_cards_1d=None,
-                                           board_cards_1d=None,
-                                           n_opponents=None,
-                                           n_iter=5000)
-        augmentation += winprob
+        hud = np.zeros(12)
+        win_prob = 1
+        # winprob = self.mc_simulator.run_mc(hero_cards_1d=None,
+        #                                    board_cards_1d=None,
+        #                                    n_opponents=None,
+        #                                    n_iter=5000)
+        # augmentation += winprob
         players = np.roll(players, -players.index(hero))
-        for opponent in players[1:]:
-            pass
-            # lookup table
-        return obs
+        for offset, opponent in enumerate(players[1:]):
+            # perform lookup
+            d = self.lut[opponent]
+            if d['total_number_of_samples'] > 20:
+                # maybe set is_tight
+                is_tight = 1 if d['vpip'] < .28 else 0
+                is_aggressive = 1 if d['af'] > 1 else 0
+                # maybe set is_aggressive
+                hud[(offset*2)] += is_tight
+                hud[(offset*2) + 1] += is_aggressive
+
+        return obs + [win_prob] + hud
 
     def _simulate_environment(self,
                               episode,
@@ -191,7 +211,7 @@ class EncoderV2:
         actions = []
         it = 0
         debug_action_list = []
-
+        player_names = [p.name for p in players]
         fold_players = []
         target_players = []
         # in case we stop early because all relevant players have folded
@@ -241,7 +261,7 @@ class EncoderV2:
                     #  player stats
                     if player.name in remaining_selected_players:
                         if self.use_hudstats:
-                            obs = self.append_hud_stats(obs, player.name, players)
+                            obs = self.append_hud_stats(obs, player.name, player_names)
                         observations.append(obs)
                         actions.append(action_label)
                         if action_label == ActionSpace.FOLD:
@@ -250,7 +270,7 @@ class EncoderV2:
                             remaining_selected_players.remove(player.name)
                     if player.name in target_players:
                         if self.use_hudstats:
-                            obs = self.append_hud_stats(obs, player.name, players)
+                            obs = self.append_hud_stats(obs, player.name, player_names)
                         observations.append(obs)
                         actions.append(action_label)
 
@@ -299,7 +319,8 @@ class EncoderV2:
                 bit_arr.append(self.cards2dtolist(card))
         return bit_arr
 
-    def get_players_starting_with_first_mover(self, episode: PokerEpisodeV2) -> List[Player]:
+    def get_players_starting_with_first_mover(self, episode: PokerEpisodeV2) -> List[
+        Player]:
         has_moved = {}
         num_players = len(episode.players)
         for pname, _ in episode.players.items():
@@ -401,7 +422,9 @@ class EncoderV2:
                 Returns observations and corresponding actions of players that made it to showdown."""
         try:
             self.use_hudstats = use_hudstats
-
+            if self.use_hudstats:
+                assert self.lut is not None
+                assert len(selected_players) == 1
             only_winners, drop_folds, fold_random_cards = self.parse_action_gen_option(
                 a_opt)
             self.verbose = verbose

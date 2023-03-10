@@ -1,5 +1,6 @@
 import copy
 import glob
+import json
 import logging
 import multiprocessing
 import os
@@ -125,6 +126,15 @@ def generate_vectorized_hand_histories(files,
     for filename in files[:-1]:
         selected_players = alias_player_rank_to_ingame_name(selected_player_names,
                                                             filename)
+        if dataset_config.hudstats_enabled:
+            lut_file = os.path.join(*[
+                dataset_config.dir_player_summaries,
+                Path(filename).stem,
+                'hud_lookup_table.json'
+            ])
+            with open(lut_file, 'r') as file:
+                dict_obj = json.load(file)
+            encoder.lut = dict_obj
         episodesV2 = parser.parse_file(filename)
         encode_episodes(dataset_config,
                         episodesV2,
@@ -170,20 +180,25 @@ class VectorizedData:
                                      blinds=(25, 50),
                                      multiply_by=1)
         encoder = encoder_cls(dummy_env)
+        if self.opt.hudstats_enabled:
+            lut_file = os.path.join(*[
+                self.opt.dir_player_summaries,
+                Path(filename).stem,
+                'hud_lookup_table.json'
+            ])
+            with open(lut_file, 'r') as file:
+                dict_obj = json.load(file)
+            encoder.lut = dict_obj
         # few files, pretty large, one per top player
         selected_players = alias_player_rank_to_ingame_name(
             selected_player_names, filename)
         episodesV2 = self.parser.parse_file(filename)
-        training_data, labels = encode_episodes(self.opt,
-                                                episodesV2,
-                                                encoder,
-                                                selected_players,
-                                                storage=self.storage,
-                                                file_suffix=suffix)
-        self.storage.vectorized_player_pool_data_to_disk(training_data,
-                                                         labels,
-                                                         encoder.feature_names,
-                                                         file_suffix=Path(filename).stem)
+        encode_episodes(self.opt,
+                        episodesV2,
+                        encoder,
+                        selected_players,
+                        storage=self.storage,
+                        file_suffix=suffix)
         return f"Success: encoded {filename}..."
 
     def _generate_player_pool_data(self,
