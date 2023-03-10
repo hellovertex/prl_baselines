@@ -1,3 +1,4 @@
+from prl.environment.Wrappers.aoh import Positions6Max as pos
 import random
 import time
 from typing import List, Tuple, Optional
@@ -10,6 +11,7 @@ from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.steinberger.PokerRL import NoLimitHoldem
 from prl.environment.steinberger.PokerRL.game.Poker import Poker
 
+from prl.baselines.cpp_hand_evaluator.monte_carlo import HandEvaluator_MonteCarlo
 from prl.baselines.evaluation.utils import get_player_cards, get_board_cards, get_round
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind
@@ -36,6 +38,13 @@ class EncoderV2:
         self.env_wrapper_cls = AugmentObservationWrapper
         self._wrapped_env = None
         self._currency_symbol = None
+        self.turn_ordered_positions = {2: (pos.BTN, pos.BB),
+                                       3: (pos.BTN, pos.SB, pos.BB),
+                                       4: (pos.CO, pos.BTN, pos.SB, pos.BB),
+                                       5: (pos.MP, pos.CO, pos.BTN, pos.SB, pos.BB),
+                                       6: (pos.UTG, pos.MP, pos.CO, pos.BTN, pos.SB, pos.BB)}
+        self.positions = None
+        self.mc_simulator = HandEvaluator_MonteCarlo()
         # self._feature_names = None
         # positions_from_btn = {2: (pos.BTN, pos.BB),
         #                       3: (pos.BTN, pos.SB, pos.BB),
@@ -50,19 +59,18 @@ class EncoderV2:
         # self.positions_from_btn = positions_from_btn[num_players]
         # self.turn_ordered_positions = turn_ordered_positions[num_players]
 
-
-class _EnvironmentEdgeCaseEncounteredError(ValueError):
+    class _EnvironmentEdgeCaseEncounteredError(ValueError):
         """This error is thrown in rare cases where the PokerEnv written by Erich Steinberger,
         fails due to edge cases. I filtered these edge cases by hand, and labelled them with the hand id.
         """
         edge_case_one = {216163387520: """Player 3 (UTG) folds
-                                Player 4 (MP) calls BB and is all-in
-                                Player 5 (CU) folds
-                                Player 0 (Button) folds
-                                Player 1 (SB) folds
-                                Player 2 (BB) - ENV is waiting for Player 2s action but the text file does not contain that action,
-                                because it is implictly given:
-                                BB can only check because the other player called the big blind and is all in anyway."""
+                                    Player 4 (MP) calls BB and is all-in
+                                    Player 5 (CU) folds
+                                    Player 0 (Button) folds
+                                    Player 1 (SB) folds
+                                    Player 2 (BB) - ENV is waiting for Player 2s action but the text file does not contain that action,
+                                    because it is implictly given:
+                                    BB can only check because the other player called the big blind and is all in anyway."""
                          }
         # fixed: edge_case_two = {213304492236: """Side Pots not split properly..."""}
 
@@ -144,7 +152,7 @@ class _EnvironmentEdgeCaseEncounteredError(ValueError):
 
         return obs
 
-    def append_hud_stats(self, obs):
+    def append_hud_stats(self, obs, hero, players):
         # todo: implement, such that obs matches FeaturesWithHudStats
         #  i.e. compute win_prob using MC simulator
         #  and extend VPIP stats from database summary
@@ -154,7 +162,16 @@ class _EnvironmentEdgeCaseEncounteredError(ValueError):
         """
         # get hand_ids for each player
         # then when computing vpip af pfr, use only hand_ids['player_name']
-
+        augmentation = []
+        winprob = self.mc_simulator.run_mc(hero_cards_1d=None,
+                                           board_cards_1d=None,
+                                           n_opponents=None,
+                                           n_iter=5000)
+        augmentation += winprob
+        players = np.roll(players, -players.index(hero))
+        for opponent in players[1:]:
+            pass
+            # lookup table
         return obs
 
     def _simulate_environment(self,
@@ -224,7 +241,7 @@ class _EnvironmentEdgeCaseEncounteredError(ValueError):
                     #  player stats
                     if player.name in remaining_selected_players:
                         if self.use_hudstats:
-                            obs = self.append_hud_stats(obs)
+                            obs = self.append_hud_stats(obs, player.name, players)
                         observations.append(obs)
                         actions.append(action_label)
                         if action_label == ActionSpace.FOLD:
@@ -233,13 +250,13 @@ class _EnvironmentEdgeCaseEncounteredError(ValueError):
                             remaining_selected_players.remove(player.name)
                     if player.name in target_players:
                         if self.use_hudstats:
-                            obs = self.append_hud_stats(obs)
+                            obs = self.append_hud_stats(obs, player.name, players)
                         observations.append(obs)
                         actions.append(action_label)
 
                     elif player.name in fold_players:
                         if self.use_hudstats:
-                            obs = self.append_hud_stats(obs)
+                            obs = self.append_hud_stats(obs, player.name, players)
                         observations.append(obs)
                         actions.append(ActionSpace.FOLD.value)
 
@@ -384,6 +401,7 @@ class _EnvironmentEdgeCaseEncounteredError(ValueError):
                 Returns observations and corresponding actions of players that made it to showdown."""
         try:
             self.use_hudstats = use_hudstats
+
             only_winners, drop_folds, fold_random_cards = self.parse_action_gen_option(
                 a_opt)
             self.verbose = verbose
