@@ -267,15 +267,21 @@ class EncoderV2:
                 player_names_not_folded.remove(player_who_acted)
             for player in players:
                 if player.name == player_who_acted:
-                    # todo update obs here with win_prob and
-                    #  player stats
                     if player.name in remaining_selected_players:
+                        # todo: recompute random cards postflop to bet good cards
+                        #  preflop random cards are bad cards
+                        if action_label == ActionSpace.FOLD:
+                            # if obs[AugmentObservationFeatureColomns.Round_preflop]:
+                            # resample player hole cards starting with buton range
+                            # 40 % and co 35 mp and utg 25
+                            # maybe? no! dont have time if win_prob > .5 resample again
+                            pass
                         if self.use_hudstats:
                             obs = self.append_hud_stats(
                                 obs,
                                 player,
                                 player_names,
-                                n_opponents=len(player_names_not_folded)-1)
+                                n_opponents=len(player_names_not_folded) - 1)
                         observations.append(obs)
                         actions.append(action_label)
                         if action_label == ActionSpace.FOLD:
@@ -288,13 +294,17 @@ class EncoderV2:
                                 obs,
                                 player,
                                 player_names,
-                                n_opponents=len(player_names_not_folded)-1)
+                                n_opponents=len(player_names_not_folded) - 1)
                         observations.append(obs)
                         actions.append(action_label)
 
                     elif player.name in fold_players:
                         if self.use_hudstats:
-                            obs = self.append_hud_stats(obs, player.name, players)
+                            obs = self.append_hud_stats(
+                                obs,
+                                player,
+                                player_names,
+                                n_opponents=len(player_names_not_folded) - 1)
                         observations.append(obs)
                         actions.append(ActionSpace.FOLD.value)
 

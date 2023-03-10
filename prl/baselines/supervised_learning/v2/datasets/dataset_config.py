@@ -349,12 +349,12 @@ arg_action_generation_option = click.option("--action_generation_option",
                                                  "4: make_folds_from_fish\n"
                                                  "See `ActionGenOption`. ")
 arg_use_multiprocessing = click.option("--use_multiprocessing",
-                                       default=True,
+                                       default=False,
                                        type=bool,
                                        help="Whether to parallelize encoding of files per TopRanked Player. "
                                             "Defaults to True. If turned off, data generation can be VERY slow (days).")
 arg_min_showdowns = click.option("--min_showdowns",
-                                 default=5000,
+                                 default=10,
                                  type=int,
                                  help="Minimum number of showdowns required to be eligible for top player "
                                       "ranking. Default is 5 for debugging. 5000 is recommended for real "
@@ -398,7 +398,7 @@ arg_seed_dataset = click.option("--seed",
                                 help="Seed used to generate dataset and datasplit using"
                                      "torch.Generator().manual_seed(seed)")
 arg_hudstats = click.option("--hudstats",
-                            default=False,
+                            default=True,
                             type=bool,
                             help="Extends observations by player statistics and hand "
                                  "strength")
