@@ -6,10 +6,13 @@ from prl.environment.steinberger.PokerRL.game.Poker import Poker
 from prl.environment.steinberger.PokerRL.game.games import NoLimitHoldem
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as fts
 from prl.baselines.evaluation.utils import pretty_print
-from prl.baselines.supervised_learning.data_acquisition.core.encoder import Encoder, PlayerInfo, Positions6Max
-from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, Action, ActionType, Blind, \
+from prl.baselines.supervised_learning.data_acquisition.core.encoder import Encoder, \
+    PlayerInfo, Positions6Max
+from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode, \
+    Action, ActionType, Blind, \
     PlayerWithCards
-from prl.baselines.supervised_learning.data_acquisition.environment_utils import DICT_RANK, DICT_SUITE, \
+from prl.baselines.supervised_learning.data_acquisition.environment_utils import \
+    DICT_RANK, DICT_SUITE, \
     make_board_cards, card_tokens, card
 
 MULTIPLY_BY = 100  # because env expects Integers, we convert $2,58 to $258
@@ -19,7 +22,7 @@ class RLStateEncoder(Encoder):
     Observations = Optional[List[List]]
     Actions_Taken = Optional[List[Tuple[int, int]]]
 
-    def __init__(self, # no_folds,
+    def __init__(self,  # no_folds,
                  env_wrapper_cls=None,
                  verbose=False):
         # self.no_folds = no_folds
@@ -83,10 +86,12 @@ class RLStateEncoder(Encoder):
         return round(float(sb.amount.split(self._currency_symbol)[1]) * MULTIPLY_BY), \
             round(float(bb.amount.split(self._currency_symbol)[1]) * MULTIPLY_BY)
 
-    def make_showdown_hands(self, table: Tuple[PlayerInfo], showdown: List[PlayerWithCards]):
+    def make_showdown_hands(self, table: Tuple[PlayerInfo],
+                            showdown: List[PlayerWithCards]):
         """Under Construction. """
         # initialize default hands
-        default_card = [Poker.CARD_NOT_DEALT_TOKEN_1D, Poker.CARD_NOT_DEALT_TOKEN_1D]  # rank, suit
+        default_card = [Poker.CARD_NOT_DEALT_TOKEN_1D,
+                        Poker.CARD_NOT_DEALT_TOKEN_1D]  # rank, suit
         player_hands = [[default_card, default_card] for _ in range(len(table))]
 
         # overwrite known hands
@@ -123,7 +128,8 @@ class RLStateEncoder(Encoder):
     def make_table(self, episode: PokerEpisode) -> Tuple[PlayerInfo]:
         """Under Construction."""
         # Roll position indices, such that each seat is assigned correct position
-        rolled_position_indices = self._roll_position_indices(episode.num_players, episode.btn_idx)
+        rolled_position_indices = self._roll_position_indices(episode.num_players,
+                                                              episode.btn_idx)
 
         # init {'BTN': None, 'SB': None,..., 'CO': None}
         player_info: Dict[str, PlayerInfo] = dict.fromkeys(
@@ -157,7 +163,8 @@ class RLStateEncoder(Encoder):
         # make hands: np.ndarray(shape=(n_players, 2, 2))
         player_hands = self.make_showdown_hands(table, episode.showdown_hands)
         initial_board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
-        return {'deck': {'deck_remaining': deck},  # np.ndarray(shape=(52-n_cards*num_players, 2))
+        return {'deck': {'deck_remaining': deck},
+                # np.ndarray(shape=(52-n_cards*num_players, 2))
                 'board': initial_board,  # np.ndarray(shape=(n_cards, 2))
                 'hand': player_hands}
 
@@ -190,19 +197,22 @@ class RLStateEncoder(Encoder):
         # obs[fts.First_player_card_1_rank_0:fts.First_player_card_1_suit_3+1]
         # remove old cards from observing player
         obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_rank_0] = 0
-        obs[fts.First_player_card_1_rank_0:fts.First_player_card_1_suit_3+1] = 0
+        obs[fts.First_player_card_1_rank_0:fts.First_player_card_1_suit_3 + 1] = 0
         # todo sample new hand from remaining cards and overwrite observation
         # update c0
         obs_bits_c0 = self.update_card()
         obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_rank_0] = obs_bits_c0
         # update c1
         obs_bits_c1 = self.update_card()
-        obs[fts.First_player_card_1_rank_0:fts.First_player_card_1_suit_3+1] = obs_bits_c1
-        assert sum(obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_suit_3+1]) == 4
+        obs[
+        fts.First_player_card_1_rank_0:fts.First_player_card_1_suit_3 + 1] = obs_bits_c1
+        assert sum(
+            obs[fts.First_player_card_0_rank_0:fts.First_player_card_1_suit_3 + 1]) == 4
 
         return obs
 
-    def _simulate_environment(self, env, episode, cards_state_dict, table, starting_stack_sizes_list,
+    def _simulate_environment(self, env, episode, cards_state_dict, table,
+                              starting_stack_sizes_list,
                               selected_players=None):
         """Runs poker environment from episode and returns observations and actions emitted for selected players.
         If no players selectd, then all showdown players actions and observations will be returned."""
@@ -210,7 +220,8 @@ class RLStateEncoder(Encoder):
         for s in starting_stack_sizes_list:
             if s == env.env.SMALL_BLIND or s == env.env.BIG_BLIND:
                 # skip edge case of player all in by calling big blind
-                raise self._EnvironmentEdgeCaseEncounteredError("Edge case 1 encountered. See docstring for details.")
+                raise self._EnvironmentEdgeCaseEncounteredError(
+                    "Edge case 1 encountered. See docstring for details.")
         state_dict = {'deck_state_dict': cards_state_dict}
         if episode.hand_id == 220485600493:
             print('break at this line for debug')
@@ -250,7 +261,8 @@ class RLStateEncoder(Encoder):
                 # If player is showdown player
                 if player.position_index == next_to_act and player.player_name in filtered_players:
                     # take (obs, action) from selected player or winner if selected players is None
-                    target_players = selected_players if selected_players else [winner.name for winner in episode.winners]
+                    target_players = selected_players if selected_players else [
+                        winner.name for winner in episode.winners]
                     if player.name in target_players:
                         actions.append(action_label)
                         observations.append(obs)
@@ -260,7 +272,8 @@ class RLStateEncoder(Encoder):
                     # if they lose to variance here, so we drop the winners action in this case
                     else:
                         if not self.drop_folds:
-                            action_label = self._wrapped_env.discretize((ActionType.FOLD.value, -1))
+                            action_label = self._wrapped_env.discretize(
+                                (ActionType.FOLD.value, -1))
                             if self.randomize_fold_cards:
                                 obs = self.overwrite_hand_cards_with_random_cards(obs)
                             actions.append(action_label)
@@ -278,12 +291,14 @@ class RLStateEncoder(Encoder):
     def cards2dtolist(self, cards2d):
         bits = np.zeros(17)
         bits[cards2d[0]] += 1
-        bits[13+cards2d[1]] += 1
+        bits[13 + cards2d[1]] += 1
         return bits
+
     def get_occupied_cards(self) -> List[np.ndarray]:
         bit_arr = []
         hands = self.state_dict['hand']
-        board = self.state_dict['deck']['deck_remaining'][:5]  # before reset so all cards are in the deck in the order theyre drawn
+        board = self.state_dict['deck']['deck_remaining'][
+                :5]  # before reset so all cards are in the deck in the order theyre drawn
         for hand in hands:
             if hand[0] != [-127, -127]:
                 bit_arr.append(self.cards2dtolist(hand[0]))
@@ -307,7 +322,8 @@ class RLStateEncoder(Encoder):
         # Maybe skip game, if selected_players is set and no selected player was in showdown
         if selected_players:
             # skip episode if no selected_players has played in it
-            showdown_players: List[str] = [player.name for player in episode.showdown_hands]
+            showdown_players: List[str] = [player.name for player in
+                                           episode.showdown_hands]
             skip = True
             for s in selected_players:
                 if s in showdown_players:
@@ -326,12 +342,14 @@ class RLStateEncoder(Encoder):
 
         self._wrapped_env = init_wrapped_env(self.env_wrapper_cls,
                                              stacks,
-                                             multiply_by=1,   # already multiplied in self.make_table()
+                                             multiply_by=1,
+                                             # already multiplied in self.make_table()
                                              )
         # will be used for naming feature index in training data vector
         self._feature_names = list(self._wrapped_env.obs_idx_dict.keys())
 
-        self._wrapped_env.env.SMALL_BLIND, self._wrapped_env.env.BIG_BLIND = self.make_blinds(episode.blinds)
+        self._wrapped_env.env.SMALL_BLIND, self._wrapped_env.env.BIG_BLIND = self.make_blinds(
+            episode.blinds)
         self._wrapped_env.env.ANTE = self._make_ante(episode.ante)
         cards_state_dict = self._build_cards_state_dict(table, episode)
         self.state_dict = cards_state_dict

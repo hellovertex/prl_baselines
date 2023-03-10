@@ -73,6 +73,7 @@ def test_vectorized_episode_board_cards(dataset_config: DatasetConfig,
         if ep.hand_id == 208959234900:
             obs, act = encoder.encode_episode(ep,
                                               a_opt=opt.action_generation_option,
+                                              use_hudstats=False,
                                               selected_players=selected_players,
                                               limit_num_players=5,
                                               verbose=True)
@@ -89,8 +90,10 @@ def test_vectorized_episode_player_cards(dataset_config: DatasetConfig,
     selected_players = ['JuanAlmighty']
     for ep in episodes:
         if ep.hand_id == 208958141851:
+            # test some episodes board encoding
             obs, act = encoder.encode_episode(ep,
                                               a_opt=opt.action_generation_option,
+                                              use_hudstats=False,
                                               selected_players=selected_players,
                                               limit_num_players=5,
                                               verbose=True)
@@ -103,6 +106,3 @@ def test_vectorized_episode_player_cards(dataset_config: DatasetConfig,
             assert np.array_equal(act, [6, 5, 1])
             a = 1
             print(obs)
-        elif ep.hand_id == 208958099944:
-            # todo: make sure vectorized form is ok
-            pass

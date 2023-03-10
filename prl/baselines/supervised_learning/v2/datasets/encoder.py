@@ -36,9 +36,22 @@ class EncoderV2:
         self.env_wrapper_cls = AugmentObservationWrapper
         self._wrapped_env = None
         self._currency_symbol = None
-        self._feature_names = None
+        # self._feature_names = None
+        # positions_from_btn = {2: (pos.BTN, pos.BB),
+        #                       3: (pos.BTN, pos.SB, pos.BB),
+        #                       4: (pos.BTN, pos.SB, pos.BB, pos.CO),
+        #                       5: (pos.BTN, pos.SB, pos.BB, pos.MP, pos.CO),
+        #                       6: (pos.BTN, pos.SB, pos.BB, pos.UTG, pos.MP, pos.CO)}
+        # turn_ordered_positions = {2: (pos.BTN, pos.BB),
+        #                           3: (pos.BTN, pos.SB, pos.BB),
+        #                           4: (pos.CO, pos.BTN, pos.SB, pos.BB),
+        #                           5: (pos.MP, pos.CO, pos.BTN, pos.SB, pos.BB),
+        #                           6: (pos.UTG, pos.MP, pos.CO, pos.BTN, pos.SB, pos.BB)}
+        # self.positions_from_btn = positions_from_btn[num_players]
+        # self.turn_ordered_positions = turn_ordered_positions[num_players]
 
-    class _EnvironmentEdgeCaseEncounteredError(ValueError):
+
+class _EnvironmentEdgeCaseEncounteredError(ValueError):
         """This error is thrown in rare cases where the PokerEnv written by Erich Steinberger,
         fails due to edge cases. I filtered these edge cases by hand, and labelled them with the hand id.
         """
@@ -141,6 +154,7 @@ class EncoderV2:
         """
         # get hand_ids for each player
         # then when computing vpip af pfr, use only hand_ids['player_name']
+
         return obs
 
     def _simulate_environment(self,
@@ -209,7 +223,7 @@ class EncoderV2:
                     # todo update obs here with win_prob and
                     #  player stats
                     if player.name in remaining_selected_players:
-                        if self.hudstats:
+                        if self.use_hudstats:
                             obs = self.append_hud_stats(obs)
                         observations.append(obs)
                         actions.append(action_label)
@@ -218,13 +232,13 @@ class EncoderV2:
                                 "Player must not be in target_players")
                             remaining_selected_players.remove(player.name)
                     if player.name in target_players:
-                        if self.hudstats:
+                        if self.use_hudstats:
                             obs = self.append_hud_stats(obs)
                         observations.append(obs)
                         actions.append(action_label)
 
                     elif player.name in fold_players:
-                        if self.hudstats:
+                        if self.use_hudstats:
                             obs = self.append_hud_stats(obs)
                         observations.append(obs)
                         actions.append(ActionSpace.FOLD.value)
@@ -268,7 +282,7 @@ class EncoderV2:
                 bit_arr.append(self.cards2dtolist(card))
         return bit_arr
 
-    def get_players_starting_with_button(self, episode: PokerEpisodeV2) -> List[Player]:
+    def get_players_starting_with_first_mover(self, episode: PokerEpisodeV2) -> List[Player]:
         has_moved = {}
         num_players = len(episode.players)
         for pname, _ in episode.players.items():
@@ -372,10 +386,6 @@ class EncoderV2:
             self.use_hudstats = use_hudstats
             only_winners, drop_folds, fold_random_cards = self.parse_action_gen_option(
                 a_opt)
-            # todo: for each selected player
-            #  pick (obs, action)
-            #  if players cards are unknown (no showdown) randomize them
-            #  if action is fold -- terminate and return all observations
             self.verbose = verbose
             self.drop_folds = drop_folds
             self.fold_random_cards = fold_random_cards
@@ -388,7 +398,7 @@ class EncoderV2:
             if skip_hand:
                 return None, None
             try:
-                players = self.get_players_starting_with_button(episode)
+                players = self.get_players_starting_with_first_mover(episode)
             except AssertionError as e:
                 logging.debug(e)
                 return None, None
