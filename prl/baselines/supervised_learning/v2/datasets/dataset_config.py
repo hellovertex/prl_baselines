@@ -218,6 +218,7 @@ class DatasetConfig:
             subdir_05_rounds,
             subdir_06_actions
         ])
+
     @property
     def dir_eval_data(self):
         DATA_DIR = DEFAULT_DATA_DIR if not self.DATA_DIR else self.DATA_DIR
@@ -227,6 +228,7 @@ class DatasetConfig:
             eval_dir,
             self.nl
         ])
+
     @property
     def dir_player_summaries(self):
         DATA_DIR = DEFAULT_DATA_DIR if not self.DATA_DIR else self.DATA_DIR
@@ -298,6 +300,17 @@ class DatasetConfig:
         # Otherwise simply return whether player pool vectorized data exists
         return os.path.exists(self.dir_vectorized_data)
 
+    def exists_player_summary_data_for_all_selected_players(self):
+        # Traverse for n selected players, if each has their own directory
+        if os.path.exists(self.dir_player_summaries):
+            dirs_top_players = [x[0] for x in os.walk(self.dir_player_summaries)]
+            for i in range(self.num_top_players):
+                # if no folder with name PlayerRank00i/ exists, return False
+                if not f'PlayerRank{str(i).zfill(3)}' in dirs_top_players:
+                    return False
+        # Otherwise simply return whether player pool vectorized data exists
+        return os.path.exists(self.dir_player_summaries)
+
 
 arg_num_top_players = click.option("--num_top_players", default=20,
                                    type=int,
@@ -341,17 +354,17 @@ arg_use_multiprocessing = click.option("--use_multiprocessing",
                                        help="Whether to parallelize encoding of files per TopRanked Player. "
                                             "Defaults to True. If turned off, data generation can be VERY slow (days).")
 arg_min_showdowns = click.option("--min_showdowns",
-                                 default=10,
+                                 default=5000,
                                  type=int,
                                  help="Minimum number of showdowns required to be eligible for top player "
                                       "ranking. Default is 5 for debugging. 5000 is recommended for real "
                                       "data.")
 arg_target_rounds = click.option("--target_rounds",
                                  multiple=True,
-                                 default=[  # Stage.PREFLOP.value,
-                                     Stage.FLOP.value,
-                                     Stage.TURN.value,
-                                     Stage.RIVER.value],
+                                 default=[Stage.PREFLOP.value],
+                                 # Stage.FLOP.value,
+                                 # Stage.TURN.value,
+                                 # Stage.RIVER.value],
                                  type=int,
                                  help="Preprocessing will reduce data to the rounds specified. Possible values: "
                                       "Stage.PREFLOP.value: 0\nStage.FLOP.value: 1"

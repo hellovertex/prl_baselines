@@ -1,9 +1,11 @@
 import json
+import logging
 import os
 import re
 from pathlib import Path
 
 import click
+from tqdm import tqdm
 
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
     arg_nl,
@@ -401,28 +403,31 @@ class DatasetStats:
         self.heroes_hud_stats_lookup_table[hero] = {}
 
     def _make_top_player_hud_stat_lookup_tables_if_missing(self):
-        # todo: check if they exist already
-        for hero in self.selected_player_names:
-            filepath = player_name_to_alias_directory(self.selected_player_names,
-                                                      hero,
-                                                      self.dataset_config)
-            filename = os.path.join(filepath, f'{Path(filepath).stem}.txt')
-            for episode in self.hands_histories(filename):
-                try:
-                    player_names = self.get_player_names_from_episode(episode)
-                except self._InvalidPlayerNameError:
-                    continue
-                for player in player_names:
-                    if player != hero:
-                        if player in self.heroes_hud_stats_lookup_table[hero]:
-                            self.heroes_hud_stats_lookup_table[hero][
-                                player].update_from_episode(episode)
-                        else:
-                            self.heroes_hud_stats_lookup_table[hero][player] = \
-                                PlayerStats(player)
-                            self.heroes_hud_stats_lookup_table[hero][
-                                player].update_from_episode(episode)
-            self.flush_to_disk(hero, Path(filepath).stem)
+        if not self.dataset_config.exists_player_summary_data_for_all_selected_players():
+            logging.info("Computing HUD-Stats lookup tables for top players")
+            for hero in tqdm(self.selected_player_names):
+                filepath = player_name_to_alias_directory(self.selected_player_names,
+                                                          hero,
+                                                          self.dataset_config)
+                filename = os.path.join(filepath, f'{Path(filepath).stem}.txt')
+                for episode in self.hands_histories(filename):
+                    try:
+                        player_names = self.get_player_names_from_episode(episode)
+                    except self._InvalidPlayerNameError:
+                        continue
+                    for player in player_names:
+                        if player != hero:
+                            if player in self.heroes_hud_stats_lookup_table[hero]:
+                                self.heroes_hud_stats_lookup_table[hero][
+                                    player].update_from_episode(episode)
+                            else:
+                                self.heroes_hud_stats_lookup_table[hero][player] = \
+                                    PlayerStats(player)
+                                self.heroes_hud_stats_lookup_table[hero][
+                                    player].update_from_episode(episode)
+                self.flush_to_disk(hero, Path(filepath).stem)
+        else:
+            logging.info(f'Player summary data exists already at {self.dataset_config.dir_player_summaries}')
 
     def _make_dataset_summary_if_missing(self):
         # todo make stats and check if missing
@@ -448,7 +453,7 @@ class DatasetStats:
 def main(num_top_players, nl, from_gdrive_id, min_showdowns):
     dataset_config = DatasetConfig(num_top_players=num_top_players,
                                    nl=nl,
-                                   min_showdowns=10,
+                                   min_showdowns=min_showdowns,
                                    from_gdrive_id=from_gdrive_id)
     make_raw_data_if_not_exists_already(dataset_config)
     parser_cls = ParseHsmithyTextToPokerEpisode
