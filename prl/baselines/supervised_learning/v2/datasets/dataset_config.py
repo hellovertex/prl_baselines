@@ -218,15 +218,24 @@ class DatasetConfig:
             subdir_05_rounds,
             subdir_06_actions
         ])
-
     @property
-    def dir_data_summary(self):
+    def dir_eval_data(self):
+        DATA_DIR = DEFAULT_DATA_DIR if not self.DATA_DIR else self.DATA_DIR
+        eval_dir = '04_eval'
+        return os.path.join(*[
+            DATA_DIR,
+            eval_dir,
+            self.nl
+        ])
+    @property
+    def dir_player_summaries(self):
         DATA_DIR = DEFAULT_DATA_DIR if not self.DATA_DIR else self.DATA_DIR
         summary_dir = '99_summary'
         return os.path.join(*[
             DATA_DIR,
             summary_dir,
-            self.nl
+            self.nl,
+            'player_summaries'
         ])
 
     @property

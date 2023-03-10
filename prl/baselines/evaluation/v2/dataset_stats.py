@@ -1,5 +1,7 @@
+import json
 import os
 import re
+from pathlib import Path
 
 import click
 
@@ -7,7 +9,7 @@ from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
     arg_nl,
     arg_from_gdrive_id,
     arg_num_top_players,
-    DatasetConfig
+    DatasetConfig, arg_min_showdowns
 )
 from typing import Dict, List
 
@@ -17,6 +19,13 @@ from prl.baselines.supervised_learning.v2.datasets.top_player_selector import \
     TopPlayerSelector
 from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import \
     ParseHsmithyTextToPokerEpisode
+
+PLAYER_NAME_TEMPLATE = r'([\w_.@#!-]+\s?[-@#!_.\w]*\s?[-@#!_.\w]*)'
+STARTING_STACK_TEMPLATE = r'\(([$€￡Â£]+\d+.?\d*)\sin chips\)'
+MATCH_ANY = r'.*?'  # not the most efficient way, but we prefer readabiliy (parsing is one time job)
+POKER_CARD_TEMPLATE = r'[23456789TJQKAjqka][SCDHscdh]'
+CURRENCY_SYMBOLS = ['$', '€', '￡',
+                    'Â£']  # only these are currently supported, â‚¬ is € encoded
 
 
 def player_name_to_alias_directory(selected_player_names: List[str],
@@ -259,6 +268,7 @@ class PlayerStats:
      This is done to speed up parsing of datasets."""
 
     def __init__(self, pname, hudstats=None):
+        self.pname = pname
         self.stats = _HudStats(pname=pname) if hudstats is None else hudstats
         assert hasattr(self.stats, 'update')
 
@@ -277,9 +287,9 @@ class PlayerStats:
             self.stats.update(current)
 
     def update_from_episode(self, episode: str):
-        if not self.target_player in episode:
+        if not self.pname in episode:
             return
-        if f'{self.target_player}: sits out' in episode:
+        if f'{self.pname}: sits out' in episode:
             return
         # accumulate stats
         self.stats.update(episode)
@@ -292,6 +302,9 @@ class PlayerStats:
             hand_database = f.read()
             hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
             self._update_stats(hands_played)
+
+    def to_dict(self):
+        return self.stats.to_dict()
 
 
 class DatasetStats:
@@ -316,6 +329,15 @@ class DatasetStats:
                 self.dataset_config.num_top_players,
                 self.dataset_config.min_showdowns
             ).keys())
+        for hero in self.selected_player_names:
+            self.heroes_hud_stats_lookup_table[hero] = {}
+
+    class _InvalidPlayerNameError(ValueError):
+        """We can encounter some weird player names like <'é=mc².Fin  é=mc³.Start'>
+           We can parse unicode characters and very exotic names including those
+           with multiple whitespaces but this name finally broke our nameparser
+           Hence we skip these _very_ rare cases where the name is unparsable without
+           additional efforts"""
 
     def get_player_names_from_episode(self, episode: str) -> List[str]:
         """
@@ -329,13 +351,19 @@ class DatasetStats:
         Seat 5: Clamfish0 ($51.25 in chips)
         Seat 6: JuanAlmighty ($98 in chips), etc.
         """
+        pattern = re.compile(
+            rf"(Seat \d): {PLAYER_NAME_TEMPLATE}\s{STARTING_STACK_TEMPLATE}", re.UNICODE)
+        amounts = re.compile(rf'{STARTING_STACK_TEMPLATE}')
+        seats = pattern.findall(episode)
+
+        if not len(seats) == len(amounts.findall(episode)):
+            raise self._InvalidPlayerNameError(
+                "This error is raised, when we encountered a very exotic player name "
+                "that cant be parsed by re.Unicode, like 'é=mc².Fin  é=mc³.Start' ")
+
         player_names = []
-        for line in episode.split("\n"):
-            if 'Seat' in line:
-                for token in self.pattern.split(line):
-                    if token:
-                        name = token.split('(')[0].strip()
-                        player_names.append(name)
+        for seat in seats:
+            player_names.append(seat[1])
         return player_names
 
     def update_from_file(self, file_path):
@@ -356,14 +384,35 @@ class DatasetStats:
                 'n_showdowns_no_mucks': self.n_showdowns_no_mucks,
                 'n_showdowns_with_mucks': self.n_showdowns_with_mucks, }
 
+    def flush_to_disk(self, hero, player_rank: str):
+        # write to 04_eval/nl/PlayerRank008/hud_lookup_table.txt
+        file_path = os.path.join(*[
+            self.dataset_config.dir_player_summaries,  # 04_eval/nl/
+            player_rank,  # PlayerRank008
+            'hud_lookup_table.json'
+        ])
+        if not os.path.exists(file_path):
+            os.makedirs(Path(file_path).parent, exist_ok=True)
+        serialized_dict = {}
+        for k, v in self.heroes_hud_stats_lookup_table[hero].items():
+            serialized_dict[k] = v.to_dict()
+        with open(file_path, 'w') as file:
+            json.dump(serialized_dict, file)
+        self.heroes_hud_stats_lookup_table[hero] = {}
+
     def _make_top_player_hud_stat_lookup_tables_if_missing(self):
         # todo: check if they exist already
         for hero in self.selected_player_names:
-            filename = player_name_to_alias_directory(self.selected_player_names,
+            filepath = player_name_to_alias_directory(self.selected_player_names,
                                                       hero,
                                                       self.dataset_config)
+            filename = os.path.join(filepath, f'{Path(filepath).stem}.txt')
             for episode in self.hands_histories(filename):
-                for player in self.get_player_names_from_episode(episode):
+                try:
+                    player_names = self.get_player_names_from_episode(episode)
+                except self._InvalidPlayerNameError:
+                    continue
+                for player in player_names:
                     if player != hero:
                         if player in self.heroes_hud_stats_lookup_table[hero]:
                             self.heroes_hud_stats_lookup_table[hero][
@@ -371,6 +420,9 @@ class DatasetStats:
                         else:
                             self.heroes_hud_stats_lookup_table[hero][player] = \
                                 PlayerStats(player)
+                            self.heroes_hud_stats_lookup_table[hero][
+                                player].update_from_episode(episode)
+            self.flush_to_disk(hero, Path(filepath).stem)
 
     def _make_dataset_summary_if_missing(self):
         # todo make stats and check if missing
@@ -383,7 +435,7 @@ class DatasetStats:
         # twice -- first sweep computes dataset stats
         # for all player_names
         # update player stats
-        output_dir = self.dataset_config.dir_data_summary
+        output_dir = self.dataset_config.dir_player_summaries
         self._make_top_player_hud_stat_lookup_tables_if_missing()
         self._make_dataset_summary_if_missing()
 
@@ -392,9 +444,11 @@ class DatasetStats:
 @arg_num_top_players
 @arg_nl
 @arg_from_gdrive_id
-def main(num_top_players, nl, from_gdrive_id):
+@arg_min_showdowns
+def main(num_top_players, nl, from_gdrive_id, min_showdowns):
     dataset_config = DatasetConfig(num_top_players=num_top_players,
                                    nl=nl,
+                                   min_showdowns=10,
                                    from_gdrive_id=from_gdrive_id)
     make_raw_data_if_not_exists_already(dataset_config)
     parser_cls = ParseHsmithyTextToPokerEpisode
