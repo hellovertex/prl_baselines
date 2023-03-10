@@ -60,7 +60,8 @@ class MCAgent:
         self._model.eval()
 
 
-    def card_bit_mask_to_int(self, c0: np.array, c1: np.array, board_mask: np.array) -> Tuple[List[int], List[int]]:
+    @staticmethod
+    def card_bit_mask_to_int(c0: np.array, c1: np.array, board_mask: np.array) -> Tuple[List[int], List[int]]:
         c0 = c0.cpu()
         c1 = c1.cpu()
         board_mask = board_mask.cpu()

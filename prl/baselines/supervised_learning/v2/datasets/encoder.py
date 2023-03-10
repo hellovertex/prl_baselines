@@ -163,7 +163,7 @@ class EncoderV2:
 
         return obs
 
-    def append_hud_stats(self, obs, hero, players):
+    def append_hud_stats(self, obs, hero, players, n_opponents):
         # todo: implement, such that obs matches FeaturesWithHudStats
         #  i.e. compute win_prob using MC simulator
         #  and extend VPIP stats from database summary
@@ -174,12 +174,9 @@ class EncoderV2:
         # get hand_ids for each player
         # then when computing vpip af pfr, use only hand_ids['player_name']
         hud = np.zeros(12)
-        win_prob = 1
-        # winprob = self.mc_simulator.run_mc(hero_cards_1d=None,
-        #                                    board_cards_1d=None,
-        #                                    n_opponents=None,
-        #                                    n_iter=5000)
-        # augmentation += winprob
+        win_prob = self.mc_simulator.run_mc(obs,
+                                            n_opponents=n_opponents,
+                                            n_iter=5000)
         players = np.roll(players, -players.index(hero))
         for offset, opponent in enumerate(players[1:]):
             # perform lookup
@@ -189,8 +186,8 @@ class EncoderV2:
                 is_tight = 1 if d['vpip'] < .28 else 0
                 is_aggressive = 1 if d['af'] > 1 else 0
                 # maybe set is_aggressive
-                hud[(offset*2)] += is_tight
-                hud[(offset*2) + 1] += is_aggressive
+                hud[(offset * 2)] += is_tight
+                hud[(offset * 2) + 1] += is_aggressive
 
         return obs + [win_prob] + hud
 
@@ -212,6 +209,7 @@ class EncoderV2:
         it = 0
         debug_action_list = []
         player_names = [p.name for p in players]
+        player_names_not_folded = [pname for pname in player_names]
         fold_players = []
         target_players = []
         # in case we stop early because all relevant players have folded
@@ -254,14 +252,20 @@ class EncoderV2:
 
             action_formatted = self.build_action(action)
             action_label = self.env.discretize(action_formatted)
-            next_to_act = action.who
+            player_who_acted = action.who
+            if action_label == ActionSpace.FOLD:
+                player_names_not_folded.remove(player_who_acted)
             for player in players:
-                if player.name == next_to_act:
+                if player.name == player_who_acted:
                     # todo update obs here with win_prob and
                     #  player stats
                     if player.name in remaining_selected_players:
                         if self.use_hudstats:
-                            obs = self.append_hud_stats(obs, player.name, player_names)
+                            obs = self.append_hud_stats(
+                                obs,
+                                player.name,
+                                player_names,
+                                n_opponents=len(player_names_not_folded))
                         observations.append(obs)
                         actions.append(action_label)
                         if action_label == ActionSpace.FOLD:
@@ -270,7 +274,11 @@ class EncoderV2:
                             remaining_selected_players.remove(player.name)
                     if player.name in target_players:
                         if self.use_hudstats:
-                            obs = self.append_hud_stats(obs, player.name, player_names)
+                            obs = self.append_hud_stats(
+                                obs,
+                                player.name,
+                                player_names,
+                                n_opponents=len(player_names_not_folded))
                         observations.append(obs)
                         actions.append(action_label)
 

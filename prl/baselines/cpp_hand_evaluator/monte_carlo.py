@@ -1,7 +1,58 @@
 import random
+
 from prl.baselines.cpp_hand_evaluator.cpp.hand_evaluator import rank
 
 LEN_DECK_WITHOUT_HERO_AND_BOARD_CARDS = 45  # 52 - 2 - 5
+from random import random
+from typing import Tuple, List, Union
+
+import numpy as np
+import torch
+
+from prl.baselines.cpp_hand_evaluator.rank import dict_str_to_sk
+
+IDX_C0_0 = 167  # feature_names.index('0th_player_card_0_rank_0')
+IDX_C0_1 = 184  # feature_names.index('0th_player_card_1_rank_0')
+IDX_C1_0 = 184  # feature_names.index('0th_player_card_1_rank_0')
+IDX_C1_1 = 201  # feature_names.index('1th_player_card_0_rank_0')
+IDX_BOARD_START = 82  #
+IDX_BOARD_END = 167  #
+CARD_BITS_TO_STR = np.array(
+    ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', 'h', 'd', 's', 'c'])
+BOARD_BITS_TO_STR = np.array(
+    ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A',
+     'h', 'd', 's', 'c', '2', '3', '4', '5', '6', '7', '8', '9', 'T',
+     'J', 'Q', 'K', 'A', 'h', 'd', 's', 'c', '2', '3', '4', '5', '6',
+     '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', 'h', 'd', 's', 'c', '2',
+     '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', 'h',
+     'd', 's', 'c', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J',
+     'Q', 'K', 'A', 'h', 'd', 's', 'c'])
+RANK = 0
+SUITE = 1
+
+
+def card_bit_mask_to_int(c0: np.array, c1: np.array, board_mask: np.array) -> Tuple[
+    List[int], List[int]]:
+    c0 = c0.cpu()
+    c1 = c1.cpu()
+    board_mask = board_mask.cpu()
+    c0_1d = dict_str_to_sk[CARD_BITS_TO_STR[c0][RANK] + CARD_BITS_TO_STR[c0][SUITE]]
+    c1_1d = dict_str_to_sk[CARD_BITS_TO_STR[c1][RANK] + CARD_BITS_TO_STR[c1][SUITE]]
+    board = BOARD_BITS_TO_STR[board_mask.bool()]
+    # board = array(['A', 'c', '2', 'h', '8', 'd'], dtype='<U1')
+    board_cards = []
+    for i in range(0, int(torch.sum(board_mask)) - 1,
+                   2):  # sum is 6,8,10 for flop turn river resp.
+        board_cards.append(dict_str_to_sk[board[i] + board[i + 1]])
+
+    return [c0_1d, c1_1d], board_cards
+
+
+def look_at_cards(obs: np.array) -> Tuple[List[int], List[int]]:
+    c0_bits = obs[0][IDX_C0_0:IDX_C0_1].bool()
+    c1_bits = obs[0][IDX_C1_0:IDX_C1_1].bool()
+    board_bits = obs[0][IDX_BOARD_START:IDX_BOARD_END]  # bit representation
+    return card_bit_mask_to_int(c0_bits, c1_bits, board_bits)
 
 
 class HandEvaluator_MonteCarlo:
@@ -47,10 +98,11 @@ class HandEvaluator_MonteCarlo:
             elif player_still_winning and ties == n_opponents:
                 tied += 1
             else:
-                raise ValueError("Hero can tie against at most n_opponents, not more. Aborting MC Simulation...")
+                raise ValueError(
+                    "Hero can tie against at most n_opponents, not more. Aborting MC Simulation...")
         return {'won': won, 'lost': lost, 'tied': tied}
 
-    def run_mc(self, hero_cards_1d, board_cards_1d, n_opponents, n_iter=1000000) -> dict:
+    def _run_mc(self, hero_cards_1d, board_cards_1d, n_opponents, n_iter=1000000) -> dict:
         """
         Returns estimated Effective Hand Strength after running n_iter Monte Carlo rollouts.
         :param hero_cards_1d: n * 4-byte representations of cards where n is the number of cards
@@ -68,3 +120,13 @@ class HandEvaluator_MonteCarlo:
                 deck.append(i)
 
         return self.mc(deck, hero_cards_1d, board_cards_1d, n_opponents, n_iter)
+
+    def run_mc(self,
+               obs: Union[np.ndarray, list],
+               n_opponents: int,
+               n_iter=5000):
+        hero_cards_1d, board_cards_1d = look_at_cards(obs)
+        return self.mc(hero_cards_1d,
+                       board_cards_1d,
+                       n_opponents,
+                       n_iter)
