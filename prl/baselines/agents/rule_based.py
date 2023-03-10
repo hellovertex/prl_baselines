@@ -2,7 +2,7 @@
 # flop pot odds
 # assume ranges (consider making them stochastic) for post flop MC analysis
 import random
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 import numpy as np
 from prl.environment.Wrappers.aoh import Positions6Max as pos
@@ -106,13 +106,15 @@ class RuleBasedAgent:
 
     @staticmethod
     def vs_3bet_after_openraise(hand, defender, aggressor, is_first_betting_round):
+        # co OR; BTN calls; sb 3bets; bb calls; co calls; btn 5bets; sb raises; bb all in co calls btn calls
+        # hero = sb has to act
         if hand in vs_3bet_after_openraise_call[defender][aggressor]:
             return ActionSpace.CHECK_CALL
         elif hand in vs_3bet_after_openraise_4b_and_allin[defender][aggressor]:
             if is_first_betting_round:
                 return ActionSpace.RAISE_POT
             else:
-                return ActionSpace.RAISE_ALL_IN
+                return ActionSpace.CHECK_CALL
         return ActionSpace.FOLD
 
     @staticmethod
@@ -157,48 +159,20 @@ class RuleBasedAgent:
                                                              # relative to hero position
                                                              raisors: List[int],
                                                              hero_index: int
-                                                             ):
+                                                             ) -> Tuple[int, int]:
         raisors_turn_ordered = []
         for r in raisors:
             rel_to_utg = self.turn_ordered_positions[(hero_index + r) % self.num_players]
             raisors_turn_ordered.append(self.turn_ordered_positions.index(rel_to_utg))
         return min(raisors_turn_ordered), max(raisors_turn_ordered)
 
-    def act_in_first_betting_round(self, hand, hero_index, hero_position, earliest,
-                                   latest):
-        if latest > hero_index:
-            # 1a) hero open raised -- faces 3bet after openraise -- hero == earliest aggressor
-            # Example: HERO-SB open raises BB 3-bets
-            if earliest == hero_index:
-                return self.vs_3bet_after_openraise(
-                    hand,
-                    defender=hero_position,
-                    aggressor=self.turn_ordered_positions[latest],
-                    is_first_betting_round=True
-                )
-            # 1b) if Hero is sandwhiched --> hero called before and now
-            # faces -- 3bet after Openraise
-            # Example: UTG open-raised -- Hero-CO calls -- SB 3Bets,...UTG CALLS
-            # --> Hero acts
-            elif earliest < hero_index < latest:
-                return self.vs_3bet_after_openraise(
-                    hand,
-                    defender=self.turn_ordered_positions[earliest],
-                    # hero has to use ranges of defender
-                    aggressor=self.turn_ordered_positions[latest],
-                    is_first_betting_round=True
-                )
-        else:
-            # 1c) if latest aggressor is before hero -- hero plays vs 1 Raiser
-            # (possibly 3bet pot already)
-            # Example UTG open raises MP 3bets HERO-CO has to act
-            assert latest < hero_index
-            return self.vs_1_raiser_pf(hand,
-                                       defender=hero_position,
-                                       aggressor=self.turn_ordered_positions[earliest],
-                                       is_first_betting_round=True)
+    # def act_in_first_betting_round(self, hand, hero_index, hero_position, earliest,
+    #                                latest):
+    #
 
     def act(self, obs: np.ndarray, legal_moves):
+        # todo consider changing fold to check_call if legal_moves[0] == 0
+        #  it is not critical however, as the environment converts folds to checks if an agent can check
         assert obs[cols.Round_preflop] == 1, \
             f"Rule Based agent is only programmed to return preflop actions, but round is " \
             f"one hot encoded as: {obs[cols.Round_preflop:cols.Round_river + 1]}"
@@ -229,10 +203,11 @@ class RuleBasedAgent:
             assert hero_index > earliest
             assert earliest == latest
             assert is_first_betting_round
-            return self.vs_1_raiser_pf(hand,
-                                       defender=hero_position,
-                                       aggressor=earliest,
-                                       is_first_betting_round=is_first_betting_round)
+            return self.vs_1_raiser_pf(
+                hand,
+                defender=hero_position,
+                aggressor=self.turn_ordered_positions[earliest],
+                is_first_betting_round=is_first_betting_round)
 
         # is empty when nobody raised twice
         players_that_raised_twice = self.get_players_who_raised_twice_preflop(
@@ -243,16 +218,50 @@ class RuleBasedAgent:
             # case 1) no-one raised twice
             if is_first_betting_round:
                 assert not players_that_raised_twice
-                return self.act_in_first_betting_round(hand,
-                                                       hero_index,
-                                                       hero_position,
-                                                       earliest,
-                                                       latest)
+                if latest > hero_index:
+                    # 1a) hero open raised -- faces 3bet after openraise -- hero == earliest aggressor
+                    # Example: HERO-SB open raises BB 3-bets
+                    if earliest == hero_index:
+                        return self.vs_3bet_after_openraise(
+                            hand,
+                            defender=hero_position,
+                            aggressor=self.turn_ordered_positions[latest],
+                            is_first_betting_round=True
+                        )
+                    # 1b) if Hero is sandwhiched --> hero called before and now
+                    # faces -- 3bet after Openraise
+                    # Example: UTG open-raised -- Hero-CO calls -- SB 3Bets,...UTG CALLS
+                    # --> Hero acts
+                    elif earliest < hero_index < latest:
+                        return self.vs_3bet_after_openraise(
+                            hand,
+                            defender=self.turn_ordered_positions[earliest],
+                            # hero has to use ranges of defender
+                            aggressor=self.turn_ordered_positions[latest],
+                            is_first_betting_round=True
+                        )
+                else:
+                    # 1c) if latest aggressor is before hero -- hero plays vs 1 Raiser
+                    # (possibly 3bet pot already)
+                    # Example UTG open raises MP 3bets HERO-CO has to act
+                    # 1d) or if latest aggressor is hero when someone previously limped
+                    # e.g. utg calls ... hero=sb raises, bb folds, utg 3bets, ...
+                    # hero sb has to act
+                    return self.vs_1_raiser_pf(hand,
+                                               defender=hero_position,
+                                               aggressor=self.turn_ordered_positions[earliest],
+                                               is_first_betting_round=True)
+                # return self.act_in_first_betting_round(
+                #     hand,
+                #     hero_index,
+                #     hero_position,
+                #     earliest=self.turn_ordered_positions[earliest],
+                #     latest=self.turn_ordered_positions[latest])
             # case 2) at least one player raised twice
             else:
-                earliest, latest = self.get_earliest_and_latest_aggressor_this_betting_round(
-                    players_that_raised_twice, hero_index
-                )
+                # earliest, latest = self.get_earliest_and_latest_aggressor_this_betting_round(
+                #     players_that_raised_twice, hero_index
+                # )
                 # Example: UTG open-raises,
                 # HERO-CO 3bets, ..., UTG-4bets, HERO has to choose ALLIN / FOLD
                 if latest < hero_index:
@@ -261,20 +270,6 @@ class RuleBasedAgent:
                         defender=hero_position,
                         aggressor=self.turn_ordered_positions[earliest],
                         is_first_betting_round=False)
-                # case 2b) hero is sandwhiched by double raisors
-                # Example: UTG open raises Hero calls SB 3 bets
-                # continued:  UTG 4 bets Hero calls SB 5 bets UTG calls -- Hero has to act
-                elif earliest < hero_index < latest:
-                    return self.vs_3bet_after_openraise(
-                        hand,
-                        defender=self.turn_ordered_positions[earliest],
-                        # hero must defend using UTG ranges
-                        aggressor=self.turn_ordered_positions[latest],
-                        is_first_betting_round=False
-                    )
-                # case 2c) all players that raised twice are AFTER HERO
-                # Example: HERO BTN limps SB Openraises BB 3bets
-                # continued: Hero calls SB 4bets BB 5 bets
                 else:
                     return self.vs_3bet_after_openraise(
                         hand,
@@ -283,6 +278,28 @@ class RuleBasedAgent:
                         aggressor=self.turn_ordered_positions[latest],
                         is_first_betting_round=False
                     )
+                # # case 2b) hero is sandwhiched by double raisors
+                # # Example: UTG open raises Hero calls SB 3 bets
+                # # continued:  UTG 4 bets Hero calls SB 5 bets UTG calls -- Hero has to act
+                # elif earliest < hero_index < latest:
+                #     return self.vs_3bet_after_openraise(
+                #         hand,
+                #         defender=self.turn_ordered_positions[earliest],
+                #         # hero must defend using UTG ranges
+                #         aggressor=self.turn_ordered_positions[latest],
+                #         is_first_betting_round=False
+                #     )
+                # # case 2c) all players that raised twice are AFTER HERO
+                # # Example: HERO BTN limps SB Openraises BB 3bets
+                # # continued: Hero calls SB 4bets BB 5 bets
+                # else:
+                #     return self.vs_3bet_after_openraise(
+                #         hand,
+                #         defender=self.turn_ordered_positions[earliest],
+                #         # hero must defend vs BB using SB ranges
+                #         aggressor=self.turn_ordered_positions[latest],
+                #         is_first_betting_round=False
+                #     )
 
 
 if __name__ == '__main__':
