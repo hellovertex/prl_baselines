@@ -358,17 +358,18 @@ class ParseHsmithyTextToPokerEpisode:
         # todo: use this to run encoding with hud stats and monte carlo sims
         episodes = []
         current = ""
-        for line in open("myfile.txt", 'r',
-                         encoding='utf-8'):
+        for line in open(f, 'r', encoding='utf-8'):
             if 'PokerStars Hand #' in line:
                 if current:
-                    parsed_hand = self.parse_hand(current)
-                    if parsed_hand:
-                        episodes.append(parsed_hand)
-                current = line
+                    try:
+                        parsed_hand = self.parse_hand(current)
+                        if parsed_hand:
+                            episodes.append(parsed_hand)
+                    except Exception:
+                        pass
+                current = line.split('PokerStars Hand #')[1]
             else:
                 current += line
-
         return episodes
 
     def parse_file(self, f: str, only_showdowns=False) -> List[PokerEpisodeV2]:

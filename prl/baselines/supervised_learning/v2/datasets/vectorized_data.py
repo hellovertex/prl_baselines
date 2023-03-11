@@ -16,6 +16,7 @@ from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
 from tqdm import tqdm
 
+from prl.baselines.evaluation.v2.dataset_stats import make_hud_stats_if_missing
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
     DatasetConfig,
     ActionGenOption)
@@ -151,7 +152,7 @@ def generate_vectorized_hand_histories_from_file(filename,
         with open(lut_file, 'r') as file:
             dict_obj = json.load(file)
         encoder.lut = dict_obj
-    episodesV2 = parser.parse_file(filename)
+    episodesV2 = parser.parse_lazily(filename)
     encode_episodes(dataset_config,
                     episodesV2,
                     encoder,
@@ -227,7 +228,7 @@ class VectorizedData:
                                    ):
         if use_multiprocessing:
             logging.info('Starting handhistory encoding using multiprocessing...')
-            gen_fn = partial(generate_vectorized_hand_histories,
+            gen_fn = partial(generate_vectorized_hand_histories_from_chunks,
                              dataset_config=self.opt,
                              parser_cls=type(self.parser),
                              encoder_cls=encoder_cls,
@@ -298,6 +299,8 @@ def make_vectorized_data_if_not_exists_already(dataset_config, use_multiprocessi
     vectorized_data = VectorizedData(dataset_config=dataset_config,
                                      parser_cls=parser_cls,
                                      top_player_selector=selector)
+    if dataset_config.hudstats_enabled:
+        make_hud_stats_if_missing(dataset_config)
     vectorized_data.generate_missing(use_multiprocessing=use_multiprocessing)
 
 
