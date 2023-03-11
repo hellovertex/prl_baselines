@@ -1,4 +1,4 @@
-from random import random
+from random import random, randint
 from typing import Optional, Any, Dict
 from typing import Tuple, List, Union
 
@@ -43,6 +43,22 @@ class TianshouCallingStation(BasePolicy):
     def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:
         nobs = len(batch.obs)
         return Batch(logits=None, act=[self.CHECK_CALL] * nobs, state=None)
+
+    def learn(self, batch: Batch, **kwargs: Any) -> Dict[str, Any]:
+        return {}
+
+
+class TianshouRandomAgent(BasePolicy):
+    CHECK_CALL = 1
+
+    def __init__(self, observation_space=None, action_space=None):
+        super().__init__(observation_space=observation_space,
+                         action_space=action_space)
+
+    def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:
+        nobs = len(batch.obs)
+        return Batch(logits=None, act=[randint(0, 2)] * nobs,
+                     state=None)
 
     def learn(self, batch: Batch, **kwargs: Any) -> Dict[str, Any]:
         return {}

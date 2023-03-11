@@ -37,7 +37,7 @@ class TianshouEnvWrapper(AECEnv):
                  env,
                  agents: List[str],
                  mc_ckpt_path: Optional[str],
-                 reward_type: RewardType = RewardType.ABSOLUTE,):
+                 reward_type: RewardType = RewardType.ABSOLUTE, ):
         super().__init__()
         self.name = "env"
         self.reward_type = reward_type
@@ -138,13 +138,13 @@ class TianshouEnvWrapper(AECEnv):
         )
         self.infos = self._convert_to_dict(
             [{"legal_moves": [],
-              "info": info} for _ in range(self.num_agents)]
-            # "info": []} for _ in range(self.num_agents)]
+              #  "info": info} for _ in range(self.num_agents)]
+              "info": []} for _ in range(self.num_agents)]
         )
         legal_moves = np.array([0, 0, 0, 0, 0, 0, 0, 0])
         legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
         if legal_moves[2] == 1:
-            legal_moves[[3, 4, 5]] = 1
+            legal_moves[3:] = 1
         self.next_legal_moves = legal_moves
         self._last_obs = obs
 
@@ -192,16 +192,16 @@ class TianshouEnvWrapper(AECEnv):
             self.agent_map = shifted_indices
 
         else:
-            legal_moves = np.array([0, 0, 0, 0, 0, 0])
+            legal_moves = np.array([0, 0, 0, 0, 0, 0, 0, 0])
             legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
             if legal_moves[2] == 1:
-                legal_moves[[3, 4, 5]] = 1
+                legal_moves[3:] = 1
             self.next_legal_moves = legal_moves
 
         self.infos = self._convert_to_dict(
             [{"legal_moves": [],
-              "info": info} for _ in range(self.num_agents)]
-            # "info": []} for _ in range(self.num_agents)]
+              # "info": info} for _ in range(self.num_agents)]
+              "info": []} for _ in range(self.num_agents)]
         )
         self._cumulative_rewards[self.agent_selection] = 0
         self.agent_selection = next_player
