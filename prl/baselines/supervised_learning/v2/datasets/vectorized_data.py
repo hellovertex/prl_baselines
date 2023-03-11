@@ -105,12 +105,29 @@ def encode_episodes(dataset_config,
     training_data, labels = None, None
 
 
-def generate_vectorized_hand_histories(files,
-                                       dataset_config: DatasetConfig,
-                                       parser_cls,
-                                       encoder_cls,
-                                       selected_player_names,
-                                       storage_cls) -> str:
+def generate_vectorized_hand_histories_from_chunks(files,
+                                                   dataset_config: DatasetConfig,
+                                                   parser_cls,
+                                                   encoder_cls,
+                                                   selected_player_names,
+                                                   storage_cls) -> str:
+    for filename in files[:-1]:
+        generate_vectorized_hand_histories_from_file(filename,
+                                                     dataset_config,
+                                                     parser_cls,
+                                                     encoder_cls,
+                                                     selected_player_names,
+                                                     storage_cls)
+    return f"Success: encoded chunk {files}..."
+
+
+def generate_vectorized_hand_histories_from_file(filename,
+                                                 dataset_config: DatasetConfig,
+                                                 parser_cls,
+                                                 encoder_cls,
+                                                 selected_player_names,
+                                                 storage_cls) -> str:
+    # todo: load lazily because file may be very large
     # make deepcopy so that multiprocessing does not share options object
     dataset_config = copy.deepcopy(dataset_config)
     # the env will be re-initialized with each hand in hand-histories, stacks and
@@ -123,26 +140,25 @@ def generate_vectorized_hand_histories(files,
     encoder = encoder_cls(dummy_env)
     parser = parser_cls(dataset_config=dataset_config)
     storage = storage_cls(dataset_config)
-    for filename in files[:-1]:
-        selected_players = alias_player_rank_to_ingame_name(selected_player_names,
-                                                            filename)
-        if dataset_config.hudstats_enabled:
-            lut_file = os.path.join(*[
-                dataset_config.dir_player_summaries,
-                Path(filename).stem,
-                'hud_lookup_table.json'
-            ])
-            with open(lut_file, 'r') as file:
-                dict_obj = json.load(file)
-            encoder.lut = dict_obj
-        episodesV2 = parser.parse_file(filename)
-        encode_episodes(dataset_config,
-                        episodesV2,
-                        encoder,
-                        selected_players,
-                        storage=storage,
-                        file_suffix=Path(filename).stem + files[-1])
-    return f"Success: encoded chunk {files}..."
+    selected_players = alias_player_rank_to_ingame_name(selected_player_names,
+                                                        filename)
+    if dataset_config.hudstats_enabled:
+        lut_file = os.path.join(*[
+            dataset_config.dir_player_summaries,
+            Path(filename).stem,
+            'hud_lookup_table.json'
+        ])
+        with open(lut_file, 'r') as file:
+            dict_obj = json.load(file)
+        encoder.lut = dict_obj
+    episodesV2 = parser.parse_file(filename)
+    encode_episodes(dataset_config,
+                    episodesV2,
+                    encoder,
+                    selected_players,
+                    storage=storage,
+                    file_suffix=Path(filename).stem)
+    return f"Success: encoded {filename}..."
 
 
 class VectorizedData:

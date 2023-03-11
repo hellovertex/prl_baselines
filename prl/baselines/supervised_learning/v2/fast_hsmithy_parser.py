@@ -306,6 +306,8 @@ class ParseHsmithyTextToPokerEpisode:
         return players, board_cards
 
     def parse_hand(self, hand_str):
+        if "sits out" in hand_str:
+            return
         # if not '208958141851' in hand_str:
         #     return []
         # try:
@@ -349,6 +351,26 @@ class ParseHsmithyTextToPokerEpisode:
                               winners=winners,
                               btn_seat_num_one_indexed=btn_seat_num)
 
+    # def parse_greedily(self, f: str) -> List[PokerEpisodeV2]:
+    #     pass
+
+    def parse_lazily(self, f: str) -> List[PokerEpisodeV2]:
+        # todo: use this to run encoding with hud stats and monte carlo sims
+        episodes = []
+        current = ""
+        for line in open("myfile.txt", 'r',
+                         encoding='utf-8'):
+            if 'PokerStars Hand #' in line:
+                if current:
+                    parsed_hand = self.parse_hand(current)
+                    if parsed_hand:
+                        episodes.append(parsed_hand)
+                current = line
+            else:
+                current += line
+
+        return episodes
+
     def parse_file(self, f: str, only_showdowns=False) -> List[PokerEpisodeV2]:
         """
         :param f: Absolute path to .txt file containing human-readable hhsmithy-export.
@@ -368,14 +390,6 @@ class ParseHsmithyTextToPokerEpisode:
                 hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
 
                 for hand in hands_played:
-                    # todo: remove `only_showdowns` -- always parse all games
-                    #  filtering is applied during vectorization or preprocessing
-                    # if not '*** SHOW DOWN ***' in hand and only_showdowns:
-                    #     continue
-                    if "leaves the table" in hand:
-                        continue
-                    if "sits out" in hand:
-                        continue
                     parsed_hand = self.parse_hand(hand)
                     if parsed_hand:
                         episodes.append(parsed_hand)
