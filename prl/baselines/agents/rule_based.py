@@ -16,6 +16,9 @@ from prl.baselines.agents.hand_ranges import open_raising_ranges, vs_1_raiser_3b
 from prl.baselines.evaluation.utils import get_reset_config, pretty_print
 from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
 
+from prl.environment.Wrappers.vectorizer import CanonicalVectorizer
+from prl.environment.Wrappers.augment import AugmentObservationWrapper
+
 
 class RuleBasedAgent:
     def __init__(self, num_players, normalization):
@@ -249,7 +252,8 @@ class RuleBasedAgent:
                     # hero sb has to act
                     return self.vs_1_raiser_pf(hand,
                                                defender=hero_position,
-                                               aggressor=self.turn_ordered_positions[earliest],
+                                               aggressor=self.turn_ordered_positions[
+                                                   earliest],
                                                is_first_betting_round=True)
                 # return self.act_in_first_betting_round(
                 #     hand,
