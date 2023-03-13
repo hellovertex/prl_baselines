@@ -1,6 +1,6 @@
 import os
 from dataclasses import dataclass
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List
 
 import torch
 from tianshou.utils.net.common import MLP
@@ -12,6 +12,8 @@ from prl.baselines.supervised_learning.v2.datasets.dataset_config import Dataset
 
 @dataclass
 class TrainingParams:
+    label_names: List[str]
+    labels: List[int]
     # early stopping - whatever is triggered first
     max_epochs: int = 100_000_000
     max_env_steps: int = 1_000_000

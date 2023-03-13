@@ -354,7 +354,7 @@ class ParseHsmithyTextToPokerEpisode:
     # def parse_greedily(self, f: str) -> List[PokerEpisodeV2]:
     #     pass
 
-    def parse_lazily(self, f: str) -> List[PokerEpisodeV2]:
+    def parse_lazily(self, f: str) -> Generator[PokerEpisodeV2, None, None]:
         # todo: use this to run encoding with hud stats and monte carlo sims
         episodes = []
         current = ""
@@ -364,13 +364,14 @@ class ParseHsmithyTextToPokerEpisode:
                     try:
                         parsed_hand = self.parse_hand(current)
                         if parsed_hand:
-                            episodes.append(parsed_hand)
+                            yield parsed_hand
+                            # episodes.append(parsed_hand)
                     except Exception:
                         pass
                 current = line.split('PokerStars Hand #')[1]
             else:
                 current += line
-        return episodes
+        # return episodes
 
     def parse_file(self, f: str, only_showdowns=False) -> List[PokerEpisodeV2]:
         """

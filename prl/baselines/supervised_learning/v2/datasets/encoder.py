@@ -448,94 +448,94 @@ class EncoderV2:
         Observations, Actions_Taken]:
         """Runs environment with steps from PokerEpisode.
                 Returns observations and corresponding actions of players that made it to showdown."""
-        # try:
-        self.use_hudstats = use_hudstats
-        if self.use_hudstats:
-            assert self.lut is not None
-            assert len(selected_players) == 1
-        only_winners, drop_folds, fold_random_cards = self.parse_action_gen_option(
-            a_opt)
-        self.verbose = verbose
-        self.drop_folds = drop_folds
-        self.fold_random_cards = fold_random_cards
-        self._currency_symbol = episode.currency_symbol
-        self.only_winners = only_winners
-        skip_hand = True
-        for pname in list(episode.players.keys()):
-            if pname in selected_players:
-                skip_hand = False
-        if skip_hand:
-            return None, None
         try:
-            players = self.get_players_starting_with_first_mover(episode)
+            self.use_hudstats = use_hudstats
+            if self.use_hudstats:
+                assert self.lut is not None
+                assert len(selected_players) == 1
+            only_winners, drop_folds, fold_random_cards = self.parse_action_gen_option(
+                a_opt)
+            self.verbose = verbose
+            self.drop_folds = drop_folds
+            self.fold_random_cards = fold_random_cards
+            self._currency_symbol = episode.currency_symbol
+            self.only_winners = only_winners
+            skip_hand = True
+            for pname in list(episode.players.keys()):
+                if pname in selected_players:
+                    skip_hand = False
+            if skip_hand:
+                return None, None
+            try:
+                players = self.get_players_starting_with_first_mover(episode)
+            except AssertionError as e:
+                logging.debug(e)
+                logging.warning(e)
+                return None, None
+            if limit_num_players:
+                if len(players) < limit_num_players:
+                    return None, None
+            stacks = [player.stack for player in players]
+            sb, bb = episode.blinds['sb'], episode.blinds['bb']
+            # self._wrapped_env = init_wrapped_env(self.env_wrapper_cls,
+            #                                      stacks,
+            #                                      blinds=(sb, bb),
+            #                                      multiply_by=1,  # already multiplied in self.make_table()
+            #                                      )
+            args = NoLimitHoldem.ARGS_CLS(n_seats=len(stacks),
+                                          scale_rewards=False,
+                                          use_simplified_headsup_obs=False,
+                                          starting_stack_sizes_list=stacks)
+            self.env.overwrite_args(args)
+            # will be used for naming feature index in training data vector
+            self._feature_names = list(self.env.obs_idx_dict.keys())
+            self.env.env.SMALL_BLIND = sb
+            self.env.env.BIG_BLIND = bb
+            self.env.env.ANTE = 0.0
+            deck = np.full(shape=(13 * 4, 2), fill_value=Poker.CARD_NOT_DEALT_TOKEN_1D,
+                           dtype=np.int8)
+            board = make_board_cards(episode.board)
+            if board:
+                deck[:len(board)] = board
+            else:
+                assert not episode.actions[
+                    'actions_flop'], "Board cards not allowed in games that ended preflop"
+                assert not episode.actions[
+                    'actions_turn'], "Board cards not allowed in games that ended preflop"
+                assert not episode.actions[
+                    'actions_river'], "Board cards not allowed in games that ended preflop"
+            player_hands = self.make_player_hands(players, board)
+            initial_board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
+            self.state_dict = {'deck': {'deck_remaining': deck},
+                               'board': initial_board,
+                               'hand': player_hands}
+            self.occupied_cards = self.get_occupied_cards()
+
+            for s in stacks:
+                if s == self.env.env.SMALL_BLIND or s == self.env.env.BIG_BLIND:
+                    # skip edge case of player all in by calling big blind
+                    return None, None
+
+            # Collect observations and actions, observations are possibly augmented
+
+            # t0 = time.time()
+            res = self._simulate_environment(episode,
+                                             players,
+                                             episode.actions['as_sequence'],
+                                             selected_players=selected_players)
+            # print(f'Simulation took {time.time() - t0} seconds')
+            return res
+        except self._EnvironmentEdgeCaseEncounteredError:
+            return None, None
+        except self._EnvironmentDidNotTerminateInTimeError:
+            return None, None
         except AssertionError as e:
             logging.debug(e)
             logging.warning(e)
             return None, None
-        if limit_num_players:
-            if len(players) < limit_num_players:
-                return None, None
-        stacks = [player.stack for player in players]
-        sb, bb = episode.blinds['sb'], episode.blinds['bb']
-        # self._wrapped_env = init_wrapped_env(self.env_wrapper_cls,
-        #                                      stacks,
-        #                                      blinds=(sb, bb),
-        #                                      multiply_by=1,  # already multiplied in self.make_table()
-        #                                      )
-        args = NoLimitHoldem.ARGS_CLS(n_seats=len(stacks),
-                                      scale_rewards=False,
-                                      use_simplified_headsup_obs=False,
-                                      starting_stack_sizes_list=stacks)
-        self.env.overwrite_args(args)
-        # will be used for naming feature index in training data vector
-        self._feature_names = list(self.env.obs_idx_dict.keys())
-        self.env.env.SMALL_BLIND = sb
-        self.env.env.BIG_BLIND = bb
-        self.env.env.ANTE = 0.0
-        deck = np.full(shape=(13 * 4, 2), fill_value=Poker.CARD_NOT_DEALT_TOKEN_1D,
-                       dtype=np.int8)
-        board = make_board_cards(episode.board)
-        if board:
-            deck[:len(board)] = board
-        else:
-            assert not episode.actions[
-                'actions_flop'], "Board cards not allowed in games that ended preflop"
-            assert not episode.actions[
-                'actions_turn'], "Board cards not allowed in games that ended preflop"
-            assert not episode.actions[
-                'actions_river'], "Board cards not allowed in games that ended preflop"
-        player_hands = self.make_player_hands(players, board)
-        initial_board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
-        self.state_dict = {'deck': {'deck_remaining': deck},
-                           'board': initial_board,
-                           'hand': player_hands}
-        self.occupied_cards = self.get_occupied_cards()
-
-        for s in stacks:
-            if s == self.env.env.SMALL_BLIND or s == self.env.env.BIG_BLIND:
-                # skip edge case of player all in by calling big blind
-                return None, None
-
-        # Collect observations and actions, observations are possibly augmented
-
-        # t0 = time.time()
-        res = self._simulate_environment(episode,
-                                         players,
-                                         episode.actions['as_sequence'],
-                                         selected_players=selected_players)
-        # print(f'Simulation took {time.time() - t0} seconds')
-        return res
-        # except self._EnvironmentEdgeCaseEncounteredError:
-        #     return None, None
-        # except self._EnvironmentDidNotTerminateInTimeError:
-        #     return None, None
-        # except AssertionError as e:
-        #     logging.debug(e)
-        #     logging.warning(e)
-        #     return None, None
-        # except Exception as e:
-        #     logging.debug(e)
-        #     logging.warning(e)
-        #     return None, None
+        except Exception as e:
+            logging.debug(e)
+            logging.warning(e)
+            return None, None
 # in: .txt files
 # out: .csv files? maybe npz or easier-on-memory formats preferred?

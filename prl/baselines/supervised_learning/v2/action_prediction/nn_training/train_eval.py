@@ -25,18 +25,6 @@ from tqdm import tqdm
 from sklearn.metrics import f1_score, classification_report
 import pprint
 
-target_names_full = ['Fold',
-                     'Check Call',
-                     'Raise Third Pot',
-                     'Raise Two Thirds Pot',
-                     'Raise Pot',
-                     'Raise 2x Pot',
-                     'Raise 3x Pot',
-                     'Raise All in']
-target_names = ['Fold',
-                'Check Call',
-                'Raise']
-
 
 def init_state(ckpt_dir, model, optim, resume: bool = True):
     start_n_iter = 0
@@ -120,6 +108,8 @@ class TrainEval:
         # (downloading, extracting, encoding, vectorizing, preprocessing, train/test
         # splitting)
         logging.info(f"Starting training with params {params}")
+        labels = params.labels
+        label_names = params.label_names
         self.device = params.device
         self.use_cuda = True if 'cuda' in self.device else False
         traindataset, testdataset, label_weights = get_datasets(self.dataset_config)
@@ -207,7 +197,7 @@ class TrainEval:
                                     pred = torch.argmax(output, dim=1)
                                     test_correct += pred.eq(y.data).cpu().sum().item()
                             test_loss /= num_test_batches
-                            test_accuracy = (100 * test_correct ) / num_test_samples
+                            test_accuracy = (100 * test_correct) / num_test_samples
                             print(f"\nTest set: Average loss: {round(test_loss, 4)}, "
                                   f"Accuracy: {round(test_correct)}/{num_test_samples} "
                                   f"({round(test_accuracy, 6)}%)\n")
@@ -241,17 +231,17 @@ class TrainEval:
                                                            # labels=[0, 1, 2, 3, 4, 5,
                                                            #         6,
                                                            #         7],
-                                                           labels=[0, 1, 2],
-                                                           target_names=target_names,
+                                                           labels=labels,
+                                                           target_names=label_names,
                                                            output_dict=True)
 
                             for name, values in report.items():
-                                if name in target_names:
+                                if name in label_names:
                                     self.writer.add_scalar(f'precision/{name.replace(" ", "")}',
                                                            values['precision'],
                                                            global_step=it_train_global)
                             for name, values in report.items():
-                                if name in target_names:
+                                if name in label_names:
                                     self.writer.add_scalar(f'recall/{name.replace(" ", "")}',
                                                            values['recall'],
                                                            global_step=it_train_global)

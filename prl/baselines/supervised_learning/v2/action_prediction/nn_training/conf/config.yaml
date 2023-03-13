@@ -5,12 +5,46 @@ max_env_steps: 100_000_000_000
 device: 'cuda'  # 'cuda' or 'cpu'
 input_dim: 569  # == len(AugmentObservationFeatureColumns)
 # FOLD, CHECK_CALL, RAISE
-output_dim: 3  # 1<= output_dim <= len(ActionSpace)
+output_dim: 7  # 1<= output_dim <= len(ActionSpace)
+#target_names_full = ['Fold',
+#                     'Check Call',
+#                     'Raise Third Pot',
+#                     'Raise Two Thirds Pot',
+#                     'Raise Pot',
+#                     'Raise 2x Pot',
+#                     'Raise 3x Pot',
+#                     'Raise All in']
+#target_names_full_no_fold = [
+#    'Check Call',
+#    'Raise Third Pot',
+#    'Raise Two Thirds Pot',
+#    'Raise Pot',
+#    'Raise 2x Pot',
+#    'Raise 3x Pot',
+#    'Raise All in']
+#target_names = ['Fold',
+#                'Check Call',
+#                'Raise']
+label_names: # examples above
+  - Check_Call,
+  - Raise_Third_Pot,
+  - Raise_Two_Thirds_Pot',
+  - Raise_Pot,
+  - Raise_2x_Pot,
+  - Raise_3x_Pot,
+  - Raise_All_in
+labels:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
 # nn params
 lrs:
   - 1e-6
 hdims:
-  - (512, 512)
   - 512
 batch_size: 512
 # progress

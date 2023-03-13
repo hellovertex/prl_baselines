@@ -8,12 +8,13 @@ import re
 import time
 from functools import partial
 from pathlib import Path
-from typing import List, Type, Optional
+from typing import List, Type, Optional, Generator
 
 import click
 import numpy as np
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
+from prl.environment.Wrappers.vectorizer import AgentObservationType
 from tqdm import tqdm
 
 from prl.baselines.evaluation.v2.dataset_stats import make_hud_stats_if_missing
@@ -56,7 +57,7 @@ def alias_player_rank_to_ingame_name(selected_player_names,
 
 
 def encode_episodes(dataset_config,
-                    episodesV2: List[PokerEpisodeV2],
+                    episodesV2: Generator[PokerEpisodeV2, None, None],  #List[PokerEpisodeV2],
                     encoder: EncoderV2,
                     selected_players: List[str],
                     storage: PersistentStorage,
@@ -64,7 +65,7 @@ def encode_episodes(dataset_config,
                     max_episodes_per_file=25000):
     training_data, labels = None, None
     it = 0
-    for ep in tqdm(episodesV2):
+    for ep in tqdm(episodesV2, total=max_episodes_per_file):
         it += 1
         try:
             observations, actions = encoder.encode_episode(
@@ -127,8 +128,8 @@ def generate_vectorized_hand_histories_from_file(filename,
                                                  parser_cls,
                                                  encoder_cls,
                                                  selected_player_names,
-                                                 storage_cls) -> str:
-    # todo: load lazily because file may be very large
+                                                 storage_cls,
+                                                 agent_observation_mode=AgentObservationType.CARD_KNOWLEDGE) -> str:
     # make deepcopy so that multiprocessing does not share options object
     dataset_config = copy.deepcopy(dataset_config)
     # the env will be re-initialized with each hand in hand-histories, stacks and
@@ -137,7 +138,8 @@ def generate_vectorized_hand_histories_from_file(filename,
     dummy_env = init_wrapped_env(AugmentObservationWrapper,
                                  [5000 for _ in range(6)],
                                  blinds=(25, 50),
-                                 multiply_by=1)
+                                 multiply_by=1,
+                                 agent_observation_mode=agent_observation_mode)
     encoder = encoder_cls(dummy_env)
     parser = parser_cls(dataset_config=dataset_config)
     storage = storage_cls(dataset_config)
@@ -223,7 +225,7 @@ class VectorizedData:
                                    files: List[str],
                                    encoder_cls: Type[EncoderV2],
                                    use_multiprocessing: bool = False,
-                                   chunksize=2  # smaller means more parallelization
+                                   chunksize=1  # smaller means more parallelization,
                                    # use with multiprocessing to avoid stackoverflow
                                    ):
         if use_multiprocessing:
