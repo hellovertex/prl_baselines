@@ -427,7 +427,8 @@ class DatasetStats:
                                     player].update_from_episode(episode)
                 self.flush_to_disk(hero, Path(filepath).stem)
         else:
-            logging.info(f'Player summary data exists already at {self.dataset_config.dir_player_summaries}')
+            logging.info(
+                f'Player summary data exists already at {self.dataset_config.dir_player_summaries}')
 
     def _make_dataset_summary_if_missing(self):
         # todo make stats and check if missing
@@ -445,6 +446,14 @@ class DatasetStats:
         self._make_dataset_summary_if_missing()
 
 
+def make_hud_stats_if_missing(dataset_config: DatasetConfig):
+    parser_cls = ParseHsmithyTextToPokerEpisode
+    selector = TopPlayerSelector(parser=parser_cls(
+        dataset_config=dataset_config))
+    stats = DatasetStats(dataset_config, selector)
+    stats.generate_if_missing()
+
+
 @click.command()
 @arg_num_top_players
 @arg_nl
@@ -456,11 +465,7 @@ def main(num_top_players, nl, from_gdrive_id, min_showdowns):
                                    min_showdowns=min_showdowns,
                                    from_gdrive_id=from_gdrive_id)
     make_raw_data_if_not_exists_already(dataset_config)
-    parser_cls = ParseHsmithyTextToPokerEpisode
-    selector = TopPlayerSelector(parser=parser_cls(
-        dataset_config=dataset_config))
-    stats = DatasetStats(dataset_config, selector)
-    stats.generate_if_missing()
+    make_hud_stats_if_missing(dataset_config)
 
 
 if __name__ == '__main__':
