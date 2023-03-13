@@ -118,7 +118,7 @@ class DatasetConfig:
 
     # 99 in memory training data
     sub_sampling_technique: Optional[
-        DataImbalanceCorrection] = None  # dont allow
+        DataImbalanceCorrection] = None  # don't allow
     # multiple
     # options
     # meta
