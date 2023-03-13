@@ -176,7 +176,6 @@ class EncoderV2:
         # get hand_ids for each player
         # then when computing vpip af pfr, use only hand_ids['player_name']
         hero_name = hero.name
-
         hud = np.zeros(12)
         # In case the player did fold -- we do not have to run Monte Carlo
         # and simply set win_prob to 0.2, not 0 because we dont want to encode fold in obs
