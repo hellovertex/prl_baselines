@@ -168,7 +168,8 @@ class TrainEval:
                                                    scalar_value=f1,
                                                    global_step=it_train_global)
                             self.writer.add_scalar(tag='Training_Accuracy',
-                                                   scalar_value=(100.0 * correct) / n_samples,
+                                                   scalar_value=(
+                                                                            100.0 * correct) / n_samples,
                                                    global_step=it_train_global)
                             print(f"\nTrain set: "
                                   f"Average loss: {round(total_loss / it_log, 4)}, "
@@ -193,7 +194,8 @@ class TrainEval:
                                     output = self.model(x)
                                     # sum up batch loss
                                     test_loss += F.cross_entropy(
-                                        output, y, weight=label_weights.to(self.device)).data.item()
+                                        output, y,
+                                        weight=label_weights.to(self.device)).data.item()
                                     pred = torch.argmax(output, dim=1)
                                     test_correct += pred.eq(y.data).cpu().sum().item()
                             test_loss /= num_test_batches
@@ -237,14 +239,16 @@ class TrainEval:
 
                             for name, values in report.items():
                                 if name in label_names:
-                                    self.writer.add_scalar(f'precision/{name.replace(" ", "")}',
-                                                           values['precision'],
-                                                           global_step=it_train_global)
+                                    self.writer.add_scalar(
+                                        f'precision/{name.replace(" ", "")}',
+                                        values['precision'],
+                                        global_step=it_train_global)
                             for name, values in report.items():
                                 if name in label_names:
-                                    self.writer.add_scalar(f'recall/{name.replace(" ", "")}',
-                                                           values['recall'],
-                                                           global_step=it_train_global)
+                                    self.writer.add_scalar(
+                                        f'recall/{name.replace(" ", "")}',
+                                        values['recall'],
+                                        global_step=it_train_global)
                             pprint.pprint(report)
                             self.model.train()
                             it_eval = 0

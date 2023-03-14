@@ -111,3 +111,18 @@ def test_preprocessor_not_changing_vectorized_observation_1(csv_files):
             # so if the sum along all dimensions is greater than the length of
             # the vector, the data has changed after vectorization
             assert sum(r) < vectorized_observation_shape
+
+
+def test_preprocessor_works_per_selected_player(dataset_config):
+    # per selected player == with hud stats
+    dataset_config.make_dataset_for_each_individual = True
+    dataset_config.hudstats_enabled = False
+    make_preprocessed_data_if_not_exists_already(dataset_config, True)
+    assert PreprocessedData(
+        dataset_config).all_vectorized_data_has_been_preprocessed_before()
+    # per selected player == no hud stats
+    dataset_config.make_dataset_for_each_individual = True
+    dataset_config.hudstats_enabled = True
+    make_preprocessed_data_if_not_exists_already(dataset_config, True)
+    assert PreprocessedData(
+        dataset_config).all_vectorized_data_has_been_preprocessed_before()

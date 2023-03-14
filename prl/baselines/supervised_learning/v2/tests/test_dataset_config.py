@@ -1,23 +1,10 @@
 import os
 from pathlib import Path
-from typing import List
 
-import numpy as np
 import pytest
-from prl.environment.Wrappers.utils import init_wrapped_env
-from prl.environment.Wrappers.vectorizer import AgentObservationType
 
-from prl.baselines.deprecated.fast_hsmithy_parser import ParseHsmithyTextToPokerEpisode
-from prl.baselines.evaluation.utils import get_player_cards, get_board_cards
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import ActionGenOption, \
     DatasetConfig
-from prl.baselines.supervised_learning.v2.datasets.vectorized_data import \
-    make_vectorized_data_if_not_exists_already
-from prl.baselines.supervised_learning.v2.poker_model import PokerEpisodeV2
-from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns, \
-    AugmentObservationWrapper
-from prl.baselines.supervised_learning.v2.datasets.encoder import EncoderV2
-import pytest
 
 
 @pytest.fixture
@@ -42,3 +29,4 @@ def default_conf():
 def test_exists_vectorized_data_for_all_selected_players(default_conf):
     data_dir = default_conf.DATA_DIR
     a = 1
+    # dont need to test this atm
