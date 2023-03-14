@@ -17,7 +17,7 @@ from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.Wrappers.vectorizer import AgentObservationType
 from tqdm import tqdm
 
-from prl.baselines.evaluation.v2.dataset_stats import make_hud_stats_if_missing
+from prl.baselines.supervised_learning.v2.datasets.dataset_stats import make_hud_stats_if_missing
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
     DatasetConfig,
     ActionGenOption)
@@ -25,7 +25,7 @@ from prl.baselines.supervised_learning.v2.datasets.persistent_storage import \
     PersistentStorage
 from prl.baselines.supervised_learning.v2.datasets.raw_data import (
     TopPlayerSelector,
-    RawData, make_raw_data_if_not_exists_already)
+    make_raw_data_if_not_exists_already)
 from prl.baselines.supervised_learning.v2.datasets.encoder import EncoderV2
 from prl.baselines.supervised_learning.v2.fast_hsmithy_parser import \
     ParseHsmithyTextToPokerEpisode
@@ -194,10 +194,12 @@ class VectorizedData:
         # the env will be re-initialized with each hand in hand-histories, stacks and
         # blinds will be read from hand-history, so it does not matter what we provide
         # here
-        dummy_env = init_wrapped_env(AugmentObservationWrapper,
-                                     [5000 for _ in range(6)],
-                                     blinds=(25, 50),
-                                     multiply_by=1)
+        dummy_env = init_wrapped_env(
+            AugmentObservationWrapper,
+            [5000 for _ in range(6)],
+            blinds=(25, 50),
+            multiply_by=1,
+            agent_observation_mode=AgentObservationType.CARD_KNOWLEDGE)
         encoder = encoder_cls(dummy_env)
         if self.opt.hudstats_enabled:
             lut_file = os.path.join(*[

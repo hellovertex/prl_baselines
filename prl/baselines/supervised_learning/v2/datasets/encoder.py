@@ -193,8 +193,10 @@ class EncoderV2:
             d = self.lut[opponent]
             if d['total_number_of_samples'] > 20:
                 # maybe set is_tight
-                is_tight = 1 if d['vpip'] < .28 else 0
-                is_aggressive = 1 if d['af'] > 1 else 0
+                # is_tight = 1 if d['vpip'] < .28 else 0
+                # is_aggressive = 1 if d['af'] > 1 else 0
+                is_tight = d['vpip']
+                is_aggressive = d['af']
                 # maybe set is_aggressive
                 hud[(offset * 2)] = is_tight
                 hud[(offset * 2) + 1] = is_aggressive
@@ -490,10 +492,7 @@ class EncoderV2:
                                           starting_stack_sizes_list=stacks)
             self.env.overwrite_args(args)
             # will be used for naming feature index in training data vector
-            if not self.use_hudstats:
-                self._feature_names = list(self.env.obs_idx_dict.keys())
-            else:
-                self._feature_names = [col.name for col in FeaturesWithHudStats]
+            self._feature_names = list(self.env.obs_idx_dict.keys())
             self.env.env.SMALL_BLIND = sb
             self.env.env.BIG_BLIND = bb
             self.env.env.ANTE = 0.0

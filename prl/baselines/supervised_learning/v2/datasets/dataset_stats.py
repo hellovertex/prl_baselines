@@ -402,7 +402,7 @@ class DatasetStats:
             json.dump(serialized_dict, file)
         self.heroes_hud_stats_lookup_table[hero] = {}
 
-    def _make_top_player_hud_stat_lookup_tables_if_missing(self):
+    def make_top_player_hud_stat_lookup_tables_if_missing(self):
         if not self.dataset_config.exists_player_summary_data_for_all_selected_players():
             logging.info("Computing HUD-Stats lookup tables for top players")
             for hero in tqdm(self.selected_player_names):
@@ -442,7 +442,7 @@ class DatasetStats:
         # for all player_names
         # update player stats
         output_dir = self.dataset_config.dir_player_summaries
-        self._make_top_player_hud_stat_lookup_tables_if_missing()
+        self.make_top_player_hud_stat_lookup_tables_if_missing()
         self._make_dataset_summary_if_missing()
 
 
