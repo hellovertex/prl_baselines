@@ -17,7 +17,8 @@ from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.Wrappers.vectorizer import AgentObservationType
 from tqdm import tqdm
 
-from prl.baselines.supervised_learning.v2.datasets.dataset_stats import make_hud_stats_if_missing
+from prl.baselines.supervised_learning.v2.datasets.dataset_stats import \
+    make_hud_stats_if_missing
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
     DatasetConfig,
     ActionGenOption)
@@ -70,11 +71,131 @@ class VectorizedData:
         self.num_files_written_to_disk = 0
 
     @staticmethod
+    def _get_mp_file_chunks(files: List[str],
+                            chunksize: int) -> List[List[str]]:
+        chunks = []
+        current_chunk = []
+        i = 0
+        for file in files:
+            current_chunk.append(file)
+            if (i + 1) % chunksize == 0:
+                chunks.append(current_chunk)
+                current_chunk = []
+            i += 1
+        # trick to avoid multiprocessing writes to same file
+        for i, chunk in enumerate(chunks):
+            chunk.append(f'{i}')
+        return chunks
+
+    @classmethod
+    def generate_vectorized_hand_histories_from_file(cls,
+                                                     filename,
+                                                     dataset_config: DatasetConfig,
+                                                     parser_cls,
+                                                     encoder_cls,
+                                                     selected_player_names,
+                                                     storage_cls,
+                                                     agent_observation_mode=AgentObservationType.CARD_KNOWLEDGE) -> str:
+        # make deepcopy so that multiprocessing does not share options object
+        dataset_config = copy.deepcopy(dataset_config)
+        # the env will be re-initialized with each hand in hand-histories, stacks and
+        # blinds will be read from hand-history, so it does not matter what we provide
+        # here
+        dummy_env = init_wrapped_env(AugmentObservationWrapper,
+                                     [5000 for _ in range(6)],
+                                     blinds=(25, 50),
+                                     multiply_by=1,
+                                     agent_observation_mode=agent_observation_mode)
+        encoder = encoder_cls(dummy_env)
+        parser = parser_cls(dataset_config=dataset_config)
+        storage = storage_cls(dataset_config)
+        selected_players = alias_player_rank_to_ingame_name(selected_player_names,
+                                                            filename)
+        if dataset_config.hudstats_enabled:
+            lut_file = os.path.join(*[
+                dataset_config.dir_player_summaries,
+                Path(filename).stem,
+                'hud_lookup_table.json'
+            ])
+            with open(lut_file, 'r') as file:
+                dict_obj = json.load(file)
+            encoder.lut = dict_obj
+        episodesV2 = parser.parse_lazily(filename)
+        # change prefix depending on dataset_config
+        file_prefix = None
+        file_suffix = Path(filename).stem
+        if dataset_config.make_dataset_for_each_individual:
+            file_prefix = ''
+            file_suffix = Path(filename).stem[:len('PlayerRank999')]
+        cls.encode_episodes(dataset_config,
+                            episodesV2,
+                            encoder,
+                            selected_players,
+                            storage=storage,
+                            file_prefix=file_prefix,
+                            file_suffix=file_suffix)
+        return f"Success: encoded {filename}..."
+
+    def generate_vectorized_hand_histories_from_chunks(self,
+                                                       files,
+                                                       dataset_config: DatasetConfig,
+                                                       parser_cls,
+                                                       encoder_cls,
+                                                       selected_player_names,
+                                                       storage_cls) -> str:
+        for filename in files[:-1]:
+            type(self).generate_vectorized_hand_histories_from_file(filename,
+                                                                    dataset_config,
+                                                                    parser_cls,
+                                                                    encoder_cls,
+                                                                    selected_player_names,
+                                                                    storage_cls)
+        return f"Success: encoded chunk {files}..."
+
+    def _generate(self,
+                  selected_player_names: List[str],
+                  files: List[str],
+                  encoder_cls: Type[EncoderV2],
+                  use_multiprocessing: bool = False,
+                  chunksize=1,  # smaller means more parallelization,
+                  # use with multiprocessing to avoid stackoverflow
+                  ):
+        if use_multiprocessing:
+            logging.info('Starting handhistory encoding using multiprocessing...')
+            gen_fn = partial(self.generate_vectorized_hand_histories_from_chunks,
+                             dataset_config=self.opt,
+                             parser_cls=type(self.parser),
+                             encoder_cls=encoder_cls,
+                             selected_player_names=selected_player_names,
+                             storage_cls=type(self.storage))
+            assert len(files) < 101, f'Dont use multiprocessing for more than Top 100 ' \
+                                     f'players.'
+            chunks = self._get_mp_file_chunks(files, chunksize)
+            start = time.time()
+            p = multiprocessing.Pool()
+            for x in p.imap_unordered(gen_fn, chunks):
+                logging.info(x + f'. Took {time.time() - start} seconds\n')
+            logging.info(f'*** Finished job after {time.time() - start} seconds. ***')
+            p.close()
+        else:
+            logging.info('Starting handhistory encoding without multiprocessing...')
+            for filename in files:
+                type(self).generate_vectorized_hand_histories_from_file(
+                    filename=filename,
+                    dataset_config=self.opt,
+                    parser_cls=type(self.parser),
+                    encoder_cls=encoder_cls,
+                    selected_player_names=selected_player_names,
+                    storage_cls=type(self.storage))
+
+    @staticmethod
     def encode_episodes(dataset_config,
-                        episodesV2: Generator[PokerEpisodeV2, None, None],  # List[PokerEpisodeV2],
+                        episodesV2: Generator[PokerEpisodeV2, None, None],
+                        # List[PokerEpisodeV2],
                         encoder: EncoderV2,
                         selected_players: List[str],
                         storage: PersistentStorage,
+                        file_prefix: str,
                         file_suffix: str,
                         max_episodes_per_file=25000):
         training_data, labels = None, None
@@ -119,126 +240,6 @@ class VectorizedData:
                                                     file_suffix=file_suffix + str(
                                                         it))
 
-    def _generate_per_selected_player(self,
-                                      selected_player_names: List[str],
-                                      files: List[str],
-                                      encoder_cls: Type[EncoderV2],
-                                      env: Optional[AugmentObservationWrapper] = None,
-                                      use_multiprocessing: bool = False):
-        # todo: implement
-        raise NotImplementedError
-
-    @classmethod
-    def generate_vectorized_hand_histories_from_file(cls,
-                                                     filename,
-                                                     dataset_config: DatasetConfig,
-                                                     parser_cls,
-                                                     encoder_cls,
-                                                     selected_player_names,
-                                                     storage_cls,
-                                                     agent_observation_mode=AgentObservationType.CARD_KNOWLEDGE) -> str:
-        # make deepcopy so that multiprocessing does not share options object
-        dataset_config = copy.deepcopy(dataset_config)
-        # the env will be re-initialized with each hand in hand-histories, stacks and
-        # blinds will be read from hand-history, so it does not matter what we provide
-        # here
-        dummy_env = init_wrapped_env(AugmentObservationWrapper,
-                                     [5000 for _ in range(6)],
-                                     blinds=(25, 50),
-                                     multiply_by=1,
-                                     agent_observation_mode=agent_observation_mode)
-        encoder = encoder_cls(dummy_env)
-        parser = parser_cls(dataset_config=dataset_config)
-        storage = storage_cls(dataset_config)
-        selected_players = alias_player_rank_to_ingame_name(selected_player_names,
-                                                            filename)
-        if dataset_config.hudstats_enabled:
-            lut_file = os.path.join(*[
-                dataset_config.dir_player_summaries,
-                Path(filename).stem,
-                'hud_lookup_table.json'
-            ])
-            with open(lut_file, 'r') as file:
-                dict_obj = json.load(file)
-            encoder.lut = dict_obj
-        episodesV2 = parser.parse_lazily(filename)
-        cls.encode_episodes(dataset_config,
-                            episodesV2,
-                            encoder,
-                            selected_players,
-                            storage=storage,
-                            file_suffix=Path(filename).stem)
-        return f"Success: encoded {filename}..."
-
-    def generate_vectorized_hand_histories_from_chunks(self,
-                                                       files,
-                                                       dataset_config: DatasetConfig,
-                                                       parser_cls,
-                                                       encoder_cls,
-                                                       selected_player_names,
-                                                       storage_cls) -> str:
-        for filename in files[:-1]:
-            type(self).generate_vectorized_hand_histories_from_file(filename,
-                                                                    dataset_config,
-                                                                    parser_cls,
-                                                                    encoder_cls,
-                                                                    selected_player_names,
-                                                                    storage_cls)
-        return f"Success: encoded chunk {files}..."
-
-    @staticmethod
-    def _get_mp_file_chunks(files: List[str],
-                            chunksize: int) -> List[List[str]]:
-        chunks = []
-        current_chunk = []
-        i = 0
-        for file in files:
-            current_chunk.append(file)
-            if (i + 1) % chunksize == 0:
-                chunks.append(current_chunk)
-                current_chunk = []
-            i += 1
-        # trick to avoid multiprocessing writes to same file
-        for i, chunk in enumerate(chunks):
-            chunk.append(f'{i}')
-        return chunks
-
-    def _generate_player_pool_data(self,
-                                   selected_player_names: List[str],
-                                   files: List[str],
-                                   encoder_cls: Type[EncoderV2],
-                                   use_multiprocessing: bool = False,
-                                   chunksize=1  # smaller means more parallelization,
-                                   # use with multiprocessing to avoid stackoverflow
-                                   ):
-        if use_multiprocessing:
-            logging.info('Starting handhistory encoding using multiprocessing...')
-            gen_fn = partial(self.generate_vectorized_hand_histories_from_chunks,
-                             dataset_config=self.opt,
-                             parser_cls=type(self.parser),
-                             encoder_cls=encoder_cls,
-                             selected_player_names=selected_player_names,
-                             storage_cls=type(self.storage))
-            assert len(files) < 101, f'Dont use multiprocessing for more than Top 100 ' \
-                                     f'players.'
-            chunks = self._get_mp_file_chunks(files, chunksize)
-            start = time.time()
-            p = multiprocessing.Pool()
-            for x in p.imap_unordered(gen_fn, chunks):
-                logging.info(x + f'. Took {time.time() - start} seconds\n')
-            logging.info(f'*** Finished job after {time.time() - start} seconds. ***')
-            p.close()
-        else:
-            logging.info('Starting handhistory encoding without multiprocessing...')
-            for filename in files:
-                type(self).generate_vectorized_hand_histories_from_file(
-                    filename=filename,
-                    dataset_config=self.opt,
-                    parser_cls=type(self.parser),
-                    encoder_cls=encoder_cls,
-                    selected_player_names=selected_player_names,
-                    storage_cls=type(self.storage))
-
     def generate_missing(self,
                          encoder_cls: Type[EncoderV2] = EncoderV2,
                          use_multiprocessing=False):
@@ -253,18 +254,11 @@ class VectorizedData:
         else:
             logging.info(f"Encoding and vectorizing hand histories to .csv files for top "
                          f"{len(selected_players)} players. ")
-            if self.opt.make_dataset_for_each_individual:
-                return self._generate_per_selected_player(
-                    selected_player_names=list(selected_players.keys()),
-                    files=filenames,
-                    encoder_cls=encoder_cls,
-                    use_multiprocessing=use_multiprocessing)
-            else:
-                return self._generate_player_pool_data(
-                    selected_player_names=list(selected_players.keys()),
-                    files=filenames,
-                    encoder_cls=encoder_cls,
-                    use_multiprocessing=use_multiprocessing)
+            return self._generate(
+                selected_player_names=list(selected_players.keys()),
+                files=filenames,
+                encoder_cls=encoder_cls,
+                use_multiprocessing=use_multiprocessing)
 
 
 def make_vectorized_data_if_not_exists_already(dataset_config, use_multiprocessing):

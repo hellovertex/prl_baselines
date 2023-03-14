@@ -19,15 +19,18 @@ class PersistentStorage:
                                             labels: np.ndarray,
                                             feature_names: List[str],
                                             compression='.bz2',
+                                            file_prefix=None,
                                             file_suffix='',
                                             ):
         if training_data is not None:
             columns = None
             header = False
             # write to self.opt.dir_vectorized_data
+            if file_prefix is None:
+                file_prefix = 'data_'
             file_path = os.path.join(self.opt.dir_vectorized_data,
-                                     f'data'
-                                     f'_{file_suffix}.csv{compression}')
+                                     f'{file_prefix}'
+                                     f'{file_suffix}.csv{compression}')
             if not os.path.exists(Path(file_path).parent):
                 os.makedirs(os.path.realpath(Path(file_path).parent), exist_ok=True)
             if not os.path.exists(file_path):
