@@ -53,19 +53,19 @@ class PersistentStorage:
             return "Success"
         return "Failure"
 
-    def preprocessed_data_to_disk(self,
-                                  df,
-                                  origin_filename):
-        output_dir = self.opt.dir_preprocessed_data
-        if not os.path.exists(output_dir):
-            os.makedirs(os.path.abspath(output_dir))
-        filename = os.path.basename(origin_filename)
-        filename = os.path.join(output_dir, filename)
-        df.to_csv(filename, index=False)
-        df.to_csv(filename + '.bz2',
-                  index=True,
-                  header=header,
-                  index_label='label',
-                  mode='a',
-                  float_format='%.5f',
-                  compression='bz2')
+    # def preprocessed_data_to_disk(self,
+    #                               df,
+    #                               origin_filename):
+    #     output_dir = self.opt.dir_preprocessed_data
+    #     if not os.path.exists(output_dir):
+    #         os.makedirs(os.path.abspath(output_dir))
+    #     filename = os.path.basename(origin_filename)
+    #     filename = os.path.join(output_dir, filename)
+    #     df.to_csv(filename, index=False)
+    #     df.to_csv(filename + '.bz2',
+    #               index=True,
+    #               header=header,
+    #               index_label='label',
+    #               mode='a',
+    #               float_format='%.5f',
+    #               compression='bz2')

@@ -50,6 +50,25 @@ def test_vectorizer_output_directory_not_empty(dataset_config):
     assert dataset_config.exists_vectorized_data_for_all_selected_players()
 
 
+def test_vectorizer_output_directory_not_empty_for_individual_players(dataset_config):
+    num_top_players = 20
+    nl = 'NL50'
+    from_gdrive_id = '18GE6Xw4K1XE2PNiXSyh762mJ5ZCRl2SO'
+    make_dataset_for_each_individual = True
+    action_generation_option = ActionGenOption. \
+        make_folds_from_top_players_with_randomized_hand
+    min_showdowns = 10
+    data_dir = os.path.join(Path(__file__).parent, 'data')
+    dataset_config = DatasetConfig(num_top_players=num_top_players,
+                                   make_dataset_for_each_individual=make_dataset_for_each_individual,
+                                   action_generation_option=action_generation_option,
+                                   min_showdowns=min_showdowns,
+                                   nl=nl,
+                                   from_gdrive_id=from_gdrive_id,
+                                   DATA_DIR=data_dir)
+    make_vectorized_data_if_not_exists_already(dataset_config, True)
+    assert dataset_config.exists_vectorized_data_for_all_selected_players()
+
 def test_parser_has_eps(episodes):
     hasep_1 = False
     hasep_2 = False
