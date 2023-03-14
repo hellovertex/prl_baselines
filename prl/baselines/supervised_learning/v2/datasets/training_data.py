@@ -83,10 +83,14 @@ class InMemoryDataset(Dataset):
     def assert_correct_rounds(self, df):
         for stage in self.dataset_config.target_rounds:
             name = 'Round_' + stage.name.casefold()
+            if name not in df.columns:
+                name = name.lower()
             assert (df[name] == 1).any()
         for stage in list(Stage):
             if stage not in self.dataset_config.target_rounds:
                 name = 'Round_' + stage.name.casefold()
+                if name not in df.columns:
+                    name = name.lower()
                 assert not (df[name] == 1).any()
 
     def get_label_counts(self, df) -> List[int]:

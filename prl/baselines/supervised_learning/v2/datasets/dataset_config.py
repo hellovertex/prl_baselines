@@ -339,7 +339,7 @@ arg_from_gdrive_id = click.option("--from_gdrive_id",
                                        "with unzipping.")
 arg_action_generation_option = click.option("--action_generation_option",
                                             # default=ActionGenOption.make_folds_from_top_players_with_randomized_hand.value,
-                                            default=ActionGenOption.make_folds_from_top_players_with_randomized_hand.value,
+                                            default=ActionGenOption.no_folds_top_player_all_showdowns.value,
                                             type=int,
                                             help="Possible Values are \n"
                                                  "0: no_folds_top_player_all_showdowns\n"
@@ -349,29 +349,29 @@ arg_action_generation_option = click.option("--action_generation_option",
                                                  "4: make_folds_from_fish\n"
                                                  "See `ActionGenOption`. ")
 arg_use_multiprocessing = click.option("--use_multiprocessing",
-                                       default=False,
+                                       default=True,
                                        type=bool,
                                        help="Whether to parallelize encoding of files per TopRanked Player. "
                                             "Defaults to True. If turned off, data generation can be VERY slow (days).")
 arg_min_showdowns = click.option("--min_showdowns",
-                                 default=10,
+                                 default=5000,
                                  type=int,
                                  help="Minimum number of showdowns required to be eligible for top player "
                                       "ranking. Default is 5 for debugging. 5000 is recommended for real "
                                       "data.")
 arg_target_rounds = click.option("--target_rounds",
                                  multiple=True,
-                                 default=[Stage.PREFLOP.value],
-                                 # Stage.FLOP.value,
-                                 # Stage.TURN.value,
-                                 # Stage.RIVER.value],
+                                 default=[Stage.PREFLOP.value,
+                                 Stage.FLOP.value,
+                                 Stage.TURN.value,
+                                 Stage.RIVER.value],
                                  type=int,
                                  help="Preprocessing will reduce data to the rounds specified. Possible values: "
                                       "Stage.PREFLOP.value: 0\nStage.FLOP.value: 1"
                                       "\nStage.TURN.value: 2\nStage.RIVER.value: 3\n"
                                       "Defaults to [FLOP,TURN,RIVER] rounds.")
 arg_action_space = click.option("--action_space",
-                                default="ActionSpaceMinimal",
+                                default="ActionSpace",
                                 type=click.Choice(["ActionSpace",
                                                    "ActionSpaceMinimal",
                                                    "FOLD",
@@ -398,7 +398,7 @@ arg_seed_dataset = click.option("--seed",
                                 help="Seed used to generate dataset and datasplit using"
                                      "torch.Generator().manual_seed(seed)")
 arg_hudstats = click.option("--hudstats",
-                            default=True,
+                            default=False,
                             type=bool,
                             help="Extends observations by player statistics and hand "
                                  "strength")
