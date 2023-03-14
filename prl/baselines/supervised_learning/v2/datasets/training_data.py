@@ -57,7 +57,11 @@ class InMemoryDataset(Dataset):
             raise NotImplementedError("Downsampling Checks/Folds and Upsampling Raises "
                                       "is not supported anymore.")
         self.label_counts = self.get_label_counts(df_total)
+        # If FOLD excluded, remove it from counts to match label number n-1
         self.y = torch.tensor(df_total['label'].values, dtype=torch.int64)
+        if self.label_counts[ActionSpace.FOLD] == 0:
+            self.label_counts = self.label_counts[1:]
+            self.y -= 1  # let check_call start at index 0
         df_total.drop(['label'], axis=1, inplace=True)
         self.x = torch.tensor(df_total.values, dtype=torch.float32)
 
@@ -70,7 +74,7 @@ class InMemoryDataset(Dataset):
         num_unique_labels = len(self.label_counts)
         act = self.dataset_config.action_space[0]
         if act is ActionSpace:
-            assert num_unique_labels == len(ActionSpace)
+            assert num_unique_labels == len(ActionSpace) or num_unique_labels == len(ActionSpace) - 1
         elif act is ActionSpaceMinimal:
             assert num_unique_labels == len(ActionSpaceMinimal)
         elif isinstance(act, ActionSpaceMinimal):
