@@ -57,8 +57,12 @@ class PreprocessedData:
         # iterate vectorized data
         vectorized_files = glob.glob(self.opt.dir_vectorized_data + '/**/*.csv.bz2',
                                      recursive=True)
+        if not vectorized_files:
+            return False
         preprocessed_files = glob.glob(self.opt.dir_preprocessed_data + '/**/*.csv.bz2',
                                        recursive=True)
+        if not preprocessed_files:
+            return False
         # for each stem, check if it exists in preprocessed dir
         for vf in vectorized_files:
             stem = Path(vf).stem
@@ -72,7 +76,7 @@ class PreprocessedData:
                 break
         return all_data_is_preprocessed
 
-    def generate_missing(self):
+    def generate_missing(self,use_multiprocessing):
         if os.path.exists(self.opt.dir_preprocessed_data):
             logging.info(f'Preprocessed data already exists at directory '
                          f'{self.opt.dir_preprocessed_data} '
@@ -81,6 +85,7 @@ class PreprocessedData:
         if not self.all_vectorized_data_has_been_preprocessed_before():
             logging.info("Not all requested data found. "
                          "Starting Preprocessing...")
+            make_vectorized_data_if_not_exists_already(self.opt,use_multiprocessing)
             # load .csv files into dataframe
             csv_files = glob.glob(self.opt.dir_vectorized_data + '/**/*.csv.bz2',
                                   recursive=True)
@@ -142,7 +147,7 @@ def make_preprocessed_data_if_not_exists_already(dataset_config,
     make_raw_data_if_not_exists_already(dataset_config)
     make_vectorized_data_if_not_exists_already(dataset_config, use_multiprocessing)
     preprocessed_data = PreprocessedData(dataset_config)
-    preprocessed_data.generate_missing()
+    preprocessed_data.generate_missing(use_multiprocessing)
 
 
 @click.command()

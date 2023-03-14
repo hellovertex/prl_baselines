@@ -11,6 +11,8 @@ from prl.baselines.deprecated.fast_hsmithy_parser import ParseHsmithyTextToPoker
 from prl.baselines.evaluation.utils import get_player_cards, get_board_cards
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import ActionGenOption, \
     DatasetConfig
+from prl.baselines.supervised_learning.v2.datasets.vectorized_data import \
+    make_vectorized_data_if_not_exists_already
 from prl.baselines.supervised_learning.v2.poker_model import PokerEpisodeV2
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns, \
     AugmentObservationWrapper
@@ -36,12 +38,16 @@ def dataset_config():
                                    DATA_DIR=data_dir)
     return dataset_config
 
-
 @pytest.fixture
 def episodes(dataset_config) -> List[PokerEpisodeV2]:
     file = 'hand_histories.txt'
     parser = ParseHsmithyTextToPokerEpisode(dataset_config)
     return parser.parse_file(file)
+
+
+def test_vectorizer_output_directory_not_empty(dataset_config):
+    make_vectorized_data_if_not_exists_already(dataset_config, True)
+    assert dataset_config.exists_vectorized_data_for_all_selected_players()
 
 
 def test_parser_has_eps(episodes):

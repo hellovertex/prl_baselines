@@ -12,6 +12,7 @@ from pettingzoo.utils.env import ObsType
 from prl.environment.Wrappers.aoh import Positions6Max
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
+from prl.environment.Wrappers.vectorizer import AgentObservationType
 from tianshou.env.pettingzoo_env import PettingZooEnv
 from tianshou.env.venvs import SubprocVectorEnv
 from prl.baselines.agents.mc_agent import MCAgent
@@ -235,7 +236,8 @@ def make_default_tianshou_env(num_players=2,
                   "stack_sizes": stack_sizes,
                   "multiply_by": 1,  # use 100 for floats to remove decimals but we have int stacks
                   "scale_rewards": False,  # we do this ourselves
-                  "blinds": blinds}
+                  "blinds": blinds,
+                  "agent_observation_mode": AgentObservationType.CARD_KNOWLEDGE}
     # env = init_wrapped_env(**env_config)
     # obs0 = env.reset(config=None)
     # AEC ENV

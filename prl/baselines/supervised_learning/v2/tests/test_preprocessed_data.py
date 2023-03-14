@@ -49,9 +49,10 @@ def csv_files(dataset_config):
                      recursive=True)
 
 
-def test_preprocessing_is_skipped_if_all_preprocessed_data_exists_already(csv_files,
-                                                                          dataset_config):
+def test_preprocessing_is_skipped_if_all_preprocessed_data_exists_already(dataset_config):
     preprocessed_data = PreprocessedData(dataset_config)
+    make_preprocessed_data_if_not_exists_already(dataset_config,
+                                                 use_multiprocessing=True)
     # `csv_files` fixture generates preprocessed data via
     # `make_preprocessed_data_if_not_exists_already`
     assert preprocessed_data.all_vectorized_data_has_been_preprocessed_before()

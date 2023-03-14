@@ -291,17 +291,30 @@ class DatasetConfig:
 
     def exists_vectorized_data_for_all_selected_players(self):
         # Traverse for n selected players, if each has their own directory
-        if self.make_dataset_for_each_individual:
-            if os.path.exists(self.dir_vectorized_data):
+        #if self.make_dataset_for_each_individual:
+        if os.path.exists(self.dir_vectorized_data):
+            if not self.hudstats_enabled:
                 dirs_top_players = [Path(x[0]).stem for x in
                                     os.walk(self.dir_vectorized_data)][1:]
-                for i in range(1, self.num_top_players+1):
+                for i in range(1, self.num_top_players + 1):
                     # if no folder with name PlayerRank00i/ exists, return False
                     if not f'PlayerRank{str(i).zfill(3)}' in dirs_top_players:
                         return False
                 return True
-        # Otherwise simply return whether player pool vectorized data exists
-        return os.path.exists(self.dir_vectorized_data)
+            else:
+                dirs_top_players = [x for x in
+                                    os.walk(self.dir_vectorized_data)][0][2]
+                for i in range(1, self.num_top_players + 1):
+                    # if no folder with name PlayerRank00i/ exists, return False
+                    for fpath in dirs_top_players:
+                        exists_i = False
+                        if f'PlayerRank{str(i).zfill(3)}' in fpath:
+                            exists_i = True
+                            break
+                    if not exists_i:
+                        return False
+                return True
+        return False
 
     def exists_player_summary_data_for_all_selected_players(self):
         # Traverse for n selected players, if each has their own directory

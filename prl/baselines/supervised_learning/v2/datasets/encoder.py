@@ -493,6 +493,9 @@ class EncoderV2:
             self.env.overwrite_args(args)
             # will be used for naming feature index in training data vector
             self._feature_names = list(self.env.obs_idx_dict.keys())
+            if self.use_hudstats:
+                self._feature_names = [col.name.lower() for col in
+                                       list(FeaturesWithHudStats)]
             self.env.env.SMALL_BLIND = sb
             self.env.env.BIG_BLIND = bb
             self.env.env.ANTE = 0.0
