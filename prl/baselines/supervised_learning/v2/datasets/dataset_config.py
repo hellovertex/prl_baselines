@@ -243,13 +243,14 @@ class DatasetConfig:
 
     @property
     def file_top_n_players_min_showdowns(self):
-        """Path to .txt file containing python dictionary with Top N players and their
+        """Path to .json file containing python dictionary with Top N players and their
                 serialized `PlayerSelection` data."""
         DATA_DIR = DEFAULT_DATA_DIR if not self.DATA_DIR else self.DATA_DIR
         raw_dir = os.path.join(DATA_DIR, '01_raw')
         return os.path.join(raw_dir,
                             self.nl,
-                            f'top_{self.num_top_players}_players_min_showdowns={self.min_showdowns}.txt')
+                            f'top_{self.num_top_players}_players_min_showdowns='
+                            f'{self.min_showdowns}.json')
 
     def target_rounds_to_str(self):
         result = 'target_rounds='
