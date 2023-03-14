@@ -268,6 +268,31 @@ class TrainEval:
 
 def train_eval(params: TrainingParams,
                dataset_config: DatasetConfig,
-               dataset_filepath: str):
-    TrainEval(dataset_config).run(params, [dataset_filepath])
-    return f'Finished training from {dataset_filepath}'
+               dataset_filepaths: List[str]):
+    for file in dataset_filepaths:
+        TrainEval(dataset_config).run(params, [file])
+    return f'Finished training from {dataset_filepaths}'
+
+
+def run_parallel(params: TrainingParams,
+                 dataset_config: DatasetConfig,
+                 data_files: List[str]):
+    train_eval_fn = partial(train_eval, params=params, dataset_config=dataset_config)
+    x = 4  # parallelize chunks of 4, 20 players means 5 processes running parlal
+    chunks = []
+    current_chunk = []
+    i = 0
+    for file in data_files:
+        current_chunk.append(file)
+        if (i + 1) % x == 0:
+            chunks.append(current_chunk)
+            current_chunk = []
+        i += 1
+    start = time.time()
+    p = multiprocessing.Pool()
+    t0 = time.time()
+    # replace all 20 at the same time with only 4 of them at a time
+    for x in p.imap_unordered(train_eval_fn, chunks):
+        print(x + f'. Took {time.time() - t0} seconds')
+    print(f'Finished job after {time.time() - start} seconds.')
+    p.close()

@@ -11,7 +11,7 @@ from hydra import compose, initialize
 from omegaconf import DictConfig
 
 from prl.baselines.supervised_learning.v2.action_prediction.nn_training.train_eval import \
-    TrainEval, train_eval
+    TrainEval, train_eval, run_parallel
 from prl.baselines.supervised_learning.v2.action_prediction.nn_training.training_config import \
     TrainingParams
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import (
@@ -85,14 +85,7 @@ def main(num_top_players,
                            '/**/*.csv.bz2',
                            recursive=True)
     if dataset_config.make_dataset_for_each_individual:
-        train_eval_fn = partial(train_eval, params=params, dataset_config=dataset_config)
-        start = time.time()
-        p = multiprocessing.Pool()
-        t0 = time.time()
-        for x in p.imap_unordered(train_eval_fn, data_files):
-            print(x + f'. Took {time.time() - t0} seconds')
-        print(f'Finished job after {time.time() - start} seconds.')
-        p.close()
+        run_parallel(params, dataset_config, data_files)
     else:
         TrainEval(dataset_config).run(params, data_files)
 
