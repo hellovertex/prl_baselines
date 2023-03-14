@@ -344,7 +344,7 @@ arg_nl = click.option("--nl",
                            "Determines the data directory.")
 
 arg_make_dataset_for_each_individual = click.option("--make_dataset_for_each_individual",
-                                                    default=False,
+                                                    default=True,
                                                     type=bool,
                                                     help="If True, creates a designated directory per player for "
                                                          "training data. Defaults to False.")
