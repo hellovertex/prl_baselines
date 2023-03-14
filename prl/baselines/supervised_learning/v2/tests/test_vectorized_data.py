@@ -66,6 +66,10 @@ def test_vectorizer_output_directory_not_empty_for_individual_players(dataset_co
                                    nl=nl,
                                    from_gdrive_id=from_gdrive_id,
                                    DATA_DIR=data_dir)
+    dataset_config.hudstats_enabled = True
+    make_vectorized_data_if_not_exists_already(dataset_config, True)
+    assert dataset_config.exists_vectorized_data_for_all_selected_players()
+    dataset_config.hudstats_enabled = False
     make_vectorized_data_if_not_exists_already(dataset_config, True)
     assert dataset_config.exists_vectorized_data_for_all_selected_players()
 

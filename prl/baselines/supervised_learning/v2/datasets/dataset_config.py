@@ -179,7 +179,8 @@ class DatasetConfig:
         subdir_03_top_n_players = f'Top{self.num_top_players}Players_' \
                                   f'n_showdowns={self.min_showdowns}' if not \
             self.make_dataset_for_each_individual else ''
-        subdir_04_hudstats_toggled = f'with_hudstats' if self.hudstats_enabled else ''
+        subdir_04_hudstats_toggled = f'with_hudstats' if self.hudstats_enabled else \
+            'no_hudstats'
         return os.path.join(*[
             vectorized_dir,
             subdir_00_nl,
@@ -206,7 +207,8 @@ class DatasetConfig:
         subdir_03_top_n_players = f'Top{self.num_top_players}Players_' \
                                   f'n_showdowns={self.min_showdowns}' if not \
             self.make_dataset_for_each_individual else ''
-        subdir_04_hudstats_toggled = f'with_hudstats' if self.hudstats_enabled else ''
+        subdir_04_hudstats_toggled = f'with_hudstats' if self.hudstats_enabled else \
+            'no_hudstats'
         subdir_05_rounds = self.target_rounds_to_str()
         subdir_06_actions = self.actions_to_str()
         return os.path.join(*[
@@ -294,27 +296,28 @@ class DatasetConfig:
         # Traverse for n selected players, if each has their own directory
         #if self.make_dataset_for_each_individual:
         if os.path.exists(self.dir_vectorized_data):
-            if not self.hudstats_enabled:
-                dirs_top_players = [Path(x[0]).stem for x in
-                                    os.walk(self.dir_vectorized_data)][1:]
-                for i in range(1, self.num_top_players + 1):
-                    # if no folder with name PlayerRank00i/ exists, return False
-                    if not f'PlayerRank{str(i).zfill(3)}' in dirs_top_players:
-                        return False
-                return True
-            else:
-                dirs_top_players = [x for x in
-                                    os.walk(self.dir_vectorized_data)][0][2]
-                for i in range(1, self.num_top_players + 1):
-                    # if no folder with name PlayerRank00i/ exists, return False
-                    for fpath in dirs_top_players:
-                        exists_i = False
-                        if f'PlayerRank{str(i).zfill(3)}' in fpath:
-                            exists_i = True
-                            break
-                    if not exists_i:
-                        return False
-                return True
+            dirs_top_players = [x for x in
+                                os.walk(self.dir_vectorized_data)][0][2]
+            for i in range(1, self.num_top_players + 1):
+                # if no folder with name PlayerRank00i/ exists, return False
+                for fpath in dirs_top_players:
+                    exists_i = False
+                    if f'PlayerRank{str(i).zfill(3)}' in fpath:
+                        exists_i = True
+                        break
+                if not exists_i:
+                    return False
+            return True
+            # if not self.hudstats_enabled:
+            #     dirs_top_players = [x for x in
+            #                         os.walk(self.dir_vectorized_data)][0][2]
+            #     for i in range(1, self.num_top_players + 1):
+            #         # if no folder with name PlayerRank00i/ exists, return False
+            #         if not f'PlayerRank{str(i).zfill(3)}' in dirs_top_players:
+            #             return False
+            #     return True
+            # else:
+            #
         return False
 
     def exists_player_summary_data_for_all_selected_players(self):

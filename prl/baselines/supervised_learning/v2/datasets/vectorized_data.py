@@ -231,14 +231,16 @@ class VectorizedData:
                     storage.vectorized_player_pool_data_to_disk(training_data,
                                                                 labels,
                                                                 encoder.feature_names,
-                                                                file_suffix=file_suffix + str(
-                                                                    it))
+                                                                file_prefix=file_prefix,
+                                                                file_suffix=file_suffix
+                                                                )
                     training_data, labels = None, None
         storage.vectorized_player_pool_data_to_disk(training_data,
                                                     labels,
                                                     encoder.feature_names,
-                                                    file_suffix=file_suffix + str(
-                                                        it))
+                                                    file_prefix=file_prefix,
+                                                    file_suffix=file_suffix
+                                                    )
 
     def generate_missing(self,
                          encoder_cls: Type[EncoderV2] = EncoderV2,
