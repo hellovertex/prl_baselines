@@ -78,11 +78,11 @@ class InMemoryDataset(Dataset):
 
     def assert_correct_rounds(self, df):
         for stage in self.dataset_config.target_rounds:
-            name = 'round_' + stage.name.casefold()
+            name = 'Round_' + stage.name.casefold()
             assert (df[name] == 1).any()
         for stage in list(Stage):
             if stage not in self.dataset_config.target_rounds:
-                name = 'round_' + stage.name.casefold()
+                name = 'Round_' + stage.name.casefold()
                 assert not (df[name] == 1).any()
 
     def get_label_counts(self, df) -> List[int]:

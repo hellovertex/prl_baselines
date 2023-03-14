@@ -177,7 +177,7 @@ class EncoderV2:
         # then when computing vpip af pfr, use only hand_ids['player_name']
         hero_name = hero.name
 
-        hud = np.zeros(12)
+        hud = np.zeros(18)
         # In case the player did fold -- we do not have to run Monte Carlo
         # and simply set win_prob to 0.2, not 0 because we dont want to encode fold in obs
         if hero.cards is None:
@@ -196,8 +196,10 @@ class EncoderV2:
                 is_tight = 1 if d['vpip'] < .28 else 0
                 is_aggressive = 1 if d['af'] > 1 else 0
                 # maybe set is_aggressive
-                hud[(offset * 2)] += is_tight
-                hud[(offset * 2) + 1] += is_aggressive
+                hud[(offset * 2)] = is_tight
+                hud[(offset * 2) + 1] = is_aggressive
+            else:
+                hud[(offset * 2) + 2] = 1  # is_balanced_or_unknown
 
         return obs.tolist() + [win_prob] + hud.tolist()
 
@@ -488,7 +490,10 @@ class EncoderV2:
                                           starting_stack_sizes_list=stacks)
             self.env.overwrite_args(args)
             # will be used for naming feature index in training data vector
-            self._feature_names = list(self.env.obs_idx_dict.keys())
+            if not self.use_hudstats:
+                self._feature_names = list(self.env.obs_idx_dict.keys())
+            else:
+                self._feature_names = [col.name for col in FeaturesWithHudStats]
             self.env.env.SMALL_BLIND = sb
             self.env.env.BIG_BLIND = bb
             self.env.env.ANTE = 0.0

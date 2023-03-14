@@ -10,6 +10,7 @@ import pandas as pd
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.base import ActionSpace, ActionSpaceMinimal
 from prl.environment.Wrappers.utils import init_wrapped_env
+from prl.environment.Wrappers.vectorizer import AgentObservationType
 from tqdm import tqdm
 
 from prl.baselines.supervised_learning.v2.datasets.dataset_config import DatasetConfig, \
@@ -40,13 +41,15 @@ class PreprocessedData:
 
     def __init__(self,
                  dataset_config: DatasetConfig,
-                 parser_cls=ParseHsmithyTextToPokerEpisode):
+                 parser_cls=ParseHsmithyTextToPokerEpisode,
+                 agent_observation_mode=AgentObservationType.CARD_KNOWLEDGE):
         self.opt = dataset_config
         self.parser_cls = parser_cls
         dummy_env = init_wrapped_env(AugmentObservationWrapper,
                                      [5000 for _ in range(6)],
                                      blinds=(25, 50),
-                                     multiply_by=1)
+                                     multiply_by=1,
+                                     agent_observation_mode=agent_observation_mode)
         self.env = dummy_env
 
     def all_vectorized_data_has_been_preprocessed_before(self) -> bool:
@@ -108,8 +111,9 @@ class PreprocessedData:
                 if self.opt.action_space[0] is ActionSpaceMinimal:
                     df['label'].clip(upper=max(ActionSpaceMinimal), inplace=True)
                 elif self.opt.action_space[0] is ActionSpace:
-                    assert df['label'].min == min(ActionSpace).value
-                    assert df['label'].max == max(ActionSpace).value
+                    min_val = min(ActionSpace).value
+                    assert (min(df['label']) == min_val or min(df['label']) == min_val + 1)
+                    assert max(df['label']) == max(ActionSpace).value
                 elif isinstance(self.opt.action_space[0], ActionSpaceMinimal):
                     target_action = self.opt.action_space[0].value
                     df = df[df['label'] == target_action]
