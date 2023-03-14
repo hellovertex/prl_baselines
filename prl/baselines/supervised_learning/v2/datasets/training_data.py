@@ -38,11 +38,14 @@ from prl.baselines.supervised_learning.v2.datasets.utils import \
 
 class InMemoryDataset(Dataset):
     def __init__(self,
-                 dataset_config: DatasetConfig):
+                 dataset_config: DatasetConfig,
+                 csv_files=None):
         self.dataset_config = dataset_config
-        csv_files = glob.glob(dataset_config.dir_preprocessed_data + '/**/*.csv.bz2',
-                              recursive=True)
+        if csv_files is None:
+            csv_files = glob.glob(dataset_config.dir_preprocessed_data + '/**/*.csv.bz2',
+                                  recursive=True)
         df_total = pd.DataFrame()
+        # todo: monkey patch training for selected player
         for file in csv_files:
             df = pd.read_csv(file,
                              sep=',',
@@ -74,7 +77,8 @@ class InMemoryDataset(Dataset):
         num_unique_labels = len(self.label_counts)
         act = self.dataset_config.action_space[0]
         if act is ActionSpace:
-            assert num_unique_labels == len(ActionSpace) or num_unique_labels == len(ActionSpace) - 1
+            assert num_unique_labels == len(ActionSpace) or num_unique_labels == len(
+                ActionSpace) - 1
         elif act is ActionSpaceMinimal:
             assert num_unique_labels == len(ActionSpaceMinimal)
         elif isinstance(act, ActionSpaceMinimal):
@@ -131,10 +135,12 @@ def get_label_weights(dataset: InMemoryDataset,
     return weights
 
 
-def get_datasets(dataset_config: DatasetConfig, use_multiprocessing=True):
+def get_datasets(dataset_config: DatasetConfig,
+                 csv_files,
+                 use_multiprocessing=True):
     make_preprocessed_data_if_not_exists_already(dataset_config, use_multiprocessing)
     # dataset = OutOfMemoryDatasetV2(input_dir, chunk_size=1)
-    dataset = InMemoryDataset(dataset_config)
+    dataset = InMemoryDataset(dataset_config, csv_files=csv_files)
     total_len = len(dataset)
     train_len = math.ceil(len(dataset) * 0.92)
     test_len = total_len - train_len

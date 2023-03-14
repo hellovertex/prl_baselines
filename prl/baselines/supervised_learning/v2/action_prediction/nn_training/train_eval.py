@@ -1,5 +1,6 @@
 # traineval consider making class
 import logging
+from typing import List
 
 import torch
 
@@ -72,15 +73,19 @@ class TrainEval:
         self.writer = None
         self.model = None
         self.optim = None
+        self.target_player = None
 
     def initialize_training(self, params, hdims, lr):
+        target_player = ''
+        if self.target_player is not None:
+            target_player = self.target_player
         self.logdir = os.path.join(
-            params.results_dir(self.dataset_config, hdims, lr),
-            'logdir'
+            *[params.results_dir(self.dataset_config, hdims, lr),
+              'logdir', target_player]
         )
         self.ckptdir = os.path.join(
-            params.results_dir(self.dataset_config, hdims, lr),
-            'ckptdir')
+            *[params.results_dir(self.dataset_config, hdims, lr),
+              'ckptdir', target_player])
         self.model = get_model(input_dim=params.input_dim,
                                output_dim=params.output_dim,
                                hdims=hdims,
@@ -103,7 +108,7 @@ class TrainEval:
         self.optim.step()
         return pred, loss
 
-    def run(self, params: TrainingParams):
+    def run(self, params: TrainingParams, csv_files: List[str]):
         # 1. Make dataset, from scratch if necessary
         # (downloading, extracting, encoding, vectorizing, preprocessing, train/test
         # splitting)
@@ -112,7 +117,10 @@ class TrainEval:
         label_names = params.label_names
         self.device = params.device
         self.use_cuda = True if 'cuda' in self.device else False
-        traindataset, testdataset, label_weights = get_datasets(self.dataset_config)
+        if len(csv_files) == 1:
+            self.target_player = Path(csv_files[0]).stem
+        traindataset, testdataset, label_weights = get_datasets(self.dataset_config,
+                                                                csv_files)
         train_dataloader = DataLoader(traindataset,
                                       batch_size=params.batch_size,
                                       shuffle=True)
@@ -169,7 +177,7 @@ class TrainEval:
                                                    global_step=it_train_global)
                             self.writer.add_scalar(tag='Training_Accuracy',
                                                    scalar_value=(
-                                                                            100.0 * correct) / n_samples,
+                                                                        100.0 * correct) / n_samples,
                                                    global_step=it_train_global)
                             print(f"\nTrain set: "
                                   f"Average loss: {round(total_loss / it_log, 4)}, "
@@ -256,3 +264,10 @@ class TrainEval:
                         it_train_global += 1
                         it_log += 1
                         it_eval += 1
+
+
+def train_eval(params: TrainingParams,
+               dataset_config: DatasetConfig,
+               dataset_filepath: str):
+    TrainEval(dataset_config).run(params, [dataset_filepath])
+    return f'Finished training from {dataset_filepath}'
