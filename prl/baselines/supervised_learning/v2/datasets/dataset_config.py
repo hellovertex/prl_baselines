@@ -1,6 +1,7 @@
 import enum
 import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import List, Optional, Union, Type
 
 import click
@@ -279,8 +280,9 @@ class DatasetConfig:
 
     def exists_raw_data_for_all_selected_players(self):
         if os.path.exists(self.dir_raw_data_top_players):
-            dirs_top_players = [x[0] for x in os.walk(self.dir_raw_data_top_players)]
-            for i in range(self.num_top_players):
+            dirs_top_players = [Path(x[0]).stem for x in os.walk(
+                self.dir_raw_data_top_players)][1:]
+            for i in range(1, self.num_top_players+1):
                 # if no folder with name PlayerRank00i/ exists, return False
                 if not f'PlayerRank{str(i).zfill(3)}' in dirs_top_players:
                     return False
@@ -291,8 +293,9 @@ class DatasetConfig:
         # Traverse for n selected players, if each has their own directory
         if self.make_dataset_for_each_individual:
             if os.path.exists(self.dir_vectorized_data):
-                dirs_top_players = [x[0] for x in os.walk(self.dir_vectorized_data)]
-                for i in range(self.num_top_players):
+                dirs_top_players = [Path(x[0]).stem for x in
+                                    os.walk(self.dir_vectorized_data)][1:]
+                for i in range(1, self.num_top_players+1):
                     # if no folder with name PlayerRank00i/ exists, return False
                     if not f'PlayerRank{str(i).zfill(3)}' in dirs_top_players:
                         return False
@@ -303,8 +306,9 @@ class DatasetConfig:
     def exists_player_summary_data_for_all_selected_players(self):
         # Traverse for n selected players, if each has their own directory
         if os.path.exists(self.dir_player_summaries):
-            dirs_top_players = [x[0] for x in os.walk(self.dir_player_summaries)]
-            for i in range(self.num_top_players):
+            dirs_top_players = [Path(x[0]).stem for x in
+                                os.walk(self.dir_player_summaries)][1:]
+            for i in range(1, self.num_top_players+1):
                 # if no folder with name PlayerRank00i/ exists, return False
                 if not f'PlayerRank{str(i).zfill(3)}' in dirs_top_players:
                     return False
@@ -362,9 +366,9 @@ arg_min_showdowns = click.option("--min_showdowns",
 arg_target_rounds = click.option("--target_rounds",
                                  multiple=True,
                                  default=[Stage.PREFLOP.value,
-                                 Stage.FLOP.value,
-                                 Stage.TURN.value,
-                                 Stage.RIVER.value],
+                                          Stage.FLOP.value,
+                                          Stage.TURN.value,
+                                          Stage.RIVER.value],
                                  type=int,
                                  help="Preprocessing will reduce data to the rounds specified. Possible values: "
                                       "Stage.PREFLOP.value: 0\nStage.FLOP.value: 1"

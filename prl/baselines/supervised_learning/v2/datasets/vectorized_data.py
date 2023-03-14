@@ -229,7 +229,6 @@ class VectorizedData:
             logging.info(f'*** Finished job after {time.time() - start} seconds. ***')
             p.close()
         else:
-            # raise NotImplementedError
             logging.info('Starting handhistory encoding without multiprocessing...')
             for filename in files:
                 type(self).generate_vectorized_hand_histories_from_file(

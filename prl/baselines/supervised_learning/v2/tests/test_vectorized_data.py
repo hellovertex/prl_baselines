@@ -5,6 +5,7 @@ from typing import List
 import numpy as np
 import pytest
 from prl.environment.Wrappers.utils import init_wrapped_env
+from prl.environment.Wrappers.vectorizer import AgentObservationType
 
 from prl.baselines.deprecated.fast_hsmithy_parser import ParseHsmithyTextToPokerEpisode
 from prl.baselines.evaluation.utils import get_player_cards, get_board_cards
@@ -60,7 +61,8 @@ def encoder():
     dummy_env = init_wrapped_env(AugmentObservationWrapper,
                                  [5000 for _ in range(6)],
                                  blinds=(25, 50),
-                                 multiply_by=1)
+                                 multiply_by=1,
+                                 agent_observation_mode=AgentObservationType.CARD_KNOWLEDGE)
     return EncoderV2(dummy_env)
 
 

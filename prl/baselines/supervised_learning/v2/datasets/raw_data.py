@@ -2,6 +2,7 @@ import glob
 import logging
 import os
 import re
+from pathlib import Path
 from typing import Optional
 
 import click
@@ -48,6 +49,9 @@ class RawData:
                      f'Downloading using gdrive_id {opt.from_gdrive_id}')
 
         path_to_zipfile = os.path.join(opt.DATA_DIR, *['00_tmp', 'bulk_hands.zip'])
+        if not os.path.exists(Path(path_to_zipfile).parent):
+            os.makedirs(Path(path_to_zipfile).parent, exist_ok=True)
+
         # 1. download .zip file from gdrive to disk
         gdown.download(id=opt.from_gdrive_id,
                        # must end with .zip
