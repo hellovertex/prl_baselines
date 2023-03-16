@@ -23,7 +23,6 @@ def make_experiment(max_episodes,
                                 [starting_stack for _ in range(len(agent_names))],
                                 blinds=(25, 50),
                                 multiply_by=1)
-
     assert len(agents) == num_players
     participants = make_participants(agents=agents,
                                      agent_names=agent_names,

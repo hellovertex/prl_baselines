@@ -66,7 +66,7 @@ class PokerExperimentRunner(ExperimentRunner):
         board = self.backend.cards2str(self.backend.board)
         return f"[{board.replace(',', '').rstrip()}]"
 
-    def _get_starting_stacks_relative_to_agents(self) -> List[PlayerStack]:
+    def  _get_starting_stacks_relative_to_agents(self) -> List[PlayerStack]:
         """ Stacks at the beginning of every episode, not during or after."""
         # seats are gotten from the environment and start with the button
         # our agent who has the button can be at a different index than 0 in our agent list
@@ -232,6 +232,7 @@ class PokerExperimentRunner(ExperimentRunner):
         observation = initial_observation
         # determine who goes first
         agent_idx = self.agent_map[self.backend.current_player.seat_id]
+
         # --- SOURCE OF ACTIONS ---
         actions_total = {'preflop': [],
                          'flop': [],
