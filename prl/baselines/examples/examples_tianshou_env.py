@@ -1,7 +1,7 @@
 from copy import deepcopy
 from enum import IntEnum
 from functools import partial
-from typing import Tuple, List, Union, Optional
+from typing import Tuple, List, Union, Optional, Dict
 
 import gym
 import numpy as np
