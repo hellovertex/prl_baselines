@@ -239,7 +239,7 @@ class HSmithyStats:
     def split_next_round(self, stringval):
         return True
 
-    def _compute_stats(self, hands_played):
+    def compute_stats(self, hands_played):
         for current in hands_played:  # c for current_hand
             # Only parse hands that went to Showdown stage, i.e. were shown
             # skip hands without target player
@@ -257,4 +257,4 @@ class HSmithyStats:
                   encoding='utf-8') as f:  # pylint: disable=invalid-name,unspecified-encoding
             hand_database = f.read()
             hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
-            self._compute_stats(hands_played)
+            self.compute_stats(hands_played)
