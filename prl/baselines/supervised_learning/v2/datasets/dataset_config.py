@@ -419,7 +419,7 @@ arg_seed_dataset = click.option("--seed",
                                 help="Seed used to generate dataset and datasplit using"
                                      "torch.Generator().manual_seed(seed)")
 arg_hudstats = click.option("--hudstats",
-                            default=False,
+                            default=True,
                             type=bool,
                             help="Extends observations by player statistics and hand "
                                  "strength")

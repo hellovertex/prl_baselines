@@ -1,12 +1,12 @@
 #dataset_configs:
 #  - PFTR_no_folds_all_showdowns_with_hudstats_ActionSpace
 # early stopping - whatever is triggered first
-max_epochs: 10_000
-max_env_steps: 100_000_000_000
+max_epochs: 100_000
+max_env_steps: 10_000_000_000
 # model params
 device: 'cuda'  # 'cuda' or 'cpu'
-# input_dim: 588  # == len(AugmentObservationFeatureColumns)
-input_dim: 569  # == len(AugmentObservationFeatureColumns)
+# input_dim: 569  # == len(AugmentObservationFeatureColumns)
+input_dim: 588  # == len(AugmentObservationFeatureColumns)
 # FOLD, CHECK_CALL, RAISE
 output_dim: 7  # 1<= output_dim <= len(ActionSpace)
 #target_names_full = ['Fold',
@@ -49,8 +49,8 @@ lrs:
   - 1e-6
 hdims:
   - 512
-batch_size: 256
+batch_size: 512
 # progress
-log_interval: 500  # log every `n` batches of size `batch_size`
-eval_interval: 1000  # log every `n` batches of size `batch_size`
+log_interval: 10  # log every `n` batches of size `batch_size`
+eval_interval: 10  # log every `n` batches of size `batch_size`
 debug: False

@@ -163,7 +163,7 @@ class TrainEval:
                         # ------------------------
                         # ------- LOGGING --------
                         # ------------------------
-                        if it_log % params.log_interval == 0:
+                        if epoch % params.log_interval == 0:
                             f1 = f1_score(y.data.cpu(),
                                           pred.cpu(),
                                           average='weighted')
@@ -190,7 +190,7 @@ class TrainEval:
                         # ---- CHECKPOINTING -----
                         # ------------------------
                         # evaluate once (i==0) every epoch (j % eval_interval)
-                        if it_eval % params.eval_interval == 0:
+                        if epoch % params.eval_interval == 0:
                             self.model.eval()
                             test_loss = 0
                             test_correct = 0
@@ -244,7 +244,18 @@ class TrainEval:
                                                            labels=labels,
                                                            target_names=label_names,
                                                            output_dict=True)
-
+                            self.writer.add_scalar(tag='Test_Loss',
+                                                   scalar_value=test_loss,
+                                                   global_step=it_train_global)
+                            f1_test = f1_score(y.data.cpu(),
+                                               pred.cpu(),
+                                               average='weighted')
+                            self.writer.add_scalar(tag='Test_F1_score',
+                                                   scalar_value=f1_test,
+                                                   global_step=it_train_global)
+                            self.writer.add_scalar(tag='Test_Accuracy',
+                                                   scalar_value=test_accuracy,
+                                                   global_step=it_train_global)
                             for name, values in report.items():
                                 if name in label_names:
                                     self.writer.add_scalar(
@@ -266,9 +277,10 @@ class TrainEval:
                         it_eval += 1
 
 
-def train_eval(params: TrainingParams,
-               dataset_config: DatasetConfig,
-               dataset_filepaths: List[str]):
+def train_eval(dataset_filepaths: List[str],
+               params: TrainingParams,
+               dataset_config: DatasetConfig
+               ):
     for file in dataset_filepaths:
         TrainEval(dataset_config).run(params, [file])
     return f'Finished training from {dataset_filepaths}'
@@ -278,7 +290,7 @@ def run_parallel(params: TrainingParams,
                  dataset_config: DatasetConfig,
                  data_files: List[str]):
     train_eval_fn = partial(train_eval, params=params, dataset_config=dataset_config)
-    x = 4  # parallelize chunks of 4, 20 players means 5 processes running parlal
+    x = 5  # parallelize chunks of 4, 20 players means 5 processes running parlal
     chunks = []
     current_chunk = []
     i = 0

@@ -38,7 +38,8 @@ class TianshouEnvWrapper(AECEnv):
                  env,
                  agents: List[str],
                  mc_ckpt_path: Optional[str],
-                 reward_type: RewardType = RewardType.ABSOLUTE, ):
+                 reward_type: RewardType = RewardType.ABSOLUTE,
+                 debug_reset_config_state_dict: Optional[Dict] = None):
         super().__init__()
         self.name = "env"
         self.reward_type = reward_type
@@ -47,6 +48,7 @@ class TianshouEnvWrapper(AECEnv):
         self.possible_agents = self.agents[:]
         self.num_players = len(self.possible_agents)
         self.env_wrapped = env  # AugmentObservationWrapper
+        self.debug_reset_config_state_dict = debug_reset_config_state_dict
         self.BIG_BLIND = self.env_wrapped.env.BIG_BLIND
         if mc_ckpt_path:
             self._mc_agent = MCAgent(
@@ -117,6 +119,8 @@ class TianshouEnvWrapper(AECEnv):
         if options:
             if 'reset_config' in options:
                 reset_config = options['reset_config']
+        if self.debug_reset_config_state_dict is not None:
+            reset_config = self.debug_reset_config_state_dict
         obs, rew, done, info = self.env_wrapped.reset(reset_config)
         player_id = self.agent_map[self.env_wrapped.env.current_player.seat_id]
         player = self._int_to_name(player_id)
@@ -260,12 +264,14 @@ def make_vectorized_pettingzoo_env(num_envs: int,
                                    agent_names: List[str],
                                    mc_model_ckpt_path: str,
                                    reward_type: RewardType = RewardType.MBB,
+                                   debug_reset_config_state_dict: Optional[Dict] = None,
                                    ) -> Tuple[SubprocVectorEnv, PettingZooEnv]:
     assert len(agent_names) == len(single_env_config['stack_sizes'])
     env = TianshouEnvWrapper(env=make_env(single_env_config),
                              agents=agent_names,
                              reward_type=reward_type,
-                             mc_ckpt_path=None)
+                             mc_ckpt_path=None,
+                             debug_reset_config_state_dict=debug_reset_config_state_dict)
     wrapped_env_fn = partial(PettingZooEnv, WrappedEnv(env))
     wrapped_env = PettingZooEnv(WrappedEnv(env))
     venv = SubprocVectorEnv([wrapped_env_fn for _ in range(num_envs)])
