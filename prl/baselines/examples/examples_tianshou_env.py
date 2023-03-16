@@ -18,7 +18,7 @@ from tianshou.env.venvs import SubprocVectorEnv
 from prl.baselines.agents.mc_agent import MCAgent
 from prl.baselines.agents.tianshou_policies import MultiAgentActionFlags
 from prl.baselines.evaluation.core.experiment import ENV_WRAPPER
-
+from omegaconf import DictConfig
 
 class RewardType(IntEnum):
     MBB = 0
@@ -260,7 +260,7 @@ def make_env(cfg):
 
 
 def make_vectorized_pettingzoo_env(num_envs: int,
-                                   single_env_config: dict,
+                                   single_env_config: Union[dict, DictConfig],
                                    agent_names: List[str],
                                    mc_model_ckpt_path: str,
                                    reward_type: RewardType = RewardType.MBB,
