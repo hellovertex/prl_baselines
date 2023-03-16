@@ -603,10 +603,17 @@ class Evaluation:
             stats_per_player[hero_name] = stats
         return stats_per_player
 
-    def maybe_write_to_disk(self, save_to_abs_path, episodes: List[SnowieEpisode]):
-        path_out = save_to_abs_path if save_to_abs_path is not None else './tmp'
-        self._storage.export_to_text_file(snowie_episodes=episodes,
-                                          path_out=path_out)
+    def maybe_write_to_disk(
+            self,
+            save_to_abs_path, episodes_per_target: Dict[str, List[SnowieEpisode]]):
+        for hero_name, episodes in episodes_per_target.items():
+            path_out = save_to_abs_path if save_to_abs_path is not None else f'./tmp/' \
+                                                                             f'' \
+                                                                             f'{hero_name}'
+            if not os.path.exists(path_out):
+                os.makedirs(path_out, exist_ok=True)
+            self._storage.export_to_text_file(snowie_episodes=episodes,
+                                              path_out=path_out)
 
     def run(self,
             n_episodes=1000,
@@ -625,7 +632,7 @@ class Evaluation:
         # record stats
         stats = self.compute_stats(snowie_episodes_per_target)
         # write either to tmp/ or persist .txt files if requested
-        self.maybe_write_to_disk(save_to_abs_path, episodes)
+        self.maybe_write_to_disk(save_to_abs_path, snowie_episodes_per_target)
         # record mbbh
         # record ranges
 
