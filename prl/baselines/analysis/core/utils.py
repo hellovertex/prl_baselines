@@ -1,5 +1,6 @@
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
+from prl.environment.Wrappers.vectorizer import AgentObservationType
 
 from prl.baselines.agents.tianshou_agents import BaselineAgent
 from prl.baselines.analysis.core.stats import PlayerStats
@@ -21,6 +22,7 @@ def make_experiment(max_episodes,
     normalization = env.env.env.env_wrapped.normalization
     test_env = init_wrapped_env(AugmentObservationWrapper,
                                 [starting_stack for _ in range(len(agent_names))],
+                                agent_observation_mode=AgentObservationType.CARD_KNOWLEDGE,
                                 blinds=(25, 50),
                                 multiply_by=1)
     assert len(agents) == num_players
@@ -31,7 +33,6 @@ def make_experiment(max_episodes,
     stats = [PlayerStats(pname=pname) for pname in agent_names]
     # run self play
     experiment = PokerExperiment(
-        # env
         wrapped_env=env,  # single environment to run sequential games on
         num_players=num_players,
         starting_stack_sizes=[starting_stack for _ in range(num_players)],
@@ -44,9 +45,7 @@ def make_experiment(max_episodes,
         cbs_metrics=[],
         options={'stats': stats,
                  'test_env': test_env},
-        # actors
         participants=participants,  # wrapper around agents that hold rllib policies that act given observation
         from_action_plan=None,  # compute action from fixed series of actions instead of calls to agent.act
-        # early_stopping_when=PokerExperiment_EarlyStopping.ALWAYS_REBUY_AND_PLAY_UNTIL_NUM_EPISODES_REACHED
     )
     return experiment
