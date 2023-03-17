@@ -87,6 +87,7 @@ class TianshouEnvWrapper(AECEnv):
         return self.action_spaces[agent]
 
     def observe(self, agent: str) -> Optional[ObsType]:
+        # return {"observation": self._last_obs[agent], "action_mask": self.next_legal_moves}
         return {"observation": self._last_obs, "action_mask": self.next_legal_moves}
         # raise NotImplementedError
 
@@ -145,14 +146,17 @@ class TianshouEnvWrapper(AECEnv):
         )
         self.infos = self._convert_to_dict(
             [{"legal_moves": [],
-              "info": info} for _ in range(self.num_agents)]
-            # "info": []} for _ in range(self.num_agents)]
+              #"info": info} for _ in range(self.num_agents)]
+            "info": []} for _ in range(self.num_agents)]
         )
         legal_moves = np.array([0, 0, 0, 0, 0, 0, 0, 0])
         legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
         if legal_moves[2] == 1:
             legal_moves[3:] = 1
         self.next_legal_moves = legal_moves
+        # if not hasattr(self, _last_obs):
+        #     self._last_obs = {}
+        # self._last_obs[player] = obs
         self._last_obs = obs
 
     def step(self, action):
@@ -166,8 +170,10 @@ class TianshouEnvWrapper(AECEnv):
             return self._was_dead_step(action)
         prev = self.env_wrapped.env.current_player.seat_id
         obs, rew, done, info = self.env_wrapped.step(action)
+        #self._last_obs[self.agent_selection] = obs
         self._last_obs = obs
-        next_player_id = self.env_wrapped.env.current_player.seat_id
+        # next_player_id = self.env_wrapped.env.current_player.seat_id
+        next_player_id = (prev + 1) % self.num_players
         next_player_id = self.agent_map[next_player_id]
         next_player = self._int_to_name(next_player_id)
         # ~~roll button to correct position [BTN,...,] to [,...,BTN,...]~~
@@ -208,8 +214,8 @@ class TianshouEnvWrapper(AECEnv):
 
         self.infos = self._convert_to_dict(
             [{"legal_moves": [],
-              "info": info} for _ in range(self.num_agents)]
-            # "info": []} for _ in range(self.num_agents)]
+              #"info": info} for _ in range(self.num_agents)]
+            "info": []} for _ in range(self.num_agents)]
         )
         self._cumulative_rewards[self.agent_selection] = 0
         self.agent_selection = next_player
