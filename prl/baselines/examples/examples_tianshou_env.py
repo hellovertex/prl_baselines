@@ -76,6 +76,7 @@ class TianshouEnvWrapper(AECEnv):
         for i in range(self.num_players):
             self.agent_map[i] = i
         self.btn = self.agent_map[0]
+        self._last_obs = {}
 
     def seed(self, seed: Optional[int] = None) -> None:
         self.seed = np.random.seed(seed)
@@ -88,7 +89,8 @@ class TianshouEnvWrapper(AECEnv):
 
     def observe(self, agent: str) -> Optional[ObsType]:
         # return {"observation": self._last_obs[agent], "action_mask": self.next_legal_moves}
-        return {"observation": self._last_obs, "action_mask": self.next_legal_moves}
+        return {"observation": self._last_obs[agent], "action_mask":
+            self.next_legal_moves}
         # raise NotImplementedError
 
     def render(self) -> Union[None, np.ndarray, str, list]:
@@ -146,18 +148,16 @@ class TianshouEnvWrapper(AECEnv):
         )
         self.infos = self._convert_to_dict(
             [{"legal_moves": [],
-              #"info": info} for _ in range(self.num_agents)]
-            "info": []} for _ in range(self.num_agents)]
+              # "info": info} for _ in range(self.num_agents)]
+              "info": []} for _ in range(self.num_agents)]
         )
         legal_moves = np.array([0, 0, 0, 0, 0, 0, 0, 0])
         legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
         if legal_moves[2] == 1:
             legal_moves[3:] = 1
         self.next_legal_moves = legal_moves
-        # if not hasattr(self, _last_obs):
-        #     self._last_obs = {}
-        # self._last_obs[player] = obs
-        self._last_obs = obs
+        self._last_obs[self.agent_selection] = obs
+        # self._last_obs = obs
 
     def step(self, action):
         # if isinstance(action, tuple):
@@ -170,12 +170,12 @@ class TianshouEnvWrapper(AECEnv):
             return self._was_dead_step(action)
         prev = self.env_wrapped.env.current_player.seat_id
         obs, rew, done, info = self.env_wrapped.step(action)
-        #self._last_obs[self.agent_selection] = obs
-        self._last_obs = obs
         # next_player_id = self.env_wrapped.env.current_player.seat_id
         next_player_id = (prev + 1) % self.num_players
         next_player_id = self.agent_map[next_player_id]
         next_player = self._int_to_name(next_player_id)
+        # self._last_obs = obs
+        self._last_obs[next_player] = obs
         # ~~roll button to correct position [BTN,...,] to [,...,BTN,...]~~
         # ~~roll relative to observer not to button~~
         # roll back to starting agent i.e. that reward of self.agents[0] is at 0
@@ -191,7 +191,18 @@ class TianshouEnvWrapper(AECEnv):
             self._scale_rewards(rewards)
         )
         if done:
-
+            # make observation for all players, so that everybody can see final
+            #  cards
+            # todo call augment.get_current_obs(offset,...)
+            last_player_who_acted = self._int_to_name(self.agent_map[prev])
+            self._last_obs[last_player_who_acted] = obs
+            for i in range(1, self.num_players):
+                prev_player_id = (prev - i) % self.num_players
+                prev_player_id = self.agent_map[prev_player_id]
+                prev_player_id = self._int_to_name(prev_player_id)
+                self._last_obs[prev_player_id] = self.env_wrapped.get_current_obs(
+                    obs, backward_offset=i
+            )
             self.terminations = self._convert_to_dict(
                 [True for _ in range(self.num_agents)]
             )
@@ -214,11 +225,15 @@ class TianshouEnvWrapper(AECEnv):
 
         self.infos = self._convert_to_dict(
             [{"legal_moves": [],
-              #"info": info} for _ in range(self.num_agents)]
-            "info": []} for _ in range(self.num_agents)]
+              # "info": info} for _ in range(self.num_agents)]
+              "info": []} for _ in range(self.num_agents)]
         )
         self._cumulative_rewards[self.agent_selection] = 0
-        self.agent_selection = next_player
+        if not done:
+            self.agent_selection = next_player
+        else:
+            # make sure last observation does not get rolled, so player can see cards
+            self.agent_selection = last_player_who_acted
         self._accumulate_rewards()
         self._deads_step_first()
 
