@@ -178,11 +178,11 @@ class TianshouEnvWrapper(AECEnv):
             rpay[self.agent_map[k]] = v
         info['payouts'] = payouts
         # update button with (agent_idx + 1) % self.num_players inseat of (agent_idx - 1) % self.num_players
-
+        self.rewards = self._convert_to_dict(
+            self._scale_rewards(rewards)
+        )
         if done:
-            self.rewards = self._convert_to_dict(
-                self._scale_rewards(rewards)
-            )
+
             self.terminations = self._convert_to_dict(
                 [True for _ in range(self.num_agents)]
             )
