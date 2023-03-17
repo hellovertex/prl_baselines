@@ -20,6 +20,7 @@ from prl.baselines.agents.tianshou_policies import MultiAgentActionFlags
 from prl.baselines.evaluation.core.experiment import ENV_WRAPPER
 from omegaconf import DictConfig
 
+
 class RewardType(IntEnum):
     MBB = 0
     ABSOLUTE = 1
@@ -60,7 +61,8 @@ class TianshouEnvWrapper(AECEnv):
         # if 'mask_legal_moves' in env_config:
         #     if env_config['mask_legal_moves']:
         observation_space = gym.spaces.Dict({
-            'obs': obs_space,  # do not change key-name 'obs' it is internally used by rllib (!)
+            'obs': obs_space,
+            # do not change key-name 'obs' it is internally used by rllib (!)
             'action_mask': Box(low=0, high=1, shape=(3,), dtype=int)
             # one-hot encoded [FOLD, CHECK_CALL, RAISE]
         })
@@ -144,7 +146,7 @@ class TianshouEnvWrapper(AECEnv):
         self.infos = self._convert_to_dict(
             [{"legal_moves": [],
               "info": info} for _ in range(self.num_agents)]
-              #"info": []} for _ in range(self.num_agents)]
+            # "info": []} for _ in range(self.num_agents)]
         )
         legal_moves = np.array([0, 0, 0, 0, 0, 0, 0, 0])
         legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
@@ -171,7 +173,8 @@ class TianshouEnvWrapper(AECEnv):
         # ~~roll button to correct position [BTN,...,] to [,...,BTN,...]~~
         # ~~roll relative to observer not to button~~
         # roll back to starting agent i.e. that reward of self.agents[0] is at 0
-        rewards = np.roll(rew, -self.agent_map[0])  # roll -self.agent_map[0] instead if we chose to
+        rewards = np.roll(rew, -self.agent_map[
+            0])  # roll -self.agent_map[0] instead if we chose to
         payouts = info['payouts']
         rpay = {}
         for k, v in payouts.items():
@@ -206,7 +209,7 @@ class TianshouEnvWrapper(AECEnv):
         self.infos = self._convert_to_dict(
             [{"legal_moves": [],
               "info": info} for _ in range(self.num_agents)]
-              #"info": []} for _ in range(self.num_agents)]
+            # "info": []} for _ in range(self.num_agents)]
         )
         self._cumulative_rewards[self.agent_selection] = 0
         self.agent_selection = next_player
@@ -238,7 +241,8 @@ def make_default_tianshou_env(num_players=2,
     env_config = {"env_wrapper_cls": AugmentObservationWrapper,
                   # "stack_sizes": [100, 125, 150, 175, 200, 250],
                   "stack_sizes": stack_sizes,
-                  "multiply_by": 1,  # use 100 for floats to remove decimals but we have int stacks
+                  "multiply_by": 1,
+                  # use 100 for floats to remove decimals but we have int stacks
                   "scale_rewards": False,  # we do this ourselves
                   "blinds": blinds,
                   "agent_observation_mode": AgentObservationType.CARD_KNOWLEDGE}
@@ -272,7 +276,15 @@ def make_vectorized_pettingzoo_env(num_envs: int,
                              reward_type=reward_type,
                              mc_ckpt_path=None,
                              debug_reset_config_state_dict=debug_reset_config_state_dict)
-    wrapped_env_fn = partial(PettingZooEnv, WrappedEnv(env))
+
+    def wrapped_env_fn():
+        return PettingZooEnv(WrappedEnv(TianshouEnvWrapper(env=make_env(
+            single_env_config),
+            agents=agent_names,
+            reward_type=reward_type,
+            mc_ckpt_path=None,
+            debug_reset_config_state_dict=debug_reset_config_state_dict)))
+
     wrapped_env = PettingZooEnv(WrappedEnv(env))
     venv = SubprocVectorEnv([wrapped_env_fn for _ in range(num_envs)])
     return venv, wrapped_env
