@@ -12,7 +12,7 @@ def test_stats_are_correct():
     # run single evaluation episode
     eval = Evaluation(record_stats=True)
     eval.agents = agents
-    eval.run(n_episodes=1)
+    eval.run(n_episodes=1, eval_agent_target_indices=agent_ids_to_inspect)
     # assert vpip is 1 for caller and 0 for always fold
     # run multiple even number of rounds and assert .5 and 0
 
