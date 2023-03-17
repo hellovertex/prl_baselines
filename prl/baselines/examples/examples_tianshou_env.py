@@ -19,7 +19,15 @@ from prl.baselines.agents.mc_agent import MCAgent
 from prl.baselines.agents.tianshou_policies import MultiAgentActionFlags
 from prl.baselines.evaluation.core.experiment import ENV_WRAPPER
 from omegaconf import DictConfig
+from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols
 
+
+def get_cards(obs):
+    one_hot_card_bit_range = slice(
+        cols.First_player_card_0_rank_0, cols.First_player_card_1_suit_3 + 1
+    )
+    # observer cards are always at position 0
+    return np.where(obs[one_hot_card_bit_range] == 1)
 
 class RewardType(IntEnum):
     MBB = 0
@@ -176,14 +184,6 @@ class TianshouEnvWrapper(AECEnv):
         next_player = self._int_to_name(next_player_id)
         # make observation for all players, so that everybody can see final
         #  cards
-        for i in range(1, self.num_players):
-            prev_player_id = (prev - i) % self.num_players
-            prev_player_id = self.agent_map[prev_player_id]
-            prev_player_id = self._int_to_name(prev_player_id)
-            self._last_obs[prev_player_id] = self.env_wrapped.get_current_obs(
-                obs, backward_offset=i
-            )
-        self._last_obs[next_player] = obs
         # ~~roll button to correct position [BTN,...,] to [,...,BTN,...]~~
         # ~~roll relative to observer not to button~~
         # roll back to starting agent i.e. that reward of self.agents[0] is at 0
@@ -199,16 +199,24 @@ class TianshouEnvWrapper(AECEnv):
             self._scale_rewards(rewards)
         )
         if done:
-            # todo call augment.get_current_obs(offset,...)
+            # if env is not done, obs is for next player, otherwise obs is for same player
+            for i in range(1, self.num_players):
+                prev_player_id = (prev - i) % self.num_players
+                prev_player_id = self.agent_map[prev_player_id]
+                prev_player_id = self._int_to_name(prev_player_id)
+                self._last_obs[prev_player_id] = self.env_wrapped.get_current_obs(
+                    obs, backward_offset=i
+            )
             last_player_who_acted = self._int_to_name(self.agent_map[prev])
             self._last_obs[last_player_who_acted] = obs
-
             self.terminations = self._convert_to_dict(
                 [True for _ in range(self.num_agents)]
             )
             self.truncations = self._convert_to_dict(
                 [False for _ in range(self.num_agents)]
             )
+            # make sure last observation does not get rolled, so player can see cards
+            self.agent_selection = self._int_to_name(self.agent_map[prev])
 
             # move btn to next player
             shifted_indices = {}
@@ -216,10 +224,17 @@ class TianshouEnvWrapper(AECEnv):
                 shifted_indices[rel_btn] = (agent_idx + 1) % self.num_players
             self.agent_map = shifted_indices
 
-            # make sure last observation does not get rolled, so player can see cards
-            self.agent_selection = last_player_who_acted
 
         else:
+            # if env is not done, obs is for next player, otherwise obs is for same player
+            for i in range(0, self.num_players - 1):
+                prev_player_id = (prev - i) % self.num_players
+                prev_player_id = self.agent_map[prev_player_id]
+                prev_player_id = self._int_to_name(prev_player_id)
+                self._last_obs[prev_player_id] = self.env_wrapped.get_current_obs(
+                    obs, backward_offset=i + 1
+                )
+            self._last_obs[next_player] = obs
             legal_moves = np.array([0, 0, 0, 0, 0, 0, 0, 0])
             legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
             if legal_moves[2] == 1:
