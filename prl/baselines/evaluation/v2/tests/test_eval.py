@@ -4,7 +4,6 @@ from prl.baselines.evaluation.v2.eval_agent import EvalAgent
 
 def test_stats_are_correct():
     """Calling Station vs AlwaysFold"""
-    DummyAgentCall
     calling_station = EvalAgent(name='callingstation',agent=DummyAgentCall())
     always_fold = EvalAgent(name='foldingagent',agent=DummyAgentFold())
     agents = [calling_station, always_fold]
@@ -17,4 +16,4 @@ def test_stats_are_correct():
     # assert vpip is 1 for caller and 0 for always fold
     # run multiple even number of rounds and assert .5 and 0
 
-    eval.player_stats[]
+    eval.player_stats

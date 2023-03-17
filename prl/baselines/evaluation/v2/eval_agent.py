@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, List
 
 import numpy as np
 from tianshou.data import Batch
@@ -20,7 +20,9 @@ class EvalAgent(EvalAgentBase):
         super().__init__(name)
         self.agent = agent
 
-    def act(self, obs: Union[Batch, np.ndarray]):
+    def act(self,
+            obs: Union[Batch, np.ndarray],
+            legal_moves: Union[List, np.ndarray]):
         """
         Dispatches observation(s) --possibly batched-- to wrapped agent.
         If wrapped agent is Tianshou agent, `wrapped_agent.forward` will be called,
@@ -28,4 +30,4 @@ class EvalAgent(EvalAgentBase):
         :param obs:
         :return:
         """
-        pass
+        return self.agent.act(obs)

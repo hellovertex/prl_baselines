@@ -5,9 +5,11 @@ from typing import List, Optional, TypeVar, Dict
 from typing import Tuple
 
 import numpy as np
+from prl.environment.Wrappers.aoh import Positions6Max as pos
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as COLS
 from prl.environment.steinberger.PokerRL import Poker
 
+from prl.baselines.agents.dummy_agents import DummyAgentCall, DummyAgentFold
 from prl.baselines.analysis.core.stats import PlayerStats
 from prl.baselines.analysis.core.stats_from_txt_string import HSmithyStats
 from prl.baselines.evaluation.core.experiment import DEFAULT_DATE, DEFAULT_VARIANT, \
@@ -89,6 +91,13 @@ class PokerExperimentRunner(ExperimentRunner):
         self._times_taken_to_compute_action = []
         self._times_taken_to_step_env = []
         self.winnings = {}
+        self.turn_ordered_positions = {2: (pos.BTN, pos.BB),
+                                       3: (pos.BTN, pos.SB, pos.BB),
+                                       4: (pos.CO, pos.BTN, pos.SB, pos.BB),
+                                       5: (pos.MP, pos.CO, pos.BTN, pos.SB, pos.BB),
+                                       6: (
+                                           pos.UTG, pos.MP, pos.CO, pos.BTN, pos.SB,
+                                           pos.BB)}
 
     def _make_board(self) -> str:
         board = self.backend.cards2str(self.backend.board)
@@ -154,15 +163,16 @@ class PokerExperimentRunner(ExperimentRunner):
         """
         agent_id_btn = self.agent_map[Positions6Max.BTN]
         agent_id_sb = self.agent_map[Positions6Max.SB]
-        agent_id_bb = self.agent_map[Positions6Max.BB]
-        # btn_offset = int(obs[COLS.Btn_idx])
-        sb_name = f"{self.player_names[agent_id_sb]}"
-        bb_name = f"{self.player_names[agent_id_bb]}"
         if self.num_players == 2:
             # the bb assignment is not a mistake
             # in heads up, the bb has index 1 which is the small blind for >2 players
             sb_name = f"{self.player_names[agent_id_btn]}"
             bb_name = f"{self.player_names[agent_id_sb]}"
+        else:
+            agent_id_bb = self.agent_map[Positions6Max.BB]
+            # btn_offset = int(obs[COLS.Btn_idx])
+            sb_name = f"{self.player_names[agent_id_sb]}"
+            bb_name = f"{self.player_names[agent_id_bb]}"
 
         sb_amount = "$" + str(parse_num(self.backend.SMALL_BLIND))
         bb_amount = "$" + str(parse_num(self.backend.BIG_BLIND))
@@ -316,7 +326,7 @@ class PokerExperimentRunner(ExperimentRunner):
             if done:
                 showdown_hands = self._get_showdown_hands(remaining_players)
 
-            legal_moves = self.env.env.env.env_wrapped.get_legal_actions()
+            legal_moves = self.env.env.env.next_legal_moves
             observation = {'obs': [obs], 'legal_moves': [legal_moves]}
             # -------- SET NEXT AGENT -----------
             agent_idx = self.agent_map[self.backend.current_player.seat_id]
@@ -366,7 +376,7 @@ class PokerExperimentRunner(ExperimentRunner):
         # obs_test, _, _, _ = self.test_env.reset(self.env_reset_config)
 
         agent_id = obs['agent_id']
-        legal_moves = self.env.env.env.env_wrapped.get_legal_actions()
+        legal_moves = self.env.env.env.next_legal_moves
         btn = self.env.env.env.btn
         obs = obs['obs']
         # assert np.array_equal(obs, obs_test)
@@ -546,6 +556,7 @@ class Evaluation:
         self._runner = PokerExperimentRunner()
         self._converter = Converter888()
         self._storage = PersistentStorage()
+        self.player_stats = None
 
     @property
     def agents(self):
@@ -630,7 +641,7 @@ class Evaluation:
             targets=eval_agent_target_indices
         )
         # record stats
-        stats = self.compute_stats(snowie_episodes_per_target)
+        self.player_stats = self.compute_stats(snowie_episodes_per_target)
         # write either to tmp/ or persist .txt files if requested
         self.maybe_write_to_disk(save_to_abs_path, snowie_episodes_per_target)
         # record mbbh
@@ -638,12 +649,23 @@ class Evaluation:
 
 
 if __name__ == '__main__':
-    agent_list: List[EvalAgent] = []
-    agent_ids_to_inspect = [0]
     # 1. implement make_participants as in `experiment.py`
     # 2. call `utils.make_experiment` here
     # 3. copy experiment runner into evaluation
     # 4. make snowie records
     # 5. compute stats and mbb_h
     # 6. debug how to get ranges from within Evaluation during run
-    eval = Evaluation().run(10)
+    calling_station = EvalAgent(name='callingstation', agent=DummyAgentCall())
+    always_fold = EvalAgent(name='foldingagent', agent=DummyAgentFold())
+    agents = [calling_station, always_fold]
+    agent_ids_to_inspect = [0]
+
+    # run single evaluation episode
+    eval = Evaluation(record_stats=True)
+    eval.agents = agents
+    eval.run(n_episodes=1)
+    # assert vpip is 1 for caller and 0 for always fold
+    # run multiple even number of rounds and assert .5 and 0
+
+    eval.player_stats['callingstation'].pstats.to_dict()
+

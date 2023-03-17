@@ -235,6 +235,7 @@ class HSmithyStats:
 
     def __init__(self, pname):
         self.pstats = SelectedPlayerStats(pname=pname)
+        self.target_player = pname
 
     def split_next_round(self, stringval):
         return True
