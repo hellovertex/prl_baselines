@@ -143,8 +143,8 @@ class TianshouEnvWrapper(AECEnv):
         )
         self.infos = self._convert_to_dict(
             [{"legal_moves": [],
-              #  "info": info} for _ in range(self.num_agents)]
-              "info": []} for _ in range(self.num_agents)]
+              "info": info} for _ in range(self.num_agents)]
+              #"info": []} for _ in range(self.num_agents)]
         )
         legal_moves = np.array([0, 0, 0, 0, 0, 0, 0, 0])
         legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
@@ -205,8 +205,8 @@ class TianshouEnvWrapper(AECEnv):
 
         self.infos = self._convert_to_dict(
             [{"legal_moves": [],
-              # "info": info} for _ in range(self.num_agents)]
-              "info": []} for _ in range(self.num_agents)]
+              "info": info} for _ in range(self.num_agents)]
+              #"info": []} for _ in range(self.num_agents)]
         )
         self._cumulative_rewards[self.agent_selection] = 0
         self.agent_selection = next_player

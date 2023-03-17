@@ -1,21 +1,38 @@
+import os.path
 import time
 from dataclasses import dataclass
-from typing import List, Dict, Optional
+from typing import List, Optional, TypeVar, Dict
+from typing import Tuple
 
 import numpy as np
+from prl.environment.Wrappers.aoh import Positions6Max as pos
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as COLS
 from prl.environment.steinberger.PokerRL import Poker
 
-from prl.baselines.evaluation.core.experiment import DEFAULT_DATE, DEFAULT_VARIANT, DEFAULT_CURRENCY
-from prl.baselines.evaluation.core.experiment import PokerExperiment
-from prl.baselines.evaluation.core.runner import ExperimentRunner
+from prl.baselines.agents.dummy_agents import DummyAgentCall, DummyAgentFold
 from prl.baselines.analysis.core.stats import PlayerStats
+from prl.baselines.analysis.core.stats_from_txt_string import HSmithyStats
+from prl.baselines.evaluation.core.experiment import DEFAULT_DATE, DEFAULT_VARIANT, \
+    DEFAULT_CURRENCY
+from prl.baselines.evaluation.core.experiment import PokerExperiment
+from prl.baselines.evaluation.core.experiment import PokerExperimentParticipant
+from prl.baselines.evaluation.core.runner import ExperimentRunner
+from prl.baselines.evaluation.pokersnowie.converter_888 import Converter888
+from prl.baselines.evaluation.pokersnowie.core.converter import PokerSnowieConverter, \
+    SnowieEpisode
 from prl.baselines.evaluation.utils import pretty_print, cards2str
+from prl.baselines.evaluation.v2.eval_agent import EvalAgent
+from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Action
-from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, PlayerStack, ActionType, \
-    PlayerWithCards, PlayerWinningsCollected, PokerEpisode
+from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, \
+    PlayerStack, ActionType, \
+    PlayerWithCards, PlayerWinningsCollected
+from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode
 from prl.baselines.utils.num_parsers import parse_num
+
+POKER_SNOWIE_CONVERTER_INSTANCE = TypeVar('POKER_SNOWIE_CONVERTER_INSTANCE',
+                                          bound=PokerSnowieConverter)
 
 POSITIONS_HEADS_UP = ['btn', 'bb']  # button is small blind in Heads Up situations
 POSITIONS = ['btn', 'sb', 'bb', 'utg', 'mp', 'co']
@@ -43,6 +60,19 @@ class PlayerWithCardsAndPosition:
     position: Optional[str] = None  # c.f. Positions6Max
 
 
+def make_participants(agents: List[EvalAgent],
+                      default_starting_stack=20000) -> Tuple[PokerExperimentParticipant]:
+    participants = []
+    for i, agent in enumerate(agents):
+        participants.append(
+            PokerExperimentParticipant(id=i,
+                                       name=agent.name,
+                                       starting_stack=default_starting_stack,
+                                       agent=agent,
+                                       config={}))
+    return tuple(participants)
+
+
 class PokerExperimentRunner(ExperimentRunner):
     # run experiments using
     def __init__(self):
@@ -61,12 +91,19 @@ class PokerExperimentRunner(ExperimentRunner):
         self._times_taken_to_compute_action = []
         self._times_taken_to_step_env = []
         self.winnings = {}
+        self.turn_ordered_positions = {2: (pos.BTN, pos.BB),
+                                       3: (pos.BTN, pos.SB, pos.BB),
+                                       4: (pos.CO, pos.BTN, pos.SB, pos.BB),
+                                       5: (pos.MP, pos.CO, pos.BTN, pos.SB, pos.BB),
+                                       6: (
+                                           pos.UTG, pos.MP, pos.CO, pos.BTN, pos.SB,
+                                           pos.BB)}
 
     def _make_board(self) -> str:
         board = self.backend.cards2str(self.backend.board)
         return f"[{board.replace(',', '').rstrip()}]"
 
-    def  _get_starting_stacks_relative_to_agents(self) -> List[PlayerStack]:
+    def _get_starting_stacks_relative_to_agents(self) -> List[PlayerStack]:
         """ Stacks at the beginning of every episode, not during or after."""
         # seats are gotten from the environment and start with the button
         # our agent who has the button can be at a different index than 0 in our agent list
@@ -77,7 +114,7 @@ class PokerExperimentRunner(ExperimentRunner):
         for agent_id, seat in enumerate(np.roll(self.backend.seats, self.agent_map[0])):
             # agent_id = self.agent_map[seat_id]
             player_name = f'{self.player_names[agent_id]}'
-            #seat_display_name = f'Seat {seat_id + 1}'  # index starts at 1
+            # seat_display_name = f'Seat {seat_id + 1}'  # index starts at 1
             seat_display_name = f'Seat {agent_id + 1}'  # index starts at 1
             stack = "$" + str(seat.starting_stack_this_episode)
             player_stacks.append(PlayerStack(seat_display_name,
@@ -126,15 +163,16 @@ class PokerExperimentRunner(ExperimentRunner):
         """
         agent_id_btn = self.agent_map[Positions6Max.BTN]
         agent_id_sb = self.agent_map[Positions6Max.SB]
-        agent_id_bb = self.agent_map[Positions6Max.BB]
-        # btn_offset = int(obs[COLS.Btn_idx])
-        sb_name = f"{self.player_names[agent_id_sb]}"
-        bb_name = f"{self.player_names[agent_id_bb]}"
         if self.num_players == 2:
             # the bb assignment is not a mistake
             # in heads up, the bb has index 1 which is the small blind for >2 players
             sb_name = f"{self.player_names[agent_id_btn]}"
             bb_name = f"{self.player_names[agent_id_sb]}"
+        else:
+            agent_id_bb = self.agent_map[Positions6Max.BB]
+            # btn_offset = int(obs[COLS.Btn_idx])
+            sb_name = f"{self.player_names[agent_id_sb]}"
+            bb_name = f"{self.player_names[agent_id_bb]}"
 
         sb_amount = "$" + str(parse_num(self.backend.SMALL_BLIND))
         bb_amount = "$" + str(parse_num(self.backend.BIG_BLIND))
@@ -172,7 +210,8 @@ class PokerExperimentRunner(ExperimentRunner):
             agent_id = self.agent_map[i]
             if not seats[i].folded_this_episode:
                 if seats[i].stack > 0 or seats[i].is_allin:
-                    cards = self.backend.cards2str(self.backend.get_hole_cards_of_player(i))
+                    cards = self.backend.cards2str(
+                        self.backend.get_hole_cards_of_player(i))
                     remaining_players.append(
                         PlayerWithCards(name=f'{self.player_names[agent_id]}',
                                         cards=self._parse_cards(cards)))
@@ -252,7 +291,8 @@ class PokerExperimentRunner(ExperimentRunner):
                 action = a.action_type, a.raise_amount
             else:
                 action = self.participants[agent_idx].agent.act(observation['obs'],
-                                                                observation['legal_moves'])
+                                                                observation[
+                                                                    'legal_moves'])
             self._times_taken_to_compute_action.append(time.time() - t0)
             # kept for reference: (this code is moved to after experiment has been run)
             # if self.stats:
@@ -281,11 +321,12 @@ class PokerExperimentRunner(ExperimentRunner):
                                                      current_bet_before_action=current_bet_before_action)
             actions_total[stage].append(episode_action)
             actions_total['as_sequence'].append(episode_action)
-            print(f'Hole cards of button: {cards2str(self.backend.get_hole_cards_of_player(0))}')
+            print(
+                f'Hole cards of button: {cards2str(self.backend.get_hole_cards_of_player(0))}')
             if done:
                 showdown_hands = self._get_showdown_hands(remaining_players)
 
-            legal_moves = self.env.env.env.env_wrapped.get_legal_actions()
+            legal_moves = self.env.env.env.next_legal_moves
             observation = {'obs': [obs], 'legal_moves': [legal_moves]}
             # -------- SET NEXT AGENT -----------
             agent_idx = self.agent_map[self.backend.current_player.seat_id]
@@ -335,10 +376,10 @@ class PokerExperimentRunner(ExperimentRunner):
         # obs_test, _, _, _ = self.test_env.reset(self.env_reset_config)
 
         agent_id = obs['agent_id']
-        legal_moves = self.env.env.env.env_wrapped.get_legal_actions()
+        legal_moves = self.env.env.env.next_legal_moves
         btn = self.env.env.env.btn
         obs = obs['obs']
-        #assert np.array_equal(obs, obs_test)
+        # assert np.array_equal(obs, obs_test)
         """
         from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols
         for i, o in enumerate(obs == obs_test):
@@ -412,7 +453,8 @@ class PokerExperimentRunner(ExperimentRunner):
               f'{np.mean(self._times_taken_to_step_env) * 1000} ms')
         return poker_episodes
 
-    def run(self, experiment: PokerExperiment, verbose=False, hero_names=None) -> List[PokerEpisode]:
+    def run(self, experiment: PokerExperiment, verbose=False, hero_names=None) -> List[
+        PokerEpisode]:
         # for testing,
         # it should be possible to
         # 1) provide hands and boards
@@ -451,7 +493,8 @@ class PokerExperimentRunner(ExperimentRunner):
             self.participants = []
             self.iter_action_plan = iter(experiment.from_action_plan)
             # let indices start at 0 when btn starts and at 3 when utg starts
-            inds = [i for i in range(self.num_players)] if self.num_players < 4 else [(i%self.num_players) for i in range(3, 3+self.num_players)]
+            inds = [i for i in range(self.num_players)] if self.num_players < 4 else [
+                (i % self.num_players) for i in range(3, 3 + self.num_players)]
             for i, pid in enumerate(inds):
                 self.agent_summary[i] = {i: PlayerStats(self.player_names[i])}
         else:
@@ -463,3 +506,166 @@ class PokerExperimentRunner(ExperimentRunner):
             for i in range(experiment.num_players):
                 self.agent_summary[i] = {i: PlayerStats(self.player_names[i])}
         return self._run_episodes(experiment)
+
+
+class PersistentStorage:
+    def _write(self, episodes, path_out, filename):
+        if not os.path.exists(path_out):
+            os.makedirs(os.path.abspath(path_out))
+        with open(os.path.join(path_out, filename), 'a+') as f:
+            for e in episodes:
+                f.write(e)
+
+    def export_to_text_file(self,
+                            snowie_episodes: List[SnowieEpisode],
+                            path_out: str,
+                            file_suffix: Optional[str] = None,
+                            max_episodes_per_file: int = 500
+                            ):
+        write_buffer = []
+        n_files_written = 0
+        for i, e in enumerate(snowie_episodes):
+            if (i + 1) % max_episodes_per_file == 0:
+                # flush and write
+                self._write(write_buffer,
+                            path_out,
+                            filename='snowie' + f'_{n_files_written}.txt')
+                n_files_written += 1
+                write_buffer = []
+            write_buffer.append(e)
+        self._write(write_buffer,
+                    path_out,
+                    filename='snowie' + f'_{n_files_written}.txt')
+
+
+class Evaluation:
+    def __init__(self,
+                 agents: Optional[List[EvalAgent]] = None,
+                 record_stats=True,
+                 record_ranges=True,
+                 record_mbb_h=True,
+                 record_snowie_histories=True,
+                 default_starting_stack=20000):
+        self._agents = agents
+        self.record_stats = record_stats
+        self.record_ranges = record_ranges
+        self.record_mbb_h = record_mbb_h
+        self.record_snowie_histories = record_snowie_histories
+        self.default_stack = default_starting_stack
+        # monkey patched, consider cleaning up
+        self._runner = PokerExperimentRunner()
+        self._converter = Converter888()
+        self._storage = PersistentStorage()
+        self.player_stats = None
+
+    @property
+    def agents(self):
+        return self._agents
+
+    @agents.setter
+    def agents(self, val):
+        self._agents = val
+
+    def make_experiment(self, n_episodes):
+        participants = make_participants(self._agents, self.default_stack)
+        agent_names = [a.name for a in self._agents]
+        env = make_default_tianshou_env(mc_model_ckpt_path=None,  # dont use mc
+                                        stack_sizes=[self.default_stack for _ in
+                                                     range(len(agent_names))],
+                                        agents=agent_names,
+                                        num_players=len(agent_names))
+        return PokerExperiment(
+            wrapped_env=env,  # single environment to run sequential games on
+            num_players=len(self._agents),
+            starting_stack_sizes=[self.default_stack for _ in range(len(self._agents))],
+            env_reset_config=None,
+            max_episodes=n_episodes,  # number of games to run
+            current_episode=0,
+            cbs_plots=[],
+            cbs_misc=[],
+            cbs_metrics=[],
+            participants=participants,
+            from_action_plan=None,
+        )
+
+    def convert_to_snowie_episodes(
+            self,
+            episodes: List[PokerEpisode],
+            targets: Tuple[int]) -> Dict[str, List[SnowieEpisode]]:
+        snowie_eval_per_player = {}
+        for eval_agent in targets:
+            snowie_episodes = []
+            hero_name = self._agents[eval_agent].name
+            for ep in episodes:
+                showdown_eps = self._converter.from_poker_episode(ep, [hero_name])
+                # showdown_eps is a list of the same episode from different angles
+                # relative to observer
+                for observer_relative in showdown_eps:
+                    snowie_episodes.append(observer_relative)
+
+            snowie_eval_per_player[hero_name] = snowie_episodes
+        return snowie_eval_per_player
+
+    def compute_stats(self, snowie_eval_per_player):
+        stats_per_player = {}
+        for hero_name, episodes in snowie_eval_per_player.items():
+            stats = HSmithyStats(hero_name)
+            stats.compute_stats(episodes)
+            stats_per_player[hero_name] = stats
+        return stats_per_player
+
+    def maybe_write_to_disk(
+            self,
+            save_to_abs_path, episodes_per_target: Dict[str, List[SnowieEpisode]]):
+        for hero_name, episodes in episodes_per_target.items():
+            path_out = save_to_abs_path if save_to_abs_path is not None else f'./tmp/' \
+                                                                             f'' \
+                                                                             f'{hero_name}'
+            if not os.path.exists(path_out):
+                os.makedirs(path_out, exist_ok=True)
+            self._storage.export_to_text_file(snowie_episodes=episodes,
+                                              path_out=path_out)
+
+    def run(self,
+            n_episodes=1000,
+            eval_agent_target_indices=(0,),
+            save_to_abs_path: Optional[str] = None):
+        assert self._agents
+        # setup environment agents etc
+        experiment = self.make_experiment(n_episodes=n_episodes)
+        # collect episodes
+        episodes: List[PokerEpisode] = self._runner.run(experiment)
+        # convert episodes to human-readable hand history format
+        snowie_episodes_per_target = self.convert_to_snowie_episodes(
+            episodes=episodes,
+            targets=eval_agent_target_indices
+        )
+        # record stats
+        self.player_stats = self.compute_stats(snowie_episodes_per_target)
+        # write either to tmp/ or persist .txt files if requested
+        self.maybe_write_to_disk(save_to_abs_path, snowie_episodes_per_target)
+        # record mbbh
+        # record ranges
+
+
+if __name__ == '__main__':
+    # 1. implement make_participants as in `experiment.py`
+    # 2. call `utils.make_experiment` here
+    # 3. copy experiment runner into evaluation
+    # 4. make snowie records
+    # 5. compute stats and mbb_h
+    # 6. debug how to get ranges from within Evaluation during run
+    calling_station = EvalAgent(name='callingstation', agent=DummyAgentCall())
+    always_fold = EvalAgent(name='foldingagent', agent=DummyAgentFold())
+    agents = [calling_station, always_fold]
+    agent_ids_to_inspect = [0]
+
+    # run single evaluation episode
+    eval = Evaluation(record_stats=True)
+    eval.agents = agents
+    eval.run(n_episodes=1)
+    # assert vpip is 1 for caller and 0 for always fold
+    # run multiple even number of rounds and assert .5 and 0
+
+    eval.player_stats['callingstation'].pstats.to_dict()
+
