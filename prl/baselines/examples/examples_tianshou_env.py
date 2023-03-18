@@ -237,10 +237,6 @@ class TianshouEnvWrapper(AECEnv):
             done = True
 
         if done:
-            if self.action_was_noop(action):
-                assert (len(self.remaining) == self.num_players) or self.awaiting_noops
-                self.remaining.pop(0)
-
             if len(self.remaining) > 0:
                 # super calls self.observe(self.agent_selection) but its ok
                 try:
@@ -249,6 +245,9 @@ class TianshouEnvWrapper(AECEnv):
                 except Exception:
                     self.agent_selection = self.remaining[0]
                 self.awaiting_noops = True
+            if self.action_was_noop(action):
+                assert (len(self.remaining) == self.num_players) or self.awaiting_noops
+                self.remaining.pop(0)
             else:
                 # All players have stepped their no-op: distribute rewards and show cards
                 self.awaiting_noops = False
