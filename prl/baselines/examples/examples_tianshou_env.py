@@ -242,12 +242,16 @@ class TianshouEnvWrapper(AECEnv):
                 nlm = np.zeros(len(ActionSpace))
                 nlm[ActionSpace.NoOp] = 1
                 self.next_legal_moves = nlm
-        else:
-            done = True
-
-        if done:
-            if len(self.remaining) > 0:
                 self.awaiting_noops = True
+                # first, let the agent collect its observation that was last to act
+                self.agent_selection = last_player_who_acted
+            else:
+                self._last_obs[next_player] = obs
+                self.next_legal_moves = self.env_wrapped.get_legal_moves_extended()
+                self.agent_selection = next_player
+
+        if self.awaiting_noops:
+            if len(self.remaining) > 0:
                 # super calls self.observe(self.agent_selection) but its ok
                 if self.action_was_noop(action):
                     self.remaining.pop(self.remaining.index(self.agent_selection))
@@ -269,33 +273,32 @@ class TianshouEnvWrapper(AECEnv):
                     shifted_indices[rel_btn] = (agent_idx + 1) % self.num_players
                 self.agent_map = shifted_indices
             else:
+                # collect no-ops to reveal cards to everybody
                 try:
                     # first, let the agent collect its observation that was last to act
                     self.agent_selection = last_player_who_acted
                 except Exception:
-                    # then collect no-ops to reveal cards to everybody
                     self.agent_selection = self.remaining[0]
-
-
-
-        else:
+                    if len(self.remaining) == 0:
+                        self.awaiting_noops = False
+        #else:
+            # turns out tianshou does not utilize this:
             # if env is not done, obs is for next player, otherwise obs is for same player
-            for i in range(0, self.num_players - 1):
-                prev_player_id = (prev - i) % self.num_players
-                prev_player_id = self.agent_map[prev_player_id]
-                prev_player_id = self._int_to_name(prev_player_id)
-                self._last_obs[prev_player_id] = self.env_wrapped.get_current_obs(
-                    obs, backward_offset=i + 1
-                )
-            self._last_obs[next_player] = obs
-            self.next_legal_moves = self.env_wrapped.get_legal_moves_extended()
-            self.agent_selection = next_player
-            if self.action_was_fold(action):
-                self.folded_players.append(last_player_who_acted)
-            if next_player in self.folded_players:
-                nlm = np.zeros(len(ActionSpace))
-                nlm[ActionSpace.NoOp] = 1
-                self.next_legal_moves = nlm
+            # for i in range(0, self.num_players - 1):
+            #     prev_player_id = (prev - i) % self.num_players
+            #     prev_player_id = self.agent_map[prev_player_id]
+            #     prev_player_id = self._int_to_name(prev_player_id)
+            #     self._last_obs[prev_player_id] = self.env_wrapped.get_current_obs(
+            #         obs, backward_offset=i + 1
+            # )
+
+            # keep for reference but all players have to step no-op at the end. They will however not
+            # if self.action_was_fold(action):
+            #     self.folded_players.append(last_player_who_acted)
+            # if next_player in self.folded_players:
+            #     nlm = np.zeros(len(ActionSpace))
+            #     nlm[ActionSpace.NoOp] = 1
+            #     self.next_legal_moves = nlm
             # if self.agent_selection in
 
         self.infos = self._convert_to_dict(
