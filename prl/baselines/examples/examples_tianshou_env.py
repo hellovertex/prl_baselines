@@ -96,7 +96,6 @@ class TianshouEnvWrapper(AECEnv):
         return self.action_spaces[agent]
 
     def observe(self, agent: str) -> Optional[ObsType]:
-        # return {"observation": self._last_obs[agent], "action_mask": self.next_legal_moves}
         return {"observation": self._last_obs[agent], "action_mask":
             self.next_legal_moves}
         # raise NotImplementedError
@@ -143,7 +142,10 @@ class TianshouEnvWrapper(AECEnv):
         # for i, seat in enumerate(self.env_wrapped.env.seats):
         #     pass
         self.agents = self.possible_agents[:]
+        self.remaining = [a for a in self.agents]
+        self.folded_players = []
         self.agent_selection = player
+
         self.rewards = self._convert_to_dict([0 for _ in range(self.num_agents)])
         self._cumulative_rewards = self._convert_to_dict(
             [0 for _ in range(self.num_agents)]
@@ -154,18 +156,28 @@ class TianshouEnvWrapper(AECEnv):
         self.truncations = self._convert_to_dict(
             [False for _ in range(self.num_agents)]
         )
+        self.next_legal_moves = self.env_wrapped.get_legal_moves_extended()
         self.infos = self._convert_to_dict(
-            [{"legal_moves": [],
+            [{"legal_moves": self.next_legal_moves,
               # "info": info} for _ in range(self.num_agents)]
               "info": []} for _ in range(self.num_agents)]
         )
-        legal_moves = np.array([0, 0, 0, 0, 0, 0, 0, 0])
-        legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
-        if legal_moves[2] == 1:
-            legal_moves[3:] = 1
-        self.next_legal_moves = legal_moves
         self._last_obs[self.agent_selection] = obs
         # self._last_obs = obs
+    def action_was_fold(self, action):
+        if isinstance(action, tuple):
+            if action[0] == ActionSpace.FOLD:
+                return True
+        if action == ActionSpace.FOLD or np.array_equal(action, [ActionSpace.FOLD]):
+            return True
+        return False
+    def action_was_noop(self, action):
+        if isinstance(action, tuple):
+            if action[0] == ActionSpace.NoOp:
+                return True
+        if action == ActionSpace.NoOp or np.array_equal(action, [ActionSpace.NoOp]):
+            return True
+        return False
 
     def step(self, action):
         # if isinstance(action, tuple):
@@ -187,18 +199,31 @@ class TianshouEnvWrapper(AECEnv):
         # ~~roll button to correct position [BTN,...,] to [,...,BTN,...]~~
         # ~~roll relative to observer not to button~~
         # roll back to starting agent i.e. that reward of self.agents[0] is at 0
-        rewards = np.roll(rew, -self.agent_map[
-            0])  # roll -self.agent_map[0] instead if we chose to
+        rewards = np.roll(rew, -self.agent_map[Positions6Max.BTN])
         payouts = info['payouts']
         rpay = {}
         for k, v in payouts.items():
             rpay[self.agent_map[k]] = v
         info['payouts'] = payouts
-        # update button with (agent_idx + 1) % self.num_players inseat of (agent_idx - 1) % self.num_players
         self.rewards = self._convert_to_dict(
             self._scale_rewards(rewards)
         )
+        last_player_who_acted = self._int_to_name(self.agent_map[prev])
+        if self.action_was_fold(action):
+            self.folded_players.add(last_player_who_acted)
+
         if done:
+            if self.action_was_noop(action):
+                self.remaining.pop(last_player_who_acted)
+
+            if len(self.remaining) > 0:
+                self.awaiting_noops = True
+                self.agent_selection = self.remaining[0]
+            else:
+                self.awaiting_noops = False
+                # make sure last observation does not get rolled, so player can see cards
+                self.agent_selection = self._int_to_name(self.agent_map[prev])
+
             # if env is not done, obs is for next player, otherwise obs is for same player
             for i in range(1, self.num_players):
                 prev_player_id = (prev - i) % self.num_players
@@ -207,24 +232,22 @@ class TianshouEnvWrapper(AECEnv):
                 self._last_obs[prev_player_id] = self.env_wrapped.get_current_obs(
                     obs, backward_offset=i
             )
-            last_player_who_acted = self._int_to_name(self.agent_map[prev])
+
             self._last_obs[last_player_who_acted] = obs
-            self.terminations = self._convert_to_dict(
-                [True for _ in range(self.num_agents)]
-            )
-            self.truncations = self._convert_to_dict(
-                [False for _ in range(self.num_agents)]
-            )
-            # make sure last observation does not get rolled, so player can see cards
-            self.agent_selection = self._int_to_name(self.agent_map[prev])
-
-            # move btn to next player
-            shifted_indices = {}
-            for rel_btn, agent_idx in self.agent_map.items():
-                shifted_indices[rel_btn] = (agent_idx + 1) % self.num_players
-            self.agent_map = shifted_indices
-
-
+            self.next_legal_moves = [ActionSpace.NoOp]
+            # All players have stepped their no-op: distribute rewards and show cards
+            if not self.awaiting_noops:
+                self.terminations = self._convert_to_dict(
+                    [True for _ in range(self.num_agents)]
+                )
+                self.truncations = self._convert_to_dict(
+                    [False for _ in range(self.num_agents)]
+                )
+                # move btn to next player
+                shifted_indices = {}
+                for rel_btn, agent_idx in self.agent_map.items():
+                    shifted_indices[rel_btn] = (agent_idx + 1) % self.num_players
+                self.agent_map = shifted_indices
         else:
             # if env is not done, obs is for next player, otherwise obs is for same player
             for i in range(0, self.num_players - 1):
@@ -235,24 +258,16 @@ class TianshouEnvWrapper(AECEnv):
                     obs, backward_offset=i + 1
                 )
             self._last_obs[next_player] = obs
-            legal_moves = np.array([0, 0, 0, 0, 0, 0, 0, 0])
-            legal_moves[self.env_wrapped.env.get_legal_actions()] += 1
-            if legal_moves[2] == 1:
-                legal_moves[3:] = 1
-            self.next_legal_moves = legal_moves
+            self.next_legal_moves = self.env_wrapped.get_legal_moves_extended()
             self.agent_selection = next_player
+            # if self.agent_selection in
 
         self.infos = self._convert_to_dict(
-            [{"legal_moves": [],
+            [{"legal_moves": self.next_legal_moves,
               # "info": info} for _ in range(self.num_agents)]
               "info": []} for _ in range(self.num_agents)]
         )
         self._cumulative_rewards[self.agent_selection] = 0
-        # if not done:
-        #     # make sure last observation does not get rolled, so player can see cards
-        #     self.agent_selection = last_player_who_acted
-        # else:
-        #     self.agent_selection = next_player
         self._accumulate_rewards()
         #self._deads_step_first()
 
