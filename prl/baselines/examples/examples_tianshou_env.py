@@ -21,7 +21,7 @@ from prl.baselines.agents.tianshou_policies import MultiAgentActionFlags
 from prl.baselines.evaluation.core.experiment import ENV_WRAPPER
 from omegaconf import DictConfig
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols
-
+import logging
 
 def get_cards(obs):
     one_hot_card_bit_range = slice(
