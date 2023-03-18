@@ -58,7 +58,8 @@ def get_rainbow_config(params):
                ActionSpace.RAISE_POT,
                ActionSpace.RAISE_2x_POT,
                ActionSpace.RAISE_3x_POT,
-               ActionSpace.RAISE_ALL_IN]
+               ActionSpace.RAISE_ALL_IN,
+               ActionSpace.NoOp]
     hidden_dim = [512, 512]
     output_dim = len(classes)
     input_dim = 569  # hard coded for now -- very unlikely to be changed by me at any poiny in time

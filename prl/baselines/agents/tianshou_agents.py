@@ -21,14 +21,16 @@ IDX_C1_0 = 184  # feature_names.index('0th_player_card_1_rank_0')
 IDX_C1_1 = 201  # feature_names.index('1th_player_card_0_rank_0')
 IDX_BOARD_START = 82  #
 IDX_BOARD_END = 167  #
-CARD_BITS_TO_STR = np.array(['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', 'h', 'd', 's', 'c'])
-BOARD_BITS_TO_STR = np.array(['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A',
-                              'h', 'd', 's', 'c', '2', '3', '4', '5', '6', '7', '8', '9', 'T',
-                              'J', 'Q', 'K', 'A', 'h', 'd', 's', 'c', '2', '3', '4', '5', '6',
-                              '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', 'h', 'd', 's', 'c', '2',
-                              '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', 'h',
-                              'd', 's', 'c', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J',
-                              'Q', 'K', 'A', 'h', 'd', 's', 'c'])
+CARD_BITS_TO_STR = np.array(
+    ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', 'h', 'd', 's', 'c'])
+BOARD_BITS_TO_STR = np.array(
+    ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A',
+     'h', 'd', 's', 'c', '2', '3', '4', '5', '6', '7', '8', '9', 'T',
+     'J', 'Q', 'K', 'A', 'h', 'd', 's', 'c', '2', '3', '4', '5', '6',
+     '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', 'h', 'd', 's', 'c', '2',
+     '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', 'h',
+     'd', 's', 'c', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J',
+     'Q', 'K', 'A', 'h', 'd', 's', 'c'])
 RANK = 0
 SUITE = 1
 
@@ -69,7 +71,9 @@ class BaselineAgentBase(BasePolicy):
         self._model.load_state_dict(ckpt['net'])
         self._model.eval()
 
-    def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:
+    def forward(self, batch: Batch,
+                state: Optional[Union[dict, Batch, np.ndarray]] = None,
+                **kwargs: Any) -> Batch:
         raise NotImplementedError
 
     def learn(self, batch: Batch, **kwargs: Any) -> Dict[str, Any]:
@@ -83,9 +87,14 @@ class TianshouCallingStation(BasePolicy):
         super().__init__(observation_space=observation_space,
                          action_space=action_space)
 
-    def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:
+    def forward(self, batch: Batch,
+                state: Optional[Union[dict, Batch, np.ndarray]] = None,
+                **kwargs: Any) -> Batch:
         nobs = len(batch.obs)
-        return Batch(logits=None, act=[self.CHECK_CALL] * nobs, state=None)
+        action = np.full(nobs, ActionSpace.CHECK_CALL, dtype=int)
+        envs_noop_pending = np.where(batch.obs.mask[:, ActionSpace.NoOp])
+        action[envs_noop_pending] = ActionSpace.NoOp
+        return Batch(logits=None, act=action, state=None)
 
     def learn(self, batch: Batch, **kwargs: Any) -> Dict[str, Any]:
         return {}
@@ -98,12 +107,20 @@ class TianshouAlwaysFoldAgentDummy(BasePolicy):
         super().__init__(observation_space=observation_space,
                          action_space=action_space)
 
-    def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:
+    def forward(self, batch: Batch,
+                state: Optional[Union[dict, Batch, np.ndarray]] = None,
+                **kwargs: Any) -> Batch:
         nobs = len(batch.obs)
-        return Batch(logits=None, act=[self.FOLD] * nobs, state=None)
+        action = np.zeros(nobs, dtype=int)
+        envs_can_check = np.where(batch.obs.mask[:, ActionSpace.CHECK_CALL])
+        action[envs_can_check] = ActionSpace.CHECK_CALL
+        envs_noop_pending = np.where(batch.obs.mask[:, ActionSpace.NoOp])
+        action[envs_noop_pending] = ActionSpace.NoOp
+        return Batch(logits=None, act=action, state=None)
 
     def learn(self, batch: Batch, **kwargs: Any) -> Dict[str, Any]:
         return {}
+
 
 class TianshouALLInAgent(BasePolicy):
     ALL_IN = 7
@@ -112,21 +129,32 @@ class TianshouALLInAgent(BasePolicy):
         super().__init__(observation_space=observation_space,
                          action_space=action_space)
 
-    def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:
+    def forward(self, batch: Batch,
+                state: Optional[Union[dict, Batch, np.ndarray]] = None,
+                **kwargs: Any) -> Batch:
         nobs = len(batch.obs)
-        return Batch(logits=None, act=[self.ALL_IN] * nobs, state=None)
+        action = np.full(nobs, ActionSpace.RAISE_ALL_IN, dtype=int)
+        envs_noop_pending = np.where(batch.obs.mask[:, ActionSpace.NoOp])
+        action[envs_noop_pending] = ActionSpace.NoOp
+        return Batch(logits=None, act=action, state=None)
 
     def learn(self, batch: Batch, **kwargs: Any) -> Dict[str, Any]:
         return {}
+
+
 class TianshouRandomAgent(BasePolicy):
     def __init__(self, observation_space=None, action_space=None):
         super().__init__(observation_space=observation_space,
                          action_space=action_space)
 
-    def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:
+    def forward(self, batch: Batch,
+                state: Optional[Union[dict, Batch, np.ndarray]] = None,
+                **kwargs: Any) -> Batch:
         nobs = len(batch.obs)
-        return Batch(logits=None, act=[randint(0, 2)] * nobs,
-                     state=None)
+        action = np.array([randint(0, 2)] * nobs)
+        envs_noop_pending = np.where(batch.obs.mask[:, ActionSpace.NoOp])
+        action[envs_noop_pending] = ActionSpace.NoOp
+        return Batch(logits=None, act=action, state=None)
 
     def learn(self, batch: Batch, **kwargs: Any) -> Dict[str, Any]:
         return {}
@@ -209,7 +237,9 @@ class MajorityBaseline(BasePolicy):
         self.logits = torch.mean(torch.stack(logits), dim=0)
         return torch.argmax(self.logits).item()
 
-    def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:
+    def forward(self, batch: Batch,
+                state: Optional[Union[dict, Batch, np.ndarray]] = None,
+                **kwargs: Any) -> Batch:
         tobs = torch.Tensor(batch.obs['obs']).to(self.device)
         logits = []
         for m in self._models:
@@ -239,7 +269,9 @@ class OracleAgent(BaselineAgentBase):
                          num_players,
                          action_space)
 
-    def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:
+    def forward(self, batch: Batch,
+                state: Optional[Union[dict, Batch, np.ndarray]] = None,
+                **kwargs: Any) -> Batch:
         # todo: implement
         self.logits = self._model(obs)
         self.probas = torch.softmax(self.logits, dim=2)
@@ -322,7 +354,8 @@ class OracleAgent(BaselineAgentBase):
                 self._prediction = pred
                 return pred
 
-        def act(self, obs: np.ndarray, legal_moves: list, use_pseudo_harmonic_mapping=False):
+        def act(self, obs: np.ndarray, legal_moves: list,
+                use_pseudo_harmonic_mapping=False):
             """
             See "Action translation in extensive-form games with large action spaces:
             Axioms, paradoxes, and the pseudo-harmonic mapping" by Ganzfried and Sandhol
@@ -380,7 +413,9 @@ class OracleAgent(BaselineAgentBase):
             # #     return ActionSpace.FOLD
             # return self._prediction.item()
 
-        def forward(self, batch: Batch, state: Optional[Union[dict, Batch, np.ndarray]] = None, **kwargs: Any) -> Batch:
+        def forward(self, batch: Batch,
+                    state: Optional[Union[dict, Batch, np.ndarray]] = None,
+                    **kwargs: Any) -> Batch:
             nobs = len(batch.obs)
             return Batch(logits=None, act=[self.CHECK_CALL] * nobs, state=None)
 
