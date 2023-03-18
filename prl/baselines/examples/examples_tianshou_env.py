@@ -218,8 +218,10 @@ class TianshouEnvWrapper(AECEnv):
                 self._scale_rewards(rewards)
             )
             last_player_who_acted = self._int_to_name(self.agent_map[prev])
+            # set final observations for each player
             if done:
                 # if env is not done, obs is for next player, otherwise obs is for same player
+
                 for i in range(1, self.num_players):
                     prev_player_id = (prev - i) % self.num_players
                     prev_player_id = self.agent_map[prev_player_id]
@@ -240,8 +242,13 @@ class TianshouEnvWrapper(AECEnv):
                 self.remaining.pop(0)
 
             if len(self.remaining) > 0:
+                # super calls self.observe(self.agent_selection) but its ok
+                try:
+                    # first, let the agent collect its observation that was last to act
+                    self.agent_selection = last_player_who_acted
+                except Exception:
+                    self.agent_selection = self.remaining[0]
                 self.awaiting_noops = True
-                self.agent_selection = self.remaining[0]
             else:
                 # All players have stepped their no-op: distribute rewards and show cards
                 self.awaiting_noops = False
@@ -272,7 +279,7 @@ class TianshouEnvWrapper(AECEnv):
             self.next_legal_moves = self.env_wrapped.get_legal_moves_extended()
             self.agent_selection = next_player
             if self.action_was_fold(action):
-                self.folded_players.add(last_player_who_acted)
+                self.folded_players.append(last_player_who_acted)
             if next_player in self.folded_players:
                 nlm = np.zeros(len(ActionSpace))
                 nlm[ActionSpace.NoOp] = 1
