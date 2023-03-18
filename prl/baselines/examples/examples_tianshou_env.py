@@ -254,7 +254,7 @@ class TianshouEnvWrapper(AECEnv):
         # else:
         #     self.agent_selection = next_player
         self._accumulate_rewards()
-        self._deads_step_first()
+        #self._deads_step_first()
 
 
 class WrappedEnv(BaseWrapper):
