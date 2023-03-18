@@ -87,6 +87,7 @@ class TianshouEnvWrapper(AECEnv):
             self.agent_map[i] = i
         self.btn = self.agent_map[0]
         self._last_obs = {}
+        self.awaiting_noops = False
 
     def seed(self, seed: Optional[int] = None) -> None:
         self.seed = np.random.seed(seed)
@@ -130,6 +131,7 @@ class TianshouEnvWrapper(AECEnv):
         if seed is not None:
             self.seed(seed=seed)
         reset_config = None
+        self.awaiting_noops = False
         if options:
             if 'reset_config' in options:
                 reset_config = options['reset_config']
@@ -147,7 +149,7 @@ class TianshouEnvWrapper(AECEnv):
         self.remaining = [a for a in self.agents]
         self.folded_players = []
         self.agent_selection = player
-        self.awaiting_noops = False
+
 
         self.rewards = self._convert_to_dict([0 for _ in range(self.num_agents)])
         self._cumulative_rewards = self._convert_to_dict(
@@ -196,7 +198,14 @@ class TianshouEnvWrapper(AECEnv):
         # only step the base env with real action
         # noops are used to distribute rewards and final observation to all players
         if action != ActionSpace.NoOp:
-            assert not self.awaiting_noops
+            try:
+                assert not self.awaiting_noops
+            except AssertionError:
+                logging.warn(f"Tried to step environment with done="
+                             f"{self.env_wrapped.done} and action"
+                             f"{action} although awaiting_noops={self.awaiting_noops}."
+                             f"Skipping Turn")
+                return
             prev = self.env_wrapped.env.current_player.seat_id
             obs, rew, done, info = self.env_wrapped.step(action)
             # next_player_id = self.env_wrapped.env.current_player.seat_id
@@ -220,8 +229,8 @@ class TianshouEnvWrapper(AECEnv):
             last_player_who_acted = self._int_to_name(self.agent_map[prev])
             # set final observations for each player
             if done:
+                self._accumulate_rewards()
                 # if env is not done, obs is for next player, otherwise obs is for same player
-
                 for i in range(1, self.num_players):
                     prev_player_id = (prev - i) % self.num_players
                     prev_player_id = self.agent_map[prev_player_id]
@@ -238,17 +247,12 @@ class TianshouEnvWrapper(AECEnv):
 
         if done:
             if len(self.remaining) > 0:
-                # super calls self.observe(self.agent_selection) but its ok
-                try:
-                    # first, let the agent collect its observation that was last to act
-                    self.agent_selection = last_player_who_acted
-                except Exception:
-                    self.agent_selection = self.remaining[0]
                 self.awaiting_noops = True
-            if self.action_was_noop(action):
-                assert (len(self.remaining) == self.num_players) or self.awaiting_noops
-                self.remaining.pop(0)
-            else:
+                # super calls self.observe(self.agent_selection) but its ok
+                if self.action_was_noop(action):
+                    self.remaining.pop(self.remaining.index(self.agent_selection))
+
+            if len(self.remaining) <= 0:
                 # All players have stepped their no-op: distribute rewards and show cards
                 self.awaiting_noops = False
                 # make sure last observation does not get rolled, so player can see cards
@@ -264,6 +268,15 @@ class TianshouEnvWrapper(AECEnv):
                 for rel_btn, agent_idx in self.agent_map.items():
                     shifted_indices[rel_btn] = (agent_idx + 1) % self.num_players
                 self.agent_map = shifted_indices
+            else:
+                try:
+                    # first, let the agent collect its observation that was last to act
+                    self.agent_selection = last_player_who_acted
+                except Exception:
+                    # then collect no-ops to reveal cards to everybody
+                    self.agent_selection = self.remaining[0]
+
+
 
         else:
             # if env is not done, obs is for next player, otherwise obs is for same player
@@ -290,8 +303,8 @@ class TianshouEnvWrapper(AECEnv):
               # "info": info} for _ in range(self.num_agents)]
               "info": []} for _ in range(self.num_agents)]
         )
-        self._cumulative_rewards[self.agent_selection] = 0
-        self._accumulate_rewards()
+        # self._cumulative_rewards[self.agent_selection] = 0
+        # self._accumulate_rewards()
         # self._deads_step_first()
 
 
