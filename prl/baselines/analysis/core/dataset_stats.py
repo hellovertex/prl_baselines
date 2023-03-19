@@ -171,16 +171,17 @@ class DatasetStats:
                 self.n_showdowns_no_mucks += 1
 
     def update_from_file(self, file_path):
-        with open(file_path, 'r',
-                  encoding='utf-8') as f:  # pylint: disable=invalid-name,unspecified-encoding
-            hand_database = f.read()
-            hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
-            for hand in hands_played:
-                try:
-                    self.update_from_single_episode(hand)
-                except UnicodeDecodeError:
-                    # few files have invalid continuation bytes, skip them
-                    pass
+        try:
+            with open(file_path, 'r',
+                      encoding='utf-8') as f:  # pylint: disable=invalid-name,unspecified-encoding
+                hand_database = f.read()
+                hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
+                for hand in hands_played:
+
+                        self.update_from_single_episode(hand)
+        except UnicodeDecodeError:
+            # few files have invalid continuation bytes, skip them
+            pass
 
     def to_dict(self):
         assert self.n_showdowns_no_mucks + self.n_showdowns_with_mucks == self.total_showdowns
