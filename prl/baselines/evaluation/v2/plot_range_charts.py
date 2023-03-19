@@ -4,6 +4,36 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+def make_annotations():
+    labels = [
+        'A',
+        'K',
+        'Q',
+        'J',
+        'T',
+        '9',
+        '8',
+        '7',
+        '6',
+        '5',
+        '4',
+        '3',
+        '2'
+    ]
+    annot = np.zeros((13, 13), dtype=object)
+    for row, c1 in enumerate(labels):
+        for col, c2 in enumerate(labels):
+            suited = 'o' if row > col else 's'
+            if row == col:
+                suited = ''
+            if suited == 'o':
+                ann = c2 + c1 + suited
+            else:
+                ann = c1 + c2 + suited
+            annot[col][row] = ann
+    print(annot)
+
+
 def plot_ranges(positions: Dict[str, np.ndarray]):
     labels = ["AA", "KK", "QQ", "JJ", "TT", "99", "88", "77", "66", "55", "44", "33",
               "22"]

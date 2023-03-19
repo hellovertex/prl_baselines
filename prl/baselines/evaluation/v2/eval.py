@@ -644,8 +644,8 @@ class Evaluation:
         self.player_stats = self.compute_stats(snowie_episodes_per_target)
         # write either to tmp/ or persist .txt files if requested
         self.maybe_write_to_disk(save_to_abs_path, snowie_episodes_per_target)
-        # record mbbh
-        # record ranges
+        # record mbbh -> get from example_tianshou_env
+        # moved to eval_ranges: record ranges
 
 
 if __name__ == '__main__':

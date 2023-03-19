@@ -2,7 +2,7 @@ from typing import Union, List
 
 import numpy as np
 from tianshou.data import Batch
-
+import numpy as np
 
 class EvalAgentBase:
     """Wrapper around any agent to match our evaluation interface"""
@@ -13,8 +13,13 @@ class EvalAgentBase:
     def act(self, *args, **kwargs):
         raise NotImplementedError
 
+class EvalAgentRanges(EvalAgentBase):
+    def __init__(self, base_agent):
+        self._agent = base_agent
+    def act(obs: np.ndarray):
+        pass
 
-class EvalAgent(EvalAgentBase):
+class EvalAgentTianshou(EvalAgentBase):
 
     def __init__(self, name, agent):
         super().__init__(name)
