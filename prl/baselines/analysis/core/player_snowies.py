@@ -1,21 +1,5 @@
-"""
-Goal is to set up a comparison pipeline
-
-take each individual player
-
-for each observation, compare actions taken
-
-/home/sascha/Documents/github.com/prl_baselines/data/baseline_model_ckpt.pt
-
-"""
 import glob
-import json
-import multiprocessing
-import os
 import re
-import time
-from pathlib import Path
-from typing import Dict
 
 from tqdm import tqdm
 
@@ -275,15 +259,6 @@ class HSmithyStats:
             self.compute_stats(hands_played)
 
 
-# todo using mutliprocessing on player names
-# rewrite _select_hands(...) such that it
-# counts hands where player has folded
-# count hands where player reached showdown even if mucked
-# how are we gonna compute stats when we dont have observations
-# todo with the goal of re-running eval_analyzer.py - like evaluation of selected players
-#  but this time with the correct numbers
-# this will only be done once so it does not have to have a perfect api
-# todo then compute baseline stats from 1M games vs random agents
 best_players = ['ishuha',
                 'Sakhacop',
                 'nastja336',
@@ -308,52 +283,32 @@ worst_players = ['Calabazaking',
                  'Fischkop993']
 
 
-def filter_games_for_player(pname: str) -> str:
-    folder_in__unzipped_txt_files = "/home/hellovertex/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
-    folder_in__unzipped_txt_files = "/home/sascha/Documents/github.com/prl_baselines/data/01_raw/0.25-0.50/unzipped"
-
-    stats = HSmithyStats(pname=pname)
-
+def write_p_episodes_to_disk(pname):
+    unzipped_dir = ''
+    max_episodes_per_file = 2500
     filenames = glob.glob(
-        f'{folder_in__unzipped_txt_files}**/*.txt',
+        f'{unzipped_dir}**/*.txt',
         recursive=True)
-    n_files = len(filenames)
-    n_files_skipped = 0
-
+    current_hands = []
     # Update player stats file by file
-    for f in tqdm(filenames):
-        # print(f'Extracting file {i} / {n_files}')
-        try:
-            stats.compute_from_file(file_path_in=f,
-                                    target_player=pname)
-        except UnicodeDecodeError:
-            # should not occur too often, less than 1% of files have some continuation byte errs
-            n_files_skipped += 1
+    for fname in tqdm(filenames):
+        with open(fname, 'r', encoding='utf-8') as f:  # pylint: disable=invalid-name
+            hand_database = f.read()
+            hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
+            for hand in hands_played:
+                if len(current_hands) < max_episodes_per_file:
+                    # write current_hands to disk
 
-    # Flush to disk
-    to_dict = stats.pstats.to_dict()
-    outfile = os.path.join('./player_stats', f'stats_{pname}.json')
-    if not os.path.exists(outfile):
-        os.makedirs(Path(outfile).parent, exist_ok=True)
-    with open(outfile, 'a+') as f:
-        f.write(json.dumps(to_dict))
-
-    return f"Done. Extracted {n_files - n_files_skipped}/ {n_files}. {n_files_skipped} files were skipped."
+                    break
+                else:
+                    current_hands.append("PokerStars Hand #" + hand)
 
 
 def main():
-    debug = True
-    if not debug:
-        start = time.time()
-        p = multiprocessing.Pool()
-        t0 = time.time()
-        for x in p.imap_unordered(filter_games_for_player, best_players):
-            print(x + f'. Took {time.time() - t0} seconds')
-        print(f'Finished job after {time.time() - start} seconds.')
-        p.close()
-    else:
-        for p in best_players:
-            filter_games_for_player(p)
+    for p in best_players:
+        write_p_episodes_to_disk(p)
+    for p in worst_players:
+        write_p_episodes_to_disk(p)
 
 
 if __name__ == '__main__':

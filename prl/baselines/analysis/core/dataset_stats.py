@@ -1,4 +1,10 @@
+import glob
+import json
+import os
 import re
+from pathlib import Path
+
+from tqdm import tqdm
 
 example_ep_without_showdown = """PokerStars Hand #208958099944:  Hold'em No Limit (
 $0.25/$0.50 
@@ -164,19 +170,13 @@ class DatasetStats:
             else:
                 self.n_showdowns_no_mucks += 1
 
-    def _upd(self, hands_played):
-        # todo increment total hands
-        #  increment showdowns no mucks
-        #  increment showdowns with mucks
-        #  check for showdown in string and muckin string
-        pass
-
     def update_from_file(self, file_path):
         with open(file_path, 'r',
                   encoding='utf-8') as f:  # pylint: disable=invalid-name,unspecified-encoding
             hand_database = f.read()
             hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
-            self._upd(hands_played)
+            for hand in hands_played:
+                self.update_from_single_episode(hand)
 
     def to_dict(self):
         assert self.n_showdowns_no_mucks + self.n_showdowns_with_mucks == self.total_showdowns
@@ -186,21 +186,43 @@ class DatasetStats:
                 'n_showdowns_with_mucks': self.n_showdowns_with_mucks, }
 
 
+def main():
+    unzipped_dir = ''
+    filenames = glob.glob(
+        f'{unzipped_dir}**/*.txt',
+        recursive=True)
+    stats = DatasetStats()
+    # Update player stats file by file
+    for f in tqdm(filenames):
+        stats.update_from_file(f)
+
+    # Flush to disk
+    to_dict = stats.pstats.to_dict()
+    outfile = os.path.join('./dataset_stats', f'dataset_stats.json')
+    if not os.path.exists(outfile):
+        os.makedirs(Path(outfile).parent, exist_ok=True)
+    with open(outfile, 'a+') as f:
+        f.write(json.dumps(to_dict))
+    pass
+
+
 if __name__ == '__main__':
-    ds = DatasetStats()
-    ds.update_from_single_episode(example_ep_showdown_mucked_hand)
-    assert ds.to_dict()['total_hands'] == 1
-    assert ds.to_dict()['total_showdowns'] == 1
-    assert ds.to_dict()['n_showdowns_with_mucks'] == 1
-    assert ds.to_dict()['n_showdowns_no_mucks'] == 0
-    ds.update_from_single_episode(example_ep_without_showdown)
-    assert ds.to_dict()['total_hands'] == 2
-    assert ds.to_dict()['total_showdowns'] == 1
-    assert ds.to_dict()['n_showdowns_with_mucks'] == 1
-    assert ds.to_dict()['n_showdowns_no_mucks'] == 0
-    ds.update_from_single_episode(example_ep_with_showdown)
-    assert ds.to_dict()['total_hands'] == 3
-    assert ds.to_dict()['total_showdowns'] == 2
-    assert ds.to_dict()['n_showdowns_with_mucks'] == 1
-    assert ds.to_dict()['n_showdowns_no_mucks'] == 1
-    print(ds.to_dict())
+    main()
+    # ds = DatasetStats()
+
+    # ds.update_from_single_episode(example_ep_showdown_mucked_hand)
+    # assert ds.to_dict()['total_hands'] == 1
+    # assert ds.to_dict()['total_showdowns'] == 1
+    # assert ds.to_dict()['n_showdowns_with_mucks'] == 1
+    # assert ds.to_dict()['n_showdowns_no_mucks'] == 0
+    # ds.update_from_single_episode(example_ep_without_showdown)
+    # assert ds.to_dict()['total_hands'] == 2
+    # assert ds.to_dict()['total_showdowns'] == 1
+    # assert ds.to_dict()['n_showdowns_with_mucks'] == 1
+    # assert ds.to_dict()['n_showdowns_no_mucks'] == 0
+    # ds.update_from_single_episode(example_ep_with_showdown)
+    # assert ds.to_dict()['total_hands'] == 3
+    # assert ds.to_dict()['total_showdowns'] == 2
+    # assert ds.to_dict()['n_showdowns_with_mucks'] == 1
+    # assert ds.to_dict()['n_showdowns_no_mucks'] == 1
+    # print(ds.to_dict())
