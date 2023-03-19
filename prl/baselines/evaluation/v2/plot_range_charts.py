@@ -118,4 +118,4 @@ if __name__ == '__main__':
     positions = {'UTG': np.random.rand(13, 13), 'MP': np.random.rand(13, 13),
                  'CO': np.random.rand(13, 13), 'BTN': np.random.rand(13, 13),
                  'SB': np.random.rand(13, 13), 'BB': np.random.rand(13, 13)}
-    plot(positions)
+    plot_ranges(positions)

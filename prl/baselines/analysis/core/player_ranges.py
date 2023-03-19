@@ -7,6 +7,7 @@ from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.Wrappers.vectorizer import AgentObservationType
 
 from prl.baselines.evaluation.v2.eval_agent import EvalAgentBase
+from prl.baselines.evaluation.v2.plot_range_charts import plot_ranges
 
 
 class Positions6Max(enum.IntEnum):
@@ -24,12 +25,18 @@ class Positions6Max(enum.IntEnum):
 turnorder = [3, 4, 5, 0, 1, 2]
 
 
-def update_ranges(range_dict, action):
+def get_card_from_obs(obs):
+    return 1, 2
+
+
+def update_ranges(plays, folds, action, position, obs):
     # if action is fold, check that action is integer and not tensor, ndarray, tuple etc
     # increment card counter -- don't compute ratios, just use absolute numbers here
+    ci, cj = get_card_from_obs(obs)
     if action == 0:
-        pass
-    return range_dict
+        # todo: make cure ci, cj are in correct order
+        folds[position][ci][cj] += 1
+    return plays, folds
 
 
 def main():
@@ -42,12 +49,18 @@ def main():
                            scale_rewards=True,
                            disable_info=False)
     n_samples = 1000
-    ranges = {Positions6Max.UTG: np.zeros((13, 13)),
-              Positions6Max.MP: np.zeros((13, 13)),
-              Positions6Max.CO: np.zeros((13, 13)),
-              Positions6Max.BTN: np.zeros((13, 13)),
-              Positions6Max.SB: np.zeros((13, 13)),
-              Positions6Max.BB: np.zeros((13, 13))}
+    ranges_played = {Positions6Max.UTG: np.zeros((13, 13)),
+                     Positions6Max.MP: np.zeros((13, 13)),
+                     Positions6Max.CO: np.zeros((13, 13)),
+                     Positions6Max.BTN: np.zeros((13, 13)),
+                     Positions6Max.SB: np.zeros((13, 13)),
+                     Positions6Max.BB: np.zeros((13, 13))}
+    ranges_folded = {Positions6Max.UTG: np.zeros((13, 13)),
+                     Positions6Max.MP: np.zeros((13, 13)),
+                     Positions6Max.CO: np.zeros((13, 13)),
+                     Positions6Max.BTN: np.zeros((13, 13)),
+                     Positions6Max.SB: np.zeros((13, 13)),
+                     Positions6Max.BB: np.zeros((13, 13))}
     for pos in turnorder:
         i = 0
         while i < n_samples:
@@ -59,7 +72,15 @@ def main():
             else:
                 action = eval_agent.act(obs)
                 # update ranges for position
+                update_ranges(ranges_played,
+                              ranges_folded,
+                              action,
+                              pos,
+                              obs)
                 i += 1
+    for pos in Positions6Max:
+        ratios = ranges_played[pos] / ranges_folded[pos]
+        plot_ranges(ratios)
 
 
 if __name__ == '__main__':
