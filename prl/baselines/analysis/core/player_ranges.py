@@ -1,8 +1,10 @@
 import enum
 from random import randint
 
+import numpy as np
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
+from prl.environment.Wrappers.vectorizer import AgentObservationType
 
 from prl.baselines.evaluation.v2.eval_agent import EvalAgentBase
 
@@ -22,20 +24,34 @@ class Positions6Max(enum.IntEnum):
 turnorder = [3, 4, 5, 0, 1, 2]
 
 
+def update_ranges(range_dict, action):
+    # if action is fold, check that action is integer and not tensor, ndarray, tuple etc
+    # increment card counter -- don't compute ratios, just use absolute numbers here
+    if action == 0:
+        pass
+    return range_dict
+
+
 def main():
     eval_agent = EvalAgentBase('hero')
     env = init_wrapped_env(AugmentObservationWrapper,
                            stack_sizes=[20000 for _ in range(6)],
-                           agent_observation_mode=1,
+                           agent_observation_mode=AgentObservationType.CARD_KNOWLEDGE,
                            blinds=(25, 50),  # = [25, 50]
                            multiply_by=100,
                            scale_rewards=True,
                            disable_info=False)
     n_samples = 1000
+    ranges = {Positions6Max.UTG: np.zeros((13, 13)),
+              Positions6Max.MP: np.zeros((13, 13)),
+              Positions6Max.CO: np.zeros((13, 13)),
+              Positions6Max.BTN: np.zeros((13, 13)),
+              Positions6Max.SB: np.zeros((13, 13)),
+              Positions6Max.BB: np.zeros((13, 13))}
     for pos in turnorder:
         i = 0
         while i < n_samples:
-            obs = env.reset()
+            obs = env.reset(None)
             next_player = env.env.current_player.seat_id
             if next_player != pos:
                 a = randint(0, 2)
