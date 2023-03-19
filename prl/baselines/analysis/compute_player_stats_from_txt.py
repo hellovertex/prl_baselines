@@ -287,18 +287,23 @@ best_players = ['ishuha',
                 'nastja336',
                 'Lucastitos',
                 'I LOVE RUS34',
-                'SerAlGog',
-                'Ma1n1',
-                'zMukeha',
-                'SoLongRain',
-                'LuckyJO777',
-                'Nepkin1',
-                'blistein',
-                'ArcticBearDK',
-                'Creator_haze',
-                'ilaviiitech',
-                'm0bba',
-                'KDV707']
+                'SerAlGog', ]
+# 'Ma1n1',
+# 'zMukeha',
+# 'SoLongRain',
+# 'LuckyJO777',
+# 'Nepkin1',
+# 'blistein',
+# 'ArcticBearDK',
+# 'Creator_haze',
+# 'ilaviiitech',
+# 'm0bba',
+# 'KDV707']
+worst_players = ['Calabazaking',
+                 'jenya86rus',
+                 'podumci',
+                 'Inas21',
+                 'Fischkop993']
 
 
 def filter_games_for_player(pname: str) -> str:
