@@ -197,7 +197,7 @@ def main():
         stats.update_from_file(f)
 
     # Flush to disk
-    to_dict = stats.pstats.to_dict()
+    to_dict = stats.to_dict()
     outfile = os.path.join('./dataset_stats', f'dataset_stats.json')
     if not os.path.exists(outfile):
         os.makedirs(Path(outfile).parent, exist_ok=True)
