@@ -203,7 +203,6 @@ def main():
         os.makedirs(Path(outfile).parent, exist_ok=True)
     with open(outfile, 'a+') as f:
         f.write(json.dumps(to_dict))
-    pass
 
 
 if __name__ == '__main__':

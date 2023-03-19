@@ -1,5 +1,8 @@
 import glob
+import json
+import os
 import re
+from pathlib import Path
 
 from tqdm import tqdm
 
@@ -289,6 +292,7 @@ def write_p_episodes_to_disk(pname):
     filenames = glob.glob(
         f'{unzipped_dir}**/*.txt',
         recursive=True)
+    written = False
     current_hands = []
     # Update player stats file by file
     for fname in tqdm(filenames):
@@ -296,12 +300,21 @@ def write_p_episodes_to_disk(pname):
             hand_database = f.read()
             hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
             for hand in hands_played:
-                if len(current_hands) < max_episodes_per_file:
-                    # write current_hands to disk
-
-                    break
-                else:
-                    current_hands.append("PokerStars Hand #" + hand)
+                if pname in hand:
+                    if len(current_hands) < max_episodes_per_file:
+                        current_hands.append("PokerStars Hand #" + hand)
+                    else:
+                        # write current_hands to disk
+                        outfile = os.path.join('./player_snowies', f'episodes.txt')
+                        if not os.path.exists(outfile):
+                            os.makedirs(Path(outfile).parent, exist_ok=True)
+                        with open(outfile, 'a+') as f:
+                            f.write(''.join(str(i) for i in current_hands))
+                        written = True
+                        break
+            if len(current_hands) > max_episodes_per_file:
+                assert written
+                break
 
 
 def main():
