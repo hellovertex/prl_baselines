@@ -1,8 +1,10 @@
 from typing import Union, List
 
 import numpy as np
+import torch
 from tianshou.data import Batch
 import numpy as np
+
 
 class EvalAgentBase:
     """Wrapper around any agent to match our evaluation interface"""
@@ -13,11 +15,26 @@ class EvalAgentBase:
     def act(self, *args, **kwargs):
         raise NotImplementedError
 
+
 class EvalAgentRanges(EvalAgentBase):
-    def __init__(self, base_agent):
+    def __init__(self, name, base_agent, *args, **kwargs):
+        super().__init__(name, *args, **kwargs)
         self._agent = base_agent
-    def act(obs: np.ndarray):
+
+    def act(self, obs: np.ndarray):
+        # can easily mask here but no need atm
+        act = self._agent(Batch(obs=obs, info={}))
+        return act.act[0]
+
+
+class EvalAgentTorchObservation(EvalAgentBase):
+    def __init__(self, name, base_agent, *args, **kwargs):
+        super().__init__(name, *args, **kwargs)
+        self._agent = base_agent
+
+    def act(self, obs: torch.Tensor):
         pass
+
 
 class EvalAgentTianshou(EvalAgentBase):
 
