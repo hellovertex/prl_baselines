@@ -77,7 +77,7 @@ def main():
                            multiply_by=100,
                            scale_rewards=True,
                            disable_info=False)
-    n_samples = 1000
+    n_samples = 10
     ranges_played = {Positions6Max.UTG: np.zeros((13, 13)),
                      Positions6Max.MP: np.zeros((13, 13)),
                      Positions6Max.CO: np.zeros((13, 13)),

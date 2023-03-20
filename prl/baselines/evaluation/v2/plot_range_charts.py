@@ -100,9 +100,9 @@ def plot_ranges(positions: Dict[str, np.ndarray]):
             axs[i].text(j, k, label, ha='center', va='center')
             axs[i].text(j, k, label, ha='center', va='center')
     # Add a colorbar
-    # cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
-    cbar = fig.colorbar(im) #, cax=cbar_ax)
-    # cbar.set_label("Percentage")
+    cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
+    cbar = fig.colorbar(im, cax=cbar_ax)
+    cbar.set_label("Percentage")
 
     # Set the overall title and adjust the layout
     # fig.suptitle("Hand Range Chart", fontsize=16)
