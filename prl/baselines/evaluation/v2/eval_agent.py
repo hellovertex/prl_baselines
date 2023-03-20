@@ -27,6 +27,14 @@ class EvalAgentRanges(EvalAgentBase):
         return act.act[0]
 
 
+class EvalAgentCall(EvalAgentBase):
+    def __init__(self, name, *args, **kwargs):
+        super().__init__(name, *args, **kwargs)
+
+    def act(self, obs: np.ndarray):
+        return 1
+
+
 class EvalAgentTorchObservation(EvalAgentBase):
     def __init__(self, name, base_agent, *args, **kwargs):
         super().__init__(name, *args, **kwargs)

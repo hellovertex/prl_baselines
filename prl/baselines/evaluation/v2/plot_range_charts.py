@@ -78,7 +78,7 @@ def plot_ranges(positions: Dict[str, np.ndarray]):
                     '22']]
 
     # Create the figure and subplots
-    fig, axs = plt.subplots(nrows=2, ncols=3, figsize=(20, 20))
+    fig, axs = plt.subplots(nrows=2, ncols=3, figsize=(30, 30))
 
     # Flatten the subplots array for easier indexing
     axs = axs.flatten()
@@ -86,7 +86,7 @@ def plot_ranges(positions: Dict[str, np.ndarray]):
     # Iterate over the starting positions and corresponding numpy arrays
     for i, (position, data) in enumerate(positions.items()):
         # Create a heatmap of the data
-        im = axs[i].imshow(data, cmap="Reds", vmin=0, vmax=1)
+        im = axs[i].imshow(data, cmap="viridis", vmin=0, vmax=1)
 
         # Set the title and axis labels
         axs[i].set_title(position)
@@ -100,13 +100,13 @@ def plot_ranges(positions: Dict[str, np.ndarray]):
             axs[i].text(j, k, label, ha='center', va='center')
             axs[i].text(j, k, label, ha='center', va='center')
     # Add a colorbar
-    cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
-    cbar = fig.colorbar(im, cax=cbar_ax)
-    cbar.set_label("Percentage")
+    # cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
+    cbar = fig.colorbar(im) #, cax=cbar_ax)
+    # cbar.set_label("Percentage")
 
     # Set the overall title and adjust the layout
-    fig.suptitle("Hand Range Chart", fontsize=16)
-    fig.tight_layout(rect=[0, 0.03, 1, 0.95])
+    # fig.suptitle("Hand Range Chart", fontsize=16)
+    # fig.tight_layout(rect=[0, 0.03, 1, 0.95])
 
     # Show the plot
     plt.show()

@@ -8,10 +8,11 @@ from prl.environment.Wrappers.vectorizer import AgentObservationType
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols
 from prl.reinforce.train_eval import RainbowConfig
 from tianshou.policy import RainbowPolicy
+from tqdm import tqdm
 
 from prl.baselines.agents.tianshou_policies import get_rainbow_config
 from prl.baselines.evaluation.v2.eval_agent import EvalAgentBase, \
-    EvalAgentRanges
+    EvalAgentRanges, EvalAgentCall
 from prl.baselines.evaluation.v2.plot_range_charts import plot_ranges
 
 
@@ -67,6 +68,7 @@ def main():
     rainbow_config = get_rainbow_config(params)
     rainbow = RainbowPolicy(**rainbow_config)
     eval_agent = EvalAgentRanges('hero', rainbow)
+    #eval_agent = EvalAgentCall('caller')
 
     env = init_wrapped_env(AugmentObservationWrapper,
                            stack_sizes=[20000 for _ in range(6)],
@@ -75,7 +77,7 @@ def main():
                            multiply_by=100,
                            scale_rewards=True,
                            disable_info=False)
-    n_samples = 10
+    n_samples = 1000
     ranges_played = {Positions6Max.UTG: np.zeros((13, 13)),
                      Positions6Max.MP: np.zeros((13, 13)),
                      Positions6Max.CO: np.zeros((13, 13)),
@@ -91,10 +93,11 @@ def main():
     for pos in turnorder:
         i = 0
         obs, _, _, _ = env.reset(None)
+        pbar = tqdm(total=n_samples)
         while i < n_samples:
             next_player = env.env.current_player.seat_id
             if next_player != pos:
-                a = randint(0, 2)
+                a = randint(0, 7)
                 obs, _, _, _ = env.step(a)
             else:
                 action = eval_agent.act(obs)
@@ -105,9 +108,11 @@ def main():
                               obs)
                 obs, _, _, _ = env.reset(None)
                 i += 1
+                pbar.update(1)
+        pbar.close()
     ranges = {}
     for pos in Positions6Max:
-        ranges[pos] = ranges_played[pos] / ranges_folded[pos]
+        ranges[pos] = ranges_played[pos]  # / (ranges_folded[pos] + ranges_played[pos])
     plot_ranges(ranges)
 
 
