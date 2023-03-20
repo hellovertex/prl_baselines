@@ -5,7 +5,7 @@ import numpy as np
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
 from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.Wrappers.vectorizer import AgentObservationType
-
+from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols
 from prl.baselines.evaluation.v2.eval_agent import EvalAgentBase
 from prl.baselines.evaluation.v2.plot_range_charts import plot_ranges
 
@@ -22,11 +22,14 @@ class Positions6Max(enum.IntEnum):
     CO = 5  # CutOff
 
 
-turnorder = [3, 4, 5, 0, 1, 2]
-
-
 def get_card_from_obs(obs):
-    return 1, 2
+    c0 = obs[cols.First_player_card_0_rank_0:cols.First_player_card_0_suit_3 + 1]
+    c1 = obs[cols.First_player_card_1_rank_0:cols.First_player_card_1_suit_3 + 1]
+    r0, s0 = np.where(c0 == 1)[0]
+    r1, s1 = np.where(c1 == 1)[0]
+    max_r = max(r0, r1)
+    min_r = min(r0, r1)
+    return (max_r, min_r) if s0 == s1 else (min_r, max_r)
 
 
 def update_ranges(plays, folds, action, position, obs):
@@ -36,7 +39,12 @@ def update_ranges(plays, folds, action, position, obs):
     if action == 0:
         # todo: make cure ci, cj are in correct order
         folds[position][ci][cj] += 1
+    else:
+        plays[position][ci][cj] += 1
     return plays, folds
+
+
+turnorder = [3, 4, 5, 0, 1, 2]
 
 
 def main():
@@ -71,7 +79,6 @@ def main():
                 obs, _, _, _ = env.step(a)
             else:
                 action = eval_agent.act(obs)
-                # update ranges for position
                 update_ranges(ranges_played,
                               ranges_folded,
                               action,
