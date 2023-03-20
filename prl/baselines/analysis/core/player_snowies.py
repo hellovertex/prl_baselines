@@ -357,8 +357,9 @@ def run(files, target_player, max_episodes_per_file=2500):
                     if target_player in hand:
                         if len(current_hands) < max_episodes_per_file:
                             ep = parser.parse_episode(hand)
-                            showdown_eps = converter.from_poker_episode(ep,
-                                                                        [target_player])
+                            if ep:
+                                showdown_eps = converter.from_poker_episode(ep,
+                                                                            [target_player])
                             for observer_relative in showdown_eps:
                                 current_hands.append(observer_relative)
                         else:
@@ -375,7 +376,7 @@ def run(files, target_player, max_episodes_per_file=2500):
 
 
 def main():
-    unzipped_dir = ''
+    unzipped_dir = '/home/sascha/Documents/github.com/prl_baselines/data/01_raw/NL50/all_players'
     filenames = glob.glob(f'{unzipped_dir}**/*.txt', recursive=True)
     for p in best_players:
         run(filenames, p)
