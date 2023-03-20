@@ -7,6 +7,7 @@ from typing import Dict, List
 
 from tqdm import tqdm
 
+from prl.baselines.analysis.core.experiment_runner import PlayerWithCardsAndPosition
 from prl.baselines.evaluation.pokersnowie.converter_888 import Converter888
 from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode
 from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import \
@@ -341,7 +342,27 @@ worst_players = ['Calabazaking',
 
 
 def is_showdown_player(target_player, episode):
-    pass
+    if not '*** SHOW DOWN ***' in episode:
+        return False
+    else:
+        maybe_showdown = episode.split('*** SHOW DOWN ***')
+        if len(maybe_showdown) == 1:
+            # no showdown
+            return False
+        showdown = maybe_showdown[1].split('*** SUMMARY ***')[0]
+        if target_player in showdown:
+            return True
+    return False
+
+
+def parse_showdown_hands(ep: PokerEpisode):
+    if not ep:
+        return ep
+    player_hands = []
+    for hand in ep.showdown_hands:
+        player_hands.append(PlayerWithCardsAndPosition(cards=hand.cards, name=hand.name))
+    ep.info['player_hands'] = player_hands
+    return ep
 
 
 def run(files, target_player, max_episodes_per_file=2500):
@@ -354,14 +375,15 @@ def run(files, target_player, max_episodes_per_file=2500):
                 hand_database = f.read()
                 hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
                 for hand in hands_played:
-                    if target_player in hand:
+                    if is_showdown_player(target_player, hand):
                         if len(current_hands) < max_episodes_per_file:
                             ep = parser.parse_episode(hand)
+                            ep = parse_showdown_hands(ep)
                             if ep:
-                                showdown_eps = converter.from_poker_episode(ep,
-                                                                            [target_player])
-                            for observer_relative in showdown_eps:
-                                current_hands.append(observer_relative)
+                                showdown_ep = converter.from_poker_episode(
+                                    ep, [target_player])
+                                for observer_relative in showdown_ep:
+                                    current_hands.append(observer_relative)
                         else:
                             # write current_hands to disk
                             outfile = os.path.join('./player_snowies', f'episodes.txt')
@@ -373,6 +395,11 @@ def run(files, target_player, max_episodes_per_file=2500):
         except UnicodeDecodeError:
             # skip few files with invalid continuation bytes
             pass
+    outfile = os.path.join(f'./player_snowies', f'{target_player}.txt')
+    if not os.path.exists(outfile):
+        os.makedirs(Path(outfile).parent, exist_ok=True)
+    with open(outfile, 'a+') as f:
+        f.write(''.join(str(i) for i in current_hands))
 
 
 def main():

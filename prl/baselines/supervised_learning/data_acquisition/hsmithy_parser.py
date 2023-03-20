@@ -345,6 +345,7 @@ class HSmithyParser(Parser):
         board_cards = self.get_board_cards(episode)
         actions_total = self._parse_actions(episode)
         money_collected = self.get_money_collected(episode)
+
         return PokerEpisode(date='',  # todo
                             hand_id=hand_id,
                             variant=self._variant,
@@ -359,6 +360,7 @@ class HSmithyParser(Parser):
                             winners=winners,
                             showdown_hands=showdown_hands,
                             money_collected=money_collected,
+                            # todo append List[PlayerWithCardsAndPosition]
                             info={'episode_str': episode})
 
     def parse_episode(self, episode: str) -> PokerEpisode:
