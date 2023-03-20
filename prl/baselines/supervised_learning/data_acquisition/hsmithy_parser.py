@@ -4,7 +4,8 @@
 import re
 from typing import List, Tuple, Dict, Iterator, Iterable, Generator
 
-from prl.baselines.supervised_learning.data_acquisition.core.parser import Parser, PokerEpisode, Action, ActionType, \
+from prl.baselines.supervised_learning.data_acquisition.core.parser import Parser, \
+    PokerEpisode, Action, ActionType, \
     PlayerStack, Blind, PlayerWithCards, PlayerWinningsCollected
 
 # REGEX templates
@@ -15,7 +16,8 @@ PLAYER_NAME_TEMPLATE = r'([\w_.@#!-]+\s?[-@#!_.\w]*\s?[-@#!_.\w]*)'
 STARTING_STACK_TEMPLATE = r'\(([$€￡Â£]+\d+.?\d*)\sin chips\)'
 MATCH_ANY = r'.*?'  # not the most efficient way, but we prefer readabiliy (parsing is one time job)
 POKER_CARD_TEMPLATE = r'[23456789TJQKAjqka][SCDHscdh]'
-CURRENCY_SYMBOLS = ['$', '€', '￡', 'Â£']  # only these are currently supported, â‚¬ is € encoded
+CURRENCY_SYMBOLS = ['$', '€', '￡',
+                    'Â£']  # only these are currently supported, â‚¬ is € encoded
 
 
 # ---------------------------- PokerStars-Parser ---------------------------------
@@ -92,7 +94,8 @@ class HSmithyParser(Parser):
             a = 1
         return hands_played[1]
 
-    def get_winner(self, showdown: str) -> Tuple[List[PlayerWithCards], List[PlayerWithCards]]:
+    def get_winner(self, showdown: str) -> Tuple[
+        List[PlayerWithCards], List[PlayerWithCards]]:
         """Return player name of player that won showdown.
         Specifically, the part after ... *** SUMMARY *** is parsed, which looks like:
         "*** SUMMARY ***
@@ -157,13 +160,15 @@ class HSmithyParser(Parser):
           So we split each line by ':', and check, which of the splitresults has exactly two elements
           (playername, action).
         """
-        possible_actions = [possible_action.split(':') for possible_action in action_history.split('\n')]
+        possible_actions = [possible_action.split(':') for possible_action in
+                            action_history.split('\n')]
         actions = []
         for maybe_action in possible_actions:
             if len(maybe_action) == 2:
                 action_type = maybe_action[1]
                 # skip actions like 'Kaya1113 said, ":'(" which happens to have length 2 as well
-                is_valid = [a_type for a_type in ['folds', 'checks', 'calls', 'bets', 'raises'] if
+                is_valid = [a_type for a_type in
+                            ['folds', 'checks', 'calls', 'bets', 'raises'] if
                             (a_type in action_type)]
                 if not is_valid:
                     continue
@@ -199,7 +204,8 @@ class HSmithyParser(Parser):
                           ('Seat 4', 'kjs609', '$200 ')]
         """
         # pattern = re.compile(rf"(Seat \d): {PLAYER_NAME_TEMPLATE}\s\(([$€]\d+.?\d*)\sin chips\)")
-        pattern = re.compile(rf"(Seat \d): {PLAYER_NAME_TEMPLATE}\s{STARTING_STACK_TEMPLATE}", re.UNICODE)
+        pattern = re.compile(
+            rf"(Seat \d): {PLAYER_NAME_TEMPLATE}\s{STARTING_STACK_TEMPLATE}", re.UNICODE)
         amounts = re.compile(rf'{STARTING_STACK_TEMPLATE}')
         stacks = pattern.findall(line)
         if not len(stacks) == len(amounts.findall(line)):
@@ -221,11 +227,13 @@ class HSmithyParser(Parser):
             raise self._InvalidGameTypeError
 
         pattern = re.compile(
-            rf"{PLAYER_NAME_TEMPLATE}: posts (small blind|big blind) ([$€Â£￡]\d+.?\d*)", re.UNICODE)
+            rf"{PLAYER_NAME_TEMPLATE}: posts (small blind|big blind) ([$€Â£￡]\d+.?\d*)",
+            re.UNICODE)
         blinds = pattern.findall(episode)
 
         if not len(blinds) == 2:
-            raise self._NoSmallAndBigBlindGameTypeError(f"Given blinds are invalid: {blinds}")
+            raise self._NoSmallAndBigBlindGameTypeError(
+                f"Given blinds are invalid: {blinds}")
 
         return blinds
 
@@ -294,17 +302,20 @@ class HSmithyParser(Parser):
         res_ante = pattern.findall(episode)
         if res_ante:
             # every player posts the same ante
-            assert res_ante[0] == res_ante[-1], "First and last player posted different amount of ante"
+            assert res_ante[0] == res_ante[
+                -1], "First and last player posted different amount of ante"
             return res_ante[0]
         return currency_symbol + '0.00'
 
     def get_money_collected(self, episode) -> List[PlayerWinningsCollected]:
-        pattern = re.compile(rf"{PLAYER_NAME_TEMPLATE} collected ([$€Â£￡]\d+.?\d*)", re.UNICODE)
+        pattern = re.compile(rf"{PLAYER_NAME_TEMPLATE} collected ([$€Â£￡]\d+.?\d*)",
+                             re.UNICODE)
         rake = re.compile(rf"Rake ([$€Â£￡]\d+.?\d*)").findall(episode)[0]
         collected = []
         for found in pattern.findall(episode):
             collected.append(
-                PlayerWinningsCollected(player_name=found[0].split("\n")[-1], collected=found[1], rake=rake))
+                PlayerWinningsCollected(player_name=found[0].split("\n")[-1],
+                                        collected=found[1], rake=rake))
         if not collected or "cashed out" in episode:
             raise self.PlayerCashedOutBeforeAwarded()
         return collected
@@ -327,7 +338,8 @@ class HSmithyParser(Parser):
         btn = self.get_button(episode)
         player_stacks = [PlayerStack(*stack) for stack in self.get_player_stacks(episode)]
         if not player_stacks:
-            raise self._Utf8NotSupportedError("utf8 encoded currency symbols are currently not supported")
+            raise self._Utf8NotSupportedError(
+                "utf8 encoded currency symbols are currently not supported")
         num_players = len(player_stacks)
         btn_idx = self.get_btn_idx(player_stacks, btn)
         board_cards = self.get_board_cards(episode)
@@ -348,6 +360,61 @@ class HSmithyParser(Parser):
                             showdown_hands=showdown_hands,
                             money_collected=money_collected,
                             info={'episode_str': episode})
+
+    def parse_episode(self, episode: str) -> PokerEpisode:
+        if not '*** SHOW DOWN ***' in episode:
+            return []
+
+        # get showdown
+        showdown = self.get_showdown(episode)
+
+        # todo: remove this -- requires changes in showdown hand parsing
+        # skip if player did not show hand
+        if 'mucks' in showdown:
+            return []
+
+        try:
+            return self._parse_episode(episode, showdown)
+        except self._InvalidPlayerNameError as e:
+            # if an _InvalidPlayerNameError is thrown, we have encountered some weird player name like
+            #  é=mc².Fin  é=mc³.Start
+            # we can parse unicode characters and very exotic player names including those
+            # with multiple whitespaces but this name finally broke our nameparser
+            # Hence we skip these _very_ rare cases where the name is unparsable without further efforts
+            a = 1
+            return []
+        except self._InvalidGameTypeError as e:
+            # We can encounter games where not only small blind,
+            # big blind, and ante are posted, but that contain lines like
+            # <'player one posts small & big blinds'>. We skip these games
+            # because our env does not support them.
+            a = 1
+            return []
+        except self._PlayerLeavesDuringPotContributionError:
+            # Edge case that player leaves before rundown
+            a = 1
+            return []
+        except self._CurrencyNotSupportedError:
+            # Only parse EUR, USD, GBP games
+            a = 1
+            return []
+        except self._Utf8NotSupportedError:
+            # A _very_ small fraction of txt files encodes the €-sign as <â‚¬>.
+            # Since it would be extra effort to adjust the parser accordingly, we skip these games.
+            a = 1
+            return []
+        except self._NoSmallAndBigBlindGameTypeError:
+            # Only games with a single small blind a single big blind are accepted.
+            # Text files included games with multiple small blinds. Maybe a bug in their crawler.
+            # We skip these games.
+            a = 1
+            return []
+        except self._ShowDownHappenedButNoSummaryDataExists:
+            a = 1
+            return []
+        except self.PlayerCashedOutBeforeAwarded:
+            a = 1
+            return []
 
     def _parse_hands(self, hands_played) -> List[PokerEpisode]:
         parsed_hands = []
@@ -412,7 +479,8 @@ class HSmithyParser(Parser):
 
     def parse_file(self, file_path) -> List[PokerEpisode]:
         self._variant = 'NoLimitHoldem'  # todo parse variant from filename
-        with open(file_path, 'r', encoding='utf-8') as f:  # pylint: disable=invalid-name,unspecified-encoding
+        with open(file_path, 'r',
+                  encoding='utf-8') as f:  # pylint: disable=invalid-name,unspecified-encoding
             hand_database = f.read()
             hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
             return self._parse_hands(hands_played)

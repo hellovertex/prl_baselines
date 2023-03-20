@@ -3,8 +3,54 @@ import json
 import os
 import re
 from pathlib import Path
+from typing import Dict, List
 
 from tqdm import tqdm
+
+from prl.baselines.evaluation.pokersnowie.converter_888 import Converter888
+from prl.baselines.supervised_learning.data_acquisition.core.parser import PokerEpisode
+from prl.baselines.supervised_learning.data_acquisition.hsmithy_parser import \
+    HSmithyParser
+
+
+def write_p_episodes_to_disk(pname):
+    unzipped_dir = ''
+    max_episodes_per_file = 2500
+    filenames = glob.glob(
+        f'{unzipped_dir}**/*.txt',
+        recursive=True)
+    current_hands = []
+    # Update player stats file by file
+    for fname in tqdm(filenames):
+        try:
+            with open(fname, 'r', encoding='utf-8') as f:  # pylint: disable=invalid-name
+                hand_database = f.read()
+                hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
+                for hand in hands_played:
+                    if pname in hand:
+                        if len(current_hands) < max_episodes_per_file:
+                            current_hands.append("PokerStars Hand #" + hand)
+                        else:
+                            # write current_hands to disk
+                            outfile = os.path.join('./player_snowies', f'episodes.txt')
+                            if not os.path.exists(outfile):
+                                os.makedirs(Path(outfile).parent, exist_ok=True)
+                            with open(outfile, 'a+') as f:
+                                f.write(''.join(str(i) for i in current_hands))
+                            return
+        except UnicodeDecodeError:
+            # skip few files with invalid continuation bytes
+            pass
+
+
+# # need to parse to pokerepisode only those games that have showdown
+#    # pokerepisodes using 888 to disk and then to snowie
+#    unzipped_dir = ''
+#
+#    # for p in best_players:
+#    #     write_p_episodes_to_disk(p)
+#    # for p in worst_players:
+#    #     write_p_episodes_to_disk(p)
 
 
 class SelectedPlayerStats:
@@ -262,23 +308,31 @@ class HSmithyStats:
             self.compute_stats(hands_played)
 
 
+class PlayerSnowies:
+
+    def __init__(self):
+        self.parser = HSmithyParser()
+
+    def make_episodes_from_file(self, filepath) -> List[PokerEpisode]:
+        # parse file
+        poker_episodes = self.parser.parse_file(filepath)
+        # simulate environment
+        # encode PokerEpisode
+        # convert PokerEpisode to PokerSnowie
+        # write to file
+        pass
+
+    def make_episodes_from_files(self, unzipped_dir):
+        pass
+
+
 best_players = ['ishuha',
                 'Sakhacop',
                 'nastja336',
                 'Lucastitos',
                 'I LOVE RUS34',
                 'SerAlGog', ]
-# 'Ma1n1',
-# 'zMukeha',
-# 'SoLongRain',
-# 'LuckyJO777',
-# 'Nepkin1',
-# 'blistein',
-# 'ArcticBearDK',
-# 'Creator_haze',
-# 'ilaviiitech',
-# 'm0bba',
-# 'KDV707']
+
 worst_players = ['Calabazaking',
                  'jenya86rus',
                  'podumci',
@@ -286,24 +340,27 @@ worst_players = ['Calabazaking',
                  'Fischkop993']
 
 
-def write_p_episodes_to_disk(pname):
-    unzipped_dir = ''
-    max_episodes_per_file = 2500
-    filenames = glob.glob(
-        f'{unzipped_dir}**/*.txt',
-        recursive=True)
-    written = False
+def is_showdown_player(target_player, episode):
+    pass
+
+
+def run(files, target_player, max_episodes_per_file=2500):
     current_hands = []
-    # Update player stats file by file
-    for fname in tqdm(filenames):
+    parser = HSmithyParser()
+    converter = Converter888()
+    for fname in tqdm(files):
         try:
             with open(fname, 'r', encoding='utf-8') as f:  # pylint: disable=invalid-name
                 hand_database = f.read()
                 hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
                 for hand in hands_played:
-                    if pname in hand:
+                    if target_player in hand:
                         if len(current_hands) < max_episodes_per_file:
-                            current_hands.append("PokerStars Hand #" + hand)
+                            ep = parser.parse_episode(hand)
+                            showdown_eps = converter.from_poker_episode(ep,
+                                                                        [target_player])
+                            for observer_relative in showdown_eps:
+                                current_hands.append(observer_relative)
                         else:
                             # write current_hands to disk
                             outfile = os.path.join('./player_snowies', f'episodes.txt')
@@ -311,21 +368,19 @@ def write_p_episodes_to_disk(pname):
                                 os.makedirs(Path(outfile).parent, exist_ok=True)
                             with open(outfile, 'a+') as f:
                                 f.write(''.join(str(i) for i in current_hands))
-                            written = True
-                            break
-                if len(current_hands) > max_episodes_per_file:
-                    assert written
-                    break
+                            return
         except UnicodeDecodeError:
             # skip few files with invalid continuation bytes
             pass
 
 
 def main():
+    unzipped_dir = ''
+    filenames = glob.glob(f'{unzipped_dir}**/*.txt', recursive=True)
     for p in best_players:
-        write_p_episodes_to_disk(p)
+        run(filenames, p)
     for p in worst_players:
-        write_p_episodes_to_disk(p)
+        run(filenames, p)
 
 
 if __name__ == '__main__':
