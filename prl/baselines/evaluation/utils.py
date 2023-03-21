@@ -1,12 +1,14 @@
 from typing import List, Dict
 
 import numpy as np
-from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols, AugmentObservationWrapper
+from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols, \
+    AugmentObservationWrapper
 from prl.environment.Wrappers.base import ActionSpace
 from prl.environment.steinberger.PokerRL import Poker, NoLimitHoldem
 from prl.environment.steinberger.PokerRL.game._.rl_env.game_rules import HoldemRules
 
-from prl.baselines.supervised_learning.data_acquisition.environment_utils import make_board_cards, card_tokens, card
+from prl.baselines.supervised_learning.data_acquisition.environment_utils import \
+    make_board_cards, card_tokens, card
 
 N_RANKS = 13
 N_SUITS = 4
@@ -57,6 +59,8 @@ def _card_bits_to_2d(c):
 
 
 CARD_NOT_VISIBLE_2D = [-127, -127]
+
+
 def card_bits_to_2d(c0, c1):
     try:
         r0, s0 = np.where(c0 == 1)[0]
@@ -160,6 +164,7 @@ def pretty_print(player_id, obs, action, env=None):
     print(result)
     return result
 
+
 def get_reset_config(player_hands: List[str],
                      board=None) -> Dict:
     """
@@ -177,7 +182,8 @@ def get_reset_config(player_hands: List[str],
         hand = [card(token) for token in cards]
         hands.append(hand)
     initial_board = np.full((5, 2), Poker.CARD_NOT_DEALT_TOKEN_1D, dtype=np.int8)
-    return {'deck_state_dict': {'deck': {'deck_remaining': deck},  # np.ndarray(shape=(52-n_cards*num_players, 2))
+    return {'deck_state_dict': {'deck': {'deck_remaining': deck},
+                                # np.ndarray(shape=(52-n_cards*num_players, 2))
                                 'board': initial_board,  # np.ndarray(shape=(n_cards, 2))
                                 'hand': hands}}
 

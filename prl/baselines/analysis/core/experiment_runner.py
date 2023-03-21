@@ -247,7 +247,7 @@ class PokerExperimentRunner(ExperimentRunner):
         players_acted = 0
         obs = observation['obs'][0]
         while not done:
-            if observation['legal_moves'][0][8]==1:
+            if observation['legal_moves'][0][8] == 1:
                 break
             # -------------------------------------
             # --------------- ACT -----------------

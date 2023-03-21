@@ -23,6 +23,7 @@ from omegaconf import DictConfig
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols
 import logging
 
+
 def get_cards(obs):
     one_hot_card_bit_range = slice(
         cols.First_player_card_0_rank_0, cols.First_player_card_1_suit_3 + 1
@@ -150,7 +151,6 @@ class TianshouEnvWrapper(AECEnv):
         self.folded_players = []
         self.agent_selection = player
 
-
         self.rewards = self._convert_to_dict([0 for _ in range(self.num_agents)])
         self._cumulative_rewards = self._convert_to_dict(
             [0 for _ in range(self.num_agents)]
@@ -208,6 +208,8 @@ class TianshouEnvWrapper(AECEnv):
                 return
             prev = self.env_wrapped.env.current_player.seat_id
             obs, rew, done, info = self.env_wrapped.step(action)
+            if not done:
+                self.last_non_zero_observation = obs
             # next_player_id = self.env_wrapped.env.current_player.seat_id
             next_player_id = (prev + 1) % self.num_players
             next_player_id = self.agent_map[next_player_id]
@@ -230,6 +232,7 @@ class TianshouEnvWrapper(AECEnv):
             # set final observations for each player
             if done:
                 self._accumulate_rewards()
+                obs = self.last_non_zero_observation
                 # if env is not done, obs is for next player, otherwise obs is for same player
                 for i in range(1, self.num_players):
                     prev_player_id = (prev - i) % self.num_players
@@ -281,25 +284,25 @@ class TianshouEnvWrapper(AECEnv):
                     self.agent_selection = self.remaining[0]
                     if len(self.remaining) == 0:
                         self.awaiting_noops = False
-        #else:
-            # turns out tianshou does not utilize this:
-            # if env is not done, obs is for next player, otherwise obs is for same player
-            # for i in range(0, self.num_players - 1):
-            #     prev_player_id = (prev - i) % self.num_players
-            #     prev_player_id = self.agent_map[prev_player_id]
-            #     prev_player_id = self._int_to_name(prev_player_id)
-            #     self._last_obs[prev_player_id] = self.env_wrapped.get_current_obs(
-            #         obs, backward_offset=i + 1
-            # )
+        # else:
+        # turns out tianshou does not utilize this:
+        # if env is not done, obs is for next player, otherwise obs is for same player
+        # for i in range(0, self.num_players - 1):
+        #     prev_player_id = (prev - i) % self.num_players
+        #     prev_player_id = self.agent_map[prev_player_id]
+        #     prev_player_id = self._int_to_name(prev_player_id)
+        #     self._last_obs[prev_player_id] = self.env_wrapped.get_current_obs(
+        #         obs, backward_offset=i + 1
+        # )
 
-            # keep for reference but all players have to step no-op at the end. They will however not
-            # if self.action_was_fold(action):
-            #     self.folded_players.append(last_player_who_acted)
-            # if next_player in self.folded_players:
-            #     nlm = np.zeros(len(ActionSpace))
-            #     nlm[ActionSpace.NoOp] = 1
-            #     self.next_legal_moves = nlm
-            # if self.agent_selection in
+        # keep for reference but all players have to step no-op at the end. They will however not
+        # if self.action_was_fold(action):
+        #     self.folded_players.append(last_player_who_acted)
+        # if next_player in self.folded_players:
+        #     nlm = np.zeros(len(ActionSpace))
+        #     nlm[ActionSpace.NoOp] = 1
+        #     self.next_legal_moves = nlm
+        # if self.agent_selection in
 
         self.infos = self._convert_to_dict(
             [{"legal_moves": self.next_legal_moves,
