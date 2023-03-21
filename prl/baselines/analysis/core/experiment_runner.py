@@ -247,8 +247,6 @@ class PokerExperimentRunner(ExperimentRunner):
         players_acted = 0
         obs = observation['obs'][0]
         while not done:
-            if observation['legal_moves'][0][8] == 1:
-                break
             # -------------------------------------
             # --------------- ACT -----------------
             # -------------------------------------
@@ -280,6 +278,8 @@ class PokerExperimentRunner(ExperimentRunner):
             # obs, _, done, info = self.env.step(action)
             obs_dict, _, done, truncated, info = self.env.step(action)
             obs = obs_dict['obs']
+            if obs_dict['mask'][8] == 1:
+                done = True
             self._times_taken_to_step_env.append(time.time() - t0)
             # -------------------------------------
             # -------- RECORD LAST ACTION ---------

@@ -12,10 +12,9 @@ from prl.baselines.evaluation.v2.eval_agent import EvalAgentBase, EvalAgentTians
 from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
 
 
-def main(agents, agent_names, pname):
+def main(max_episodes, agents, agent_names, pname):
     assert len(agents) == len(agent_names)
     num_players = len(agents)
-    max_episodes = 10
     ckpt_abs_fpath = ""
     hidden_dims = [256] if '256' in pname else [512]
     path_out = "./baseline_stats"
@@ -66,10 +65,13 @@ def main(agents, agent_names, pname):
 
 def load_imitation_agent(ckpt_dir):
     return ImitatorAgent(ckpt_dir,
-                             flatten_input=False,
-                             num_players=num_players,
-                             model_hidden_dims=(512,))
+                         flatten_input=False,
+                         num_players=num_players,
+                         model_hidden_dims=(512,))
+
+
 if __name__ == '__main__':
+    max_episodes = 10
     num_players = 6
     pname = 'AI_AGENT_v2'
     agent_names = [f'{pname}', '2', '3', '4', '5', '6']
@@ -79,4 +81,4 @@ if __name__ == '__main__':
     agents = [EvalAgentTianshou(pname, agent)]  # MajorityBaseline
     agents += [EvalAgentRandom(f'p{i + 1}') for i in
                range(num_players - 1)]
-    main(agents, agent_names, pname)
+    main(max_episodes, agents, agent_names, pname)

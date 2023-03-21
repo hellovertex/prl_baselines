@@ -213,17 +213,17 @@ class TianshouEnvWrapper(AECEnv):
             prev = self.env_wrapped.env.current_player.seat_id
             last_player_who_acted = self._int_to_name(self.agent_map[prev])
             # *** REMOVE WHEN DONE
-            if last_player_who_acted == self.agents[0]:
-                # temporary monkey patch to mask other players cards when env in SEER mode
-                # assume learner is always at index 0
-                # set his observationtype from SEER to CARD_KNOWLEDGE
-                self.env_wrapped.set_agent_observation_mode(AgentObservationType.CARD_KNOWLEDGE)
+            # if last_player_who_acted == self.agents[0]:
+            #     # temporary monkey patch to mask other players cards when env in SEER mode
+            #     # assume learner is always at index 0
+            #     # set his observationtype from SEER to CARD_KNOWLEDGE
+            #     self.env_wrapped.set_agent_observation_mode(AgentObservationType.CARD_KNOWLEDGE)
             # *** REMOVE END
             obs, rew, done, info = self.env_wrapped.step(action)
             if not done:
                 self.last_non_zero_observation = obs
             # *** REMOVE WHEN DONE
-            self.env_wrapped.set_agent_observation_mode(AgentObservationType.SEER)
+            # self.env_wrapped.set_agent_observation_mode(AgentObservationType.SEER)
             # *** REMOVE END
             # next_player_id = self.env_wrapped.env.current_player.seat_id
             next_player_id = (prev + 1) % self.num_players
@@ -321,8 +321,8 @@ class TianshouEnvWrapper(AECEnv):
 
         self.infos = self._convert_to_dict(
             [{"legal_moves": self.next_legal_moves,
-              # "info": info} for _ in range(self.num_agents)]
-              "info": []} for _ in range(self.num_agents)]
+              "info": info} for _ in range(self.num_agents)]
+              #"info": []} for _ in range(self.num_agents)]
         )
         # self._cumulative_rewards[self.agent_selection] = 0
         # self._accumulate_rewards()
