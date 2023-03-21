@@ -256,7 +256,6 @@ class HSmithyStats:
 
     def compute_stats(self, hands_played):
         for current in hands_played:  # c for current_hand
-            # Only parse hands that went to Showdown stage, i.e. were shown
             # skip hands without target player
             if not self.target_player in current:
                 continue

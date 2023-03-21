@@ -3,16 +3,14 @@ from random import randint
 
 import numpy as np
 from prl.environment.Wrappers.augment import AugmentObservationWrapper
+from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols
 from prl.environment.Wrappers.utils import init_wrapped_env
 from prl.environment.Wrappers.vectorizer import AgentObservationType
-from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols
-from prl.reinforce.train_eval import RainbowConfig
 from tianshou.policy import RainbowPolicy
 from tqdm import tqdm
 
 from prl.baselines.agents.tianshou_policies import get_rainbow_config
-from prl.baselines.evaluation.v2.eval_agent import EvalAgentBase, \
-    EvalAgentRanges, EvalAgentCall
+from prl.baselines.evaluation.v2.eval_agent import EvalAgentRanges
 from prl.baselines.evaluation.v2.plot_range_charts import plot_ranges
 
 
@@ -68,7 +66,7 @@ def main():
     rainbow_config = get_rainbow_config(params)
     rainbow = RainbowPolicy(**rainbow_config)
     eval_agent = EvalAgentRanges('hero', rainbow)
-    #eval_agent = EvalAgentCall('caller')
+    # eval_agent = EvalAgentCall('caller')
 
     env = init_wrapped_env(AugmentObservationWrapper,
                            stack_sizes=[20000 for _ in range(6)],
