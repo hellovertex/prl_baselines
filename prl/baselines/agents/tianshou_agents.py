@@ -14,7 +14,7 @@ from torch import softmax
 from prl.baselines.agents.rule_based import RuleBasedAgent
 from prl.baselines.cpp_hand_evaluator.rank import dict_str_to_sk
 from prl.baselines.evaluation.utils import pretty_print
-
+from torch.distributions import Categorical
 IDX_C0_0 = 167  # feature_names.index('0th_player_card_0_rank_0')
 IDX_C0_1 = 184  # feature_names.index('0th_player_card_1_rank_0')
 IDX_C1_0 = 184  # feature_names.index('0th_player_card_1_rank_0')
@@ -195,7 +195,9 @@ class TianshouALLInAgent(BasePolicy):
     def learn(self, batch: Batch, **kwargs: Any) -> Dict[str, Any]:
         return {}
 
-
+probs = torch.tensor([.2,.4,.4])
+Categorical(probs=probs)
+d = Categorical(probs=probs)
 class TianshouRandomAgent(BasePolicy):
     def __init__(self, observation_space=None, action_space=None):
         super().__init__(observation_space=observation_space,
@@ -205,7 +207,7 @@ class TianshouRandomAgent(BasePolicy):
                 state: Optional[Union[dict, Batch, np.ndarray]] = None,
                 **kwargs: Any) -> Batch:
         nobs = len(batch.obs)
-        action = np.array([randint(0, 2)] * nobs)
+        action = np.array([d.sample.item()] * nobs)
         envs_noop_pending = np.where(batch.obs.mask[:, ActionSpace.NoOp])
         action[envs_noop_pending] = ActionSpace.NoOp
         return Batch(logits=None, act=action, state=None)
