@@ -299,32 +299,35 @@ class HSmithyStats:
             # accumulate stats
             self.pstats.update(current)
 
-    def compute_from_file(self, file_path_in, target_player):
+    def compute_from_file(self,
+                          file_path_in,
+                          target_player,
+                          hand_separator: str = r'PokerStars Hand #'):
         self._variant = 'NoLimitHoldem'  # todo parse variant from filename
         self.target_player = target_player
         with open(file_path_in, 'r',
                   encoding='utf-8') as f:  # pylint: disable=invalid-name,unspecified-encoding
             hand_database = f.read()
-            hands_played = re.split(r'PokerStars Hand #', hand_database)[1:]
+            hands_played = re.split(hand_separator, hand_database)[1:]
             self.compute_stats(hands_played)
 
 
-class PlayerSnowies:
-
-    def __init__(self):
-        self.parser = HSmithyParser()
-
-    def make_episodes_from_file(self, filepath) -> List[PokerEpisode]:
-        # parse file
-        poker_episodes = self.parser.parse_file(filepath)
-        # simulate environment
-        # encode PokerEpisode
-        # convert PokerEpisode to PokerSnowie
-        # write to file
-        pass
-
-    def make_episodes_from_files(self, unzipped_dir):
-        pass
+# class PlayerSnowies:
+#
+#     def __init__(self):
+#         self.parser = HSmithyParser()
+#
+#     def make_episodes_from_file(self, filepath) -> List[PokerEpisode]:
+#         # parse file
+#         poker_episodes = self.parser.parse_file(filepath)
+#         # simulate environment
+#         # encode PokerEpisode
+#         # convert PokerEpisode to PokerSnowie
+#         # write to file
+#         pass
+#
+#     def make_episodes_from_files(self, unzipped_dir):
+#         pass
 
 
 best_players = ['ishuha',

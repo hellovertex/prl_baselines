@@ -42,7 +42,6 @@ class ImitatorAgent(BasePolicy):
                  model_hidden_dims=(256,),
                  device=None,
                  observation_space=None,
-                 num_players=None,
                  action_space=None
                  ):
         super().__init__(observation_space=observation_space,
@@ -56,7 +55,6 @@ class ImitatorAgent(BasePolicy):
         self.device = device
         self.load_model(model_ckpt_path, flatten_input)
         self._normalization = None
-        self.num_players = num_players
         self.rule_based: Optional[RuleBasedAgent] = None
     def forward(self, batch: Batch,
                 state: Optional[Union[dict, Batch, np.ndarray]] = None,
