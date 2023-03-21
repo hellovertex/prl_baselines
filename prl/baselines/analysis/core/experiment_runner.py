@@ -4,16 +4,19 @@ from typing import List, Dict, Optional
 
 import numpy as np
 from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as COLS
+from prl.environment.Wrappers.base import ActionSpace
 from prl.environment.steinberger.PokerRL import Poker
 
-from prl.baselines.evaluation.core.experiment import DEFAULT_DATE, DEFAULT_VARIANT, DEFAULT_CURRENCY
+from prl.baselines.evaluation.core.experiment import DEFAULT_DATE, DEFAULT_VARIANT, \
+    DEFAULT_CURRENCY
 from prl.baselines.evaluation.core.experiment import PokerExperiment
 from prl.baselines.evaluation.core.runner import ExperimentRunner
 from prl.baselines.analysis.core.stats import PlayerStats
 from prl.baselines.evaluation.utils import pretty_print, cards2str
 from prl.baselines.supervised_learning.data_acquisition.core.encoder import Positions6Max
 from prl.baselines.supervised_learning.data_acquisition.core.parser import Action
-from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, PlayerStack, ActionType, \
+from prl.baselines.supervised_learning.data_acquisition.core.parser import Blind, \
+    PlayerStack, ActionType, \
     PlayerWithCards, PlayerWinningsCollected, PokerEpisode
 from prl.baselines.utils.num_parsers import parse_num
 
@@ -66,7 +69,7 @@ class PokerExperimentRunner(ExperimentRunner):
         board = self.backend.cards2str(self.backend.board)
         return f"[{board.replace(',', '').rstrip()}]"
 
-    def  _get_starting_stacks_relative_to_agents(self) -> List[PlayerStack]:
+    def _get_starting_stacks_relative_to_agents(self) -> List[PlayerStack]:
         """ Stacks at the beginning of every episode, not during or after."""
         # seats are gotten from the environment and start with the button
         # our agent who has the button can be at a different index than 0 in our agent list
@@ -77,7 +80,7 @@ class PokerExperimentRunner(ExperimentRunner):
         for agent_id, seat in enumerate(np.roll(self.backend.seats, self.agent_map[0])):
             # agent_id = self.agent_map[seat_id]
             player_name = f'{self.player_names[agent_id]}'
-            #seat_display_name = f'Seat {seat_id + 1}'  # index starts at 1
+            # seat_display_name = f'Seat {seat_id + 1}'  # index starts at 1
             seat_display_name = f'Seat {agent_id + 1}'  # index starts at 1
             stack = "$" + str(seat.starting_stack_this_episode)
             player_stacks.append(PlayerStack(seat_display_name,
@@ -172,7 +175,8 @@ class PokerExperimentRunner(ExperimentRunner):
             agent_id = self.agent_map[i]
             if not seats[i].folded_this_episode:
                 if seats[i].stack > 0 or seats[i].is_allin:
-                    cards = self.backend.cards2str(self.backend.get_hole_cards_of_player(i))
+                    cards = self.backend.cards2str(
+                        self.backend.get_hole_cards_of_player(i))
                     remaining_players.append(
                         PlayerWithCards(name=f'{self.player_names[agent_id]}',
                                         cards=self._parse_cards(cards)))
@@ -243,6 +247,8 @@ class PokerExperimentRunner(ExperimentRunner):
         players_acted = 0
         obs = observation['obs'][0]
         while not done:
+            if observation['legal_moves'][0][8]==1:
+                break
             # -------------------------------------
             # --------------- ACT -----------------
             # -------------------------------------
@@ -252,7 +258,8 @@ class PokerExperimentRunner(ExperimentRunner):
                 action = a.action_type, a.raise_amount
             else:
                 action = self.participants[agent_idx].agent.act(observation['obs'],
-                                                                observation['legal_moves'])
+                                                                observation[
+                                                                    'legal_moves'])
             self._times_taken_to_compute_action.append(time.time() - t0)
             # kept for reference: (this code is moved to after experiment has been run)
             # if self.stats:
@@ -263,11 +270,12 @@ class PokerExperimentRunner(ExperimentRunner):
             # -------------------------------------
             # -------- STEP ENVIRONMENT -----------
             # -------------------------------------
-            remaining_players: List[PlayerWithCards] = self._get_remaining_players()
-            stage = Poker.INT2STRING_ROUND[self.backend.current_round]
-            current_bet_before_action = self.backend.current_player.current_bet
-            if self.verbose:
-                pretty_print(agent_idx, observation['obs'][0], action)
+            if not action == ActionSpace.NoOp:
+                remaining_players: List[PlayerWithCards] = self._get_remaining_players()
+                stage = Poker.INT2STRING_ROUND[self.backend.current_round]
+                current_bet_before_action = self.backend.current_player.current_bet
+                if self.verbose:
+                    pretty_print(agent_idx, observation['obs'][0], action)
             t0 = time.time()
             # obs, _, done, info = self.env.step(action)
             obs_dict, _, done, truncated, info = self.env.step(action)
@@ -276,16 +284,18 @@ class PokerExperimentRunner(ExperimentRunner):
             # -------------------------------------
             # -------- RECORD LAST ACTION ---------
             # -------------------------------------
-            episode_action = self.record_last_action(agent_idx=agent_idx,
-                                                     stage=stage,
-                                                     current_bet_before_action=current_bet_before_action)
-            actions_total[stage].append(episode_action)
-            actions_total['as_sequence'].append(episode_action)
-            print(f'Hole cards of button: {cards2str(self.backend.get_hole_cards_of_player(0))}')
+            if not action == ActionSpace.NoOp:
+                episode_action = self.record_last_action(agent_idx=agent_idx,
+                                                         stage=stage,
+                                                         current_bet_before_action=current_bet_before_action)
+                actions_total[stage].append(episode_action)
+                actions_total['as_sequence'].append(episode_action)
+                print(
+                    f'Hole cards of button: {cards2str(self.backend.get_hole_cards_of_player(0))}')
             if done:
                 showdown_hands = self._get_showdown_hands(remaining_players)
 
-            legal_moves = self.env.env.env.env_wrapped.get_legal_actions()
+            legal_moves = self.env.env.env.env_wrapped.get_legal_moves_extended()
             observation = {'obs': [obs], 'legal_moves': [legal_moves]}
             # -------- SET NEXT AGENT -----------
             agent_idx = self.agent_map[self.backend.current_player.seat_id]
@@ -335,10 +345,10 @@ class PokerExperimentRunner(ExperimentRunner):
         # obs_test, _, _, _ = self.test_env.reset(self.env_reset_config)
 
         agent_id = obs['agent_id']
-        legal_moves = self.env.env.env.env_wrapped.get_legal_actions()
+        legal_moves = self.env.env.env.env_wrapped.get_legal_moves_extended()
         btn = self.env.env.env.btn
         obs = obs['obs']
-        #assert np.array_equal(obs, obs_test)
+        # assert np.array_equal(obs, obs_test)
         """
         from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols
         for i, o in enumerate(obs == obs_test):
@@ -352,7 +362,7 @@ class PokerExperimentRunner(ExperimentRunner):
             self.iter_actions = iter(next(self.iter_action_plan))
 
         # --- RUN GAME LOOP ---
-        # legal_moves = self.env.get_legal_actions()
+        # legal_moves = self.env.get_legal_moves_extended()()
         initial_observation = {'obs': [obs], 'legal_moves': [legal_moves]}
         actions_total, showdown_hands, info = self._run_game(initial_observation)
         info = info['info']
@@ -412,7 +422,8 @@ class PokerExperimentRunner(ExperimentRunner):
               f'{np.mean(self._times_taken_to_step_env) * 1000} ms')
         return poker_episodes
 
-    def run(self, experiment: PokerExperiment, verbose=False, hero_names=None) -> List[PokerEpisode]:
+    def run(self, experiment: PokerExperiment, verbose=False, hero_names=None) -> List[
+        PokerEpisode]:
         # for testing,
         # it should be possible to
         # 1) provide hands and boards
@@ -451,7 +462,8 @@ class PokerExperimentRunner(ExperimentRunner):
             self.participants = []
             self.iter_action_plan = iter(experiment.from_action_plan)
             # let indices start at 0 when btn starts and at 3 when utg starts
-            inds = [i for i in range(self.num_players)] if self.num_players < 4 else [(i%self.num_players) for i in range(3, 3+self.num_players)]
+            inds = [i for i in range(self.num_players)] if self.num_players < 4 else [
+                (i % self.num_players) for i in range(3, 3 + self.num_players)]
             for i, pid in enumerate(inds):
                 self.agent_summary[i] = {i: PlayerStats(self.player_names[i])}
         else:

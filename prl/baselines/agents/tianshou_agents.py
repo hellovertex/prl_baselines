@@ -35,6 +35,60 @@ RANK = 0
 SUITE = 1
 
 
+class ImitatorAgent(BasePolicy):
+    def __init__(self,
+                 model_ckpt_path: str,
+                 flatten_input=False,
+                 model_hidden_dims=(256,),
+                 device=None,
+                 observation_space=None,
+                 num_players=None,
+                 action_space=None
+                 ):
+        super().__init__(observation_space=observation_space,
+                         action_space=action_space)
+        self.model_ckpt_path = model_ckpt_path
+        self.hidden_dims = model_hidden_dims
+        if device is None:
+            # todo: time inference times cuda vs cpu
+            #  in case obs comes from cpu
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = device
+        self.load_model(model_ckpt_path, flatten_input)
+        self._normalization = None
+        self.num_players = num_players
+        self.rule_based: Optional[RuleBasedAgent] = None
+    def forward(self, batch: Batch,
+                state: Optional[Union[dict, Batch, np.ndarray]] = None,
+                **kwargs: Any) -> Batch:
+        raise NotImplementedError
+
+    def learn(self, batch: Batch, **kwargs: Any) -> Dict[str, Any]:
+        raise NotImplementedError
+    def load_model(self, ckpt_path, flatten_input):
+        input_dim = 569
+        self._model = MLP(input_dim,
+                          3,
+                          list(self.hidden_dims),
+                          flatten_input=flatten_input).to(self.device)
+        ckpt = torch.load(ckpt_path,
+                          map_location=self.device)
+        self._model.load_state_dict(ckpt['net'])
+        self._model.eval()
+
+    def act(self, obs: np.ndarray, legal_moves: list, use_pseudo_harmonic_mapping=False):
+        """
+        See "Action translation in extensive-form games with large action spaces:
+        Axioms, paradoxes, and the pseudo-harmonic mapping" by Ganzfried and Sandhol
+
+        for why pseudo-harmonic-mapping is useful to prevent exploitability of a strategy.
+        """
+        self.logits = self._model(torch.tensor(obs[0]).float())
+        self.probas = torch.softmax(self.logits, dim=0)
+        pred = torch.argmax(self.probas, dim=0).item()
+        return pred
+
+
 class BaselineAgentBase(BasePolicy):
 
     def __init__(self,

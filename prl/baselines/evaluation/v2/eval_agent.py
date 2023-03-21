@@ -1,3 +1,4 @@
+import random
 from typing import Union, List
 
 import numpy as np
@@ -35,6 +36,14 @@ class EvalAgentCall(EvalAgentBase):
         return 1
 
 
+class EvalAgentRandom(EvalAgentBase):
+    def __init__(self, name, *args, **kwargs):
+        super().__init__(name, *args, **kwargs)
+
+    def act(self, obs: np.ndarray, legal_moves):
+        return random.randint(0, 2)
+
+
 class EvalAgentTorchObservation(EvalAgentBase):
     def __init__(self, name, base_agent, *args, **kwargs):
         super().__init__(name, *args, **kwargs)
@@ -60,4 +69,4 @@ class EvalAgentTianshou(EvalAgentBase):
         :param obs:
         :return:
         """
-        return self.agent.act(obs)
+        return self.agent.act(obs, legal_moves)
