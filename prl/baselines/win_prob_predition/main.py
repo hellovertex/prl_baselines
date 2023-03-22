@@ -1,4 +1,6 @@
 import glob
+import os
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -45,6 +47,20 @@ def load_data(data_dir, n_files=20, start_idx=0):
     data = np.concatenate(data)
     labels = np.concatenate(labels)
     return data, labels
+
+
+def write_ckpt(epoch, model, n_iter, optim, loss, ):
+    if not os.path.exists('./ckpt'):
+        os.makedirs(Path('./ckpt'), exist_ok=True)
+    torch.save({'epoch': epoch,
+                'net': model.state_dict(),
+                'n_iter': n_iter,
+                # j * batch_size * len(dataloader) == env_steps
+                'optim': optim.state_dict(),
+                'loss': loss},
+               '.ckpt/ckpt.pt')  # net
+    # save model for inference
+    torch.save(model, '.ckpt/model.pt')
 
 
 def main(data, labels):
@@ -96,6 +112,7 @@ def main(data, labels):
             print(f'Epoch {epoch}: MSE loss = {loss:.4f}')
             print(f'Epoch {epoch}: R2 score = {r2_score:.4f}')
             if epoch % 5 == 0:
+                write_ckpt(epoch, net, epoch, optim, loss)
                 plt.scatter(pred, test_labels)
                 plt.xlabel('True probabilities')
                 plt.ylabel('Predicted probabilities')
