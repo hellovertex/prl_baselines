@@ -4,6 +4,7 @@ import numpy as np
 from prl.environment.Wrappers.base import ActionSpace
 from prl.environment.Wrappers.vectorizer import AgentObservationType
 from tianshou.policy import RainbowPolicy
+from tqdm import tqdm
 
 from prl.baselines.agents.tianshou_agents import ImitatorAgent
 from prl.baselines.agents.tianshou_policies import get_rainbow_config
@@ -20,7 +21,7 @@ def load_imitation_agent(ckpt_dir):
 
 
 def load_rainbow_agent(ckpt_dir):
-    params = {'device': 'cpu',
+    params = {'device': 'cuda',
               'load_from_ckpt': ckpt_dir,
               'lr': 1e-6,
               'num_atoms': 51,
@@ -48,7 +49,7 @@ def run(max_episodes, agents, agent_names, pname):
                                     agent_observation_mode=AgentObservationType.SEER)
     targets_rewards = []
     pidx = agent_names.index(pname)
-    for _ in range(max_episodes):
+    for _ in tqdm(range(max_episodes)):
         obs_dict = env.reset()
         obs = obs_dict['obs']
         agent_id = obs_dict['agent_id']
@@ -76,7 +77,7 @@ def moving_average(a, n=3):
 
 
 if __name__ == '__main__':
-    max_episodes = 1000
+    max_episodes = 1000000
     num_players = 6
     # num_players = 2
     pname = 'AI_AGENT_v2'
@@ -84,12 +85,13 @@ if __name__ == '__main__':
     #ckpt_dir = '/home/sascha/Documents/github.com/prl_baselines/data/05_train_results
     # /from_gdrive/05_train_results-20230320T232447Z-001/05_train_results/NL50/player_pool/folds_from_top_players_with_randomized_hand/Top20Players_n_showdowns=5000/target_rounds=FTR/actions=ActionSpaceMinimal/512_1e-06/ckptdir/ckpt.pt'
     ckpt_dir = '/home/sascha/Documents/github.com/prl_baselines/data/checkpoints/v6-20230322T023213Z-001/v6/debug_1vs_caller/n_step_lookahead=1/_buffer=50000/_freq=10000/ckpt.pt'
-    ckpt_dir = '/home/sascha/Documents/github.com/prl_baselines/data/checkpoints/v6-20230322T023213Z-001/v6/self_play_oracle_training/_buffer=50000/_freq=5000/ckpt.pt'
+    # 6oracle self play
+    ckpt_dir = '/home/hellovertex/Documents/github.com/prl_reinforce/prl/reinforce/v6/self_play_oracle_training/_buffer=50000/_freq=5000/ckpt.pt'
     # if you want to load RL learners, use the loading_fns from train_eval.py
     # agent = load_imitation_agent(ckpt_dir)
     agent = load_rainbow_agent(ckpt_dir)
     agents = [EvalAgentRainbow(pname, agent)]
-    agents += [EvalAgentRandom(f'p{i + 1}') for i in
+    agents += [EvalAgentCall(f'p{i + 1}') for i in
                range(1, num_players)]
     # agents += [EvalAgentCall('2')]
     rews = run(max_episodes, agents, agent_names, pname)

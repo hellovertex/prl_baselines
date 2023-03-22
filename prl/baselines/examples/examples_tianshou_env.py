@@ -197,10 +197,10 @@ class TianshouEnvWrapper(AECEnv):
             return self._was_dead_step(action)
         # only step the base env with real action
         # noops are used to distribute rewards and final observation to all players
-        if isinstance(action, np.ndarray):
-            if len(action) == len(ActionSpace) or len(action) == len(ActionSpace) -1:
-                # greedily pick action
-                action = np.argmax(action)
+        # if isinstance(action, np.ndarray):
+        #     if len(action) == len(ActionSpace) or len(action) == len(ActionSpace) -1:
+        #         # greedily pick action
+        #         action = np.argmax(action)
         if action != ActionSpace.NoOp:
             try:
                 assert not self.awaiting_noops
@@ -285,7 +285,7 @@ class TianshouEnvWrapper(AECEnv):
                 self.truncations = self._convert_to_dict(
                     [False for _ in range(self.num_agents)]
                 )
-                # move btn to next player
+                # # move btn to next player
                 shifted_indices = {}
                 for rel_btn, agent_idx in self.agent_map.items():
                     shifted_indices[rel_btn] = (agent_idx + 1) % self.num_players

@@ -10,25 +10,6 @@ from tqdm import tqdm
 
 from prl.baselines.cpp_hand_evaluator.monte_carlo import HandEvaluator_MonteCarlo
 
-IDX_C0_0 = 167  # feature_names.index('0th_player_card_0_rank_0')
-IDX_C0_1 = 184  # feature_names.index('0th_player_card_1_rank_0')
-IDX_C1_0 = 184  # feature_names.index('0th_player_card_1_rank_0')
-IDX_C1_1 = 201  # feature_names.index('1th_player_card_0_rank_0')
-IDX_BOARD_START = 82  #
-IDX_BOARD_END = 167  #
-CARD_BITS_TO_STR = np.array(
-    ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', 'h', 'd', 's', 'c'])
-BOARD_BITS_TO_STR = np.array(
-    ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A',
-     'h', 'd', 's', 'c', '2', '3', '4', '5', '6', '7', '8', '9', 'T',
-     'J', 'Q', 'K', 'A', 'h', 'd', 's', 'c', '2', '3', '4', '5', '6',
-     '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', 'h', 'd', 's', 'c', '2',
-     '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', 'h',
-     'd', 's', 'c', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J',
-     'Q', 'K', 'A', 'h', 'd', 's', 'c'])
-RANK = 0
-SUITE = 1
-
 from prl.baselines.examples.examples_tianshou_env import make_default_tianshou_env
 
 
@@ -52,12 +33,13 @@ def main(out_file_suffix: int, num_players, max_episodes_per_file):
                 action = ActionSpace.CHECK_CALL
             obs_dict, rews, terminated, truncated, info = env.step(action)
             obs = obs_dict['obs']
-            mc_dict = mc_eval.run_mc(obs,
-                                     n_opponents=num_players - 1,
-                                     n_iter=n_iter)
-            win_prob = (mc_dict['won'] + mc_dict['tied']) / n_iter
-            observations[i, :] = obs
-            labels[i] = win_prob
+            if not action == ActionSpace.NoOp:
+                mc_dict = mc_eval.run_mc(obs,
+                                         n_opponents=num_players - 1,
+                                         n_iter=n_iter)
+                win_prob = (mc_dict['won'] + mc_dict['tied']) / n_iter
+                observations[i, :] = obs
+                labels[i] = win_prob
             if terminated:
                 break
     # save to disk
@@ -76,6 +58,7 @@ def main(out_file_suffix: int, num_players, max_episodes_per_file):
 
 if __name__ == '__main__':
     max_files = 20
+    # if debug: main(1,2,100)
     # 1a) run games using 2 calling stations
     start = time.time()
     p = multiprocessing.Pool()
