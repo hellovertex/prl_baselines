@@ -9,6 +9,7 @@ import numpy as np
 import torch
 
 from prl.baselines.cpp_hand_evaluator.rank import dict_str_to_sk
+from prl.environment.Wrappers.augment import AugmentedObservationFeatureColumns as cols
 
 IDX_C0_0 = 167  # feature_names.index('0th_player_card_0_rank_0')
 IDX_C0_1 = 184  # feature_names.index('0th_player_card_1_rank_0')
@@ -43,6 +44,7 @@ def card_bit_mask_to_int(c0: np.array, c1: np.array, board_mask: np.array) -> Tu
 
     return [c0_1d, c1_1d], board_cards
 
+
 # def card_bit_mask_to_int_torch(c0: np.array, c1: np.array, board_mask: np.array) ->
 # Tuple[
 #     List[int], List[int]]:
@@ -66,6 +68,18 @@ def look_at_cards(obs: np.array) -> Tuple[List[int], List[int]]:
     c1_bits = obs[IDX_C1_0:IDX_C1_1].astype(bool)
     board_bits = obs[IDX_BOARD_START:IDX_BOARD_END].astype(bool)  # bit representation
     return card_bit_mask_to_int(c0_bits, c1_bits, board_bits)
+
+
+def look_at_cards_opp_i(obs: np.ndarray, offset_to_hero):
+    offset = (34 * offset_to_hero)
+    c0_bits = obs[IDX_C0_0 + offset:IDX_C0_1 + offset].astype(bool)
+    c1_bits = obs[IDX_C1_0 + offset:IDX_C1_1 + offset].astype(bool)
+    c0_1d = dict_str_to_sk[CARD_BITS_TO_STR[c0_bits][RANK] + CARD_BITS_TO_STR[c0_bits][
+        SUITE]]
+    c1_1d = dict_str_to_sk[CARD_BITS_TO_STR[c1_bits][RANK] + CARD_BITS_TO_STR[c1_bits][
+        SUITE]]
+    return [c0_1d, c1_1d]
+
 
 # def look_at_cards_torch(obs: np.array) -> Tuple[List[int], List[int]]:
 #     c0_bits = obs[IDX_C0_0:IDX_C0_1].bool()
@@ -138,6 +152,89 @@ class HandEvaluator_MonteCarlo:
                 deck.append(i)
 
         return self.mc(deck, hero_cards_1d, board_cards_1d, n_opponents, n_iter)
+
+    def mc_known_opp_cards(self, deck, hero_cards_1d, board_cards_1d, n_opponents,
+                           n_iter, opp_cards):
+        n_missing_board_cards = len(deck) - LEN_DECK_WITHOUT_HERO_AND_BOARD_CARDS
+        cards_to_sample = 2 * n_opponents + n_missing_board_cards
+
+        won = 0
+        lost = 0
+        tied = 0
+
+        for i in range(n_iter):
+            # draw board, if not complete already
+            drawn_cards_1d = random.sample(deck, cards_to_sample)
+            if n_missing_board_cards == 0:
+                board = board_cards_1d
+            else:
+                board = board_cards_1d + drawn_cards_1d[-n_missing_board_cards:]
+
+            # rank hero hand
+            hero_hand = hero_cards_1d + board
+            hero_rank = rank(*hero_hand)
+
+            # compare hero hand to opponent hands
+            player_still_winning = True
+            ties = 0
+            for opp in range(n_opponents - len(opp_cards)):
+                opp_hand = [drawn_cards_1d[2 * opp],
+                            drawn_cards_1d[2 * opp + 1]] + board
+                opp_rank = rank(*opp_hand)
+                if opp_rank > hero_rank:
+                    player_still_winning = False
+                    break
+                elif opp_rank == hero_rank:
+                    ties += 1
+            for opp_hand in opp_cards:
+                opp_rank = rank(*opp_hand)
+                if opp_rank > hero_rank:
+                    player_still_winning = False
+                    break
+                elif opp_rank == hero_rank:
+                    ties += 1
+            # update won/lost/tied stats
+            if not player_still_winning:
+                lost += 1
+            elif player_still_winning and ties < n_opponents:
+                won += 1
+            elif player_still_winning and ties == n_opponents:
+                tied += 1
+            else:
+                raise ValueError(
+                    "Hero can tie against at most n_opponents, not more. Aborting MC Simulation...")
+        return {'won': won, 'lost': lost, 'tied': tied}
+
+    def _run_mc_known_opp_cards(self, hero_cards_1d, board_cards_1d, n_opponents, n_iter,
+                                opp_cards):
+        deck = []
+        for i in range(52):
+            if i not in hero_cards_1d and i not in board_cards_1d:
+                in_opp_cards = False
+                for ohand in opp_cards:
+                    if i in ohand:
+                        in_opp_cards = True
+                if not in_opp_cards:
+                    deck.append(i)
+
+        return self.mc_known_opp_cards(deck, hero_cards_1d, board_cards_1d,
+                                       n_opponents, n_iter, opp_cards)
+
+    def run_mc_known_opp_cards(self, obs, n_opponents, n_iter=5000):
+        opp_cards_1d = []
+        hero_cards_1d, board_cards_1d = look_at_cards(obs)
+        # new
+        for i in range(0, n_opponents):
+            try:
+                opp_cards = look_at_cards_opp_i(obs, i + 1)
+                opp_cards_1d.append(opp_cards)
+            except IndexError:
+                pass
+        # new end
+        return self._run_mc_known_opp_cards(hero_cards_1d,
+                                            board_cards_1d,
+                                            n_opponents,
+                                            n_iter, opp_cards_1d)
 
     def run_mc(self,
                obs: Union[np.ndarray, list],

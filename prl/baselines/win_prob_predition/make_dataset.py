@@ -34,9 +34,9 @@ def main(out_file_suffix: int, num_players, max_episodes_per_file):
             obs_dict, rews, terminated, truncated, info = env.step(action)
             obs = obs_dict['obs']
             if not action == ActionSpace.NoOp:
-                mc_dict = mc_eval.run_mc(obs,
-                                         n_opponents=num_players - 1,
-                                         n_iter=n_iter)
+                mc_dict = mc_eval.run_mc_known_opp_cards(obs,
+                                                         n_opponents=num_players - 1,
+                                                         n_iter=n_iter)
                 win_prob = (mc_dict['won'] + mc_dict['tied']) / n_iter
                 observations[i, :] = obs
                 labels[i] = win_prob
@@ -59,16 +59,17 @@ def main(out_file_suffix: int, num_players, max_episodes_per_file):
 if __name__ == '__main__':
     max_files = 20
     # if debug: main(1,2,100)
+    main(1, 2, 100)
     # 1a) run games using 2 calling stations
-    start = time.time()
-    p = multiprocessing.Pool()
-    t0 = time.time()
-    fn = partial(main,
-                 num_players=2, max_episodes_per_file=20000)
-    for x in p.imap_unordered(fn, [i for i in range(max_files)]):
-        print(x + f'. Took {time.time() - t0} seconds')
-    print(f'Finished job after {time.time() - start} seconds.')
-    p.close()
+    # start = time.time()
+    # p = multiprocessing.Pool()
+    # t0 = time.time()
+    # fn = partial(main,
+    #              num_players=2, max_episodes_per_file=20000)
+    # for x in p.imap_unordered(fn, [i for i in range(max_files)]):
+    #     print(x + f'. Took {time.time() - t0} seconds')
+    # print(f'Finished job after {time.time() - start} seconds.')
+    # p.close()
 
     # # 1b). run games using 6 calling stations
     # start = time.time()
