@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from tianshou.data import Batch
 import numpy as np
+from tianshou.policy import BasePolicy
 
 
 class EvalAgentBase:
@@ -32,7 +33,7 @@ class EvalAgentCall(EvalAgentBase):
     def __init__(self, name, *args, **kwargs):
         super().__init__(name, *args, **kwargs)
 
-    def act(self, obs: np.ndarray):
+    def act(self, obs: np.ndarray, legal_moves):
         return 1
 
 
@@ -44,13 +45,18 @@ class EvalAgentRandom(EvalAgentBase):
         return random.randint(0, 2)
 
 
-class EvalAgentTorchObservation(EvalAgentBase):
-    def __init__(self, name, base_agent, *args, **kwargs):
-        super().__init__(name, *args, **kwargs)
-        self._agent = base_agent
+class EvalAgentRainbow(EvalAgentBase):
+    def __init__(self, name, agent):
+        super().__init__(name)
+        self.agent: BasePolicy = agent
 
-    def act(self, obs: torch.Tensor):
-        pass
+    def act(self, obs, legal_moves):
+        obs = dict(obs=obs,
+                   mask=legal_moves)
+        batch = Batch(obs=obs, info={})
+        act = self.agent.forward(batch)
+        return act.act[0]
+
 
 
 class EvalAgentTianshou(EvalAgentBase):
