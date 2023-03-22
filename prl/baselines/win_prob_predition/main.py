@@ -1,14 +1,11 @@
-import glob
-
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import numpy as np
 from matplotlib import pyplot as plt
-from sklearn.metrics import roc_curve, auc
 from sklearn.model_selection import train_test_split
 from tianshou.utils.net.common import MLP
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import TensorDataset
 
 
 def load_model(ckpt_path=None, flatten_input=False, device='cpu'):
@@ -48,7 +45,7 @@ def main(data, labels):
     net = load_model()
     optimizer = optim.Adam(net.parameters(), lr=learning_rate)
 
-    batch_size = 32
+    batch_size = 512
     train_data, test_data, train_labels, test_labels = train_test_split(data, labels,
                                                                         test_size=0.05)
     train_data = torch.from_numpy(train_data).float()
@@ -74,7 +71,7 @@ def main(data, labels):
         plt.plot(x, x, color='red')
         plt.show()
 
-    for epoch in range(n_epochs):
+    for epoch in range(1, n_epochs):
         for batch_data, batch_labels in train_loader:
             optimizer.zero_grad()
         outputs = net(batch_data)
@@ -88,15 +85,16 @@ def main(data, labels):
             loss = criterion(test_prob, test_labels)
             variance = np.var(test_labels)
             r2_score = 1 - loss / variance
-            print(f'Epoch {0}: MSE loss = {loss:.4f}')
-            print(f'Epoch {0}: R2 score = {r2_score:.4f}')
-            plt.scatter(pred, test_labels)
-            plt.xlabel('True probabilities')
-            plt.ylabel('Predicted probabilities')
-            plt.title('Scatter plot of true probabilities vs predicted probabilities')
-            x = np.linspace(0, 1, 100)
-            plt.plot(x, x, color='red')
-            plt.show()
+            print(f'Epoch {epoch}: MSE loss = {loss:.4f}')
+            print(f'Epoch {epoch}: R2 score = {r2_score:.4f}')
+            if epoch % 5 == 0:
+                plt.scatter(pred, test_labels)
+                plt.xlabel('True probabilities')
+                plt.ylabel('Predicted probabilities')
+                plt.title('Scatter plot of true probabilities vs predicted probabilities')
+                x = np.linspace(0, 1, 100)
+                plt.plot(x, x, color='red')
+                plt.show()
 
 
 if __name__ == '__main__':
