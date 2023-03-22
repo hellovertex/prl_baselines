@@ -1,3 +1,5 @@
+import glob
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -24,22 +26,29 @@ def load_model(ckpt_path=None, flatten_input=False, device='cpu'):
     return model
 
 
-def load_data(data_dir):
-    data, labels = None, None
-    # # Load the data
-    # datafiles = glob.glob(data_dir + '**/*.npy*', recursive=False)
-    # datafiles = glob.glob(data_dir + '**/*label*', recursive=False)
-    # data = np.array([])
-    # for dfile in datafiles:
-    #     np.concatenate([data, np.load(dfile)])
-    # for lfile in labelfiles:
-    #     np.concatenate([data, np.load(dfile)])
-    # labels = np.load('labels.npy')
+def load_data(data_dir, n_files=20, start_idx=0):
+    data = []
+    labels = []
+    files = glob.glob(data_dir + '**/*.npy*', recursive=False)
+    for i in range(start_idx, n_files + 1):
+        d = f'data_{i}.npy'
+        l = f'labels_{i}.npy'
+        len_data = len(data)
+        len_labels = len(labels)
+        for f in files:
+            if d in f:
+                data.append(np.load(f))
+            if l in f:
+                labels.append(np.load(f))
+        assert len(data) == len_data + 1
+        assert len(labels) == len_labels + 1
+    data = np.concatenate(data)
+    labels = np.concatenate(labels)
     return data, labels
 
 
 def main(data, labels):
-    learning_rate = 0.01
+    learning_rate = 1e-6
     n_epochs = 100
     criterion = nn.MSELoss()
     net = load_model()
@@ -58,7 +67,7 @@ def main(data, labels):
     with torch.no_grad():
         pred = net(test_data)
         loss = criterion(pred, test_labels)
-        variance = np.var(test_labels)
+        variance = torch.var(test_labels)
         r2_score = 1 - loss / variance
         print(f'Epoch {0}: MSE loss = {loss:.4f}')
         print(f'Epoch {0}: R2 score = {r2_score:.4f}')
@@ -81,9 +90,8 @@ def main(data, labels):
         print('Epoch {}, Loss: {:.4f}'.format(epoch + 1, loss.item()))
         # Compute accuracy on test set
         with torch.no_grad():
-            test_prob = net(test_data)
-            loss = criterion(test_prob, test_labels)
-            variance = np.var(test_labels)
+            pred = net(test_data)
+            loss = criterion(pred, test_labels)
             r2_score = 1 - loss / variance
             print(f'Epoch {epoch}: MSE loss = {loss:.4f}')
             print(f'Epoch {epoch}: R2 score = {r2_score:.4f}')
@@ -99,5 +107,5 @@ def main(data, labels):
 
 if __name__ == '__main__':
     data_dir = './data'
-    data, labels = load_data(data_dir)
+    data, labels = load_data(data_dir, n_files=2, start_idx=1)
     main(data, labels)
