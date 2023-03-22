@@ -343,7 +343,8 @@ def make_default_tianshou_env(num_players=2,
                               agents=None,
                               stack_sizes=None,
                               blinds: List[int] = None,
-                              mc_model_ckpt_path=None):
+                              mc_model_ckpt_path=None,
+                              agent_observation_mode=AgentObservationType.CARD_KNOWLEDGE):
     starting_stack = 5000
     if blinds is None:
         blinds = [25, 50]
@@ -358,7 +359,7 @@ def make_default_tianshou_env(num_players=2,
                   # use 100 for floats to remove decimals but we have int stacks
                   "scale_rewards": False,  # we do this ourselves
                   "blinds": blinds,
-                  "agent_observation_mode": AgentObservationType.CARD_KNOWLEDGE}
+                  "agent_observation_mode": agent_observation_mode}
     # env = init_wrapped_env(**env_config)
     # obs0 = env.reset(config=None)
     # AEC ENV
