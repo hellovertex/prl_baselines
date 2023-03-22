@@ -67,7 +67,9 @@ if __name__ == '__main__':
     fig = plt.figure(figsize=(8, 6), dpi=300)
     plt.xlabel('Hands played')
     plt.ylabel('Big Blinds won')
-    fig.yaxis.set_label_position("right")
+    ax = plt.gca()
+    ax.yaxis.set_label_position("right")
+    ax.yaxis.tick_right()
     plt.set_cmap('viridis')
     plt.grid()
 
