@@ -64,9 +64,10 @@ if __name__ == '__main__':
                range(num_players - 1)]
     rews = run(max_episodes, agents, agent_names, pname)
     rews = np.cumsum(rews)
+    fig = plt.figure(figsize=(8, 6), dpi=300)
     plt.xlabel('Hands played')
     plt.ylabel('Big Blinds won')
-    plt.yaxis.set_label_position("right")
+    fig.yaxis.set_label_position("right")
     plt.set_cmap('viridis')
     plt.grid()
 
