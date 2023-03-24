@@ -20,8 +20,8 @@ def load_imitation_agent(ckpt_dir):
                          model_hidden_dims=(512,))
 
 
-def load_rainbow_agent(ckpt_dir):
-    params = {'device': 'cuda',
+def load_rainbow_agent(ckpt_dir,device):
+    params = {'device': device,
               'load_from_ckpt': ckpt_dir,
               'lr': 1e-6,
               'num_atoms': 51,
@@ -77,7 +77,7 @@ def moving_average(a, n=3):
 
 
 if __name__ == '__main__':
-    max_episodes = 1000000
+    max_episodes = 5000
     num_players = 6
     # num_players = 2
     pname = 'AI_AGENT_v2'
@@ -86,10 +86,10 @@ if __name__ == '__main__':
     # /from_gdrive/05_train_results-20230320T232447Z-001/05_train_results/NL50/player_pool/folds_from_top_players_with_randomized_hand/Top20Players_n_showdowns=5000/target_rounds=FTR/actions=ActionSpaceMinimal/512_1e-06/ckptdir/ckpt.pt'
     ckpt_dir = '/home/sascha/Documents/github.com/prl_baselines/data/checkpoints/v6-20230322T023213Z-001/v6/debug_1vs_caller/n_step_lookahead=1/_buffer=50000/_freq=10000/ckpt.pt'
     # 6oracle self play
-    ckpt_dir = '/home/hellovertex/Documents/github.com/prl_reinforce/prl/reinforce/v6/self_play_oracle_training/_buffer=50000/_freq=5000/ckpt.pt'
+    ckpt_dir = '/home/sascha/Documents/github.com/prl_baselines/data/checkpoints/v6-20230322T023213Z-001/v6/self_play_oracle_training/_buffer=50000/_freq=5000/ckpt.pt'
     # if you want to load RL learners, use the loading_fns from train_eval.py
     # agent = load_imitation_agent(ckpt_dir)
-    agent = load_rainbow_agent(ckpt_dir)
+    agent = load_rainbow_agent(ckpt_dir, 'cpu')
     agents = [EvalAgentRainbow(pname, agent)]
     agents += [EvalAgentCall(f'p{i + 1}') for i in
                range(1, num_players)]
@@ -106,6 +106,6 @@ if __name__ == '__main__':
     plt.grid()
     plt.axhline(0, color='black')
     plt.rcParams.update({'font.size': 12, 'font.family': 'Times New Roman'})
-    plt.title('Winnings in Big Blinds per Game')
+    plt.title('Big Blinds won - cumulative')
     plt.plot(np.arange(len(rews)), rews)
     plt.show()
